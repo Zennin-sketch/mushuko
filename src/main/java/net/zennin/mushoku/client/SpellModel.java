@@ -26,8 +26,22 @@ public final class SpellModel {
     /** Una cara: 4 vertices (en pixeles), normal, UV y color. */
     public record Face(float[] xyz, float[] uv, float nx, float ny, float nz, int r, int g, int b, float alpha) {}
 
-    public record Group(ResourceLocation texture, Render render, boolean glow, float[] spin, float pulseAmp, float pulsePeriod,
-                        float flicker, List<Face> faces) {}
+    public record Group(ResourceLocation texture, Render render, boolean glow, float[] tilt, float[] spin, float pulseAmp, float pulsePeriod,
+                        float flicker, List<Face> faces, Emitter emitter) {}
+
+    /** Cubitos tipo particula: nacen al azar dentro de 'radius', suben/se alejan y se achican y apagan en 'life' ticks. */
+    public record Emitter(int count, float life, float[] radius, float size0, float size1, int color0, int color1, float alpha,
+                          float rise, float drift, float outward) {}
+
+    /** Cubo de 1x1x1 centrado (para los cubitos de los emisores). */
+    public static final List<Face> UNIT_CUBE = new ArrayList<>();
+    static { addBox(UNIT_CUBE, new float[]{0, 0, 0}, new float[]{1, 1, 1}, new float[]{0, 0, 0}, 0xffffff, 1f, 0); }
+
+    /** Azar deterministico (identico al de la pagina de preview). */
+    public static float hash(int i, int k) {
+        double v = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453;
+        return (float) (v - Math.floor(v));
+    }
 
     public final List<Group> groups = new ArrayList<>();
 
@@ -76,9 +90,19 @@ public final class SpellModel {
             addBox(faces, vec(b.getAsJsonArray("at")), vec(b.getAsJsonArray("size")), vec(b.getAsJsonArray("rot")),
                     Integer.parseInt(b.get("color").getAsString(), 16), b.get("alpha").getAsFloat(), seed++);
         }
-        return new Group(ResourceLocation.parse(g.get("texture").getAsString()), render, g.get("glow").getAsBoolean(),
+        Emitter emitter = null;
+        if (g.has("emit")) {
+            JsonObject e = g.getAsJsonObject("emit");
+            JsonArray size = e.getAsJsonArray("size"), colors = e.getAsJsonArray("colors");
+            emitter = new Emitter(e.get("count").getAsInt(), Math.max(1f, e.get("life").getAsFloat()), vec(e.getAsJsonArray("radius")),
+                    size.get(0).getAsFloat(), size.get(1).getAsFloat(),
+                    Integer.parseInt(colors.get(0).getAsString(), 16), Integer.parseInt(colors.get(1).getAsString(), 16),
+                    e.get("alpha").getAsFloat(), e.get("rise").getAsFloat(), e.get("drift").getAsFloat(), e.get("outward").getAsFloat());
+        }
+        float[] tilt = g.has("tilt") ? vec(g.getAsJsonArray("tilt")) : new float[3];
+        return new Group(ResourceLocation.parse(g.get("texture").getAsString()), render, g.get("glow").getAsBoolean(), tilt,
                 vec(g.getAsJsonArray("spin")), pulse.get(0).getAsFloat(), Math.max(1f, pulse.get(1).getAsFloat()),
-                g.get("flicker").getAsFloat(), faces);
+                g.get("flicker").getAsFloat(), faces, emitter);
     }
 
     /** Giro X, luego Y, luego Z (igual que la pagina de preview). */

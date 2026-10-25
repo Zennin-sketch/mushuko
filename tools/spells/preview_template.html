@@ -81,12 +81,12 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 const DATA = /*__DATA__*/null;
 
 const INFO = {
-  stone_bullet: { el: 'Tierra', note: 'El "rombo" de Rudeus: perfil de diamante con la punta más larga adelante, sección cuadrada girada 45° y estrías en espiral como una mecha. En la novela el Stone Cannon tiene punta de taladro y gira para perforar; acá gira 45° por tick.' },
-  fireball: { el: 'Fuego', note: 'Fuego cúbico: núcleo casi blanco, capa naranja y cáscara roja translúcida girando en sentidos opuestos, con lenguas de fuego que quedan atrás. Ex-Flame es la misma bola a 2× (unos 2 m en el anime).' },
-  water_ball: { el: 'Agua', note: 'Esfera de agua voxel (cruz de cajas + núcleo), translúcida, con un brillo blanco fijo y gotas que se desprenden detrás. Water Cannon usa el mismo modelo a 2×.' },
-  icicle: { el: 'Hielo', note: 'Carámbano largo de sección romboidal con núcleo blanco y cuatro esquirlas hacia atrás. Lo usan Ice Smash, Icicle Lance y la lluvia helada.' },
-  wind_blade: { el: 'Viento', note: 'Media luna horizontal, convexa hacia adelante, con el filo blanco. Wind Slice, Sonic Boom y los tajos de viento de las técnicas de espada.' },
-  wind_drill: { el: 'Viento', note: 'Tornado Impact: viento con forma de taladro que gira y perfora. Anillos en espiral que se achican hacia la punta.' },
+  stone_bullet: { el: 'Tierra', note: 'Rombo limpio: bipirámide de sección cuadrada girada 45°, escalonada píxel a píxel, con la punta de adelante más larga (como la bala de Rudeus) y un cinturón claro en la parte más ancha. Gira 40° por tick y suelta polvo de piedra.' },
+  fireball: { el: 'Fuego', note: 'Fuego cúbico: núcleo casi blanco, capa naranja y cáscara roja translúcida girando en sentidos opuestos, lenguas detrás y brasas cúbicas que suben, se achican y se apagan. Ex-Flame es la misma bola a 2× (unos 2 m en el anime).' },
+  water_ball: { el: 'Agua', note: 'Como la escena del anime: esfera translúcida con manchas de luz adentro y cuatro cintas de agua que la rodean girando en planos distintos, más gotitas que salen despedidas. Water Cannon usa el mismo modelo a 2×.' },
+  icicle: { el: 'Hielo', note: 'Carámbano de sección romboidal: base gruesa con esquirlas y una punta larga que se afina píxel a píxel hasta un filo blanco. Suelta escarcha.' },
+  wind_blade: { el: 'Viento', note: 'Media luna fina: gruesa al centro y con puntas filosas, en tres capas (bruma, cuerpo y filo blanco), con estelas y motas detrás. Wind Slice, Sonic Boom y los tajos de viento de las técnicas de espada.' },
+  wind_drill: { el: 'Viento', note: 'Tornado Impact: tres cintas de viento en espiral que forman un cono y terminan en punta, con un cono de bruma adentro que gira al revés.' },
 };
 
 const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('c'), antialias: true });
@@ -160,10 +160,44 @@ function buildGroup(g) {
   const opts = { map: tex, vertexColors: true, transparent: translucent, side: THREE.DoubleSide, depthWrite: !translucent, alphaTest: translucent ? 0 : 0.1 };
   const mat = g.render === 'emissive' ? new THREE.MeshBasicMaterial(opts)
     : new THREE.MeshLambertMaterial({ ...opts, emissive: g.glow ? 0x3a3a3a : 0x000000, emissiveMap: g.glow ? tex : null });
-  const mesh = new THREE.Mesh(geo, mat);
-  const holder = new THREE.Group(); holder.add(mesh);
-  holder.userData = g;
-  return holder;
+  const spinner = new THREE.Group();
+  if (g.boxes.length) spinner.add(new THREE.Mesh(geo, mat));
+  spinner.userData = { g, mat, parts: [] };
+  if (g.emit) {
+    for (let i = 0; i < g.emit.count; i++) {
+      const pm = new THREE.MeshBasicMaterial({ map: tex, transparent: translucent, depthWrite: !translucent });
+      const m = new THREE.Mesh(UNIT, pm);
+      spinner.add(m); spinner.userData.parts.push(m);
+    }
+  }
+  const tilt = new THREE.Group();
+  tilt.rotation.set(g.tilt[0]*D2R, g.tilt[1]*D2R, g.tilt[2]*D2R, 'ZYX');
+  tilt.add(spinner);
+  tilt.userData = spinner.userData; tilt.userData.spinner = spinner;
+  return tilt;
+}
+const UNIT = new THREE.BoxGeometry(1, 1, 1);
+{ const uv = UNIT.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) / 16, 1 - (1 - uv.getY(i)) / 16); }
+// Mismo azar que SpellModel.hash en Java
+function hash(i, k) { const v = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return v - Math.floor(v); }
+function lerpHex(a, b, t) {
+  const ca = new THREE.Color('#' + a), cb = new THREE.Color('#' + b);
+  return ca.lerp(cb, t);
+}
+function updateEmitter(ud, t) {
+  const e = ud.g.emit;
+  ud.parts.forEach((m, i) => {
+    let age = t / e.life + hash(i, 4);
+    const cycle = Math.floor(age); age -= cycle;
+    const seed = i * 31 + cycle * 7;
+    const bx = e.radius[0] * (2 * hash(seed, 1) - 1), by = e.radius[1] * (2 * hash(seed, 2) - 1), bz = e.radius[2] * (2 * hash(seed, 3) - 1);
+    const len = Math.hypot(bx, by, bz) + 1e-3, tk = age * e.life;
+    m.position.set(bx + e.outward * tk * bx / len, by + e.outward * tk * by / len + e.rise * tk, bz + e.outward * tk * bz / len - e.drift * tk);
+    m.rotation.set(hash(seed, 6) * 90 * D2R, hash(seed, 5) * 90 * D2R, 0, 'XYZ');
+    m.scale.setScalar(e.size[0] + (e.size[1] - e.size[0]) * age);
+    m.material.color.copy(lerpHex(e.colors[0], e.colors[1], age));
+    m.material.opacity = ud.g.render === 'solid' ? 1 : e.alpha * (1 - age);
+  });
 }
 
 const projectile = new THREE.Group(); scene.add(projectile);
@@ -221,12 +255,12 @@ function frame(now) {
   const s = sizeMul / 16 * appear;
   projectile.scale.set(s, s, s);
   groups.forEach((h, gi) => {
-    const g = h.userData;
-    h.rotation.set(g.spin[0]*t*D2R, g.spin[1]*t*D2R, g.spin[2]*t*D2R, 'ZYX');
+    const ud = h.userData, g = ud.g, sp = ud.spinner;
+    sp.rotation.set(g.spin[0]*t*D2R, g.spin[1]*t*D2R, g.spin[2]*t*D2R, 'ZYX');
     const p = g.pulse[0] ? 1 + g.pulse[0] * Math.sin(t * 2 * Math.PI / Math.max(1, g.pulse[1])) : 1;
-    h.scale.setScalar(p);
-    const mat = h.children[0].material;
-    mat.opacity = g.flicker > 0 ? 1 - g.flicker * Math.abs(Math.sin(t*0.9 + gi*1.7) * Math.sin(t*0.37 + gi)) : 1;
+    sp.scale.setScalar(p);
+    ud.mat.opacity = g.flicker > 0 ? 1 - g.flicker * Math.abs(Math.sin(t*0.9 + gi*1.7) * Math.sin(t*0.37 + gi)) : 1;
+    if (g.emit) updateEmitter(ud, t);
   });
   hud.textContent = `tick ${t.toFixed(1)} · ${(sizeMul * (DATA.models[current] ? 1 : 0)).toFixed(1)}× · 1 celda = 1 bloque`;
   controls.update();
