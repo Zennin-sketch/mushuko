@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [" d ", "g g", " g "],
+  "key": {"d": {"item": "minecraft:diamond"}, "g": {"item": "minecraft:gold_ingot"}},
+  "result": {"count": 1, "id": "remushoku:wedding_ring"}
+}

@@ -19,7 +19,9 @@ import net.zennin.mushoku.entity.MagicProjectile;
 import net.zennin.mushoku.entity.creature.AnimatedBoss;
 import net.zennin.mushoku.entity.creature.AnimatedMonster;
 import net.zennin.mushoku.entity.npc.BanditEntity;
-import net.zennin.mushoku.entity.npc.CharacterEntity;
+import net.zennin.mushoku.companion.CompanionEntity;
+import net.zennin.mushoku.companion.CompanionKind;
+import net.zennin.mushoku.entity.npc.VillagerGuardEntity;
 import net.zennin.mushoku.entity.npc.KalmanEntity;
 import net.zennin.mushoku.entity.npc.MageBanditEntity;
 import net.zennin.mushoku.entity.npc.TownNpcEntity;
@@ -72,9 +74,13 @@ public final class ModEntities {
                     .sized(0.6f, 1.8f).clientTrackingRange(10).build("ent_swap_totem"));
 
     // --- Personajes extra (skins slim) ---
-    public static final EntityType<CharacterEntity> ERIS = humanoid("eris_greyrat", MobCategory.CREATURE, (t, l) -> new CharacterEntity(t, l, false));
-    public static final EntityType<CharacterEntity> SYLPHIETTE = humanoid("sylphiette_greyrat", MobCategory.CREATURE, (t, l) -> new CharacterEntity(t, l, true));
-    public static final EntityType<CharacterEntity> SYLPHIETTE_YOUNG = humanoid("sylphiette_joven", MobCategory.CREATURE, (t, l) -> new CharacterEntity(t, l, false));
+    // Personajes con vinculos (estilo MCA). Mismos ids que el addon original para Roxy, Rudeus, Ghislaine, Ruijerd y Kishirika.
+    public static final java.util.Map<CompanionKind, EntityType<CompanionEntity>> COMPANIONS = new java.util.EnumMap<>(CompanionKind.class);
+    static {
+        for (CompanionKind k : CompanionKind.values())
+            COMPANIONS.put(k, humanoid(k.id, MobCategory.CREATURE, (t, l) -> new CompanionEntity(t, l, k)));
+    }
+    public static final EntityType<VillagerGuardEntity> VILLAGER_GUARD = humanoid("villager_guard_entity", MobCategory.CREATURE, VillagerGuardEntity::new);
 
     private ModEntities() {}
 
@@ -119,12 +125,22 @@ public final class ModEntities {
         egg("snow_drake", SNOW_DRAKE, 0xDDEEFF, 0x6699CC);
         egg("snow_drake_mom", SNOW_DRAKE_MOM, 0xDDEEFF, 0x224488);
         egg("giant_turtle", GIANT_TURTLE, 0x335522, 0x887744);
-        FabricDefaultAttributeRegistry.register(ERIS, CharacterEntity.stats(256, 20, 16));
-        FabricDefaultAttributeRegistry.register(SYLPHIETTE, CharacterEntity.stats(150, 10, 4));
-        FabricDefaultAttributeRegistry.register(SYLPHIETTE_YOUNG, CharacterEntity.stats(40, 2, 4));
-        egg("eris_greyrat", ERIS, 0xB0302A, 0xE8C080);
-        egg("sylphiette_greyrat", SYLPHIETTE, 0x2E7D4F, 0xF0F0F0);
-        egg("sylphiette_joven", SYLPHIETTE_YOUNG, 0x4FAF6F, 0xF0F0F0);
+        int[][] colors = {{0xB0302A, 0xE8C080}, {0x2E7D4F, 0xF0F0F0}, {0x4FAF6F, 0xF0F0F0}, {0x2A4FA0, 0x7FB0FF},
+                {0x6B4A2E, 0x3E6EB0}, {0x3A2A20, 0xC0A070}, {0x2E7A5A, 0xE0E0E0}, {0x4A2A5A, 0xD0A0E0}};
+        for (CompanionKind k : CompanionKind.values()) {
+            FabricDefaultAttributeRegistry.register(COMPANIONS.get(k), CompanionEntity.attributes(k));
+            egg(k.id, COMPANIONS.get(k), colors[k.ordinal()][0], colors[k.ordinal()][1]);
+        }
+        FabricDefaultAttributeRegistry.register(VILLAGER_GUARD, VillagerGuardEntity.attributes());
+        egg("villager_guard_entity", VILLAGER_GUARD, 0x6B4A2E, 0xAAAAAA);
+        // Aparicion natural del addon: un personaje suelto por el mundo (pesos originales)
+        int[][] spawn = {{CompanionKind.GHISLAINE.ordinal(), 8}, {CompanionKind.KISHIRIKA.ordinal(), 1}, {CompanionKind.ROXY.ordinal(), 3},
+                {CompanionKind.RUDEUS.ordinal(), 2}, {CompanionKind.RUIJERD.ordinal(), 5}};
+        for (int[] sp : spawn) {
+            EntityType<CompanionEntity> t = COMPANIONS.get(CompanionKind.values()[sp[0]]);
+            SpawnPlacements.register(t, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, net.minecraft.world.entity.Mob::checkMobSpawnRules);
+            BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), MobCategory.CREATURE, t, sp[1], 1, 1);
+        }
         egg("sg_bandit", SG_BANDIT, 0x993300, 0xCC0033);
         egg("ng_bandit", NG_BANDIT, 0x993300, 0x0000FF);
         egg("wg_bandit", WG_BANDIT, 0x993300, 0x00CCCC);

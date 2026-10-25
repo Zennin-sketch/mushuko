@@ -73,6 +73,8 @@ public final class ModItems {
     public static final Item STAFF_OF_AREOS = staff("staff_of_areos", 0.30f);
     public static final Item ULTIMO_SUSPIRO = register("ultimo_suspiro", new ExtraItems.TipItem("tooltip.remushoku.ultimo_suspiro", new Item.Properties().stacksTo(1)));
 
+    public static final Item WEDDING_RING = register("wedding_ring", new ExtraItems.TipItem("tooltip.remushoku.wedding_ring", new Item.Properties().stacksTo(1)));
+
     // --- Armadura Magica Mk 2 (defensa y durabilidad del original) ---
     public static final net.minecraft.core.Holder<net.minecraft.world.item.ArmorMaterial> MK2_MATERIAL = Registry.registerForHolder(
             BuiltInRegistries.ARMOR_MATERIAL, MushokuMod.id("mk2"), new net.minecraft.world.item.ArmorMaterial(

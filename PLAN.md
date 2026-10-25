@@ -93,6 +93,16 @@ Se mantiene el id `remushoku` para que las texturas, modelos y datos funcionen s
 - [x] Todos los NPCs con modelo de jugador completo: se ve la capa exterior de la skin
 - [x] Compatibilidad opcional con 3D Skin Layers (capa exterior en 3D si el mod está instalado)
 
+## Addon (mushokutenseiaddon) — port a Fabric
+#### A1 — Personajes con vínculos estilo MCA (HECHA, en prueba)
+- [x] Roxy, Rudeus, Ghislaine, Ruijerd, Kishirika (stats y técnicas del addon) + Eris, Sylphiette, Sylphiette joven
+- [x] Menú de interacción: Hablar / Interactuar / Órdenes / Especial, corazones por jugador, ánimo, cansancio por repetición
+- [x] Seguir (pelea a tu lado), quedarse, andar libre, casa; casamiento con Anillo de Bodas (solo personajes adultos)
+- [x] ~350 frases propias por personalidad; acción especial de cada uno
+- [x] Guardia de Aldea; aparición natural de los personajes como en el addon
+#### A2 — Razas (7) y habilidades del addon (Esquivar, Piel de Maná, Resistencia, Factor Laplace)
+#### A3 — Hechizos combinados, grupo, maldición Superd, objetos (piedras de maná, capa, casco, botas, gafas, lanza Superd...)
+
 ## Cómo se compila
 1. Subir este proyecto a un repositorio de GitHub.
 2. GitHub Actions lo compila solo en cada cambio ("Compilar mod").

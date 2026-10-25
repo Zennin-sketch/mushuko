@@ -33,9 +33,10 @@ public class MushokuClient implements ClientModInitializer {
         AnimatedRenderer.register(ModEntities.SNOW_DRAKE, "snowdrake", "snowdraketxt", 0.5f);
         AnimatedRenderer.register(ModEntities.GIANT_TURTLE, "greattortoise", "gianttortoisetexture", 3f);
         AnimatedRenderer.register(ModEntities.SNOW_DRAKE_MOM, "snowdrakemommy", "snowdrakemommytxt", 1.5f);
-        HumanoidNpcRenderer.register(ModEntities.ERIS, "eris_greyrat", true);
-        HumanoidNpcRenderer.register(ModEntities.SYLPHIETTE, "sylphiette_greyrat", true);
-        HumanoidNpcRenderer.register(ModEntities.SYLPHIETTE_YOUNG, "sylphiette_joven", true);
+        for (var k : net.zennin.mushoku.companion.CompanionKind.values())
+            HumanoidNpcRenderer.register(ModEntities.COMPANIONS.get(k), k.texture, k.slim);
+        HumanoidNpcRenderer.register(ModEntities.VILLAGER_GUARD, "villager_guard");
+        ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.CompanionStatePayload.TYPE, (payload, context) -> CompanionScreen.receive(payload.state()));
         HumanoidNpcRenderer.register(ModEntities.SG_BANDIT, "sgbandittxt");
         HumanoidNpcRenderer.register(ModEntities.NG_BANDIT, "ngbandittxt");
         HumanoidNpcRenderer.register(ModEntities.WG_BANDIT, "wgbandittxt");

@@ -24,6 +24,12 @@ public final class ModNetworking {
         PayloadTypeRegistry.playC2S().register(SwordActionPayload.TYPE, SwordActionPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(GuildSyncPayload.TYPE, GuildSyncPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ExtraSyncPayload.TYPE, ExtraSyncPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(CompanionStatePayload.TYPE, CompanionStatePayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(CompanionActionPayload.TYPE, CompanionActionPayload.CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(CompanionActionPayload.TYPE, (payload, ctx) -> {
+            ServerPlayer p = ctx.player();
+            p.server.execute(() -> net.zennin.mushoku.companion.Interactions.handle(p, payload.entityId(), payload.action()));
+        });
         PayloadTypeRegistry.playS2C().register(OpenScreenPayload.TYPE, OpenScreenPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(GuildActionPayload.TYPE, GuildActionPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(ComboPayload.TYPE, ComboPayload.CODEC);
