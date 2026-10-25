@@ -4,14 +4,20 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.zennin.mushoku.MushokuMod;
+import net.zennin.mushoku.magic.Spell;
 
-/** Barra de mana medieval arriba a la izquierda, con el numero adentro. */
+/** Barra de mana medieval arriba a la izquierda, hechizo en cola, y las flechas mientras conjuras. */
 public final class ManaBarHud {
     private static final ResourceLocation FRAME = MushokuMod.id("textures/screens/mana_bar_frame.png");
     private static final ResourceLocation BACK = MushokuMod.id("textures/screens/mana_bar_back.png");
     private static final ResourceLocation FILL = MushokuMod.id("textures/screens/mana_bar_fill.png");
+    private static final ResourceLocation UP = MushokuMod.id("textures/screens/uparrowful.png");
+    private static final ResourceLocation DOWN = MushokuMod.id("textures/screens/downarrowful.png");
+    private static final ResourceLocation LEFT = MushokuMod.id("textures/screens/leftarrowful.png");
+    private static final ResourceLocation RIGHT = MushokuMod.id("textures/screens/rightarrowful.png");
     private static final int W = 124, H = 20, FX = 21, FY = 5, FW = 98, FH = 10, X = 4, Y = 4;
 
     private ManaBarHud() {}
@@ -24,14 +30,42 @@ public final class ManaBarHud {
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        g.blit(BACK, X + FX, Y + FY, 0, 0, FW, FH, FW, FH);
+        g.blit(BACK, X + FX, Y + FY, 0f, 0f, FW, FH, FW, FH);
         int fw = (int) Math.round(FW * frac);
         if (fw <= 0 && mana > 0) fw = 1;
-        if (fw > 0) g.blit(FILL, X + FX, Y + FY, 0, 0, fw, FH, FW, FH);
-        g.blit(FRAME, X, Y, 0, 0, W, H, W, H);
+        if (fw > 0) g.blit(FILL, X + FX, Y + FY, 0f, 0f, fw, FH, FW, FH);
+        g.blit(FRAME, X, Y, 0f, 0f, W, H, W, H);
 
         String text = (long) Math.floor(mana) + " / " + (long) Math.floor(max);
         int tw = mc.font.width(text);
         g.drawString(mc.font, text, X + FX + (FW - tw) / 2, Y + FY + 1, 0xFFFFFFFF, true);
+
+        if (ClientManaState.playerClass != 1) return;
+        int line = Y + H + 4;
+        if (ClientManaState.noElement) {
+            g.drawString(mc.font, Component.translatable("hud.remushoku.no_element"), X + 2, line, 0xFFD58CFF, true);
+            line += 11;
+        }
+        Spell queued = ClientManaState.queued.isEmpty() ? null : Spell.byId(ClientManaState.queued);
+        if (queued != null) {
+            g.drawString(mc.font, Component.translatable("hud.remushoku.queued", Component.translatable(queued.translationKey())), X + 2, line, 0xFF8FD8FF, true);
+        }
+
+        if (CastingClient.casting) {
+            String combo = CastingClient.combo;
+            int size = 16, gap = 2;
+            int total = Math.max(1, combo.length()) * (size + gap) - gap;
+            int sx = (g.guiWidth() - total) / 2, sy = g.guiHeight() / 2 - 40;
+            g.drawCenteredString(mc.font, Component.translatable("hud.remushoku.casting"), g.guiWidth() / 2, sy - 12, 0xFFFFFFFF);
+            for (int i = 0; i < combo.length(); i++) {
+                ResourceLocation tex = switch (combo.charAt(i)) {
+                    case 'u' -> UP;
+                    case 'd' -> DOWN;
+                    case 'l' -> LEFT;
+                    default -> RIGHT;
+                };
+                g.blit(tex, sx + i * (size + gap), sy, 0f, 0f, size, size, size, size);
+            }
+        }
     }
 }

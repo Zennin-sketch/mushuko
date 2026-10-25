@@ -9,6 +9,9 @@ import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.Tier;
 import net.zennin.mushoku.MushokuMod;
+import net.zennin.mushoku.item.ClassChangeItem;
+import net.zennin.mushoku.item.ElementBookItem;
+import net.zennin.mushoku.magic.Element;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,10 +29,10 @@ public final class ModItems {
     public static final Item IMPERIAL_STONE = simple("imperial_stone");
 
     // --- Libros y magia (funcionalidad en fases siguientes) ---
-    public static final Item FIRE_BOOK = single("fire_book");
-    public static final Item EARTH_BOOK = single("earth_book");
-    public static final Item WIND_BOOK = single("wind_book");
-    public static final Item WATER_BOOK = single("water_book");
+    public static final Item FIRE_BOOK = register("fire_book", new ElementBookItem(Element.FIRE, new Item.Properties().stacksTo(1)));
+    public static final Item EARTH_BOOK = register("earth_book", new ElementBookItem(Element.EARTH, new Item.Properties().stacksTo(1)));
+    public static final Item WIND_BOOK = register("wind_book", new ElementBookItem(Element.WIND, new Item.Properties().stacksTo(1)));
+    public static final Item WATER_BOOK = register("water_book", new ElementBookItem(Element.WATER, new Item.Properties().stacksTo(1)));
     public static final Item SPELL_BOOK = single("spell_book");
     public static final Item GUIDE_BOOK = single("guide_book");
     public static final Item SILENT_TOME = single("silent_tome");
@@ -37,7 +40,7 @@ public final class ModItems {
     public static final Item CHALK = single("chalk");
     public static final Item INKAND_QUILL = single("inkand_quill");
     public static final Item INK_VIAL = simple("ink_vial");
-    public static final Item CLASS_CHANGE_ITEM = single("class_change_item");
+    public static final Item CLASS_CHANGE_ITEM = register("class_change_item", new ClassChangeItem(new Item.Properties().stacksTo(16)));
     public static final Item SUMMON_SCROLL_KALMAN = single("summon_scroll_kalman");
     public static final Item DEMON_EYE = single("demon_eye");
 

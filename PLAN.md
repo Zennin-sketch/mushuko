@@ -21,12 +21,16 @@ Se mantiene el id `remushoku` para que las texturas, modelos y datos funcionen s
 - [x] Maná del jugador (guardado, se conserva al morir) con la regeneración original
 - [x] Barra de maná medieval en el HUD
 
-### Fase 2 — Clases y lanzamiento de hechizos
-- Elección de clase (Mago / Espadachín) y orbe de cambio de clase
-- Teclas: conjurar (Shift+Ctrl), flechas WASD, activar (Tab)
-- Combinaciones de flechas → hechizo, costo de maná y ganancia de maná máximo por nivel
-- Libros elementales + piedras para desbloquear niveles
-- Primeros hechizos por elemento (proyectiles de agua/fuego/tierra/viento)
+### Fase 2 — Clases y lanzamiento de hechizos (HECHA, en prueba)
+- [x] Elección de clase (Mago / Espadachín) al entrar, y orbe de cambio de clase
+- [x] Teclas: conjurar (Shift+Ctrl), flechas WASD, activar (Tab) — configurables en Controles
+- [x] Las 56 combinaciones del original; costo de maná y maná máximo ganado por nivel
+- [x] Libros elementales + piedra en la otra mano para aprender niveles 2-6
+- [x] Modo sin elemento (Tab sin hechizo en cola)
+- [x] 16 hechizos Principiante: Bola de Agua, Escudo de Agua, Flecha de Agua, Golpe de Hielo, Hoja de Hielo,
+      Bola de Fuego, Mano Ardiente, Suelo Ardiente, Bala de Roca, Nube de Arena, Excavar, Ráfaga,
+      Caída Suave, Pies Veloces, Curación, Crecimiento, Escudo Mágico
+- [x] Comandos de prueba: /mushoku mana, /mushoku maxmana, /mushoku elemento, /mushoku clase
 
 ### Fase 3 — Hechizos completos y círculos mágicos
 - Los ~60 hechizos (Principiante → Imperial)

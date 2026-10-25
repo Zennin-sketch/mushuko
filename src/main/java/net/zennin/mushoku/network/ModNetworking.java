@@ -3,18 +3,50 @@ package net.zennin.mushoku.network;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.level.ServerPlayer;
+import net.zennin.mushoku.data.MagicData;
 import net.zennin.mushoku.data.ManaData;
 import net.zennin.mushoku.data.ModAttachments;
+import net.zennin.mushoku.magic.PlayerClasses;
+import net.zennin.mushoku.magic.SpellCasting;
 
 public final class ModNetworking {
     private ModNetworking() {}
 
     public static void init() {
         PayloadTypeRegistry.playS2C().register(ManaSyncPayload.TYPE, ManaSyncPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(MagicSyncPayload.TYPE, MagicSyncPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(ActionPayload.TYPE, ActionPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(ComboPayload.TYPE, ComboPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(ActionPayload.TYPE, ActionPayload.CODEC);
+
+        ServerPlayNetworking.registerGlobalReceiver(ComboPayload.TYPE, (payload, ctx) -> {
+            ServerPlayer p = ctx.player();
+            p.server.execute(() -> SpellCasting.onCombo(p, payload.combo()));
+        });
+        ServerPlayNetworking.registerGlobalReceiver(ActionPayload.TYPE, (payload, ctx) -> {
+            ServerPlayer p = ctx.player();
+            p.server.execute(() -> {
+                switch (payload.action()) {
+                    case ActionPayload.CAST -> SpellCasting.onActivate(p);
+                    case ActionPayload.CHOOSE_MAGE -> PlayerClasses.choose(p, SpellCasting.CLASS_MAGE);
+                    case ActionPayload.CHOOSE_SWORDSMAN -> PlayerClasses.choose(p, SpellCasting.CLASS_SWORDSMAN);
+                    default -> {}
+                }
+            });
+        });
     }
 
     public static void syncMana(ServerPlayer player) {
         ManaData d = ModAttachments.get(player);
         ServerPlayNetworking.send(player, new ManaSyncPayload(d.mana(), d.maxMana(), d.playerClass()));
+    }
+
+    public static void syncMagic(ServerPlayer player) {
+        MagicData m = ModAttachments.magic(player);
+        ServerPlayNetworking.send(player, new MagicSyncPayload(m.queued(), m.noElement(), m.water(), m.fire(), m.earth(), m.wind()));
+    }
+
+    public static void openClassScreen(ServerPlayer player) {
+        ServerPlayNetworking.send(player, new ActionPayload(ActionPayload.OPEN_CLASS_SCREEN));
     }
 }

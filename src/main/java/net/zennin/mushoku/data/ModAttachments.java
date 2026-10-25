@@ -14,7 +14,25 @@ public final class ModAttachments {
             .initializer(() -> ManaData.DEFAULT)
             .buildAndRegister(MushokuMod.id("mana"));
 
+    /** Hechizo en cola, modo sin elemento y niveles aprendidos por elemento. */
+    @SuppressWarnings("UnstableApiUsage")
+    public static final AttachmentType<MagicData> MAGIC = AttachmentRegistry.<MagicData>builder()
+            .persistent(MagicData.CODEC)
+            .copyOnDeath()
+            .initializer(() -> MagicData.DEFAULT)
+            .buildAndRegister(MushokuMod.id("magic"));
+
     private ModAttachments() {}
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static MagicData magic(Player player) {
+        return player.getAttachedOrCreate(MAGIC);
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static void setMagic(Player player, MagicData data) {
+        player.setAttached(MAGIC, data);
+    }
 
     @SuppressWarnings("UnstableApiUsage")
     public static ManaData get(Player player) {
