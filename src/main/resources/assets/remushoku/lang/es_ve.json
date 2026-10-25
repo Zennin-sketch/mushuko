@@ -1756,9 +1756,6 @@
   "coin.remushoku.gold": "%s Oro",
   "gui.remushoku.shop.buy": "Comprar",
   "gui.remushoku.shop.sell": "Vender",
-  "gui.remushoku.shop.price": "%s",
-  "gui.remushoku.shop.sell_price": "vende: %s",
-  "gui.remushoku.shop.money": "Tu dinero: %s oro, %s plata, %s cobre grande, %s cobre chico",
   "gui.remushoku.shop.ench_unbreaking": "(Irrompibilidad %s)",
   "gui.remushoku.shop.ench_sharpness": "(Filo %s)",
   "msg.remushoku.shop_no_money": "No te alcanza el dinero",
@@ -1804,5 +1801,10 @@
   "job.remushoku.snow_drake_mother_subjugation": "Exterminio de la Draca de Nieve Madre",
   "job.remushoku.snow_drake_mother_subjugation.desc": "Mata %s Draca de Nieve Madre",
   "job.remushoku.monster_subjugation_a": "Exterminio de Monstruos Inmensos",
-  "job.remushoku.monster_subjugation_a.desc": "Mata %s monstruos"
+  "job.remushoku.monster_subjugation_a.desc": "Mata %s monstruos",
+  "gui.remushoku.shop.purse": "Tu bolsa:",
+  "gui.remushoku.shop.buy_short": "Compra",
+  "gui.remushoku.shop.sell_short": "Venta",
+  "gui.remushoku.shop.tip_buy": "Comprar %s × %s por %s",
+  "gui.remushoku.shop.tip_sell": "Vender %s por %s"
 }
