@@ -1,0 +1,12 @@
+{
+  "type": "remushoku:structure_feature",
+  "config": {
+    "structure": "remushoku:skyislandsmall",
+    "ignored_blocks": "minecraft:structure_block",
+    "offset": [
+      0,
+      40,
+      0
+    ]
+  }
+}

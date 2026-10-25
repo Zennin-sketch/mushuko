@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "remushoku:city",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 51,
+    "separation": 50,
+    "salt": 1687843387
+  }
+}

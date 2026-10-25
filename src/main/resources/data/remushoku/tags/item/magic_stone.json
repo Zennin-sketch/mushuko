@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "remushoku:elementary_stone",
+    "remushoku:intermediate_stone",
+    "remushoku:advanced_stone",
+    "remushoku:saint_stone",
+    "remushoku:king_stone",
+    "remushoku:imperial_stone"
+  ]
+}

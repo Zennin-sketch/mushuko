@@ -1,0 +1,7 @@
+{
+  "parent": "remushoku:custom/mossykey",
+  "textures": {
+    "0": "remushoku:block/mossykeytxt",
+    "particle": "remushoku:item/mossykeytxt"
+  }
+}

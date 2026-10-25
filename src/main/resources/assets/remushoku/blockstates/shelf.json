@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "remushoku:block/shelf"
+    },
+    "facing=east": {
+      "model": "remushoku:block/shelf",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "remushoku:block/shelf",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "remushoku:block/shelf",
+      "y": 270
+    }
+  }
+}

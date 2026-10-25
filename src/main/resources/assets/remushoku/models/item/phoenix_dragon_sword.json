@@ -1,0 +1,7 @@
+{
+  "parent": "remushoku:custom/phoenixdragonsword",
+  "textures": {
+    "0": "remushoku:block/phoenixdragonsword",
+    "particle": "remushoku:item/phoenixdragonsword"
+  }
+}

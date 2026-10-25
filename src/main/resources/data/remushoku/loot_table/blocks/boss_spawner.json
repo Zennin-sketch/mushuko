@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:block",
+  "random_sequence": "remushoku:blocks/boss_spawner",
+  "pools": [
+    {
+      "rolls": 1.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "remushoku:boss_spawner"
+        }
+      ]
+    }
+  ]
+}

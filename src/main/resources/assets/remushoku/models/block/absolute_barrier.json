@@ -1,0 +1,13 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "down": "remushoku:block/graytranslu",
+    "up": "remushoku:block/graytranslu",
+    "north": "remushoku:block/graytranslu",
+    "east": "remushoku:block/graytranslu",
+    "south": "remushoku:block/graytranslu",
+    "west": "remushoku:block/graytranslu",
+    "particle": "remushoku:block/graytranslu"
+  },
+  "render_type": "translucent"
+}

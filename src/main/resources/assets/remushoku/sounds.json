@@ -1,0 +1,10 @@
+{
+  "blanksound": {
+    "sounds": [
+      {
+        "name": "remushoku:blanksound",
+        "stream": false
+      }
+    ]
+  }
+}

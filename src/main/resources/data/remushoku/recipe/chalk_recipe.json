@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "a",
+    "b",
+    "c"
+  ],
+  "key": {
+    "a": {
+      "item": "minecraft:clay_ball"
+    },
+    "b": {
+      "item": "remushoku:elementary_stone"
+    },
+    "c": {
+      "tag": "minecraft:sand"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "remushoku:chalk"
+  }
+}

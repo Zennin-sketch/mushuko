@@ -1,0 +1,13 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "down": "remushoku:block/doorplank1",
+    "up": "remushoku:block/doorplank1",
+    "north": "remushoku:block/doorplank1",
+    "east": "remushoku:block/doorplank1",
+    "south": "remushoku:block/doorplank1",
+    "west": "remushoku:block/doorplank1",
+    "particle": "remushoku:block/doorplank1"
+  },
+  "render_type": "solid"
+}

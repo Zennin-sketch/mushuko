@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "remushoku:chalk_north",
+    "remushoku:chalk_south",
+    "remushoku:chalk_east",
+    "remushoku:chalk_west",
+    "remushoku:chalk_center",
+    "remushoku:chalk_north_loop",
+    "remushoku:chalk_south_loop",
+    "remushoku:chalk_east_loop",
+    "remushoku:chalk_west_loop"
+  ]
+}

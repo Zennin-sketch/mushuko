@@ -1,0 +1,13 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "down": "remushoku:block/sandcloudtxt",
+    "up": "remushoku:block/sandcloudtxt",
+    "north": "remushoku:block/sandcloudtxt",
+    "east": "remushoku:block/sandcloudtxt",
+    "south": "remushoku:block/sandcloudtxt",
+    "west": "remushoku:block/sandcloudtxt",
+    "particle": "remushoku:block/sandcloudtxt"
+  },
+  "render_type": "translucent"
+}

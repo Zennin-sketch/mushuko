@@ -1,0 +1,7 @@
+{
+  "parent": "remushoku:custom/migurdsword",
+  "textures": {
+    "0": "remushoku:block/migurdsword",
+    "particle": "remushoku:item/erisswordthicktexture"
+  }
+}

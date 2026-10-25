@@ -1,0 +1,7 @@
+{
+  "parent": "block/pressure_plate_up",
+  "textures": {
+    "texture": "remushoku:block/chalkup2"
+  },
+  "render_type": "translucent"
+}

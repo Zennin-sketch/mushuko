@@ -1,0 +1,7 @@
+{
+  "parent": "block/pressure_plate_down",
+  "textures": {
+    "texture": "remushoku:block/chalkleftloop2"
+  },
+  "render_type": "translucent"
+}

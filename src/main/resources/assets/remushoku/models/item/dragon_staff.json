@@ -1,0 +1,7 @@
+{
+  "parent": "remushoku:custom/imperial_staff",
+  "textures": {
+    "0": "remushoku:block/dragonstafftexture2",
+    "particle": "remushoku:item/dragonstafftexture2"
+  }
+}

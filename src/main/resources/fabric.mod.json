@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "remushoku",
+  "version": "${version}",
+  "name": "Mushoku Tensei (Fabric)",
+  "description": "Port a Fabric 1.21.1 del mod Mushoku Tensei de Wiwar (MushokuRework), traducido al español.",
+  "authors": ["adamr / Wiwar (mod original)", "Zennin (port)"],
+  "license": "AFL-3.0",
+  "icon": "assets/remushoku/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["net.zennin.mushoku.MushokuMod"],
+    "client": ["net.zennin.mushoku.client.MushokuClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}

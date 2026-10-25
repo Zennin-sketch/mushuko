@@ -1,0 +1,13 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "down": "remushoku:block/plank_1",
+    "up": "remushoku:block/plank_1",
+    "north": "remushoku:block/jobboard3",
+    "east": "remushoku:block/jobboard3",
+    "south": "remushoku:block/jobboard3",
+    "west": "remushoku:block/jobboard3",
+    "particle": "remushoku:block/plank_1"
+  },
+  "render_type": "solid"
+}

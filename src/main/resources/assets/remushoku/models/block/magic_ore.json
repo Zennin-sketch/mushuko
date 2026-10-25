@@ -1,0 +1,13 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "down": "remushoku:block/magicore2",
+    "up": "remushoku:block/magicore2",
+    "north": "remushoku:block/magicore2",
+    "east": "remushoku:block/magicore2",
+    "south": "remushoku:block/magicore2",
+    "west": "remushoku:block/magicore2",
+    "particle": "remushoku:block/magicore2"
+  },
+  "render_type": "solid"
+}

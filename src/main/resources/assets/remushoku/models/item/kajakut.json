@@ -1,0 +1,9 @@
+{
+  "parent": "remushoku:custom/alexander_mushoku_tensei_sworddd",
+  "textures": {
+    "1": "remushoku:block/upper_handle_thingi",
+    "2": "remushoku:block/pointy_things_to_blade",
+    "3": "remushoku:block/middle_blade",
+    "particle": "remushoku:item/upper_handle_thingi"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "powered=false": {
+      "model": "remushoku:block/chalk_south"
+    },
+    "powered=true": {
+      "model": "remushoku:block/chalk_south_down"
+    }
+  }
+}

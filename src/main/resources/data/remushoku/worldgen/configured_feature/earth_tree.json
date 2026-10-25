@@ -1,0 +1,9 @@
+{
+  "type": "remushoku:structure_feature",
+  "config": {
+    "structure": "remushoku:earthbooktree",
+    "random_rotation": true,
+    "random_mirror": true,
+    "ignored_blocks": "minecraft:structure_block"
+  }
+}

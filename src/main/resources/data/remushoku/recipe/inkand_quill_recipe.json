@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "minecraft:feather"
+    },
+    {
+      "item": "remushoku:elementary_stone"
+    },
+    {
+      "item": "minecraft:ink_sac"
+    },
+    {
+      "item": "remushoku:elementary_stone"
+    },
+    {
+      "item": "minecraft:glass_bottle"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "remushoku:inkand_quill"
+  }
+}

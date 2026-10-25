@@ -1,0 +1,13 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "down": "remushoku:block/transparent",
+    "up": "remushoku:block/transparent",
+    "north": "remushoku:block/transparent",
+    "east": "remushoku:block/transparent",
+    "south": "remushoku:block/transparent",
+    "west": "remushoku:block/transparent",
+    "particle": "remushoku:block/transparent"
+  },
+  "render_type": "translucent"
+}

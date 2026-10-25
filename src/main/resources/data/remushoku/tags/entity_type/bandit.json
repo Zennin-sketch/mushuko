@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "remushoku:m_bandit",
+    "remushoku:ng_bandit",
+    "remushoku:sg_bandit",
+    "remushoku:wg_bandit"
+  ]
+}

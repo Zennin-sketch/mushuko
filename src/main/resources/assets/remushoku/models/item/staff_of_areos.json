@@ -1,0 +1,7 @@
+{
+  "parent": "remushoku:custom/staffofareon",
+  "textures": {
+    "0": "remushoku:block/staffofareon",
+    "particle": "remushoku:item/staffofareon"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "remushoku:custom/katana",
+  "textures": {
+    "0": "remushoku:block/katana1",
+    "1": "remushoku:block/katana2",
+    "particle": "remushoku:item/katana1"
+  }
+}

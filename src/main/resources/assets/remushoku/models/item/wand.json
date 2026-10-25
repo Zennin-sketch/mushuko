@@ -1,0 +1,7 @@
+{
+  "parent": "remushoku:custom/tinywand",
+  "textures": {
+    "0": "remushoku:block/tinywand",
+    "particle": "remushoku:item/tinywand"
+  }
+}

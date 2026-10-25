@@ -1,0 +1,7 @@
+{
+  "parent": "remushoku:custom/metalrodmodle",
+  "textures": {
+    "0": "remushoku:block/metalrodtxt",
+    "particle": "remushoku:item/metalrodtxt"
+  }
+}

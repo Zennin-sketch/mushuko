@@ -1,0 +1,17 @@
+{
+  "name": "remushoku:mossy_dungeon_stairs",
+  "fallback": "remushoku:mossy_dungeon_wall",
+  "elements": [
+    {
+      "weight": 100,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "remushoku:dung_stairs",
+        "projection": "rigid",
+        "processors": {
+          "processors": []
+        }
+      }
+    }
+  ]
+}

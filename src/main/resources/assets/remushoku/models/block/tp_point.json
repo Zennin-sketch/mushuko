@@ -1,0 +1,8 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "all": "remushoku:block/gray",
+    "particle": "remushoku:block/gray"
+  },
+  "render_type": "solid"
+}

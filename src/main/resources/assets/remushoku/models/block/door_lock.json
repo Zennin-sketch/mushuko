@@ -1,0 +1,13 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "down": "remushoku:block/doorkey",
+    "up": "remushoku:block/doorkey",
+    "north": "remushoku:block/doorkey",
+    "east": "remushoku:block/doorkey",
+    "south": "remushoku:block/doorkey",
+    "west": "remushoku:block/doorkey",
+    "particle": "remushoku:block/doorkey"
+  },
+  "render_type": "solid"
+}

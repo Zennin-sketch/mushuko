@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "powered=false": {
+      "model": "remushoku:block/magic_circle"
+    },
+    "powered=true": {
+      "model": "remushoku:block/magic_circle_down"
+    }
+  }
+}

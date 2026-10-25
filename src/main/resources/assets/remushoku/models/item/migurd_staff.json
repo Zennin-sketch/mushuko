@@ -1,0 +1,7 @@
+{
+  "parent": "remushoku:custom/migurdstaff_3",
+  "textures": {
+    "0": "remushoku:block/midgurdstafftexture3",
+    "particle": "remushoku:item/midgurdstafftexture3"
+  }
+}

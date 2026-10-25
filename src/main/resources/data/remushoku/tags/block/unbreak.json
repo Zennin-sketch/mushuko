@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:bedrock",
+    "remushoku:door_lock",
+    "remushoku:door_plank",
+    "remushoku:absolute_barrier",
+    "remushoku:block_sand_cloud"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "remushoku:large_copper"
+    },
+    {
+      "item": "remushoku:large_copper"
+    },
+    {
+      "item": "remushoku:large_copper"
+    },
+    {
+      "item": "remushoku:large_copper"
+    },
+    {
+      "item": "remushoku:large_copper"
+    },
+    {
+      "item": "remushoku:large_copper"
+    },
+    {
+      "item": "remushoku:large_copper"
+    },
+    {
+      "item": "remushoku:large_copper"
+    },
+    {
+      "item": "remushoku:large_copper"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "remushoku:silver_coin"
+  }
+}

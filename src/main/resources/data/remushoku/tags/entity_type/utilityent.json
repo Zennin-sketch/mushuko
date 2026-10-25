@@ -1,0 +1,16 @@
+{
+  "replace": false,
+  "values": [
+    "remushoku:absolute_zero_ent",
+    "remushoku:clairvoyant_ent",
+    "remushoku:dust_storm_ent",
+    "remushoku:earth_drill_ent",
+    "remushoku:ent_eye_absolute_void",
+    "remushoku:minefield_ent",
+    "remushoku:mountian_ent",
+    "remushoku:sand_cloud_ent",
+    "remushoku:sand_storm_ent",
+    "remushoku:spice_bag_ent",
+    "remushoku:violent_storm_ent"
+  ]
+}

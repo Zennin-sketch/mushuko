@@ -1,0 +1,10 @@
+{
+  "parent": "remushoku:custom/shelf",
+  "textures": {
+    "all": "remushoku:block/plank_1",
+    "particle": "remushoku:block/plank_1",
+    "1": "remushoku:block/plank_1",
+    "missing": "remushoku:block/plank_1"
+  },
+  "render_type": "solid"
+}

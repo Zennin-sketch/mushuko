@@ -1,0 +1,7 @@
+{
+  "parent": "remushoku:custom/scythemodel",
+  "textures": {
+    "0": "remushoku:block/scythetexture",
+    "particle": "remushoku:item/scythetexture"
+  }
+}

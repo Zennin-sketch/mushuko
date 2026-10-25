@@ -1,0 +1,13 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "down": "remushoku:block/black",
+    "up": "remushoku:block/black",
+    "north": "remushoku:block/black",
+    "east": "remushoku:block/black",
+    "south": "remushoku:block/black",
+    "west": "remushoku:block/black",
+    "particle": "remushoku:block/black"
+  },
+  "render_type": "solid"
+}

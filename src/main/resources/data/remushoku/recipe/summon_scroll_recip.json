@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "minecraft:chorus_fruit"
+    },
+    {
+      "item": "minecraft:paper"
+    },
+    {
+      "item": "remushoku:imperial_stone"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "remushoku:summon_scroll_kalman"
+  }
+}
