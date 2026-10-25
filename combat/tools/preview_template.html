@@ -1112,6 +1112,8 @@ edPanel.innerHTML = `
   <div class="grp"><b>Parte elegida</b>
     <div class="selname" id="ed-sel"></div>
     <div class="r"><button id="ed-rot">Rotar (R)</button><button id="ed-mov">Mover (G)</button><button id="ed-reset">Reiniciar parte</button></div>
+    <div class="r"><button id="ed-cprev">Igual al anterior</button><button id="ed-cnext">Igual al siguiente</button></div>
+    <p class="hint" id="ed-cinfo"></p>
     <div id="ed-axes"></div>
     <div class="parts" id="ed-parts"></div>
   </div>
@@ -1136,7 +1138,7 @@ edPanel.innerHTML = `
 const $ = id => document.getElementById(id);
 for (const [k, label] of SEGS) { const b = document.createElement('button'); b.textContent = label; b.dataset.seg = k; b.onclick = () => edSelect(k); $('ed-parts').appendChild(b); }
 for (const k of Object.keys(parsed)) $('ed-src').insertAdjacentHTML('beforeend', `<option value="${k}">${k}</option>`);
-function edSelect(seg) { if (tool.mode) edConfirm(); ED.seg = seg; edRender(); }
+function edSelect(seg) { if (tool.mode) edConfirm(); ED.seg = seg; const ci = document.getElementById('ed-cinfo'); if (ci) ci.textContent = ''; edRender(); }
 const R2D = 180 / PI;
 function edFields() { // valores visibles y editables de la parte (grados / px)
   const P = ED.pose[ED.seg], k = SEG[ED.seg].kind, f = [];
@@ -1187,6 +1189,19 @@ $('ed-start').onclick = () => { // keyframes sacados de la animacion actual en s
   ED.length = a.end; ED.tick = 0; linkKeys(); edStore(); edSync();
 };
 $('ed-animate').onclick = () => { if (ED.keys.length < 2) { edRender(); return; } edBake(); ED.t = 0; edPlayer.real = 0; ED.playing = true; setPlaying(true); edRender(); };
+/** La parte elegida vuelve a como estaba en el keyframe anterior o siguiente (solo esa parte). */
+function edCopyNeighbor(dir) {
+  const ks = edSorted().filter(k => dir < 0 ? k.tick < ED.tick : k.tick > ED.tick);
+  const k = dir < 0 ? ks[ks.length - 1] : ks[0];
+  if (!k) { $('ed-cinfo').textContent = dir < 0 ? 'No hay keyframe antes de este tick.' : 'No hay keyframe despues de este tick.'; return; }
+  edPush();
+  normPose(k.pose);
+  ED.pose[ED.seg] = clone(k.pose[ED.seg]);
+  ED.baked = null; edRender();
+  $('ed-cinfo').textContent = `${SEG[ED.seg].label}: copiada del tick ${k.tick}. Guarda el keyframe para conservarla.`;
+}
+$('ed-cprev').onclick = () => edCopyNeighbor(-1);
+$('ed-cnext').onclick = () => edCopyNeighbor(1);
 $('ed-rot').onclick = () => edBegin('rotate');
 $('ed-mov').onclick = () => edBegin('move');
 $('ed-name').onchange = () => { ED.name = $('ed-name').value.replace(/[^a-z0-9_]/gi, '_').toLowerCase() || 'mi_animacion'; edStore(); edRender(); };
