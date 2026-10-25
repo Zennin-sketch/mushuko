@@ -11,6 +11,16 @@ repositories {
     maven { url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
 }
 
+// Copia minima de la API de Better Combat: solo para compilar el mixin (no va dentro del .jar).
+sourceSets {
+    stubs {
+        compileClasspath += main.compileClasspath
+    }
+    main {
+        compileClasspath += stubs.output
+    }
+}
+
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings loom.officialMojangMappings()

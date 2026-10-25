@@ -439,3 +439,35 @@ if __name__ == '__main__':
     import animgen as G
     import anims  # noqa: F401
     G.write(sys.argv[1])
+
+# ---------------------------------------------------------------- armas guardadas
+
+def quat(m):
+    """Matriz de rotacion -> cuaternion (x, y, z, w) como JOML."""
+    tr = m[0][0] + m[1][1] + m[2][2]
+    if tr > 0:
+        s = math.sqrt(tr + 1.0) * 2
+        return ((m[2][1] - m[1][2]) / s, (m[0][2] - m[2][0]) / s, (m[1][0] - m[0][1]) / s, 0.25 * s)
+    if m[0][0] > m[1][1] and m[0][0] > m[2][2]:
+        s = math.sqrt(1.0 + m[0][0] - m[1][1] - m[2][2]) * 2
+        return (0.25 * s, (m[0][1] + m[1][0]) / s, (m[0][2] + m[2][0]) / s, (m[2][1] - m[1][2]) / s)
+    if m[1][1] > m[2][2]:
+        s = math.sqrt(1.0 + m[1][1] - m[0][0] - m[2][2]) * 2
+        return ((m[0][1] + m[1][0]) / s, 0.25 * s, (m[1][2] + m[2][1]) / s, (m[0][2] - m[2][0]) / s)
+    s = math.sqrt(1.0 + m[2][2] - m[0][0] - m[1][1]) * 2
+    return ((m[0][2] + m[2][0]) / s, (m[1][2] + m[2][1]) / s, 0.25 * s, (m[1][0] - m[0][1]) / s)
+
+def hand_slot(anim_obj, tick):
+    """Donde queda el arma en la mano derecha en ese tick, relativo al torso (para dibujarla guardada)."""
+    first, poses = anim_obj.series()
+    p = poses[tick - first]
+    t = p['torso']
+    R_t = zyx(t[1] * D, t[0] * D, -t[2] * D)
+    U, bend, axis, Qi = arm_ik(R_t, -5, *p['rarm'])
+    Rti = transpose(R_t)
+    F = mat_mul(Rti, U)
+    pos = mat_vec(Rti, mat_vec(R_t, [-5, 2, 0]))
+    wrist = euler_candidates(Qi)[0] if Qi is not None else (0.0, 0.0, 0.0)
+    r = lambda v: round(v, 5)
+    return dict(pos=[r(v) for v in pos], rot=[r(v) for v in quat(F)], bend=r(bend), axis=r(axis or 0.0),
+                wrist=[r(v) for v in wrist])

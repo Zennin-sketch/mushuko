@@ -264,24 +264,85 @@ dash('dash_backward', 'Dash hacia atras (mago)', (0, -1))
 dash('dash_left', 'Dash a la izquierda (mago)', (-1, 0))
 dash('dash_right', 'Dash a la derecha (mago)', (1, 0))
 
-def roll(name, desc, lean=0, tilt=0):
+def roll(name, desc, lean=0, tilt=0, lean_in=None):
+    """Roll en 5 tiempos: 1) se inclina y da un paso hacia donde va a rodar, 2) se zambulle encogiendose,
+    3) gira, 4) cae amortiguando con los brazos abiertos, 5) se levanta."""
     sl, st = (1 if lean > 0 else -1 if lean < 0 else 0), (1 if tilt > 0 else -1 if tilt < 0 else 0)
-    x = anim(name, desc, end=15, stop=19, lag=LIMBS_LAG)
-    reach = dict(rarm=R((4, -10, 6 * sl or 3), (0, 0, 1)), larm=L((-4, -10, 6 * sl or 3), (0, 0, 1)))
+    x = anim(name, desc, end=17, stop=21, lag=LIMBS_LAG)
     balance = dict(rarm=R((10, -7, 2)), larm=L((-10, -7, 2)))
     x.key(0, 'stop', **NEUTRAL_P)
-    x.key(2, 'stop', **P(root(up=-0.15, lean=18 * sl, tilt=14 * st, plant=0), reach, legs('crouch', -10), head(down=15)))
-    x.key(4, 'smooth', **P(root(up=-0.3, lean=lean * 0.22, tilt=tilt * 0.22, plant=0), TUCK))
-    x.key(8, 'smooth', **P(root(up=-0.4, lean=lean * 0.68, tilt=tilt * 0.68, plant=0)))
-    x.key(11, 'smooth', **P(root(up=-0.32, lean=lean * 0.95, tilt=tilt * 0.95, plant=0), legs('crouch', 15)))
-    x.key(12, 'stop', **P(root(up=-0.24, lean=lean + 8 * sl, tilt=tilt + 8 * st, plant=0), balance, legs('crouch', 15), head(down=5)))
-    x.key(15, 'stop', **P(NEUTRAL_P, root(lean=lean, tilt=tilt, plant=0)))
+    half = {k: v for k, v in lean_in.items()}
+    r = list(half['root']); r[1] *= 0.4; r[3] *= 0.4; r[5] *= 0.4
+    half['root'] = tuple(r)
+    x.key(2, 'smooth', **P(half, head(down=8)))
+    x.key(4, 'stop', **P(lean_in, head(down=18)))
+    x.key(6, 'smooth', **P(root(up=-0.3, lean=lean * 0.25 + lean_in['root'][3] * 0.3, tilt=tilt * 0.25 + lean_in['root'][5] * 0.3, plant=0.3), TUCK))
+    x.key(10, 'smooth', **P(root(up=-0.4, lean=lean * 0.7, tilt=tilt * 0.7, plant=0)))
+    x.key(13, 'smooth', **P(root(up=-0.3, lean=lean * 0.97, tilt=tilt * 0.97, plant=0), legs('crouch', 15)))
+    x.key(14, 'stop', **P(root(up=-0.24, lean=lean + 6 * sl, tilt=tilt + 6 * st, plant=0), balance, legs('crouch', 15), head(down=5)))
+    x.key(17, 'stop', **P(NEUTRAL_P, root(lean=lean, tilt=tilt, plant=0)))
 
 TUCK = P(dict(rarm=R((3, -6, 6), (0, 1, 0)), larm=L((-3, -6, 6), (0, 1, 0))), legs('tuck'), head(down=30))
-roll('roll_forward', 'Roll hacia adelante (espadachin)', lean=360)
-roll('roll_backward', 'Roll hacia atras (espadachin)', lean=-360)
-roll('roll_left', 'Roll lateral a la izquierda (espadachin)', tilt=-360)
-roll('roll_right', 'Roll lateral a la derecha (espadachin)', tilt=360)
+roll('roll_forward', 'Roll hacia adelante (espadachin)', lean=360, lean_in=P(
+    root(up=-0.18, lean=38), legs('lunge', 15), dict(rarm=R((4, -12, 8)), larm=L((-4, -12, 8)))))
+roll('roll_backward', 'Roll hacia atras (espadachin)', lean=-360, lean_in=P(
+    root(up=-0.28, lean=-22), legs('crouch', -5), dict(rarm=R((5, -6, 8)), larm=L((-5, -6, 8)))))
+roll('roll_left', 'Roll lateral a la izquierda (espadachin)', tilt=-360, lean_in=P(
+    root(up=-0.16, tilt=-34), dict(lleg=((-0.45, -0.9, 0.05), 30), rleg=((0.1, -1, 0), 5)),
+    dict(rarm=R((0, -12, 4)), larm=L((-9, -12, 2)))))
+roll('roll_right', 'Roll lateral a la derecha (espadachin)', tilt=360, lean_in=P(
+    root(up=-0.16, tilt=34), dict(rleg=((0.45, -0.9, 0.05), 30), lleg=((-0.1, -1, 0), 5)),
+    dict(rarm=R((9, -12, 2)), larm=L((0, -12, 4)))))
+
+# =============================================================== DESENVAINAR / ENVAINAR
+# El arma guardada se dibuja exactamente donde queda la mano en el tick de "agarre": por eso las dos poses de agarre
+# (GRAB_HIP, GRAB_BACK) se comparten entre sacar y guardar, y sheaths.json se calcula de ahi.
+GRAB_HIP = P(root(lean=4), torso(turn=-24, lean=4), head(yaw=-20, down=18),
+             dict(rarm=R((-4.5, -11, 4), (-0.15, -0.45, -0.88)), larm=L((-6, -12, 1), (0, -0.3, -1))))
+GRAB_BACK = P(root(lean=-3), torso(turn=12, lean=-3), head(yaw=-12, down=-6),
+              dict(rarm=R((4, 3, -4), (-0.6, -0.8, -0.05)), larm=L((-6, -11, 2))))
+SHEATH_SLOTS = {}  # slot -> (animacion, tick de agarre)
+
+def draw_hip():
+    x = anim('hip_draw', 'Desenvainar desde la cintura', end=14, stop=18, lag=('head', 'larm'))
+    x.key(0, 'stop', **NEUTRAL_P)
+    x.key(3, 'smooth', **P(root(lean=2), torso(turn=-14), head(yaw=-12, down=10),
+                           dict(rarm=R((0, -10, 6), (-0.1, -0.2, -0.9)), larm=L((-6, -12, 1)))))
+    x.key(5, 'stop', **GRAB_HIP)
+    x.key(8, 'smooth', **P(root(lean=3, turn=6), torso(turn=16, lean=-2), head(yaw=-4, down=0),
+                           dict(rarm=R((7, -1, 8), (0.5, 0.75, 0.4)), larm=L((-6, -11, -2)))))
+    x.key(11, 'stop', **GUARD_1H)
+    x.key(14, 'stop', **P(NEUTRAL_P, dict(rarm=R((5, -11, 4), (0, 0.5, 1)))))
+    SHEATH_SLOTS['hip'] = (x, 5)
+
+def sheathe_hip():
+    x = anim('hip_sheathe', 'Envainar en la cintura', end=13, stop=17, lag=('head', 'larm'))
+    x.key(0, 'stop', **P(NEUTRAL_P, dict(rarm=R((5, -11, 4), (0, 0.5, 1)))))
+    x.key(4, 'smooth', **P(root(lean=2), torso(turn=-10), head(yaw=-14, down=12),
+                           dict(rarm=R((2, -5, 8), (-0.45, -0.1, -0.9)), larm=L((-6, -12, 1)))))
+    x.key(8, 'stop', **GRAB_HIP)
+    x.key(10, 'smooth', **P(root(lean=1), torso(turn=-8), head(down=6), dict(rarm=R((2, -11, 4)))))
+    x.key(13, 'stop', **NEUTRAL_P)
+
+def draw_back():
+    x = anim('back_draw', 'Desenvainar desde la espalda', end=14, stop=18, lag=('head', 'larm'))
+    x.key(0, 'stop', **NEUTRAL_P)
+    x.key(3, 'smooth', **P(torso(turn=8), head(yaw=-8, down=-3), dict(rarm=R((6, 0, -1), (-0.3, -0.6, -0.6)))))
+    x.key(5, 'stop', **GRAB_BACK)
+    x.key(8, 'smooth', **P(root(lean=4), torso(turn=-6, lean=4), head(), dict(rarm=R((6, 5, 5), (0.2, 0.9, 0.35)), larm=L((-3, -4, 8)))))
+    x.key(11, 'stop', **GUARD_H)
+    x.key(14, 'stop', **P(NEUTRAL_P, grip((3, -9, 6), (0.15, 0.9, 0.3))))
+    SHEATH_SLOTS['back'] = (x, 5)
+
+def sheathe_back():
+    x = anim('back_sheathe', 'Guardar en la espalda', end=13, stop=17, lag=('head', 'larm'))
+    x.key(0, 'stop', **P(NEUTRAL_P, grip((3, -9, 6), (0.15, 0.9, 0.3))))
+    x.key(4, 'smooth', **P(torso(turn=6), head(yaw=-6), dict(rarm=R((6, 5, 3), (0.1, 0.9, -0.4)), larm=L((-6, -11, 2)))))
+    x.key(8, 'stop', **GRAB_BACK)
+    x.key(10, 'smooth', **P(torso(turn=4), dict(rarm=R((6, -6, 1)))))
+    x.key(13, 'stop', **NEUTRAL_P)
+
+draw_hip(); sheathe_hip(); draw_back(); sheathe_back()
 
 # =============================================================== CONJURO (pose de Rudeus)
 # Cuerpo de perfil con el hombro derecho adelante, brazo derecho extendido hacia el objetivo con el baston

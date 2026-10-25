@@ -1,4 +1,5 @@
 {
   "key.mushoku_combat.dodge": "Esquivar (roll / dash)",
-  "modmenu.descriptionTranslation.mushoku_combat": "Combos animados con Better Combat, estamina, roll y dash con esquiva perfecta."
+  "modmenu.descriptionTranslation.mushoku_combat": "Combos animados con Better Combat, estamina, roll y dash con esquiva perfecta.",
+  "key.mushoku_combat.combat_mode": "Modo combate (sacar / guardar arma)"
 }

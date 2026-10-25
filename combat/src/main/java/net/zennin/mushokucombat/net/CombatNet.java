@@ -11,5 +11,7 @@ public final class CombatNet {
         PayloadTypeRegistry.playS2C().register(PerfectDodgePayload.TYPE, PerfectDodgePayload.CODEC);
         PayloadTypeRegistry.playC2S().register(DodgePayload.TYPE, DodgePayload.CODEC);
         PayloadTypeRegistry.playC2S().register(PoseStatePayload.TYPE, PoseStatePayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(SheathPayload.TYPE, SheathPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(SheathStatePayload.TYPE, SheathStatePayload.CODEC);
     }
 }

@@ -7,41 +7,41 @@ def atk(anim, hitbox, dmg, angle, sound, upswing=0.5):
 NS = 'mushoku_combat'
 
 FAMILIES = {
-    'sword': dict(label='Espada', two_handed=False, range_bonus=0.0, pose=None, attacks=[
+    'sword': dict(slot='hip', label='Espada', two_handed=False, range_bonus=0.0, pose=None, attacks=[
         atk('sword_slash_1', 'HORIZONTAL_PLANE', 0.9, 140, 'bettercombat:sword_slash'),
         atk('sword_slash_2', 'HORIZONTAL_PLANE', 1.0, 140, 'bettercombat:sword_slash'),
         atk('sword_thrust_3', 'FORWARD_BOX', 1.35, 0, 'bettercombat:rapier_stab'),
     ]),
-    'katana': dict(label='Katana', two_handed=True, range_bonus=0.25, pose='bettercombat:pose_two_handed_katana', attacks=[
+    'katana': dict(slot='hip', label='Katana', two_handed=True, range_bonus=0.25, pose='bettercombat:pose_two_handed_katana', attacks=[
         atk('katana_iai', 'HORIZONTAL_PLANE', 0.95, 150, 'bettercombat:katana_slash'),
         atk('katana_overhead', 'VERTICAL_PLANE', 1.1, 90, 'bettercombat:katana_slash'),
         atk('katana_whirlwind', 'HORIZONTAL_PLANE', 1.3, 360, 'bettercombat:katana_slash'),
     ]),
-    'heavy': dict(label='Mandoble', two_handed=True, range_bonus=0.5, pose='bettercombat:pose_two_handed_heavy', attacks=[
+    'heavy': dict(slot='back', label='Mandoble', two_handed=True, range_bonus=0.5, pose='bettercombat:pose_two_handed_heavy', attacks=[
         atk('heavy_sweep', 'HORIZONTAL_PLANE', 1.0, 160, 'bettercombat:claymore_swing'),
         atk('heavy_rise', 'VERTICAL_PLANE', 1.05, 120, 'bettercombat:claymore_swing'),
         atk('heavy_slam', 'VERTICAL_PLANE', 1.45, 120, 'bettercombat:claymore_slam'),
     ]),
-    'axe': dict(label='Hacha de guerra', two_handed=True, range_bonus=0.25, pose='bettercombat:pose_two_handed_heavy', attacks=[
+    'axe': dict(slot='back', label='Hacha de guerra', two_handed=True, range_bonus=0.25, pose='bettercombat:pose_two_handed_heavy', attacks=[
         atk('heavy_rise', 'VERTICAL_PLANE', 1.0, 120, 'bettercombat:double_axe_swing'),
         atk('heavy_sweep', 'HORIZONTAL_PLANE', 1.0, 160, 'bettercombat:double_axe_swing'),
         atk('heavy_slam', 'VERTICAL_PLANE', 1.5, 120, 'bettercombat:hammer_slam'),
     ]),
-    'scythe': dict(label='Guadana', two_handed=True, range_bonus=0.75, pose='bettercombat:pose_two_handed_scythe', attacks=[
+    'scythe': dict(slot='back', label='Guadana', two_handed=True, range_bonus=0.75, pose='bettercombat:pose_two_handed_scythe', attacks=[
         atk('scythe_reap', 'HORIZONTAL_PLANE', 1.0, 170, 'bettercombat:scythe_slash'),
         atk('scythe_backswing', 'HORIZONTAL_PLANE', 1.0, 170, 'bettercombat:scythe_slash'),
         atk('scythe_cyclone', 'HORIZONTAL_PLANE', 1.3, 360, 'bettercombat:scythe_slash'),
     ]),
-    'spear': dict(label='Lanza', two_handed=True, range_bonus=1.0, pose=NS + ':pose_spear', attacks=[
+    'spear': dict(slot='back', label='Lanza', two_handed=True, range_bonus=1.0, pose=NS + ':pose_spear', attacks=[
         atk('spear_thrust', 'FORWARD_BOX', 0.9, 0, 'bettercombat:spear_stab'),
         atk('spear_sweep', 'HORIZONTAL_PLANE', 0.85, 160, 'bettercombat:glaive_slash_quick'),
         atk('spear_dragon_pierce', 'FORWARD_BOX', 1.5, 0, 'bettercombat:spear_stab'),
     ]),
-    'staff': dict(label='Baston magico', two_handed=True, range_bonus=0.25, pose=NS + ':pose_staff', attacks=[
+    'staff': dict(slot='back', label='Baston magico', two_handed=True, range_bonus=0.25, pose=NS + ':pose_staff', attacks=[
         atk('staff_jab', 'FORWARD_BOX', 0.9, 0, 'bettercombat:staff_stab'),
         atk('staff_crack', 'VERTICAL_PLANE', 1.1, 120, 'bettercombat:staff_slam'),
     ]),
-    'rod': dict(label='Maza', two_handed=False, range_bonus=0.0, pose=None, attacks=[
+    'rod': dict(slot='hip', label='Maza', two_handed=False, range_bonus=0.0, pose=None, attacks=[
         atk('sword_slash_1', 'HORIZONTAL_PLANE', 1.0, 120, 'bettercombat:mace_slash'),
         atk('sword_slash_2', 'HORIZONTAL_PLANE', 1.0, 120, 'bettercombat:mace_slash'),
         atk('staff_crack', 'VERTICAL_PLANE', 1.3, 90, 'bettercombat:mace_slam'),
@@ -75,6 +75,8 @@ EXTRA = [
     dict(group='Esquivas (espadachin)', items=['roll_forward', 'roll_backward', 'roll_left', 'roll_right'], weapon='migurd_sword'),
     dict(group='Esquivas (mago)', items=['dash_forward', 'dash_backward', 'dash_left', 'dash_right'], weapon='aqua_heartia'),
     dict(group='Conjuro', items=['cast_pose', 'cast_release'], weapon='aqua_heartia'),
+    dict(group='Desenvainar y guardar (cintura)', items=['hip_draw', 'hip_sheathe'], weapon='migurd_sword'),
+    dict(group='Desenvainar y guardar (espalda)', items=['back_draw', 'back_sheathe'], weapon='kajakut'),
     dict(group='Poses', items=['pose_staff', 'pose_spear'], weapon='aqua_heartia'),
 ]
 

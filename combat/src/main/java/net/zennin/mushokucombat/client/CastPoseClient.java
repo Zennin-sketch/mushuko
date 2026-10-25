@@ -33,6 +33,7 @@ public final class CastPoseClient {
             send(PoseStatePayload.CAST_RELEASE);
             posed = false;
         } else if (mage && CastingClient.casting && !posed) {
+            ClientSheath.ensureDrawn(p);
             CombatAnimations.play(p, "cast_pose", 4);
             send(PoseStatePayload.CAST_POSE);
             posed = true;

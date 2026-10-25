@@ -27,6 +27,7 @@ public final class Dodge {
     public static final int PERFECT_WINDOW = 6;
     private static final Map<UUID, Long> STARTED = new HashMap<>();
     private static final Set<String> RELAYED = Set.of("cast_pose", "cast_release",
+            "hip_draw", "hip_sheathe", "back_draw", "back_sheathe",
             "roll_forward", "roll_backward", "roll_left", "roll_right",
             "dash_forward", "dash_backward", "dash_left", "dash_right");
 

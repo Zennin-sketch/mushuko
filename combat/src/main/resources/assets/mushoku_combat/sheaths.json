@@ -1,0 +1,76 @@
+{
+ "slots": {
+  "hip": {
+   "pos": [
+    -5.0,
+    2.0,
+    0.0
+   ],
+   "rot": [
+    0.37282,
+    0.90929,
+    -0.1793,
+    0.04528
+   ],
+   "bend": 0.0,
+   "axis": 0.0,
+   "wrist": [
+    -0.1434,
+    -0.0,
+    -0.0
+   ],
+   "draw": "hip_draw",
+   "sheathe": "hip_sheathe",
+   "grab": 5,
+   "drawLength": 18,
+   "release": 8,
+   "sheatheLength": 17
+  },
+  "back": {
+   "pos": [
+    -5.0,
+    2.0,
+    -0.0
+   ],
+   "rot": [
+    0.57903,
+    -0.56505,
+    -0.31787,
+    0.49438
+   ],
+   "bend": -1.78067,
+   "axis": -1.38281,
+   "wrist": [
+    0.51862,
+    0.0,
+    -0.0
+   ],
+   "draw": "back_draw",
+   "sheathe": "back_sheathe",
+   "grab": 5,
+   "drawLength": 18,
+   "release": 8,
+   "sheatheLength": 17
+  }
+ },
+ "items": {
+  "remushoku:migurd_sword": "hip",
+  "remushoku:pauls_sword": "hip",
+  "remushoku:almanfi_sword": "hip",
+  "remushoku:hiramune": "hip",
+  "remushoku:ice_blade": "hip",
+  "remushoku:phoenix_dragon_sword": "hip",
+  "remushoku:stone_blade": "hip",
+  "remushoku:katana": "hip",
+  "remushoku:kajakut": "back",
+  "remushoku:war_axe": "back",
+  "remushoku:scythe": "back",
+  "remushoku:superd_spear": "back",
+  "remushoku:aqua_heartia": "back",
+  "remushoku:dragon_staff": "back",
+  "remushoku:staff_of_areos": "back",
+  "remushoku:migurd_staff": "back",
+  "remushoku:wand": "hip",
+  "remushoku:metal_rod": "hip"
+ }
+}
