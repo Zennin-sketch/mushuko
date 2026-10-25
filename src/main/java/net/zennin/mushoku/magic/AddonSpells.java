@@ -95,7 +95,7 @@ public final class AddonSpells {
                 sound(p, SoundEvents.MUD_BRICKS_BREAK, 0.6f);
             }
             case STONE_BLADE -> {
-                ItemStack blade = new ItemStack(ModItems.STONE_BLADE);
+                ItemStack blade = new ItemStack(net.zennin.mushoku.addon.AddonItems.STONE_BLADE);
                 if (!p.getInventory().add(blade)) p.drop(blade, false);
                 fx(level, p.position(), net.minecraft.core.particles.ParticleTypes.CRIT, 20, 0.6);
                 sound(p, SoundEvents.ANVIL_PLACE, 0.8f);
