@@ -700,6 +700,7 @@ function drawTimeline() {
   for (let t = 0; t <= total; t += total > 40 ? 10 : 5) { tg.fillRect(x(t), 22, 1, 4); tg.fillText(t, x(t) - 3, 34); }
   tg.fillStyle = '#d9ab4e'; tg.fillRect(x(a.begin) - 1, 8, 2, 18); tg.fillRect(x(a.end) - 1, 8, 2, 18);
   if (ATTACK.has(selected)) { tg.fillStyle = '#e9803a'; tg.fillRect(x(a.end / 2) - 1.5, 4, 3, 22); }
+  if (ED.on && ED.baked) { tg.fillStyle = '#e9803a'; tg.fillRect(x(ED.length / 2) - 1.5, 4, 3, 22); }
   if (ED.on) for (const k of ED.keys) { tg.fillStyle = k.stop ? '#e9803a' : '#d9ab4e'; tg.beginPath(); const kx = x(k.tick); tg.moveTo(kx, 11); tg.lineTo(kx + 5, 17); tg.lineTo(kx, 23); tg.lineTo(kx - 5, 17); tg.fill(); }
   const now = ED.on ? (ED.playing ? ED.t + player.delta : ED.tick) : player.running ? player.tick + player.delta : (a.loop ? a.end : a.stop);
   tg.fillStyle = '#ece3cf'; tg.beginPath(); tg.moveTo(x(now), 12); tg.lineTo(x(now) - 5, 3); tg.lineTo(x(now) + 5, 3); tg.fill();
@@ -836,7 +837,7 @@ function fromRaw(get) {
   return P;
 }
 
-const ED = { on: false, name: 'mi_animacion', length: 20, tick: 0, keys: [], pose: null, seg: 'rArmU', playing: false, t: 0, undo: [] };
+const ED = { on: false, name: 'mi_animacion', length: 20, tick: 0, keys: [], pose: null, seg: 'rArmU', playing: false, t: 0, undo: [], weapon: null, hit: 1, baked: null };
 ED.pose = edBlankPose();
 const clone = o => JSON.parse(JSON.stringify(o));
 function edSorted() { return ED.keys.slice().sort((a, b) => a.tick - b.tick); }
@@ -869,10 +870,27 @@ class EditorPlayer {
   constructor() { this.running = true; this.delta = 0; this.frac = 0; this.real = 0; this.cooldown = 0; this.raw = null; this.rawFor = null; }
   get a() { return { begin: 0, end: ED.length, stop: ED.length, loop: true, ret: 0 }; }
   get tick() { return ED.playing ? Math.floor(ED.t) : ED.tick; }
-  rate() { return 1; }
-  advance() { if (ED.playing) { ED.t += 1; if (ED.t > ED.length) ED.t = 0; } }
+  rate() {
+    if (!ED.baked) return 1;
+    const cd = DATA.families[DATA.weapons[ED.weapon].family].cooldown || 0;
+    if (!cd) return 1;
+    const S = ED.length / cd;
+    return this.real < cd * 0.25 ? 2 * S : this.real < cd ? 0.75 * S : S;
+  }
+  advance() {
+    if (!ED.playing) return;
+    ED.t += this.rate(); this.real += 1;
+    if (ED.t > ED.length) { ED.t = 0; this.real = 0; }
+  }
   step() { ED.tick = Math.min(ED.length, ED.tick + 1); edSync(); }
   value(part, ax, cur) {
+    if (ED.playing && ED.baked) { // animacion final (con transiciones y piso)
+      const t = Math.min(ED.length, ED.t + this.delta * this.rate()), i = Math.floor(t), f = t - i;
+      const A = ED.baked[Math.min(i, ED.baked.length - 1)], B = ED.baked[Math.min(i + 1, ED.baked.length - 1)];
+      const a = A[part] && A[part][ax], b = B[part] && B[part][ax];
+      if (a === undefined) return cur;
+      return a + (b - a) * f;
+    }
     const key = ED.playing ? ED.t + this.delta : 'edit';
     if (this.rawFor !== key || key === 'edit') { this.raw = toRaw(ED.playing ? edEval(ED.t + this.delta) : ED.pose); this.rawFor = key; }
     const v = this.raw[part] && this.raw[part][ax];
@@ -880,9 +898,20 @@ class EditorPlayer {
   }
 }
 let edPlayer = null, edSaved = null;
-function edStore() { try { localStorage.setItem('mushoku-editor-2', JSON.stringify({ name: ED.name, length: ED.length, keys: ED.keys })); } catch (e) {} }
-function edLoadStore() { try { const j = JSON.parse(localStorage.getItem('mushoku-editor-2') || 'null'); if (j && j.keys) { ED.name = j.name; ED.length = j.length; ED.keys = j.keys; } } catch (e) {} }
-function edSync() { const k = ED.keys.find(k => k.tick === ED.tick); ED.pose = k ? clone(k.pose) : edEval(ED.tick); edRender(); }
+const slotKey = () => `mushoku-ed3-${ED.weapon}-${ED.hit}`;
+function edStore() { ED.baked = null; try { localStorage.setItem(slotKey(), JSON.stringify({ name: ED.name, length: ED.length, keys: ED.keys })); localStorage.setItem('mushoku-ed3-last', JSON.stringify([ED.weapon, ED.hit])); } catch (e) {} }
+function edLoadSlot() {
+  ED.keys = []; ED.length = 20; ED.name = `${ED.weapon}_golpe${ED.hit}`; ED.baked = null; ED.tick = 0;
+  try { const j = JSON.parse(localStorage.getItem(slotKey()) || 'null'); if (j && j.keys) { ED.name = j.name || ED.name; ED.length = j.length || 20; ED.keys = j.keys; } } catch (e) {}
+}
+function edLoadStore() {
+  try { const l = JSON.parse(localStorage.getItem('mushoku-ed3-last') || 'null'); if (l) { ED.weapon = l[0]; ED.hit = l[1]; } } catch (e) {}
+  if (!ED.weapon || !DATA.weapons[ED.weapon]) ED.weapon = Object.keys(DATA.weapons)[0];
+  edLoadSlot();
+}
+/** Animacion del mod que usa hoy ese golpe de esa arma (punto de partida). */
+function edCurrentAnim() { const f = DATA.families[DATA.weapons[ED.weapon].family]; const a = f.attacks[ED.hit - 1]; return a ? a.anim : null; }
+function edSync() { if (!ED.playing) ED.baked = ED.baked; const k = ED.keys.find(k => k.tick === ED.tick); ED.pose = k ? clone(k.pose) : edEval(ED.tick); edRender(); }
 function edPush() { ED.undo.push(clone(ED.pose)); if (ED.undo.length > 60) ED.undo.shift(); }
 
 /* ---------------- resaltado de la parte elegida */
@@ -945,22 +974,32 @@ function edKey(e) {
   if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
   const k = e.key.toLowerCase();
   if ((e.ctrlKey || e.metaKey) && k === 'z') { if (ED.undo.length) { ED.pose = ED.undo.pop(); edRender(); } e.preventDefault(); return; }
-  if (tool.mode && (k === 'x' || k === 'y' || k === 'z')) { tool.lock = tool.lock === k ? null : k; edToolMsg(); e.preventDefault(); return; }
+  if (tool.mode === 'move' && (k === 'x' || k === 'y' || k === 'z')) { tool.lock = tool.lock === k ? null : k; edToolMsg(); e.preventDefault(); return; }
   if (k === 'escape' && tool.mode) { edCancel(); return; }
   if (k === 'enter' && tool.mode) { edConfirm(); return; }
-  if (k === 'r' && !tool.mode) { edBegin('rotate'); e.preventDefault(); }
+  if (k === 'r') { // R: eje X; otra vez R: eje Y; otra vez: eje Z (como BBS)
+    if (tool.mode === 'rotate') { tool.axis = (tool.axis + 1) % edRotChannels().length; tool.base = clone(ED.pose); tool.x0 = mouseXY[0]; edToolMsg(); }
+    else if (!tool.mode) edBegin('rotate');
+    e.preventDefault();
+  }
   if (k === 'g' && !tool.mode && SEG[ED.seg].move) { edBegin('move'); e.preventDefault(); }
 }
 window.addEventListener('keydown', edKey);
 let mouseXY = [0, 0];
 window.addEventListener('pointermove', e => { mouseXY = [e.clientX, e.clientY]; if (tool.mode) edToolMove(); });
+function edRotChannels() { return SEG[ED.seg].kind === 'q' ? [['rx', 'X'], ['ry', 'Y'], ['rz', 'Z']] : [['bend', 'Doblez'], ['dir', 'Direccion']]; }
 function edToolMsg() {
-  const ax = tool.lock ? ` · eje ${tool.lock.toUpperCase()}` : ' · eje de la camara';
-  setStatus((tool.mode === 'rotate' ? 'Rotando ' : 'Moviendo ') + SEG[ED.seg].label + ax + ' — X/Y/Z fija el eje, clic confirma, Esc cancela');
+  if (tool.mode === 'rotate') {
+    const ch = edRotChannels()[tool.axis];
+    setStatus(`Rotando ${SEG[ED.seg].label} en ${ch[1]} — mové el mouse a los costados · R cambia de eje · clic confirma · Esc cancela`);
+  } else {
+    const ax = tool.lock ? ` en ${tool.lock.toUpperCase()}` : '';
+    setStatus(`Moviendo ${SEG[ED.seg].label}${ax} — X/Y/Z fija el eje · clic confirma · Esc cancela`);
+  }
 }
 function edBegin(mode) {
   ED.playing = false; setPlaying(false);
-  tool.mode = mode; tool.lock = null; tool.snap = clone(ED.pose); tool.pivot = segPivot(ED.seg);
+  tool.mode = mode; tool.lock = null; tool.snap = clone(ED.pose); tool.base = clone(ED.pose); tool.axis = 0; tool.x0 = mouseXY[0]; tool.pivot = segPivot(ED.seg);
   const sp = screenOf(tool.pivot); tool.start = Math.atan2(mouseXY[1] - sp[1], mouseXY[0] - sp[0]);
   const n = new THREE.Vector3(); camera.getWorldDirection(n);
   tool.plane = new THREE.Plane().setFromNormalAndCoplanarPoint(n, tool.pivot);
@@ -973,17 +1012,13 @@ function edRayPlane() {
 }
 const AXES = { x: V3(1, 0, 0), y: V3(0, 1, 0), z: V3(0, 0, 1) };
 function edToolMove() {
-  const P = clone(tool.snap);
+  const P = clone(tool.mode === 'rotate' ? tool.base : tool.snap);
   if (tool.mode === 'rotate') {
-    const sp = screenOf(tool.pivot), a = Math.atan2(mouseXY[1] - sp[1], mouseXY[0] - sp[0]);
-    let ang = -(a - tool.start);
-    let axis;
-    if (tool.lock) {
-      axis = AXES[tool.lock].clone();
-      const toCam = camera.position.clone().sub(tool.pivot);
-      if (axis.dot(toCam) < 0) ang = -ang; // que siga al mouse mirando desde cualquier lado
-    } else axis = camera.position.clone().sub(tool.pivot).normalize();
-    rotateSeg(P, ED.seg, axis, ang);
+    const id = edRotChannels()[tool.axis][0];
+    const before = ED.pose; ED.pose = P;
+    const cur = edFields().find(f => f[2] === id)[1];
+    edSetField(id, cur + (mouseXY[0] - tool.x0) * 0.5, false); // medio grado por pixel
+    ED.pose = before;
   } else {
     const h = edRayPlane(); if (!h || !tool.hit0) return;
     let dw = h.clone().sub(tool.hit0);
@@ -995,9 +1030,9 @@ function edToolMove() {
       P.weapon.p = P.weapon.p.map((v, i) => v + [d.x, d.y, d.z][i]);
     }
   }
-  ED.pose = P; edPanelValues();
+  ED.pose = P; ED.baked = null; edPanelValues();
 }
-function edConfirm() { ED.undo.push(tool.snap); tool.mode = null; controls.enabled = true; setStatus(''); edRender(); }
+function edConfirm() { ED.baked = null; ED.undo.push(tool.snap); tool.mode = null; controls.enabled = true; setStatus(''); edRender(); }
 function edCancel() { ED.pose = tool.snap; tool.mode = null; controls.enabled = true; setStatus(''); edRender(); }
 renderer.domElement.addEventListener('contextmenu', e => { if (tool.mode) { e.preventDefault(); edCancel(); } });
 
@@ -1011,6 +1046,7 @@ function edToggle(on) {
     edSaved = { selected };
     queue = []; fade = null; selected = '__editor'; ED.playing = false;
     edPlayer = new EditorPlayer(); player = edPlayer; setPlaying(false);
+    equip(ED.weapon);
     document.getElementById('now').innerHTML = 'Editor de keyframes<small>clic en una parte · R rotar · G mover · X/Y/Z eje · Ctrl+Z deshacer</small>';
     edSync();
   } else {
@@ -1021,13 +1057,19 @@ function edToggle(on) {
   edHighlight();
 }
 const playBtn = document.getElementById('play');
-playBtn.addEventListener('click', () => { if (ED.on) { ED.playing = playing; ED.t = ED.tick; if (!ED.playing) edSync(); } });
+playBtn.addEventListener('click', () => { if (ED.on) { ED.playing = playing; ED.t = ED.tick; if (edPlayer) edPlayer.real = 0; if (!ED.playing) edSync(); } });
 const edBtn = document.createElement('button'); edBtn.className = 'edtoggle'; edBtn.textContent = 'Editor de keyframes';
 edBtn.onclick = () => edToggle(!ED.on);
 side.prepend(edBtn);
 const edPanel = document.createElement('div'); edPanel.className = 'ed'; edPanel.hidden = true;
 side.insertBefore(edPanel, edBtn.nextSibling);
 edPanel.innerHTML = `
+  <div class="grp"><b>Que animas</b>
+    <div class="r"><select id="ed-weapon" aria-label="Arma"></select></div>
+    <div class="r" id="ed-hits"></div>
+    <div class="r"><button id="ed-start">Partir de la animacion actual</button></div>
+    <p class="hint" id="ed-slotinfo"></p>
+  </div>
   <div class="grp"><b>Parte elegida</b>
     <div class="selname" id="ed-sel"></div>
     <div class="r"><button id="ed-rot">Rotar (R)</button><button id="ed-mov">Mover (G)</button><button id="ed-reset">Reiniciar parte</button></div>
@@ -1040,6 +1082,7 @@ edPanel.innerHTML = `
     <div class="r"><button class="gold" id="ed-save">Guardar keyframe</button><button id="ed-del">Borrar</button>
       <label class="chk"><input type="checkbox" id="ed-stop"> Frenar aca</label></div>
     <div class="keys" id="ed-keys"></div>
+    <div class="r"><button class="gold" id="ed-animate">Animar</button><span class="hint" id="ed-anim-info"></span></div>
   </div>
   <div class="grp"><b>Animacion</b>
     <div class="r"><label for="ed-name">Nombre</label><input type="text" id="ed-name"></div>
@@ -1064,14 +1107,23 @@ function edFields() { // valores visibles y editables de la parte (grados / px)
   return f;
 }
 function edPanelValues() { for (const [, v, id] of edFields()) { const el = $('f-' + id); if (el && document.activeElement !== el) el.value = (+v).toFixed(id.startsWith('p') ? 3 : 1); } }
-function edSetField(id, val) {
-  edPush();
+function edSetField(id, val, undo = true) {
+  if (undo) edPush();
   const P = ED.pose[ED.seg];
   if (id[0] === 'r') { const e = new THREE.Euler().setFromQuaternion(Q(P.q), 'XYZ'); e['xyz'['rx ry rz'.split(' ').indexOf(id)]] = val / R2D; P.q = qa(new THREE.Quaternion().setFromEuler(e)); }
   else if (id === 'bend' || id === 'dir') { let [b, ax] = bendOf(P.d); if (id === 'bend') b = val / R2D; else ax = val / R2D; const v = V3(0, 1, 0).applyAxisAngle(V3(Math.cos(-ax), 0, Math.sin(-ax)), b); P.d = [v.x, v.y, v.z]; }
   else P.p['xyz'.indexOf(id[1])] = val;
 }
 function edRender() {
+  const wsel = $('ed-weapon');
+  if (!wsel.options.length) for (const [k, w] of Object.entries(DATA.weapons)) wsel.insertAdjacentHTML('beforeend', `<option value="${k}">${w.label} (${DATA.families[w.family].label})</option>`);
+  wsel.value = ED.weapon;
+  const fam = DATA.families[DATA.weapons[ED.weapon].family], n = Math.max(3, fam.attacks.length);
+  $('ed-hits').innerHTML = Array.from({ length: n }, (_, i) => `<button data-h="${i + 1}" class="${ED.hit === i + 1 ? 'gold' : ''}">Golpe ${i + 1}</button>`).join('');
+  $('ed-hits').querySelectorAll('button').forEach(b => b.onclick = () => { edStore(); ED.hit = +b.dataset.h; edLoadSlot(); edSync(); });
+  const cur = edCurrentAnim();
+  $('ed-slotinfo').textContent = `${DATA.weapons[ED.weapon].label}, golpe ${ED.hit}. Hoy usa: ${cur || 'ninguna'}. Cada arma y golpe se guarda aparte.`;
+  $('ed-anim-info').textContent = ED.baked ? 'Animada: Reproducir muestra la version final a la velocidad del juego.' : (ED.keys.length < 2 ? 'Necesita al menos 2 keyframes.' : '');
   $('ed-name').value = ED.name; $('ed-len').value = ED.length; $('ed-tick').value = ED.tick; $('ed-tick').max = ED.length;
   const k = ED.keys.find(k => k.tick === ED.tick); $('ed-stop').checked = !!(k && k.stop);
   $('ed-keys').innerHTML = edSorted().map(k => `<button data-t="${k.tick}" class="${k.tick === ED.tick ? 'sel' : ''} ${k.stop ? 'stop' : ''}">${k.tick}</button>`).join('') || '<span class="hint">Todavia no hay keyframes.</span>';
@@ -1080,9 +1132,22 @@ function edRender() {
   $('ed-sel').textContent = SEG[ED.seg].label;
   $('ed-mov').disabled = !SEG[ED.seg].move;
   $('ed-axes').innerHTML = edFields().map(([l, v, id]) => `<div class="ax"><label for="f-${id}">${l}</label><span></span><input type="number" id="f-${id}" step="${id.startsWith('p') ? 0.05 : 1}" value="${(+v).toFixed(id.startsWith('p') ? 3 : 1)}"></div>`).join('');
-  for (const [, , id] of edFields()) $('f-' + id).onchange = e => { edSetField(id, +e.target.value); edRender(); };
+  for (const [, , id] of edFields()) $('f-' + id).onchange = e => { edSetField(id, +e.target.value); ED.baked = null; edRender(); };
   edHighlight();
 }
+$('ed-weapon').onchange = () => { edStore(); ED.weapon = $('ed-weapon').value; ED.hit = 1; equip(ED.weapon); edLoadSlot(); edSync(); };
+$('ed-start').onclick = () => { // keyframes sacados de la animacion actual en sus momentos clave
+  const name = edCurrentAnim(); if (!name) return;
+  const a = parsed[name];
+  const ticks = [0, 3, 5, 8, 10, 14, a.end].filter((t, i, arr) => t <= a.end && arr.indexOf(t) === i);
+  ED.keys = ticks.map(t => {
+    const pl = new Player(a); for (let i = 0; i < t; i++) pl.step();
+    const pose = fromRaw((part, ax, d) => pl.value(part, ax, (ax === 'x' || ax === 'y' || ax === 'z') && part !== 'body' && part !== 'rightItem' ? defaultOf(part, ax) : d));
+    return { tick: t, stop: t === 0 || t === 14 || t === a.end, pose };
+  });
+  ED.length = a.end; ED.tick = 0; edStore(); edSync();
+};
+$('ed-animate').onclick = () => { if (ED.keys.length < 2) { edRender(); return; } edBake(); ED.t = 0; edPlayer.real = 0; ED.playing = true; setPlaying(true); edRender(); };
 $('ed-rot').onclick = () => edBegin('rotate');
 $('ed-mov').onclick = () => SEG[ED.seg].move && edBegin('move');
 $('ed-name').onchange = () => { ED.name = $('ed-name').value.replace(/[^a-z0-9_]/gi, '_').toLowerCase() || 'mi_animacion'; edStore(); edRender(); };
@@ -1090,7 +1155,7 @@ $('ed-len').onchange = () => { ED.length = Math.max(2, Math.min(200, +$('ed-len'
 $('ed-tick').onchange = () => { ED.playing = false; setPlaying(false); ED.tick = Math.max(0, Math.min(ED.length, Math.round(+$('ed-tick').value))); edSync(); };
 $('ed-prev').onclick = () => { ED.playing = false; setPlaying(false); ED.tick = Math.max(0, ED.tick - 1); edSync(); };
 $('ed-next').onclick = () => { ED.playing = false; setPlaying(false); ED.tick = Math.min(ED.length, ED.tick + 1); edSync(); };
-$('ed-save').onclick = () => { const stop = $('ed-stop').checked; ED.keys = ED.keys.filter(k => k.tick !== ED.tick); ED.keys.push({ tick: ED.tick, stop, pose: clone(ED.pose) }); edStore(); edRender(); };
+$('ed-save').onclick = () => { ED.baked = null; const stop = $('ed-stop').checked; ED.keys = ED.keys.filter(k => k.tick !== ED.tick); ED.keys.push({ tick: ED.tick, stop, pose: clone(ED.pose) }); edStore(); edRender(); };
 $('ed-stop').onchange = () => { const k = ED.keys.find(k => k.tick === ED.tick); if (k) { k.stop = $('ed-stop').checked; edStore(); edRender(); } };
 $('ed-del').onclick = () => { ED.keys = ED.keys.filter(k => k.tick !== ED.tick); edStore(); edSync(); };
 $('ed-new').onclick = () => { edPush(); ED.keys = []; ED.pose = edBlankPose(); ED.tick = 0; edStore(); edRender(); };
@@ -1104,8 +1169,8 @@ $('ed-copy').onclick = () => {
   edRender();
 };
 $('ed-export').onclick = () => {
-  const out = { formato: 'mushoku-keyframes-2', nombre: ED.name, duracion: ED.length, arma: currentWeapon,
-    keyframes: edSorted().map(k => ({ tick: k.tick, frenar: k.stop, pose: k.pose, crudo: toRaw(k.pose) })) };
+  const out = { formato: 'mushoku-keyframes-3', nombre: ED.name, duracion: ED.length, arma: ED.weapon, golpe: ED.hit,
+    keyframes: edSorted().map(k => ({ tick: k.tick, frenar: k.stop, pose: k.pose })), animacion: ED.keys.length >= 2 ? edEmotecraft() : null };
   const txt = JSON.stringify(out); $('ed-json').value = txt;
   const done = () => { $('ed-export').textContent = 'Copiado'; setTimeout(() => $('ed-export').textContent = 'Copiar texto', 1500); };
   try { navigator.clipboard.writeText(txt).then(done, () => $('ed-json').select()); } catch (e) { $('ed-json').select(); }
@@ -1115,10 +1180,45 @@ $('ed-import').onclick = () => {
     const j = JSON.parse($('ed-json').value); if (!j.keyframes) throw new Error();
     ED.name = j.nombre || ED.name; ED.length = j.duracion || ED.length;
     ED.keys = j.keyframes.map(k => ({ tick: k.tick, stop: !!(k.frenar ?? k.stop), pose: k.pose }));
-    if (j.arma) equip(j.arma);
+    if (j.arma && DATA.weapons[j.arma]) { ED.weapon = j.arma; equip(j.arma); }
+    if (j.golpe) ED.hit = j.golpe;
     ED.tick = 0; edStore(); edSync();
   } catch (e) { $('ed-json').value = 'No pude leer ese texto: pega el que copiaste con "Copiar texto".'; }
 };
+/** Animar: genera todos los ticks entre keyframes (curva suave) y apoya el cuerpo en el piso (nada lo atraviesa). */
+function edBake() {
+  const frames = [];
+  for (let t = 0; t <= ED.length; t++) frames.push(toRaw(edEval(t)));
+  // piso: se prueba cada tick en la escena real y se sube el cuerpo lo justo
+  const need = frames.map(raw => {
+    const fake = { running: true, delta: 0, value: (p, a, c) => (raw[p] && raw[p][a] !== undefined ? raw[p][a] : c) };
+    const keepFade = fade; fade = null; apply(fake); fade = keepFade;
+    rig.root.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(rig.root, true);
+    return box.min.y < 0.02 ? 0.02 - box.min.y : 0;
+  });
+  const n = need.length;
+  const wide = need.map((_, i) => Math.max(...need.slice(Math.max(0, i - 1), i + 2)));
+  const lift = wide.map((_, i) => { const w = wide.slice(Math.max(0, i - 1), i + 2); return Math.max(need[i], w.reduce((a, b) => a + b, 0) / w.length); });
+  frames.forEach((f, i) => { f.body.y += lift[i]; });
+  // angulos continuos (sin saltos de 360)
+  for (const part of Object.keys(frames[0])) for (const ax of ['pitch', 'yaw', 'roll', 'axis']) {
+    for (let i = 1; i < n; i++) {
+      if (frames[i][part][ax] === undefined) continue;
+      let v = frames[i][part][ax]; const pv = frames[i - 1][part][ax];
+      while (v - pv > PI) v -= 2 * PI; while (v - pv < -PI) v += 2 * PI;
+      frames[i][part][ax] = v;
+    }
+  }
+  ED.baked = frames;
+}
+function edEmotecraft() {
+  if (!ED.baked) edBake();
+  const moves = ED.baked.map((f, t) => Object.assign({ tick: t, easing: t === ED.baked.length - 1 ? 'EASEINOUTSINE' : 'LINEAR' },
+    Object.fromEntries(Object.entries(f).map(([p, v]) => [p, Object.fromEntries(Object.entries(v).map(([k, x]) => [k, +x.toFixed(4)]))]))));
+  return { version: 3, name: ED.name, author: 'Zennin (editor)', description: `${DATA.weapons[ED.weapon].label} golpe ${ED.hit}`,
+    emote: { beginTick: 3, endTick: ED.length, stopTick: ED.length + 6, isLoop: 'false', returnTick: 0, degrees: false, moves } };
+}
 edLoadStore();
 
 // clic: elegir parte (o confirmar la herramienta)
