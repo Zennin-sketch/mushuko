@@ -19,6 +19,7 @@ import net.zennin.mushoku.entity.MagicProjectile;
 import net.zennin.mushoku.entity.creature.AnimatedBoss;
 import net.zennin.mushoku.entity.creature.AnimatedMonster;
 import net.zennin.mushoku.entity.npc.BanditEntity;
+import net.zennin.mushoku.entity.npc.CharacterEntity;
 import net.zennin.mushoku.entity.npc.KalmanEntity;
 import net.zennin.mushoku.entity.npc.MageBanditEntity;
 import net.zennin.mushoku.entity.npc.TownNpcEntity;
@@ -70,6 +71,11 @@ public final class ModEntities {
             MushokuMod.id("ent_swap_totem"), EntityType.Builder.<net.zennin.mushoku.entity.SwapTotemEntity>of(net.zennin.mushoku.entity.SwapTotemEntity::new, MobCategory.MISC)
                     .sized(0.6f, 1.8f).clientTrackingRange(10).build("ent_swap_totem"));
 
+    // --- Personajes extra (skins slim) ---
+    public static final EntityType<CharacterEntity> ERIS = humanoid("eris_greyrat", MobCategory.CREATURE, (t, l) -> new CharacterEntity(t, l, false));
+    public static final EntityType<CharacterEntity> SYLPHIETTE = humanoid("sylphiette_greyrat", MobCategory.CREATURE, (t, l) -> new CharacterEntity(t, l, true));
+    public static final EntityType<CharacterEntity> SYLPHIETTE_YOUNG = humanoid("sylphiette_joven", MobCategory.CREATURE, (t, l) -> new CharacterEntity(t, l, false));
+
     private ModEntities() {}
 
     private static <T extends Mob> EntityType<T> creature(String name, float w, float h, EntityType.EntityFactory<T> factory) {
@@ -113,6 +119,12 @@ public final class ModEntities {
         egg("snow_drake", SNOW_DRAKE, 0xDDEEFF, 0x6699CC);
         egg("snow_drake_mom", SNOW_DRAKE_MOM, 0xDDEEFF, 0x224488);
         egg("giant_turtle", GIANT_TURTLE, 0x335522, 0x887744);
+        FabricDefaultAttributeRegistry.register(ERIS, CharacterEntity.stats(256, 20, 16));
+        FabricDefaultAttributeRegistry.register(SYLPHIETTE, CharacterEntity.stats(150, 10, 4));
+        FabricDefaultAttributeRegistry.register(SYLPHIETTE_YOUNG, CharacterEntity.stats(40, 2, 4));
+        egg("eris_greyrat", ERIS, 0xB0302A, 0xE8C080);
+        egg("sylphiette_greyrat", SYLPHIETTE, 0x2E7D4F, 0xF0F0F0);
+        egg("sylphiette_joven", SYLPHIETTE_YOUNG, 0x4FAF6F, 0xF0F0F0);
         egg("sg_bandit", SG_BANDIT, 0x993300, 0xCC0033);
         egg("ng_bandit", NG_BANDIT, 0x993300, 0x0000FF);
         egg("wg_bandit", WG_BANDIT, 0x993300, 0x00CCCC);

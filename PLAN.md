@@ -88,7 +88,10 @@ Se mantiene el id `remushoku` para que las texturas, modelos y datos funcionen s
 - [x] Roca, Bolsa de Especias, Tótem y Capa de Intercambio, Garras de escalada (Objetos del Dios Norte)
 - [x] Último Suspiro (+50% magia) y Aqua Heartia (+20%); Tomo de Conjuro Silencioso
 - [x] Libro Guía (textos originales + capítulos nuevos) y Libro de Hechizos
-#### 6B — Personajes extra (Eris, Sylphiette) y capas 3D de skin
+#### 6B — Personajes y skins (HECHA, en prueba)
+- [x] Eris Greyrat, Sylphiette Greyrat (varita, cortes de viento) y Sylphiette joven, slim, neutrales
+- [x] Todos los NPCs con modelo de jugador completo: se ve la capa exterior de la skin
+- [x] Compatibilidad opcional con 3D Skin Layers (capa exterior en 3D si el mod está instalado)
 
 ## Cómo se compila
 1. Subir este proyecto a un repositorio de GitHub.

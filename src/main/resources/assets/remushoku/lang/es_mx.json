@@ -1856,5 +1856,11 @@
   "eye.remushoku.absolute_void": "Vacío Absoluto",
   "eye.remushoku.absolute_void.desc": "Crea una esfera irrompible que te encierra a ti y a los que estén cerca hasta que lo apagues (50 de maná).",
   "eye.remushoku.magic_power": "Poder Mágico",
-  "eye.remushoku.magic_power.desc": "Toda criatura que mires brilla, incluso a través de paredes."
+  "eye.remushoku.magic_power.desc": "Toda criatura que mires brilla, incluso a través de paredes.",
+  "entity.remushoku.eris_greyrat": "Eris Greyrat",
+  "entity.remushoku.sylphiette_greyrat": "Sylphiette Greyrat",
+  "entity.remushoku.sylphiette_joven": "Sylphiette (joven)",
+  "item.remushoku.eris_greyrat_spawn_egg": "Huevo de Eris Greyrat",
+  "item.remushoku.sylphiette_greyrat_spawn_egg": "Huevo de Sylphiette Greyrat",
+  "item.remushoku.sylphiette_joven_spawn_egg": "Huevo de Sylphiette (joven)"
 }

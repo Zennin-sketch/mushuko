@@ -1856,5 +1856,11 @@
   "eye.remushoku.absolute_void": "Absolute Void",
   "eye.remushoku.absolute_void.desc": "Creates an unbreakable sphere trapping you and anyone nearby until you turn it off (50 mana).",
   "eye.remushoku.magic_power": "Magic Power",
-  "eye.remushoku.magic_power.desc": "Any creature you look at glows, even through walls."
+  "eye.remushoku.magic_power.desc": "Any creature you look at glows, even through walls.",
+  "entity.remushoku.eris_greyrat": "Eris Greyrat",
+  "entity.remushoku.sylphiette_greyrat": "Sylphiette Greyrat",
+  "entity.remushoku.sylphiette_joven": "Sylphiette (young)",
+  "item.remushoku.eris_greyrat_spawn_egg": "Eris Greyrat Spawn Egg",
+  "item.remushoku.sylphiette_greyrat_spawn_egg": "Sylphiette Greyrat Spawn Egg",
+  "item.remushoku.sylphiette_joven_spawn_egg": "Young Sylphiette Spawn Egg"
 }

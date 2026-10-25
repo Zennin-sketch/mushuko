@@ -33,6 +33,9 @@ public class MushokuClient implements ClientModInitializer {
         AnimatedRenderer.register(ModEntities.SNOW_DRAKE, "snowdrake", "snowdraketxt", 0.5f);
         AnimatedRenderer.register(ModEntities.GIANT_TURTLE, "greattortoise", "gianttortoisetexture", 3f);
         AnimatedRenderer.register(ModEntities.SNOW_DRAKE_MOM, "snowdrakemommy", "snowdrakemommytxt", 1.5f);
+        HumanoidNpcRenderer.register(ModEntities.ERIS, "eris_greyrat", true);
+        HumanoidNpcRenderer.register(ModEntities.SYLPHIETTE, "sylphiette_greyrat", true);
+        HumanoidNpcRenderer.register(ModEntities.SYLPHIETTE_YOUNG, "sylphiette_joven", true);
         HumanoidNpcRenderer.register(ModEntities.SG_BANDIT, "sgbandittxt");
         HumanoidNpcRenderer.register(ModEntities.NG_BANDIT, "ngbandittxt");
         HumanoidNpcRenderer.register(ModEntities.WG_BANDIT, "wgbandittxt");
