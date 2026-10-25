@@ -1738,5 +1738,6 @@
   "msg.remushoku.npc_blacksmith": "Blacksmith: The finest weapons in town! (the shop arrives in part 5D)",
   "msg.remushoku.npc_general_store": "Shopkeeper: Come in, come in! (the shop arrives in part 5D)",
   "msg.remushoku.npc_magic_shop": "Magic Vendor: magic stones and books... (the shop arrives in part 5D)",
-  "msg.remushoku.kalman_summoned": "North God Kalman III has been summoned!"
+  "msg.remushoku.kalman_summoned": "North God Kalman III has been summoned!",
+  "msg.remushoku.boss_awakens": "%s has awakened!"
 }

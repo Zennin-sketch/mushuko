@@ -1738,5 +1738,6 @@
   "msg.remushoku.npc_blacksmith": "Herrero: ¡Las mejores armas de la ciudad! (la tienda llega en la parte 5D)",
   "msg.remushoku.npc_general_store": "Tendero: ¡Pasa, pasa! (la tienda llega en la parte 5D)",
   "msg.remushoku.npc_magic_shop": "Vendedor de Magia: piedras mágicas y libros... (la tienda llega en la parte 5D)",
-  "msg.remushoku.kalman_summoned": "¡El Dios Norte Kalman III ha sido invocado!"
+  "msg.remushoku.kalman_summoned": "¡El Dios Norte Kalman III ha sido invocado!",
+  "msg.remushoku.boss_awakens": "¡%s ha despertado!"
 }

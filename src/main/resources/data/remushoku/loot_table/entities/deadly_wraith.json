@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "remushoku:advanced_stone"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "remushoku:entities/deadly_wraith"
+}

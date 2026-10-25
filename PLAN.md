@@ -69,7 +69,11 @@ Se mantiene el id `remushoku` para que las texturas, modelos y datos funcionen s
 - [x] Herrero, Tendero, Vendedor de Magia y Recepcionista (aparecen en las ciudades; tiendas en 5D)
 - [x] Kalman III (jefe, 1024 de vida, barra de jefe, Touki por fases) con su pergamino de invocación
 - [x] Huevos de aparición
-#### 5C — Criaturas GeckoLib: perro de asalto, rata, dracos de nieve, tortuga gigante, espectro; jefes
+#### 5C — Criaturas GeckoLib (HECHA, en prueba)
+- [x] GeckoLib 4.7.2 incluido dentro del .jar (no hace falta instalarlo aparte)
+- [x] Perro de Asalto, Rata Mugrienta (aparición natural), Draca de Nieve, Espectro Letal con sus animaciones
+- [x] Jefes: Tortuga Gigante (mazmorra musgosa) y Draca de Nieve Madre (mazmorra de hielo) con barra de jefe
+- [x] Invocador de jefe en la sala; botín de jefes según la guía del original
 #### 5D — Gremio (trabajos F→A), tiendas y monedas
 
 ### Fase 6 — Ojos demoníacos y extras

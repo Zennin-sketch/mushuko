@@ -23,6 +23,12 @@ public class MushokuClient implements ClientModInitializer {
         CastingClient.init();
         SwordClient.init();
         EntityRendererRegistry.register(ModEntities.MAGIC_PROJECTILE, NoopRenderer::new);
+        AnimatedRenderer.register(ModEntities.ASSAULT_DOG, "assaultdog2", "assaultdog", 0.6f);
+        AnimatedRenderer.register(ModEntities.MUCKY_RAT, "muckyrat", "muckyrattxt", 0.15f);
+        AnimatedRenderer.register(ModEntities.DEADLY_WRAITH, "deadlywraith", "deadlywraithtxt", 0.5f);
+        AnimatedRenderer.register(ModEntities.SNOW_DRAKE, "snowdrake", "snowdraketxt", 0.5f);
+        AnimatedRenderer.register(ModEntities.GIANT_TURTLE, "greattortoise", "gianttortoisetexture", 3f);
+        AnimatedRenderer.register(ModEntities.SNOW_DRAKE_MOM, "snowdrakemommy", "snowdrakemommytxt", 1.5f);
         HumanoidNpcRenderer.register(ModEntities.SG_BANDIT, "sgbandittxt");
         HumanoidNpcRenderer.register(ModEntities.NG_BANDIT, "ngbandittxt");
         HumanoidNpcRenderer.register(ModEntities.WG_BANDIT, "wgbandittxt");

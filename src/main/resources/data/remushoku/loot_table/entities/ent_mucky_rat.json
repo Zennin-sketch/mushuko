@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.4
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "remushoku:small_copper"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "remushoku:entities/ent_mucky_rat"
+}

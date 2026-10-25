@@ -13,6 +13,7 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.zennin.mushoku.MushokuMod;
+import net.zennin.mushoku.block.BossSpawnerBlock;
 import net.zennin.mushoku.block.DoorLockBlock;
 import net.zennin.mushoku.block.InfoBlock;
 import net.zennin.mushoku.block.MagicCircleBlock;
@@ -51,7 +52,7 @@ public final class ModBlocks {
             .strength(10000f, 1.0E8f).noOcclusion().sound(SoundType.GLASS).isViewBlocking((s, l, p) -> false)));
     public static final Block BLOCK_SAND_CLOUD = withItem("block_sand_cloud", new SandCloudBlock(BlockBehaviour.Properties.of()
             .mapColor(MapColor.SAND).strength(-1f, 3600000f).noOcclusion().noLootTable().replaceable().sound(SoundType.SAND)));
-    public static final Block BOSS_SPAWNER = withItem("boss_spawner", new InfoBlock("msg.remushoku.boss_soon",
+    public static final Block BOSS_SPAWNER = withItem("boss_spawner", new BossSpawnerBlock(
             BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).strength(10f, 15f).sound(SoundType.STONE)));
 
     public static final BlockEntityType<MagicCircleBlockEntity> MAGIC_CIRCLE_BE = Registry.register(

@@ -9,6 +9,7 @@ base { archivesName = project.archives_base_name }
 
 repositories {
     maven { url = 'https://maven.fabricmc.net/' }
+    maven { url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
 }
 
 dependencies {
@@ -16,6 +17,9 @@ dependencies {
     mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    // GeckoLib (MIT): animaciones de las criaturas. Va incluido dentro del .jar del mod.
+    modImplementation "software.bernie.geckolib:geckolib-fabric-1.21.1:${project.geckolib_version}"
+    include "software.bernie.geckolib:geckolib-fabric-1.21.1:${project.geckolib_version}"
 }
 
 processResources {
