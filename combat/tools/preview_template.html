@@ -85,13 +85,15 @@ aside h2:first-child { margin-top: 0; }
 .ed .parts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
 .ed .parts button { font-size: 13px; padding: 5px 6px; }
 .ed .parts button.sel { border-color: var(--gold); color: var(--gold); }
-.ed .ax { display: grid; grid-template-columns: 92px minmax(0, 1fr) 64px; gap: 6px; align-items: center; font-size: 13px; color: var(--mist); }
+.ed .ax { display: grid; grid-template-columns: 120px minmax(0, 1fr) 80px; gap: 6px; align-items: center; font-size: 13px; color: var(--mist); }
 .ed .ax input[type=range] { width: 100%; accent-color: var(--gold); }
 .ed .keys { display: flex; flex-wrap: wrap; gap: 4px; }
 .ed .keys button { font: 12px var(--mono); padding: 2px 8px; border-radius: 999px; }
 .ed .keys button.sel { border-color: var(--gold); color: var(--gold); }
 .ed .keys button.stop { border-style: dashed; }
 .ed textarea { width: 100%; min-height: 90px; background: var(--slate-2); color: var(--parchment); border: 1px solid var(--line); border-radius: 6px; font: 11px var(--mono); padding: 6px; resize: vertical; }
+.ed .selname { font-family: var(--display); font-size: 18px; color: var(--gold); }
+.ed .parts { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
 .ed .hint { font-size: 12px; color: var(--mist); margin: 0; }
 .ed button.gold { background: var(--gold); color: #1a1408; border-color: var(--gold); font-weight: 700; }
 @media (max-width: 860px) {
@@ -750,220 +752,392 @@ let wasCombo = false;
 const _playList = playList;
 playList = (list, weapon, qid) => { wasCombo = list.length > 1; _playList(list, weapon, qid); };
 
-/* ================================================================ editor de keyframes */
-// Valores crudos de Player Animator (lo mismo que va en el JSON del juego), rotaciones en grados para la interfaz.
-const ED_PARTS = [
-  ['body', 'Cuerpo entero', ['x', 'y', 'z', 'pitch', 'yaw', 'roll']],
-  ['torso', 'Torso', ['pitch', 'yaw', 'roll', 'bend']],
-  ['head', 'Cabeza', ['pitch', 'yaw', 'roll']],
-  ['rightArm', 'Brazo der.', ['pitch', 'yaw', 'roll', 'bend', 'axis', 'x', 'y', 'z']],
-  ['leftArm', 'Brazo izq.', ['pitch', 'yaw', 'roll', 'bend', 'axis', 'x', 'y', 'z']],
-  ['rightLeg', 'Pierna der.', ['pitch', 'yaw', 'roll', 'bend', 'axis', 'x', 'y', 'z']],
-  ['leftLeg', 'Pierna izq.', ['pitch', 'yaw', 'roll', 'bend', 'axis', 'x', 'y', 'z']],
-  ['rightItem', 'Arma (mano der.)', ['x', 'y', 'z', 'pitch', 'yaw', 'roll']],
+/* ================================================================ editor de keyframes (estilo BBS) */
+// Esqueleto del editor: cada segmento tiene su giro relativo al padre (cadera -> pecho -> cabeza/brazos; cadera -> piernas).
+// Al final se convierte a los valores de Player Animator / Bendy-lib (lo que usa el juego).
+const SEGS = [
+  ['hip', 'Cadera (todo el cuerpo)', 'q', true], ['chest', 'Pecho', 'q'], ['head', 'Cabeza', 'q'],
+  ['rArmU', 'Brazo der.', 'q'], ['rArmL', 'Antebrazo der.', 'd'], ['lArmU', 'Brazo izq.', 'q'], ['lArmL', 'Antebrazo izq.', 'd'],
+  ['rLegU', 'Muslo der.', 'q'], ['rLegL', 'Pierna der.', 'd'], ['lLegU', 'Muslo izq.', 'q'], ['lLegL', 'Pierna izq.', 'd'],
+  ['weapon', 'Arma', 'q', true],
 ];
-const AX_LABEL = { pitch: 'Giro X', yaw: 'Giro Y', roll: 'Giro Z', x: 'Posicion X', y: 'Posicion Y', z: 'Posicion Z', bend: 'Doblez', axis: 'Dir. doblez' };
-const isRot = ax => ['pitch', 'yaw', 'roll', 'bend', 'axis'].includes(ax);
-function edDefault(part, ax) {
-  if (isRot(ax)) return 0;
-  if (part === 'body' || part === 'rightItem' || part === 'leftItem') return 0;
-  return defaultOf(part, ax);
+const SEG = Object.fromEntries(SEGS.map(([k, label, kind, move]) => [k, { label, kind, move: !!move }]));
+const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+const Q = a => new THREE.Quaternion(a[0], a[1], a[2], a[3]);
+const qa = q => [q.x, q.y, q.z, q.w];
+const WAIST = V3(0, 6, 0);
+function edBlankPose() {
+  const p = {};
+  for (const [k, , kind, move] of SEGS) {
+    p[k] = kind === 'q' ? { q: [0, 0, 0, 1] } : { d: [0, 1, 0] };
+    if (move) p[k].p = [0, 0, 0];
+  }
+  return p;
 }
-function edRange(part, ax) {
-  if (isRot(ax)) return [-180, 180, 1];
-  if (part === 'body') return [-2, 2, 0.01];
-  return [-24, 24, 0.25];
+const eulerZYX = q => new THREE.Euler().setFromQuaternion(q, 'ZYX');
+function bendOf(d) {
+  const y = V3(0, 1, 0), v = V3(...d).normalize();
+  const ang = y.angleTo(v);
+  if (ang < 1e-4) return [0, 0];
+  const k = new THREE.Vector3().crossVectors(y, v).normalize();
+  return [ang, -Math.atan2(k.z, k.x)];
 }
-const ED = { on: false, name: 'mi_animacion', length: 20, tick: 0, keys: [], pose: {}, part: 'rightArm', playing: false, t: 0 };
-function edBlankPose() { const p = {}; for (const [part, , axes] of ED_PARTS) { p[part] = {}; for (const ax of axes) p[part][ax] = edDefault(part, ax); } return p; }
+function chestSplit(qc) {
+  // Qc = T (giro sobre el eje vertical, se aplica al cubo entero) * B (doblez por la cintura)
+  const y = V3(0, 1, 0), v = y.clone().applyQuaternion(qc);
+  const S = new THREE.Quaternion().setFromUnitVectors(y, v);
+  const T = S.clone().invert().multiply(qc);           // giro puro sobre y
+  const B = T.clone().invert().multiply(S).multiply(T);
+  const tw = 2 * Math.atan2(T.y, T.w);
+  const bv = V3(0, 1, 0).applyQuaternion(B);
+  return { yaw: tw, bend: bendOf([bv.x, bv.y, bv.z]) };
+}
+/** Pose del editor -> valores crudos de Player Animator (rotaciones en radianes, posiciones en px o bloques). */
+function toRaw(P) {
+  const raw = {};
+  const hq = Q(P.hip.q), he = eulerZYX(hq);
+  raw.body = { x: P.hip.p[0], y: P.hip.p[1], z: P.hip.p[2], pitch: he.x, yaw: he.y, roll: he.z };
+  const qc = Q(P.chest.q), cs = chestSplit(qc);
+  raw.torso = { x: 0, y: 0, z: 0, pitch: 0, yaw: cs.yaw, roll: 0, bend: cs.bend[0], axis: cs.bend[1] };
+  const att = (pivot, q) => { // cabeza y brazos van pegados al pecho (giran alrededor de la cintura)
+    const pos = pivot.clone().sub(WAIST).applyQuaternion(qc).add(WAIST);
+    const e = eulerZYX(qc.clone().multiply(q));
+    return { x: pos.x, y: pos.y, z: pos.z, pitch: e.x, yaw: e.y, roll: e.z };
+  };
+  raw.head = att(V3(0, 0, 0), Q(P.head.q));
+  for (const [seg, part, pv] of [['rArm', 'rightArm', V3(-5, 2, 0)], ['lArm', 'leftArm', V3(5, 2, 0)]]) {
+    raw[part] = att(pv, Q(P[seg + 'U'].q));
+    const [bend, axis] = bendOf(P[seg + 'L'].d); raw[part].bend = bend; raw[part].axis = axis;
+  }
+  for (const [seg, part, pv] of [['rLeg', 'rightLeg', [-1.9, 12, 0.1]], ['lLeg', 'leftLeg', [1.9, 12, 0.1]]]) {
+    const e = eulerZYX(Q(P[seg + 'U'].q)), [bend, axis] = bendOf(P[seg + 'L'].d);
+    raw[part] = { x: pv[0], y: pv[1], z: pv[2], pitch: e.x, yaw: e.y, roll: e.z, bend, axis };
+  }
+  const we = eulerZYX(Q(P.weapon.q));
+  raw.rightItem = { x: P.weapon.p[0], y: P.weapon.p[1], z: P.weapon.p[2], pitch: we.x, yaw: we.y, roll: we.z };
+  return raw;
+}
+/** Valores crudos -> pose del editor (para traer poses de las animaciones existentes). */
+function fromRaw(get) {
+  const P = edBlankPose();
+  const qe = (part) => new THREE.Quaternion().setFromEuler(new THREE.Euler(get(part, 'pitch', 0), get(part, 'yaw', 0), get(part, 'roll', 0), 'ZYX'));
+  const dirOf = (part) => { const b = get(part, 'bend', 0), ax = get(part, 'axis', 0); const v = V3(0, 1, 0).applyAxisAngle(V3(Math.cos(-ax), 0, Math.sin(-ax)), b); return [v.x, v.y, v.z]; };
+  P.hip.p = [get('body', 'x', 0), get('body', 'y', 0), get('body', 'z', 0)]; P.hip.q = qa(qe('body'));
+  const tb = get('torso', 'bend', 0), tax = get('torso', 'axis', 0);
+  const qc = qe('torso').multiply(new THREE.Quaternion().setFromAxisAngle(V3(Math.cos(-tax), 0, Math.sin(-tax)), tb));
+  P.chest.q = qa(qc);
+  const inv = qc.clone().invert();
+  P.head.q = qa(inv.clone().multiply(qe('head')));
+  P.rArmU.q = qa(inv.clone().multiply(qe('rightArm'))); P.rArmL.d = dirOf('rightArm');
+  P.lArmU.q = qa(inv.clone().multiply(qe('leftArm'))); P.lArmL.d = dirOf('leftArm');
+  P.rLegU.q = qa(qe('rightLeg')); P.rLegL.d = dirOf('rightLeg');
+  P.lLegU.q = qa(qe('leftLeg')); P.lLegL.d = dirOf('leftLeg');
+  P.weapon.p = [get('rightItem', 'x', 0), get('rightItem', 'y', 0), get('rightItem', 'z', 0)]; P.weapon.q = qa(qe('rightItem'));
+  return P;
+}
+
+const ED = { on: false, name: 'mi_animacion', length: 20, tick: 0, keys: [], pose: null, seg: 'rArmU', playing: false, t: 0, undo: [] };
 ED.pose = edBlankPose();
+const clone = o => JSON.parse(JSON.stringify(o));
 function edSorted() { return ED.keys.slice().sort((a, b) => a.tick - b.tick); }
-// Curva cubica entre keyframes (frenar = velocidad cero en ese keyframe), igual que el generador
-function edEval(t) {
+function edEval(t) { // curva suave entre keyframes ("frenar" = velocidad cero ahi)
   const ks = edSorted();
-  if (!ks.length) return JSON.parse(JSON.stringify(ED.pose));
-  if (t <= ks[0].tick) return JSON.parse(JSON.stringify(ks[0].pose));
-  if (t >= ks[ks.length - 1].tick) return JSON.parse(JSON.stringify(ks[ks.length - 1].pose));
+  if (!ks.length) return clone(ED.pose);
+  if (t <= ks[0].tick) return clone(ks[0].pose);
+  if (t >= ks[ks.length - 1].tick) return clone(ks[ks.length - 1].pose);
   let i = 0; while (ks[i + 1].tick < t) i++;
   const k0 = ks[i], k1 = ks[i + 1], h = k1.tick - k0.tick, u = (t - k0.tick) / h;
-  const tan = (j, part, ax) => {
-    const k = ks[j];
-    if (k.stop || j === 0 || j === ks.length - 1) return 0;
-    return (ks[j + 1].pose[part][ax] - ks[j - 1].pose[part][ax]) / (ks[j + 1].tick - ks[j - 1].tick);
-  };
   const h00 = 2 * u ** 3 - 3 * u ** 2 + 1, h10 = u ** 3 - 2 * u ** 2 + u, h01 = -2 * u ** 3 + 3 * u ** 2, h11 = u ** 3 - u ** 2;
+  const vec = (seg, f) => { // componentes, con cuaterniones en el mismo hemisferio
+    const get = j => { const v = ks[j].pose[seg][f].slice(); if (f === 'q' && j !== i) { const r = ks[i].pose[seg].q; if (v[0] * r[0] + v[1] * r[1] + v[2] * r[2] + v[3] * r[3] < 0) for (let c = 0; c < 4; c++) v[c] = -v[c]; } return v; };
+    const tan = j => (ks[j].stop || j === 0 || j === ks.length - 1) ? null : [get(j - 1), get(j + 1), ks[j + 1].tick - ks[j - 1].tick];
+    const a = get(i), b = get(i + 1), ta = tan(i), tb = tan(i + 1);
+    return a.map((_, c) => h00 * a[c] + h10 * h * (ta ? (ta[1][c] - ta[0][c]) / ta[2] : 0) + h01 * b[c] + h11 * h * (tb ? (tb[1][c] - tb[0][c]) / tb[2] : 0));
+  };
   const out = {};
-  for (const [part, , axes] of ED_PARTS) {
-    out[part] = {};
-    for (const ax of axes) {
-      const a = k0.pose[part][ax], b = k1.pose[part][ax];
-      out[part][ax] = h00 * a + h10 * h * tan(i, part, ax) + h01 * b + h11 * h * tan(i + 1, part, ax);
+  for (const [seg] of SEGS) {
+    out[seg] = {};
+    for (const f of Object.keys(k0.pose[seg])) {
+      let v = vec(seg, f);
+      if (f === 'q' || f === 'd') { const n = Math.hypot(...v) || 1; v = v.map(c => c / n); }
+      out[seg][f] = v;
     }
   }
   return out;
 }
 class EditorPlayer {
-  constructor() { this.running = true; this.delta = 0; this.frac = 0; this.real = 0; this.cooldown = 0; }
+  constructor() { this.running = true; this.delta = 0; this.frac = 0; this.real = 0; this.cooldown = 0; this.raw = null; this.rawFor = null; }
   get a() { return { begin: 0, end: ED.length, stop: ED.length, loop: true, ret: 0 }; }
   get tick() { return ED.playing ? Math.floor(ED.t) : ED.tick; }
   rate() { return 1; }
   advance() { if (ED.playing) { ED.t += 1; if (ED.t > ED.length) ED.t = 0; } }
   step() { ED.tick = Math.min(ED.length, ED.tick + 1); edSync(); }
   value(part, ax, cur) {
-    const pose = ED.playing ? edEval(ED.t + this.delta) : ED.pose;
-    const v = pose[part] && pose[part][ax];
-    if (v === undefined) return cur;
-    return isRot(ax) ? v * D : v;
+    const key = ED.playing ? ED.t + this.delta : 'edit';
+    if (this.rawFor !== key || key === 'edit') { this.raw = toRaw(ED.playing ? edEval(ED.t + this.delta) : ED.pose); this.rawFor = key; }
+    const v = this.raw[part] && this.raw[part][ax];
+    return v === undefined ? cur : v;
   }
 }
 let edPlayer = null, edSaved = null;
-function edStore() { try { localStorage.setItem('mushoku-editor', JSON.stringify({ name: ED.name, length: ED.length, keys: ED.keys })); } catch (e) {} }
-function edLoadStore() { try { const j = JSON.parse(localStorage.getItem('mushoku-editor') || 'null'); if (j && j.keys) { ED.name = j.name; ED.length = j.length; ED.keys = j.keys; } } catch (e) {} }
-function edSync() { // al moverse de tick (en pausa) se ve la pose interpolada, lista para ajustar y guardar
-  const k = ED.keys.find(k => k.tick === ED.tick);
-  ED.pose = k ? JSON.parse(JSON.stringify(k.pose)) : edEval(ED.tick);
-  edRender();
+function edStore() { try { localStorage.setItem('mushoku-editor-2', JSON.stringify({ name: ED.name, length: ED.length, keys: ED.keys })); } catch (e) {} }
+function edLoadStore() { try { const j = JSON.parse(localStorage.getItem('mushoku-editor-2') || 'null'); if (j && j.keys) { ED.name = j.name; ED.length = j.length; ED.keys = j.keys; } } catch (e) {} }
+function edSync() { const k = ED.keys.find(k => k.tick === ED.tick); ED.pose = k ? clone(k.pose) : edEval(ED.tick); edRender(); }
+function edPush() { ED.undo.push(clone(ED.pose)); if (ED.undo.length > 60) ED.undo.shift(); }
+
+/* ---------------- resaltado de la parte elegida */
+const hiMat = skinMat.clone(); hiMat.emissive = new THREE.Color(0xd9ab4e); hiMat.emissiveIntensity = 0.45;
+let segMeshes = {};
+function edTagParts() {
+  segMeshes = {};
+  const add = (seg, list) => { segMeshes[seg] = (segMeshes[seg] || []).concat(list); for (const m of list) m.userData.seg = seg; };
+  add('head', rig.parts.head.g.children.filter(c => c.isMesh));
+  add('hip', rig.parts.torso.flex.fixed); add('chest', rig.parts.torso.flex.moving);
+  for (const [part, seg] of [['rightArm', 'rArm'], ['leftArm', 'lArm'], ['rightLeg', 'rLeg'], ['leftLeg', 'lLeg']]) {
+    add(seg + 'U', rig.parts[part].flex.fixed); add(seg + 'L', rig.parts[part].flex.moving);
+  }
+  rig.parts.rightArm.item.slot.userData.seg = 'weapon';
+  edHighlight();
 }
+function edHighlight() {
+  for (const [seg, list] of Object.entries(segMeshes)) for (const m of list) m.material = (ED.on && seg === ED.seg) ? hiMat : (m.userData.baseMat || (m.userData.baseMat = m.material));
+  hiMat.map = skinMat.map;
+}
+
+/* ---------------- herramienta: R rotar, G mover (como BBS / Blender) */
+const tool = { mode: null, lock: null, snap: null, start: null, pivot: null, plane: null, hit0: null };
+const status = document.createElement('div'); status.className = 'hit'; status.style.top = 'auto'; status.style.bottom = '14px'; status.style.letterSpacing = '.06em'; status.style.fontFamily = 'var(--body)'; status.style.fontSize = '14px'; status.style.color = 'var(--parchment)';
+view.appendChild(status);
+function setStatus(t) { status.textContent = t; status.classList.toggle('on', !!t); }
+function segPivot(seg) {
+  const P = rig.parts, w = new THREE.Vector3();
+  const obj = { hip: rig.bodyT, chest: P.torso.lower, head: P.head.g, rArmU: P.rightArm.g, rArmL: P.rightArm.lower, lArmU: P.leftArm.g, lArmL: P.leftArm.lower,
+    rLegU: P.rightLeg.g, rLegL: P.rightLeg.lower, lLegU: P.leftLeg.g, lLegL: P.leftLeg.lower, weapon: P.rightArm.item.it }[seg];
+  return obj.getWorldPosition(w);
+}
+function screenOf(v) { const p = v.clone().project(camera), r = renderer.domElement.getBoundingClientRect(); return [r.left + (p.x + 1) / 2 * r.width, r.top + (1 - p.y) / 2 * r.height]; }
+function modelQ() { return rig.model.getWorldQuaternion(new THREE.Quaternion()); }
+/** Aplica un giro (eje en el mundo, angulo) a la parte elegida, partiendo de la pose guardada al empezar. */
+function rotateSeg(P, seg, axisW, ang) {
+  const dW = new THREE.Quaternion().setFromAxisAngle(axisW, ang);
+  const mq = modelQ(), mqi = mq.clone().invert();
+  const dM = mqi.clone().multiply(dW).multiply(mq);              // el mismo giro, en coordenadas del modelo
+  const local = (parentQ, q) => parentQ.clone().invert().multiply(dM).multiply(parentQ).multiply(q);
+  const qc = Q(P.chest.q);
+  if (seg === 'hip') P.hip.q = qa(dW.clone().multiply(Q(P.hip.q)));   // la cadera gira en el mundo
+  else if (seg === 'weapon') {
+    const pq = rig.parts.rightArm.item.it.parent.getWorldQuaternion(new THREE.Quaternion());
+    P.weapon.q = qa(pq.clone().invert().multiply(dW).multiply(pq).multiply(Q(P.weapon.q)));
+  } else if (seg === 'chest') P.chest.q = qa(dM.clone().multiply(qc));
+  else if (SEG[seg].kind === 'q') {
+    const parent = (seg === 'head' || seg.endsWith('ArmU')) ? qc : new THREE.Quaternion();
+    P[seg].q = qa(local(parent, Q(P[seg].q)));
+  } else { // antebrazo / pierna: se gira la direccion respecto del segmento de arriba (doblez de Bendy-lib)
+    const up = seg.replace('L', 'U');
+    const parent = (seg.startsWith('rArm') || seg.startsWith('lArm') ? qc.clone() : new THREE.Quaternion()).multiply(Q(P[up].q));
+    const d = V3(...P[seg].d).applyQuaternion(parent).applyQuaternion(dM).applyQuaternion(parent.clone().invert());
+    P[seg].d = [d.x, d.y, d.z];
+  }
+}
+function edKey(e) {
+  if (!ED.on) return;
+  const tag = (e.target && e.target.tagName) || '';
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  const k = e.key.toLowerCase();
+  if ((e.ctrlKey || e.metaKey) && k === 'z') { if (ED.undo.length) { ED.pose = ED.undo.pop(); edRender(); } e.preventDefault(); return; }
+  if (tool.mode && (k === 'x' || k === 'y' || k === 'z')) { tool.lock = tool.lock === k ? null : k; edToolMsg(); e.preventDefault(); return; }
+  if (k === 'escape' && tool.mode) { edCancel(); return; }
+  if (k === 'enter' && tool.mode) { edConfirm(); return; }
+  if (k === 'r' && !tool.mode) { edBegin('rotate'); e.preventDefault(); }
+  if (k === 'g' && !tool.mode && SEG[ED.seg].move) { edBegin('move'); e.preventDefault(); }
+}
+window.addEventListener('keydown', edKey);
+let mouseXY = [0, 0];
+window.addEventListener('pointermove', e => { mouseXY = [e.clientX, e.clientY]; if (tool.mode) edToolMove(); });
+function edToolMsg() {
+  const ax = tool.lock ? ` · eje ${tool.lock.toUpperCase()}` : ' · eje de la camara';
+  setStatus((tool.mode === 'rotate' ? 'Rotando ' : 'Moviendo ') + SEG[ED.seg].label + ax + ' — X/Y/Z fija el eje, clic confirma, Esc cancela');
+}
+function edBegin(mode) {
+  ED.playing = false; setPlaying(false);
+  tool.mode = mode; tool.lock = null; tool.snap = clone(ED.pose); tool.pivot = segPivot(ED.seg);
+  const sp = screenOf(tool.pivot); tool.start = Math.atan2(mouseXY[1] - sp[1], mouseXY[0] - sp[0]);
+  const n = new THREE.Vector3(); camera.getWorldDirection(n);
+  tool.plane = new THREE.Plane().setFromNormalAndCoplanarPoint(n, tool.pivot);
+  tool.hit0 = edRayPlane(); controls.enabled = false; edToolMsg();
+}
+function edRayPlane() {
+  const r = renderer.domElement.getBoundingClientRect();
+  ray.setFromCamera(new THREE.Vector2(((mouseXY[0] - r.left) / r.width) * 2 - 1, -((mouseXY[1] - r.top) / r.height) * 2 + 1), camera);
+  return ray.ray.intersectPlane(tool.plane, new THREE.Vector3());
+}
+const AXES = { x: V3(1, 0, 0), y: V3(0, 1, 0), z: V3(0, 0, 1) };
+function edToolMove() {
+  const P = clone(tool.snap);
+  if (tool.mode === 'rotate') {
+    const sp = screenOf(tool.pivot), a = Math.atan2(mouseXY[1] - sp[1], mouseXY[0] - sp[0]);
+    let ang = -(a - tool.start);
+    let axis;
+    if (tool.lock) {
+      axis = AXES[tool.lock].clone();
+      const toCam = camera.position.clone().sub(tool.pivot);
+      if (axis.dot(toCam) < 0) ang = -ang; // que siga al mouse mirando desde cualquier lado
+    } else axis = camera.position.clone().sub(tool.pivot).normalize();
+    rotateSeg(P, ED.seg, axis, ang);
+  } else {
+    const h = edRayPlane(); if (!h || !tool.hit0) return;
+    let dw = h.clone().sub(tool.hit0);
+    if (tool.lock) { const ax = AXES[tool.lock]; dw = ax.clone().multiplyScalar(dw.dot(ax)); }
+    if (ED.seg === 'hip') P.hip.p = P.hip.p.map((v, i) => v + [dw.x, dw.y, dw.z][i]);
+    else { // arma: el desplazamiento pasado al marco de la mano (px)
+      const par = rig.parts.rightArm.item.it.parent;
+      const a0 = par.worldToLocal(tool.hit0.clone()), a1 = par.worldToLocal(h.clone()), d = a1.sub(a0);
+      P.weapon.p = P.weapon.p.map((v, i) => v + [d.x, d.y, d.z][i]);
+    }
+  }
+  ED.pose = P; edPanelValues();
+}
+function edConfirm() { ED.undo.push(tool.snap); tool.mode = null; controls.enabled = true; setStatus(''); edRender(); }
+function edCancel() { ED.pose = tool.snap; tool.mode = null; controls.enabled = true; setStatus(''); edRender(); }
+renderer.domElement.addEventListener('contextmenu', e => { if (tool.mode) { e.preventDefault(); edCancel(); } });
+
+/* ---------------- panel */
 function edToggle(on) {
   ED.on = on;
   side.querySelectorAll(':scope > :not(.edtoggle):not(.ed)').forEach(el => el.hidden = on);
   edPanel.hidden = !on;
   edBtn.textContent = on ? 'Volver a las animaciones' : 'Editor de keyframes';
   if (on) {
-    edSaved = { player, selected, queue, playingWas: playing };
+    edSaved = { selected };
     queue = []; fade = null; selected = '__editor'; ED.playing = false;
     edPlayer = new EditorPlayer(); player = edPlayer; setPlaying(false);
-    document.getElementById('now').innerHTML = 'Editor de keyframes<small>clic en una parte del personaje para elegirla</small>';
+    document.getElementById('now').innerHTML = 'Editor de keyframes<small>clic en una parte · R rotar · G mover · X/Y/Z eje · Ctrl+Z deshacer</small>';
     edSync();
   } else {
+    if (tool.mode) edCancel();
     ED.playing = false; player = null; fade = null;
     if (edSaved && edSaved.selected && parsed[edSaved.selected]) start(edSaved.selected);
   }
+  edHighlight();
 }
-// La pausa/reproduccion del editor usa el boton principal
 const playBtn = document.getElementById('play');
 playBtn.addEventListener('click', () => { if (ED.on) { ED.playing = playing; ED.t = ED.tick; if (!ED.playing) edSync(); } });
-
 const edBtn = document.createElement('button'); edBtn.className = 'edtoggle'; edBtn.textContent = 'Editor de keyframes';
 edBtn.onclick = () => edToggle(!ED.on);
 side.prepend(edBtn);
 const edPanel = document.createElement('div'); edPanel.className = 'ed'; edPanel.hidden = true;
 side.insertBefore(edPanel, edBtn.nextSibling);
 edPanel.innerHTML = `
-  <div class="grp"><b>Animacion</b>
-    <div class="r"><label for="ed-name">Nombre</label><input type="text" id="ed-name"></div>
-    <div class="r"><label for="ed-len">Duracion</label><input type="number" id="ed-len" min="2" max="200"> <span class="hint">ticks (20 = 1 s)</span></div>
-    <div class="r"><button id="ed-new">Empezar de cero</button></div>
+  <div class="grp"><b>Parte elegida</b>
+    <div class="selname" id="ed-sel"></div>
+    <div class="r"><button id="ed-rot">Rotar (R)</button><button id="ed-mov">Mover (G)</button><button id="ed-reset">Reiniciar parte</button></div>
+    <div id="ed-axes"></div>
+    <div class="parts" id="ed-parts"></div>
   </div>
   <div class="grp"><b>Keyframe</b>
-    <div class="r"><button id="ed-prev">&lt;</button><label for="ed-tick">Tick</label><input type="number" id="ed-tick" min="0"><button id="ed-next">&gt;</button></div>
+    <div class="r"><button id="ed-prev">&lt;</button><label for="ed-tick">Tick</label><input type="number" id="ed-tick" min="0"><button id="ed-next">&gt;</button>
+      <label for="ed-len">de</label><input type="number" id="ed-len" min="2" max="200"></div>
     <div class="r"><button class="gold" id="ed-save">Guardar keyframe</button><button id="ed-del">Borrar</button>
       <label class="chk"><input type="checkbox" id="ed-stop"> Frenar aca</label></div>
     <div class="keys" id="ed-keys"></div>
-    <p class="hint">Entre keyframes la pagina hace una curva suave. "Frenar aca" = el movimiento se detiene en esa pose (preparacion, fin del golpe).</p>
   </div>
-  <div class="grp"><b>Parte</b>
-    <div class="parts" id="ed-parts"></div>
-    <div id="ed-axes" class="ed"></div>
-    <div class="r"><button id="ed-reset">Volver esta parte al reposo</button></div>
-  </div>
-  <div class="grp"><b>Copiar una pose existente</b>
-    <div class="r"><select id="ed-src"></select><input type="number" id="ed-srct" min="0" value="10"><button id="ed-copy">Copiar</button></div>
-    <p class="hint">Trae la pose de una animacion del mod en ese tick (por ejemplo, para retocarla).</p>
+  <div class="grp"><b>Animacion</b>
+    <div class="r"><label for="ed-name">Nombre</label><input type="text" id="ed-name"></div>
+    <div class="r"><select id="ed-src" aria-label="Animacion de origen"></select><input type="number" id="ed-srct" min="0" value="10" aria-label="Tick de origen"><button id="ed-copy">Traer pose</button></div>
+    <div class="r"><button id="ed-new">Empezar de cero</button></div>
   </div>
   <div class="grp"><b>Enviar a Claude</b>
     <div class="r"><button class="gold" id="ed-export">Copiar texto</button><button id="ed-import">Cargar texto</button></div>
     <textarea id="ed-json" spellcheck="false" aria-label="Keyframes en texto"></textarea>
-    <p class="hint">Copia el texto y pegamelo en el chat: yo genero la animacion final con las transiciones, el piso y los choques del arma.</p>
+    <p class="hint">Pegame el texto en el chat y genero la animacion final (piso, choques del arma, giros suaves).</p>
   </div>`;
 const $ = id => document.getElementById(id);
-const partsBox = $('ed-parts');
-for (const [part, label] of ED_PARTS) {
-  const b = document.createElement('button'); b.textContent = label; b.dataset.part = part;
-  b.onclick = () => { ED.part = part; edRender(); };
-  partsBox.appendChild(b);
-}
+for (const [k, label] of SEGS) { const b = document.createElement('button'); b.textContent = label; b.dataset.seg = k; b.onclick = () => edSelect(k); $('ed-parts').appendChild(b); }
 for (const k of Object.keys(parsed)) $('ed-src').insertAdjacentHTML('beforeend', `<option value="${k}">${k}</option>`);
+function edSelect(seg) { if (tool.mode) edConfirm(); ED.seg = seg; edRender(); }
+const R2D = 180 / PI;
+function edFields() { // valores visibles y editables de la parte (grados / px)
+  const P = ED.pose[ED.seg], k = SEG[ED.seg].kind, f = [];
+  if (k === 'q') { const e = new THREE.Euler().setFromQuaternion(Q(P.q), 'XYZ'); f.push(['Giro X', e.x * R2D, 'rx'], ['Giro Y', e.y * R2D, 'ry'], ['Giro Z', e.z * R2D, 'rz']); }
+  else { const [b, ax] = bendOf(P.d); f.push(['Doblez', b * R2D, 'bend'], ['Direccion', ax * R2D, 'dir']); }
+  if (P.p) { const u = ED.seg === 'hip' ? 'bloques' : 'px'; f.push([`Pos X (${u})`, P.p[0], 'px'], [`Pos Y (${u})`, P.p[1], 'py'], [`Pos Z (${u})`, P.p[2], 'pz']); }
+  return f;
+}
+function edPanelValues() { for (const [, v, id] of edFields()) { const el = $('f-' + id); if (el && document.activeElement !== el) el.value = (+v).toFixed(id.startsWith('p') ? 3 : 1); } }
+function edSetField(id, val) {
+  edPush();
+  const P = ED.pose[ED.seg];
+  if (id[0] === 'r') { const e = new THREE.Euler().setFromQuaternion(Q(P.q), 'XYZ'); e['xyz'['rx ry rz'.split(' ').indexOf(id)]] = val / R2D; P.q = qa(new THREE.Quaternion().setFromEuler(e)); }
+  else if (id === 'bend' || id === 'dir') { let [b, ax] = bendOf(P.d); if (id === 'bend') b = val / R2D; else ax = val / R2D; const v = V3(0, 1, 0).applyAxisAngle(V3(Math.cos(-ax), 0, Math.sin(-ax)), b); P.d = [v.x, v.y, v.z]; }
+  else P.p['xyz'.indexOf(id[1])] = val;
+}
 function edRender() {
   $('ed-name').value = ED.name; $('ed-len').value = ED.length; $('ed-tick').value = ED.tick; $('ed-tick').max = ED.length;
-  const k = ED.keys.find(k => k.tick === ED.tick);
-  $('ed-stop').checked = !!(k && k.stop);
+  const k = ED.keys.find(k => k.tick === ED.tick); $('ed-stop').checked = !!(k && k.stop);
   $('ed-keys').innerHTML = edSorted().map(k => `<button data-t="${k.tick}" class="${k.tick === ED.tick ? 'sel' : ''} ${k.stop ? 'stop' : ''}">${k.tick}</button>`).join('') || '<span class="hint">Todavia no hay keyframes.</span>';
   $('ed-keys').querySelectorAll('button').forEach(b => b.onclick = () => { ED.playing = false; setPlaying(false); ED.tick = +b.dataset.t; edSync(); });
-  partsBox.querySelectorAll('button').forEach(b => b.classList.toggle('sel', b.dataset.part === ED.part));
-  const def = ED_PARTS.find(p => p[0] === ED.part);
-  $('ed-axes').innerHTML = def[2].map(ax => {
-    const [mn, mx, st] = edRange(ED.part, ax), val = ED.pose[ED.part][ax];
-    return `<div class="ax"><label for="ax-${ax}">${AX_LABEL[ax]}</label><input type="range" id="ax-${ax}" min="${mn}" max="${mx}" step="${st}" value="${val}"><input type="number" id="axn-${ax}" step="${st}" value="${+val.toFixed(2)}"></div>`;
-  }).join('');
-  for (const ax of def[2]) {
-    const r = $('ax-' + ax), n = $('axn-' + ax);
-    const set = v => { ED.pose[ED.part][ax] = +v; r.value = v; n.value = (+v).toFixed(2); if (ED.playing) { ED.playing = false; setPlaying(false); } };
-    r.oninput = () => set(r.value); n.onchange = () => set(n.value);
-  }
+  $('ed-parts').querySelectorAll('button').forEach(b => b.classList.toggle('sel', b.dataset.seg === ED.seg));
+  $('ed-sel').textContent = SEG[ED.seg].label;
+  $('ed-mov').disabled = !SEG[ED.seg].move;
+  $('ed-axes').innerHTML = edFields().map(([l, v, id]) => `<div class="ax"><label for="f-${id}">${l}</label><span></span><input type="number" id="f-${id}" step="${id.startsWith('p') ? 0.05 : 1}" value="${(+v).toFixed(id.startsWith('p') ? 3 : 1)}"></div>`).join('');
+  for (const [, , id] of edFields()) $('f-' + id).onchange = e => { edSetField(id, +e.target.value); edRender(); };
+  edHighlight();
 }
+$('ed-rot').onclick = () => edBegin('rotate');
+$('ed-mov').onclick = () => SEG[ED.seg].move && edBegin('move');
 $('ed-name').onchange = () => { ED.name = $('ed-name').value.replace(/[^a-z0-9_]/gi, '_').toLowerCase() || 'mi_animacion'; edStore(); edRender(); };
 $('ed-len').onchange = () => { ED.length = Math.max(2, Math.min(200, +$('ed-len').value || 20)); edStore(); edRender(); };
 $('ed-tick').onchange = () => { ED.playing = false; setPlaying(false); ED.tick = Math.max(0, Math.min(ED.length, Math.round(+$('ed-tick').value))); edSync(); };
 $('ed-prev').onclick = () => { ED.playing = false; setPlaying(false); ED.tick = Math.max(0, ED.tick - 1); edSync(); };
 $('ed-next').onclick = () => { ED.playing = false; setPlaying(false); ED.tick = Math.min(ED.length, ED.tick + 1); edSync(); };
-$('ed-save').onclick = () => {
-  const stop = $('ed-stop').checked;
-  ED.keys = ED.keys.filter(k => k.tick !== ED.tick);
-  ED.keys.push({ tick: ED.tick, stop, pose: JSON.parse(JSON.stringify(ED.pose)) });
-  edStore(); edRender();
-};
+$('ed-save').onclick = () => { const stop = $('ed-stop').checked; ED.keys = ED.keys.filter(k => k.tick !== ED.tick); ED.keys.push({ tick: ED.tick, stop, pose: clone(ED.pose) }); edStore(); edRender(); };
 $('ed-stop').onchange = () => { const k = ED.keys.find(k => k.tick === ED.tick); if (k) { k.stop = $('ed-stop').checked; edStore(); edRender(); } };
 $('ed-del').onclick = () => { ED.keys = ED.keys.filter(k => k.tick !== ED.tick); edStore(); edSync(); };
-$('ed-new').onclick = () => { ED.keys = []; ED.pose = edBlankPose(); ED.tick = 0; edStore(); edRender(); };
-$('ed-reset').onclick = () => { const def = ED_PARTS.find(p => p[0] === ED.part); for (const ax of def[2]) ED.pose[ED.part][ax] = edDefault(ED.part, ax); edRender(); };
+$('ed-new').onclick = () => { edPush(); ED.keys = []; ED.pose = edBlankPose(); ED.tick = 0; edStore(); edRender(); };
+$('ed-reset').onclick = () => { edPush(); ED.pose[ED.seg] = edBlankPose()[ED.seg]; edRender(); };
 $('ed-copy').onclick = () => {
   const a = parsed[$('ed-src').value]; if (!a) return;
-  const pl = new Player(a); const t = Math.max(0, Math.min(a.stop, +$('ed-srct').value || 0));
+  const pl = new Player(a), t = Math.max(0, Math.min(a.stop, +$('ed-srct').value || 0));
   for (let i = 0; i < t; i++) pl.step();
-  for (const [part, , axes] of ED_PARTS) for (const ax of axes) {
-    const v = pl.value(part, ax, isRot(ax) ? 0 : edDefault(part, ax));
-    ED.pose[part][ax] = isRot(ax) ? +(v / D).toFixed(2) : +v.toFixed(3);
-  }
+  edPush();
+  ED.pose = fromRaw((part, ax, d) => pl.value(part, ax, (ax === 'x' || ax === 'y' || ax === 'z') && part !== 'body' && part !== 'rightItem' ? defaultOf(part, ax) : d));
   edRender();
 };
 $('ed-export').onclick = () => {
-  const out = { formato: 'mushoku-keyframes-1', nombre: ED.name, duracion: ED.length, arma: currentWeapon, keyframes: edSorted() };
+  const out = { formato: 'mushoku-keyframes-2', nombre: ED.name, duracion: ED.length, arma: currentWeapon,
+    keyframes: edSorted().map(k => ({ tick: k.tick, frenar: k.stop, pose: k.pose, crudo: toRaw(k.pose) })) };
   const txt = JSON.stringify(out); $('ed-json').value = txt;
   const done = () => { $('ed-export').textContent = 'Copiado'; setTimeout(() => $('ed-export').textContent = 'Copiar texto', 1500); };
-  try { navigator.clipboard.writeText(txt).then(done, () => { $('ed-json').select(); }); } catch (e) { $('ed-json').select(); }
+  try { navigator.clipboard.writeText(txt).then(done, () => $('ed-json').select()); } catch (e) { $('ed-json').select(); }
 };
 $('ed-import').onclick = () => {
   try {
-    const j = JSON.parse($('ed-json').value);
-    if (!j.keyframes) throw new Error('sin keyframes');
-    ED.name = j.nombre || ED.name; ED.length = j.duracion || ED.length; ED.keys = j.keyframes;
+    const j = JSON.parse($('ed-json').value); if (!j.keyframes) throw new Error();
+    ED.name = j.nombre || ED.name; ED.length = j.duracion || ED.length;
+    ED.keys = j.keyframes.map(k => ({ tick: k.tick, stop: !!(k.frenar ?? k.stop), pose: k.pose }));
     if (j.arma) equip(j.arma);
     ED.tick = 0; edStore(); edSync();
   } catch (e) { $('ed-json').value = 'No pude leer ese texto: pega el que copiaste con "Copiar texto".'; }
 };
 edLoadStore();
 
-// clic sobre el personaje: elegir la parte
-const ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
+// clic: elegir parte (o confirmar la herramienta)
+const ray = new THREE.Raycaster();
 let downAt = null;
-renderer.domElement.addEventListener('pointerdown', e => { downAt = [e.clientX, e.clientY]; });
+renderer.domElement.addEventListener('pointerdown', e => {
+  downAt = [e.clientX, e.clientY];
+  if (tool.mode && e.button === 0) { edConfirm(); downAt = null; }
+});
 renderer.domElement.addEventListener('pointerup', e => {
-  if (!ED.on || !downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 4) return;
+  if (!ED.on || tool.mode || !downAt || e.button !== 0 || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 4) return;
   const r = renderer.domElement.getBoundingClientRect();
-  mouse.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
-  ray.setFromCamera(mouse, camera);
-  const hits = ray.intersectObject(rig.root, true);
-  for (const h of hits) {
-    let o = h.object, part = null;
-    while (o && !part) { part = o.userData.edPart; o = o.parent; }
-    if (part) { ED.part = part; edRender(); break; }
+  ray.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), camera);
+  for (const h of ray.intersectObject(rig.root, true)) {
+    let o = h.object, seg = null;
+    while (o && !seg) { seg = o.userData.seg; o = o.parent; }
+    if (seg) { edSelect(seg); break; }
   }
 });
-function edTagParts() {
-  for (const [name, P] of Object.entries(rig.parts)) P.g.userData.edPart = name;
-  rig.parts.rightArm.item.slot.userData.edPart = 'rightItem';
-}
 
 buildPlayer(false);
 edTagParts();
