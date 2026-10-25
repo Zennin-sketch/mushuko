@@ -762,18 +762,21 @@ const SEGS = [
   ['rLegU', 'Muslo der.', 'q'], ['rLegL', 'Pierna der.', 'd'], ['lLegU', 'Muslo izq.', 'q'], ['lLegL', 'Pierna izq.', 'd'],
   ['weapon', 'Arma', 'q', true],
 ];
-const SEG = Object.fromEntries(SEGS.map(([k, label, kind, move]) => [k, { label, kind, move: !!move }]));
+const SEG = Object.fromEntries(SEGS.map(([k, label, kind]) => [k, { label, kind, move: true }]));
+const moveTarget = seg => SEG[seg].kind === 'd' ? seg.slice(0, -1) + 'U' : seg; // antebrazo/pierna mueven la extremidad entera
 const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
 const Q = a => new THREE.Quaternion(a[0], a[1], a[2], a[3]);
 const qa = q => [q.x, q.y, q.z, q.w];
 const WAIST = V3(0, 6, 0);
 function edBlankPose() {
   const p = {};
-  for (const [k, , kind, move] of SEGS) {
-    p[k] = kind === 'q' ? { q: [0, 0, 0, 1] } : { d: [0, 1, 0] };
-    if (move) p[k].p = [0, 0, 0];
-  }
+  for (const [k, , kind] of SEGS) p[k] = kind === 'q' ? { q: [0, 0, 0, 1], p: [0, 0, 0] } : { d: [0, 1, 0] };
   return p;
+}
+function normPose(P) { // poses guardadas con versiones anteriores: completar lo que falte
+  const b = edBlankPose();
+  for (const k of Object.keys(b)) { P[k] = Object.assign({}, b[k], P[k] || {}); }
+  return P;
 }
 const eulerZYX = q => new THREE.Euler().setFromQuaternion(q, 'ZYX');
 function bendOf(d) {
@@ -799,20 +802,22 @@ function toRaw(P) {
   const hq = Q(P.hip.q), he = eulerZYX(hq);
   raw.body = { x: P.hip.p[0], y: P.hip.p[1], z: P.hip.p[2], pitch: he.x, yaw: he.y, roll: he.z };
   const qc = Q(P.chest.q), cs = chestSplit(qc);
-  raw.torso = { x: 0, y: 0, z: 0, pitch: 0, yaw: cs.yaw, roll: 0, bend: cs.bend[0], axis: cs.bend[1] };
-  const att = (pivot, q) => { // cabeza y brazos van pegados al pecho (giran alrededor de la cintura)
-    const pos = pivot.clone().sub(WAIST).applyQuaternion(qc).add(WAIST);
+  const cp = V3(...P.chest.p);
+  raw.torso = { x: cp.x, y: cp.y, z: cp.z, pitch: 0, yaw: cs.yaw, roll: 0, bend: cs.bend[0], axis: cs.bend[1] };
+  const att = (pivot, q, off) => { // cabeza y brazos van pegados al pecho (giran alrededor de la cintura)
+    const pos = pivot.clone().sub(WAIST).applyQuaternion(qc).add(WAIST).add(cp).add(V3(...off));
     const e = eulerZYX(qc.clone().multiply(q));
     return { x: pos.x, y: pos.y, z: pos.z, pitch: e.x, yaw: e.y, roll: e.z };
   };
-  raw.head = att(V3(0, 0, 0), Q(P.head.q));
+  raw.head = att(V3(0, 0, 0), Q(P.head.q), P.head.p);
   for (const [seg, part, pv] of [['rArm', 'rightArm', V3(-5, 2, 0)], ['lArm', 'leftArm', V3(5, 2, 0)]]) {
-    raw[part] = att(pv, Q(P[seg + 'U'].q));
+    raw[part] = att(pv, Q(P[seg + 'U'].q), P[seg + 'U'].p);
     const [bend, axis] = bendOf(P[seg + 'L'].d); raw[part].bend = bend; raw[part].axis = axis;
   }
   for (const [seg, part, pv] of [['rLeg', 'rightLeg', [-1.9, 12, 0.1]], ['lLeg', 'leftLeg', [1.9, 12, 0.1]]]) {
     const e = eulerZYX(Q(P[seg + 'U'].q)), [bend, axis] = bendOf(P[seg + 'L'].d);
-    raw[part] = { x: pv[0], y: pv[1], z: pv[2], pitch: e.x, yaw: e.y, roll: e.z, bend, axis };
+    const o = P[seg + 'U'].p;
+    raw[part] = { x: pv[0] + o[0], y: pv[1] + o[1], z: pv[2] + o[2], pitch: e.x, yaw: e.y, roll: e.z, bend, axis };
   }
   const we = eulerZYX(Q(P.weapon.q));
   raw.rightItem = { x: P.weapon.p[0], y: P.weapon.p[1], z: P.weapon.p[2], pitch: we.x, yaw: we.y, roll: we.z };
@@ -843,6 +848,7 @@ const clone = o => JSON.parse(JSON.stringify(o));
 function edSorted() { return ED.keys.slice().sort((a, b) => a.tick - b.tick); }
 function edEval(t) { // curva suave entre keyframes ("frenar" = velocidad cero ahi)
   const ks = edSorted();
+  for (const k of ks) normPose(k.pose);
   if (!ks.length) return clone(ED.pose);
   if (t <= ks[0].tick) return clone(ks[0].pose);
   if (t >= ks[ks.length - 1].tick) return clone(ks[ks.length - 1].pose);
@@ -898,11 +904,43 @@ class EditorPlayer {
   }
 }
 let edPlayer = null, edSaved = null;
-const slotKey = () => `mushoku-ed3-${ED.weapon}-${ED.hit}`;
-function edStore() { ED.baked = null; try { localStorage.setItem(slotKey(), JSON.stringify({ name: ED.name, length: ED.length, keys: ED.keys })); localStorage.setItem('mushoku-ed3-last', JSON.stringify([ED.weapon, ED.hit])); } catch (e) {} }
+const slotKey = (w = ED.weapon, h = ED.hit) => `mushoku-ed3-${w}-${h}`;
+function readSlot(w, h) { try { return JSON.parse(localStorage.getItem(slotKey(w, h)) || 'null'); } catch (e) { return null; } }
+function writeSlot(w, h, o) { try { localStorage.setItem(slotKey(w, h), JSON.stringify(o)); } catch (e) {} }
+const lastKey = keys => keys.slice().sort((a, b) => a.tick - b.tick).pop();
+/** El golpe que sigue arranca exactamente donde termina este (y al reves). */
+function linkKeys() {
+  if (ED.hit > 1) {
+    const prev = readSlot(ED.weapon, ED.hit - 1);
+    if (prev && prev.keys && prev.keys.length) {
+      const lk = lastKey(prev.keys);
+      ED.keys = ED.keys.filter(k => k.tick !== 0);
+      ED.keys.push({ tick: 0, stop: true, link: true, pose: clone(lk.pose) });
+    }
+  }
+}
+function pushLinks() {
+  const lk = ED.keys.length ? lastKey(ED.keys) : null;
+  const next = readSlot(ED.weapon, ED.hit + 1);
+  if (lk && next && next.keys && next.keys.length) {
+    next.keys = next.keys.filter(k => k.tick !== 0);
+    next.keys.push({ tick: 0, stop: true, link: true, pose: clone(lk.pose) });
+    writeSlot(ED.weapon, ED.hit + 1, next);
+  }
+  const k0 = ED.keys.find(k => k.tick === 0);
+  const prev = ED.hit > 1 ? readSlot(ED.weapon, ED.hit - 1) : null;
+  if (k0 && prev && prev.keys && prev.keys.length) {
+    const pl = lastKey(prev.keys);
+    prev.keys = prev.keys.filter(k => k.tick !== pl.tick);
+    prev.keys.push({ tick: pl.tick, stop: true, pose: clone(k0.pose) });
+    writeSlot(ED.weapon, ED.hit - 1, prev);
+  }
+}
+function edStore() { ED.baked = null; try { localStorage.setItem(slotKey(), JSON.stringify({ name: ED.name, length: ED.length, keys: ED.keys })); localStorage.setItem('mushoku-ed3-last', JSON.stringify([ED.weapon, ED.hit])); } catch (e) {} pushLinks(); }
 function edLoadSlot() {
   ED.keys = []; ED.length = 20; ED.name = `${ED.weapon}_golpe${ED.hit}`; ED.baked = null; ED.tick = 0;
   try { const j = JSON.parse(localStorage.getItem(slotKey()) || 'null'); if (j && j.keys) { ED.name = j.name || ED.name; ED.length = j.length || 20; ED.keys = j.keys; } } catch (e) {}
+  linkKeys();
 }
 function edLoadStore() {
   try { const l = JSON.parse(localStorage.getItem('mushoku-ed3-last') || 'null'); if (l) { ED.weapon = l[0]; ED.hit = l[1]; } } catch (e) {}
@@ -911,7 +949,7 @@ function edLoadStore() {
 }
 /** Animacion del mod que usa hoy ese golpe de esa arma (punto de partida). */
 function edCurrentAnim() { const f = DATA.families[DATA.weapons[ED.weapon].family]; const a = f.attacks[ED.hit - 1]; return a ? a.anim : null; }
-function edSync() { if (!ED.playing) ED.baked = ED.baked; const k = ED.keys.find(k => k.tick === ED.tick); ED.pose = k ? clone(k.pose) : edEval(ED.tick); edRender(); }
+function edSync() { for (const k of ED.keys) normPose(k.pose); const k = ED.keys.find(k => k.tick === ED.tick); ED.pose = normPose(k ? clone(k.pose) : edEval(ED.tick)); edRender(); }
 function edPush() { ED.undo.push(clone(ED.pose)); if (ED.undo.length > 60) ED.undo.shift(); }
 
 /* ---------------- resaltado de la parte elegida */
@@ -962,7 +1000,7 @@ function rotateSeg(P, seg, axisW, ang) {
     const parent = (seg === 'head' || seg.endsWith('ArmU')) ? qc : new THREE.Quaternion();
     P[seg].q = qa(local(parent, Q(P[seg].q)));
   } else { // antebrazo / pierna: se gira la direccion respecto del segmento de arriba (doblez de Bendy-lib)
-    const up = seg.replace('L', 'U');
+    const up = seg.slice(0, -1) + 'U';
     const parent = (seg.startsWith('rArm') || seg.startsWith('lArm') ? qc.clone() : new THREE.Quaternion()).multiply(Q(P[up].q));
     const d = V3(...P[seg].d).applyQuaternion(parent).applyQuaternion(dM).applyQuaternion(parent.clone().invert());
     P[seg].d = [d.x, d.y, d.z];
@@ -982,7 +1020,7 @@ function edKey(e) {
     else if (!tool.mode) edBegin('rotate');
     e.preventDefault();
   }
-  if (k === 'g' && !tool.mode && SEG[ED.seg].move) { edBegin('move'); e.preventDefault(); }
+  if (k === 'g' && !tool.mode) { edBegin('move'); e.preventDefault(); }
 }
 window.addEventListener('keydown', edKey);
 let mouseXY = [0, 0];
@@ -994,7 +1032,7 @@ function edToolMsg() {
     setStatus(`Rotando ${SEG[ED.seg].label} en ${ch[1]} — mové el mouse a los costados · R cambia de eje · clic confirma · Esc cancela`);
   } else {
     const ax = tool.lock ? ` en ${tool.lock.toUpperCase()}` : '';
-    setStatus(`Moviendo ${SEG[ED.seg].label}${ax} — X/Y/Z fija el eje · clic confirma · Esc cancela`);
+    setStatus(`Moviendo ${SEG[moveTarget(ED.seg)].label}${ax} — X/Y/Z fija el eje · clic confirma · Esc cancela`);
   }
 }
 function edBegin(mode) {
@@ -1023,11 +1061,12 @@ function edToolMove() {
     const h = edRayPlane(); if (!h || !tool.hit0) return;
     let dw = h.clone().sub(tool.hit0);
     if (tool.lock) { const ax = AXES[tool.lock]; dw = ax.clone().multiplyScalar(dw.dot(ax)); }
-    if (ED.seg === 'hip') P.hip.p = P.hip.p.map((v, i) => v + [dw.x, dw.y, dw.z][i]);
-    else { // arma: el desplazamiento pasado al marco de la mano (px)
-      const par = rig.parts.rightArm.item.it.parent;
+    const tgt = moveTarget(ED.seg);
+    if (tgt === 'hip') P.hip.p = P.hip.p.map((v, i) => v + [dw.x, dw.y, dw.z][i]);
+    else { // el desplazamiento pasado al marco de esa parte (px)
+      const par = tgt === 'weapon' ? rig.parts.rightArm.item.it.parent : rig.model;
       const a0 = par.worldToLocal(tool.hit0.clone()), a1 = par.worldToLocal(h.clone()), d = a1.sub(a0);
-      P.weapon.p = P.weapon.p.map((v, i) => v + [d.x, d.y, d.z][i]);
+      P[tgt].p = P[tgt].p.map((v, i) => v + [d.x, d.y, d.z][i]);
     }
   }
   ED.pose = P; ED.baked = null; edPanelValues();
@@ -1122,15 +1161,15 @@ function edRender() {
   $('ed-hits').innerHTML = Array.from({ length: n }, (_, i) => `<button data-h="${i + 1}" class="${ED.hit === i + 1 ? 'gold' : ''}">Golpe ${i + 1}</button>`).join('');
   $('ed-hits').querySelectorAll('button').forEach(b => b.onclick = () => { edStore(); ED.hit = +b.dataset.h; edLoadSlot(); edSync(); });
   const cur = edCurrentAnim();
-  $('ed-slotinfo').textContent = `${DATA.weapons[ED.weapon].label}, golpe ${ED.hit}. Hoy usa: ${cur || 'ninguna'}. Cada arma y golpe se guarda aparte.`;
+  $('ed-slotinfo').textContent = `${DATA.weapons[ED.weapon].label}, golpe ${ED.hit}. Hoy usa: ${cur || 'ninguna'}. Cada arma y golpe se guarda aparte; el tick 0 de cada golpe es el ultimo keyframe del anterior (⛓).`;
   $('ed-anim-info').textContent = ED.baked ? 'Animada: Reproducir muestra la version final a la velocidad del juego.' : (ED.keys.length < 2 ? 'Necesita al menos 2 keyframes.' : '');
   $('ed-name').value = ED.name; $('ed-len').value = ED.length; $('ed-tick').value = ED.tick; $('ed-tick').max = ED.length;
   const k = ED.keys.find(k => k.tick === ED.tick); $('ed-stop').checked = !!(k && k.stop);
-  $('ed-keys').innerHTML = edSorted().map(k => `<button data-t="${k.tick}" class="${k.tick === ED.tick ? 'sel' : ''} ${k.stop ? 'stop' : ''}">${k.tick}</button>`).join('') || '<span class="hint">Todavia no hay keyframes.</span>';
+  $('ed-keys').innerHTML = edSorted().map(k => `<button data-t="${k.tick}" class="${k.tick === ED.tick ? 'sel' : ''} ${k.stop ? 'stop' : ''}" title="${k.link ? 'Enlace: es el ultimo keyframe del golpe anterior' : ''}">${k.tick}${k.link ? ' ⛓' : ''}</button>`).join('') || '<span class="hint">Todavia no hay keyframes.</span>';
   $('ed-keys').querySelectorAll('button').forEach(b => b.onclick = () => { ED.playing = false; setPlaying(false); ED.tick = +b.dataset.t; edSync(); });
   $('ed-parts').querySelectorAll('button').forEach(b => b.classList.toggle('sel', b.dataset.seg === ED.seg));
   $('ed-sel').textContent = SEG[ED.seg].label;
-  $('ed-mov').disabled = !SEG[ED.seg].move;
+
   $('ed-axes').innerHTML = edFields().map(([l, v, id]) => `<div class="ax"><label for="f-${id}">${l}</label><span></span><input type="number" id="f-${id}" step="${id.startsWith('p') ? 0.05 : 1}" value="${(+v).toFixed(id.startsWith('p') ? 3 : 1)}"></div>`).join('');
   for (const [, , id] of edFields()) $('f-' + id).onchange = e => { edSetField(id, +e.target.value); ED.baked = null; edRender(); };
   edHighlight();
@@ -1145,11 +1184,11 @@ $('ed-start').onclick = () => { // keyframes sacados de la animacion actual en s
     const pose = fromRaw((part, ax, d) => pl.value(part, ax, (ax === 'x' || ax === 'y' || ax === 'z') && part !== 'body' && part !== 'rightItem' ? defaultOf(part, ax) : d));
     return { tick: t, stop: t === 0 || t === 14 || t === a.end, pose };
   });
-  ED.length = a.end; ED.tick = 0; edStore(); edSync();
+  ED.length = a.end; ED.tick = 0; linkKeys(); edStore(); edSync();
 };
 $('ed-animate').onclick = () => { if (ED.keys.length < 2) { edRender(); return; } edBake(); ED.t = 0; edPlayer.real = 0; ED.playing = true; setPlaying(true); edRender(); };
 $('ed-rot').onclick = () => edBegin('rotate');
-$('ed-mov').onclick = () => SEG[ED.seg].move && edBegin('move');
+$('ed-mov').onclick = () => edBegin('move');
 $('ed-name').onchange = () => { ED.name = $('ed-name').value.replace(/[^a-z0-9_]/gi, '_').toLowerCase() || 'mi_animacion'; edStore(); edRender(); };
 $('ed-len').onchange = () => { ED.length = Math.max(2, Math.min(200, +$('ed-len').value || 20)); edStore(); edRender(); };
 $('ed-tick').onchange = () => { ED.playing = false; setPlaying(false); ED.tick = Math.max(0, Math.min(ED.length, Math.round(+$('ed-tick').value))); edSync(); };
