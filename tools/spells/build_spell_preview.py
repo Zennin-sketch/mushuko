@@ -13,8 +13,10 @@ def main(out):
     for f in sorted(os.listdir(tdir)):
         with open(os.path.join(tdir, f), 'rb') as fh:
             textures[f[:-4]] = 'data:image/png;base64,' + base64.b64encode(fh.read()).decode()
+    import cosmetics
+    cos = {name: fn() for name, fn in cosmetics.COSMETICS.items()}
     tpl = open(os.path.join(HERE, 'preview_template.html'), encoding='utf-8').read()
-    html = tpl.replace('/*__DATA__*/null', json.dumps(dict(models=models, textures=textures), separators=(',', ':')))
+    html = tpl.replace('/*__DATA__*/null', json.dumps(dict(models=models, textures=textures, cosmetics=cos), separators=(',', ':')))
     with open(out, 'w', encoding='utf-8') as f:
         f.write(html)
     print('preview ->', out, round(len(html) / 1024), 'KB')

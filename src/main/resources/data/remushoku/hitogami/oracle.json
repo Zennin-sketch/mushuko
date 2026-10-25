@@ -1,0 +1,16 @@
+{
+  "_comentario": "Lugares que Hitogami puede revelar en sueños. Para sumar estructuras del mod: agregar {structure, dimension, name, hint}. name va despues de 'hay ...'.",
+  "entries": [
+    {"structure": "minecraft:stronghold", "dimension": "minecraft:overworld", "name": "una fortaleza enterrada", "hint": "Bajo tierra duerme un portal hacia otro mundo... los ojos de Ender saben el camino. Lleva antorchas: sus pasillos son un laberinto."},
+    {"structure": "minecraft:ancient_city", "dimension": "minecraft:overworld", "name": "una ciudad antigua en las profundidades", "hint": "Muy abajo, donde la piedra se vuelve oscura, hay algo que escucha cada paso que das. No hagas ruido. En serio."},
+    {"structure": "minecraft:trial_chambers", "dimension": "minecraft:overworld", "name": "unas cámaras de prueba", "hint": "Pasillos de cobre y puertas de hierro. Quien supere sus pruebas encontrará llaves... y lo que abren."},
+    {"structure": "minecraft:mansion", "dimension": "minecraft:overworld", "name": "una mansión en el bosque oscuro", "hint": "Una casa enorme llena de gente que no te va a recibir con té. Dicen que guardan un tótem que vence a la muerte."},
+    {"structure": "minecraft:monument", "dimension": "minecraft:overworld", "name": "un templo bajo el mar", "hint": "Bajo el océano brilla un templo custodiado por guardianes con un solo ojo. Bajo sus muros hay oro."},
+    {"structure": "minecraft:desert_pyramid", "dimension": "minecraft:overworld", "name": "una pirámide en el desierto", "hint": "Hay un tesoro bajo el centro de la pirámide. Mira bien dónde pisas: los antiguos odiaban a los ladrones."},
+    {"structure": "minecraft:jungle_pyramid", "dimension": "minecraft:overworld", "name": "un templo en la selva", "hint": "Entre lianas y musgo hay un templo con trampas. Las palancas cuentan una historia; léelas antes de tocarlas."},
+    {"structure": "minecraft:village_plains", "dimension": "minecraft:overworld", "name": "una aldea", "hint": "Gente simple, camas, comida y comercio. Un buen lugar para empezar... o para esconderse."},
+    {"structure": "minecraft:pillager_outpost", "dimension": "minecraft:overworld", "name": "una torre de saqueadores", "hint": "Hombres con ballestas y un estandarte. Si te ven, no van a negociar."},
+    {"structure": "minecraft:bastion_remnant", "dimension": "minecraft:nether", "name": "un bastión de los piglins", "hint": "Una fortaleza de piedra negra llena de oro. Los piglins la defienden con su vida; ponte algo dorado o corre."},
+    {"structure": "minecraft:fortress", "dimension": "minecraft:nether", "name": "una fortaleza del Nether", "hint": "Puentes de ladrillo rojo sobre la lava. Ahí crecen las verrugas y vuelan los blazes."}
+  ]
+}

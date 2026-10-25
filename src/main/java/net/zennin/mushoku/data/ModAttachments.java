@@ -54,6 +54,34 @@ public final class ModAttachments {
             .initializer(() -> net.zennin.mushoku.race.RaceData.DEFAULT)
             .buildAndRegister(MushokuMod.id("race"));
 
+    /** Rasgo visible de la raza (orejas, cuernos, gema) elegido al crear el personaje. */
+    @SuppressWarnings("UnstableApiUsage")
+    public static final AttachmentType<net.zennin.mushoku.race.Appearance> APPEARANCE = AttachmentRegistry.<net.zennin.mushoku.race.Appearance>builder()
+            .persistent(net.zennin.mushoku.race.Appearance.CODEC)
+            .copyOnDeath()
+            .initializer(() -> net.zennin.mushoku.race.Appearance.NONE)
+            .buildAndRegister(MushokuMod.id("appearance"));
+
+    /** Personaje creado con Hitogami y estado del sueno (para volver junto a la cama). */
+    @SuppressWarnings("UnstableApiUsage")
+    public static final AttachmentType<net.zennin.mushoku.hitogami.HitogamiData> HITOGAMI = AttachmentRegistry.<net.zennin.mushoku.hitogami.HitogamiData>builder()
+            .persistent(net.zennin.mushoku.hitogami.HitogamiData.CODEC)
+            .copyOnDeath()
+            .initializer(() -> net.zennin.mushoku.hitogami.HitogamiData.DEFAULT)
+            .buildAndRegister(MushokuMod.id("hitogami"));
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static net.zennin.mushoku.race.Appearance appearance(Player player) { return player.getAttachedOrCreate(APPEARANCE); }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static void setAppearance(Player player, net.zennin.mushoku.race.Appearance a) { player.setAttached(APPEARANCE, a); }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static net.zennin.mushoku.hitogami.HitogamiData hitogami(Player player) { return player.getAttachedOrCreate(HITOGAMI); }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static void setHitogami(Player player, net.zennin.mushoku.hitogami.HitogamiData d) { player.setAttached(HITOGAMI, d); }
+
     private ModAttachments() {}
 
     @SuppressWarnings("UnstableApiUsage")

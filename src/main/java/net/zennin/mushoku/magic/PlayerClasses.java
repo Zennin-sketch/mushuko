@@ -51,7 +51,8 @@ public final class PlayerClasses {
                 ServerPlayer p = server.getPlayerList().getPlayer(e.getKey());
                 if (p != null) {
                     ModNetworking.syncMagic(p);
-                    if (ModAttachments.get(p).playerClass() == 0) ModNetworking.openClassScreen(p);
+                    // Sin raza todavia: la clase se elige con Hitogami (creacion de personaje)
+                    if (ModAttachments.get(p).playerClass() == 0 && !ModAttachments.race(p).race().isEmpty()) ModNetworking.openClassScreen(p);
                 }
                 return true;
             });

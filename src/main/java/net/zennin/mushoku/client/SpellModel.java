@@ -161,7 +161,7 @@ public final class SpellModel {
     // Que ejes de la caja forman el ancho/alto de la textura en cada cara
     private static final int[][] FACE_AXES = {{2, 1}, {2, 1}, {0, 2}, {0, 2}, {0, 1}, {0, 1}};
 
-    private static void addBox(List<Face> out, float[] at, float[] size, float[] rot, int rgb, float alpha, int seed) {
+    static void addBox(List<Face> out, float[] at, float[] size, float[] rot, int rgb, float alpha, int seed) {
         Matrix3f r = rotation(rot[0], rot[1], rot[2]);
         int cr = (rgb >> 16) & 255, cg = (rgb >> 8) & 255, cb = rgb & 255;
         for (int f = 0; f < 6; f++) {

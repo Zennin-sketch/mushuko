@@ -1,0 +1,22 @@
+{
+  "type": "remushoku:void",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "remushoku:void",
+      "lakes": false,
+      "features": false,
+      "structure_overrides": [],
+      "layers": [
+        {
+          "block": "minecraft:air",
+          "height": 64
+        },
+        {
+          "block": "remushoku:void_floor",
+          "height": 1
+        }
+      ]
+    }
+  }
+}

@@ -84,6 +84,9 @@ public final class ModEntities {
         for (CompanionKind k : CompanionKind.values())
             COMPANIONS.put(k, humanoid(k.id, MobCategory.CREATURE, (t, l) -> new CompanionEntity(t, l, k)));
     }
+    /** Hitogami amistoso (dimension del vacio). */
+    public static final EntityType<net.zennin.mushoku.hitogami.HitogamiEntity> HITOGAMI = humanoid("hitogami", MobCategory.MISC,
+            net.zennin.mushoku.hitogami.HitogamiEntity::new);
     public static final EntityType<VillagerGuardEntity> VILLAGER_GUARD = humanoid("villager_guard_entity", MobCategory.CREATURE, VillagerGuardEntity::new);
 
     private ModEntities() {}
@@ -105,6 +108,7 @@ public final class ModEntities {
     }
 
     public static void init() {
+        FabricDefaultAttributeRegistry.register(HITOGAMI, net.zennin.mushoku.hitogami.HitogamiEntity.attributes());
         FabricDefaultAttributeRegistry.register(SG_BANDIT, BanditEntity.attributes(40));
         FabricDefaultAttributeRegistry.register(NG_BANDIT, BanditEntity.attributes(40));
         FabricDefaultAttributeRegistry.register(WG_BANDIT, BanditEntity.attributes(60));

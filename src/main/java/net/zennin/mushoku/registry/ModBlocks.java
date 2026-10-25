@@ -52,6 +52,9 @@ public final class ModBlocks {
             .strength(10000f, 1.0E8f).noOcclusion().sound(SoundType.GLASS).isViewBlocking((s, l, p) -> false)));
     public static final Block BLOCK_SAND_CLOUD = withItem("block_sand_cloud", new SandCloudBlock(BlockBehaviour.Properties.of()
             .mapColor(MapColor.SAND).strength(-1f, 3600000f).noOcclusion().noLootTable().replaceable().sound(SoundType.SAND)));
+    /** Piso de la dimension del vacio: blanco total e irrompible como la bedrock. */
+    public static final Block VOID_FLOOR = withItem("void_floor", new Block(BlockBehaviour.Properties.of()
+            .mapColor(MapColor.SNOW).strength(-1f, 3600000f).noLootTable().sound(SoundType.CALCITE).isValidSpawn((s, l, p, t) -> false)));
     public static final Block BOSS_SPAWNER = withItem("boss_spawner", new BossSpawnerBlock(
             BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).strength(10f, 15f).sound(SoundType.STONE)));
 

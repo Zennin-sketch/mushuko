@@ -47,6 +47,7 @@ public class MushokuMod implements ModInitializer {
         net.zennin.mushoku.race.RaceSystem.init();
         net.zennin.mushoku.party.Parties.init();
         net.zennin.mushoku.addon.AddonSystem.init();
+        net.zennin.mushoku.hitogami.HitogamiSystem.init();
         MushokuCommands.init();
         LOG.info("Mushoku Tensei (Fabric) cargado");
     }

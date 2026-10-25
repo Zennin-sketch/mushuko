@@ -72,6 +72,25 @@ public final class MushokuCommands {
                             net.zennin.mushoku.race.RaceSystem.grantLaplace(c.getSource().getPlayerOrException());
                             return 1;
                         }))
+                        .then(Commands.literal("hitogami")
+                                .then(Commands.literal("sueno").executes(c -> {
+                                    net.zennin.mushoku.hitogami.HitogamiSystem.dream(c.getSource().getPlayerOrException());
+                                    return 1;
+                                }))
+                                .then(Commands.literal("reiniciar").executes(c -> {
+                                    // Borra raza, clase y rasgo y vuelve a empezar con Hitogami (para probar la creacion de personaje)
+                                    ServerPlayer p = c.getSource().getPlayerOrException();
+                                    ModAttachments.setRace(p, ModAttachments.race(p).withRace(""));
+                                    ModAttachments.set(p, ModAttachments.get(p).withClass(0));
+                                    net.zennin.mushoku.sword.SwordSystem.reset(p);
+                                    ModNetworking.syncMana(p);
+                                    net.zennin.mushoku.race.RaceSystem.refresh(p);
+                                    net.zennin.mushoku.race.RaceSystem.sync(p);
+                                    net.zennin.mushoku.hitogami.HitogamiSystem.setAppearance(p, net.zennin.mushoku.race.Appearance.NONE);
+                                    ModAttachments.setHitogami(p, net.zennin.mushoku.hitogami.HitogamiData.DEFAULT);
+                                    net.zennin.mushoku.hitogami.HitogamiSystem.beginIntro(p);
+                                    return 1;
+                                })))
                         .then(Commands.literal("clase").executes(c -> {
                             PlayerClasses.reset(c.getSource().getPlayerOrException());
                             return 1;

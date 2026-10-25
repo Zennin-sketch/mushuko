@@ -50,11 +50,13 @@ canvas { display: block; width: 100%; height: 100%; }
 <div class="wrap">
   <aside>
     <h1>Grimorio de Hechizos</h1>
-    <p class="sub">Modelos voxel de los hechizos, tal cual los dibuja el juego: mismas cajas, texturas, giros, pulsos y tiempos.</p>
+    <p class="sub">Modelos voxel de los hechizos y rasgos de raza, tal cual los dibuja el juego.</p>
     <h2 class="sec">Proyectiles</h2>
     <div class="list" id="list"></div>
     <h2 class="sec">Efectos</h2>
     <div class="list" id="listfx"></div>
+    <h2 class="sec">Rasgos de raza</h2>
+    <div class="list" id="listcos"></div>
     <div class="note" id="note"></div>
   </aside>
   <main>
@@ -72,6 +74,9 @@ canvas { display: block; width: 100%; height: 100%; }
           <option value="2">2× (Ex-Flame, cañón de agua)</option>
           <option value="3">3× (Exodus Flame)</option>
         </select>
+      </label>
+      <label for="height" id="heightbox" hidden>Altura
+        <select id="height"></select>
       </label>
       <label for="speed">Velocidad
         <select id="speed"><option value="1">normal</option><option value="0.25">lenta ×¼</option><option value="0">pausa</option></select>
@@ -289,7 +294,68 @@ function buildBolt(h) {
 }
 
 let current = null, groups = [], model = null, outroAlpha = 1;
+// ---- Rasgos de raza sobre una cabeza de ejemplo ----
+const SKIN = '#d9a27e', HAIR = '#4a3222';
+const cosHolder = new THREE.Group(); scene.add(cosHolder);
+function cosColor(c) {
+  const [src, mul] = c.split(':');
+  const base = src === 'skin' ? SKIN : src === 'hair' ? HAIR : '#' + src;
+  const col = new THREE.Color(base); if (mul) col.multiplyScalar(+mul); return col;
+}
+function headMesh() {
+  const g = new THREE.Group();
+  const mk = (at, size, color) => { const m = new THREE.Mesh(new THREE.BoxGeometry(...size), new THREE.MeshLambertMaterial({ color })); m.position.set(...at); g.add(m); };
+  mk([0, 4, 0], [8, 8, 8], SKIN);
+  mk([0, 7.6, -0.4], [8.3, 1.2, 8.6], HAIR); mk([0, 6.2, -4.05], [8.3, 3.6, 0.6], HAIR);
+  mk([4.05, 6.2, -1.2], [0.6, 3.4, 6], HAIR); mk([-4.05, 6.2, -1.2], [0.6, 3.4, 6], HAIR);
+  mk([0, 7.0, 4.05], [8.3, 1.4, 0.4], HAIR);
+  mk([-2, 3.5, 4.05], [2, 1, 0.2], '#ffffff'); mk([2, 3.5, 4.05], [2, 1, 0.2], '#ffffff');
+  mk([-1.5, 3.5, 4.12], [1, 1, 0.2], '#3a5a9a'); mk([1.5, 3.5, 4.12], [1, 1, 0.2], '#3a5a9a');
+  mk([0, 1.5, 4.05], [2, 0.6, 0.2], '#9a5a4a');
+  mk([0, -3, 0], [8, 6, 4], '#3c6aa8');
+  return g;
+}
+function showCosmetic(name) {
+  const c = DATA.cosmetics[name];
+  cosHolder.clear();
+  const hgt = +document.getElementById('height').value || 0;
+  const head = headMesh(); cosHolder.add(head);
+  const g = new THREE.Group(); g.position.y = c.heights[Math.min(hgt, c.heights.length - 1)];
+  c.boxes.forEach(b => {
+    const col = cosColor(b.color);
+    const mat = b.glow ? new THREE.MeshBasicMaterial({ color: col }) : new THREE.MeshLambertMaterial({ color: col });
+    const m = new THREE.Mesh(new THREE.BoxGeometry(...b.size), mat);
+    m.position.set(...b.at); m.rotation.set(b.rot[0]*D2R, b.rot[1]*D2R, b.rot[2]*D2R, 'ZYX');
+    g.add(m);
+  });
+  cosHolder.add(g);
+}
+function selectCosmetic(name) {
+  current = 'cos:' + name; model = null; groups = []; inner.clear(); bolt.clear();
+  const c = DATA.cosmetics[name];
+  const sel = document.getElementById('height');
+  sel.innerHTML = c.heights.map((h, i) => `<option value="${i}">${c.height_names[i]}</option>`).join('');
+  sel.value = c.heights.length > 1 ? '1' : '0';
+  document.getElementById('heightbox').hidden = c.heights.length < 2;
+  ['fly', 'sizebox', 'replay'].forEach(id => document.getElementById(id).hidden = true);
+  document.querySelectorAll('.spell').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.id === 'cos:' + name)));
+  document.getElementById('note').innerHTML = `<h2>${c.name}</h2><p>${COSINFO[name]}</p>`;
+  cosHolder.visible = true; refGroup.visible = false;
+  cosHolder.position.set(0, 0.4, 0); cosHolder.scale.setScalar(1 / 16 * 2.2);
+  controls.target.set(0, 0.4 + 6 * 2.2 / 16, 0); camera.position.set(2.4, 2.1, 3.2);
+  showCosmetic(name);
+  sel.onchange = () => showCosmetic(name);
+}
+const COSINFO = {
+  elf_ears: 'Orejas largas y en punta, del color de tu piel (se toma de tu skin), con el pliegue interno más oscuro. Al crear el personaje elegís entre 3 alturas.',
+  demon_horns: 'Cuernos en espiral tipo carnero, oscuros con estrías y la punta color hueso, como los de Kishirika. 3 alturas a elegir.',
+  beast_cat: 'Orejas de gato puntiagudas, del color de tu pelo (se toma de la parte de arriba de tu skin) con el interior rosado.',
+  beast_dog: 'Orejas de perro: paradas en la base y con la punta doblada hacia adelante.',
+  beast_bear: 'Orejas de oso: chicas y redondeadas, con el interior más oscuro.',
+  superd_gem: 'La joya roja de los Superd, centrada en la frente. Brilla un poco en la oscuridad.',
+};
 function show(name) {
+  cosHolder.visible = false; cosHolder.clear(); document.getElementById('heightbox').hidden = true;
   current = name; model = DATA.models[name];
   inner.clear();
   groups = model.groups.map(buildGroup);
@@ -323,6 +389,13 @@ function addButton(listEl, id, m) {
 }
 for (const [id, m] of Object.entries(DATA.models))
   addButton(document.getElementById(m.preview && m.preview.kind === 'fx' ? 'listfx' : 'list'), id, m);
+for (const [id, c] of Object.entries(DATA.cosmetics)) {
+  const b = document.createElement('button');
+  b.className = 'spell'; b.dataset.id = 'cos:' + id;
+  b.innerHTML = `<b>${c.name}</b><span class="el">${{elf_ears:'Elfo',demon_horns:'Demonio',beast_cat:'Bestia',beast_dog:'Bestia',beast_bear:'Bestia',superd_gem:'Superd'}[id]}</span>`;
+  b.onclick = () => selectCosmetic(id);
+  document.getElementById('listcos').appendChild(b);
+}
 
 let flying = false, sizeMul = 1, speed = 1;
 const flyBtn = document.getElementById('fly'), refBtn = document.getElementById('ref');
@@ -346,6 +419,7 @@ const hud = document.getElementById('hud');
 function frame(now) {
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
   ticks += dt * 20 * speed;
+  if (!model) { controls.update(); renderer.render(scene, camera); requestAnimationFrame(frame); return; }
   const pv = model.preview || { kind: 'projectile' };
   let t = ticks, s;
   outroAlpha = 1;
@@ -381,5 +455,5 @@ function frame(now) {
 let start = 'stone_bullet';
 try { const v = localStorage.getItem('grimorio-sel'); if (v && DATA.models[v]) start = v; } catch (e) {}
 show(start); resize(); requestAnimationFrame(frame);
-window.__show = show; window.__setTicks = v => { ticks = v; };
+window.__show = show; window.__cos = selectCosmetic; window.__setTicks = v => { ticks = v; };
 </script>
