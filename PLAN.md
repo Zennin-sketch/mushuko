@@ -100,7 +100,10 @@ Se mantiene el id `remushoku` para que las texturas, modelos y datos funcionen s
 - [x] Seguir (pelea a tu lado), quedarse, andar libre, casa; casamiento con Anillo de Bodas (solo personajes adultos)
 - [x] ~350 frases propias por personalidad; acción especial de cada uno
 - [x] Guardia de Aldea; aparición natural de los personajes como en el addon
-#### A2 — Razas (7) y habilidades del addon (Esquivar, Piel de Maná, Resistencia, Factor Laplace)
+#### A2 — Razas y habilidades (HECHA, en prueba)
+- [x] 7 razas con las stats y afinidades mágicas del addon; tamaño con el atributo de escala de 1.21
+- [x] Menú del Aventurero (N) y habilidad de raza (R): bendición élfica, visión nocturna, minería enana
+- [x] Piel de Maná (magos, por maná máximo), Esquivar (libro de habilidad), Factor Laplace (derrotar a Kishirika)
 #### A3 — Hechizos combinados, grupo, maldición Superd, objetos (piedras de maná, capa, casco, botas, gafas, lanza Superd...)
 
 ## Cómo se compila

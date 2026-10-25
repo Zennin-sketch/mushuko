@@ -24,6 +24,9 @@ public final class ModKeys {
     // Ojos demoniacos: G y H como el original
     public static final KeyMapping EYE_1 = reg("key.remushoku.key_eye_one", GLFW.GLFW_KEY_G);
     public static final KeyMapping EYE_2 = reg("key.remushoku.key_eye_twoh", GLFW.GLFW_KEY_H);
+    // Addon: N abre el Menu del Aventurero, R usa la habilidad de raza (como el addon original)
+    public static final KeyMapping ADVENTURER = reg("key.remushoku.adventurer_menu", GLFW.GLFW_KEY_N);
+    public static final KeyMapping RACE_SKILL = reg("key.remushoku.race_skill", GLFW.GLFW_KEY_R);
 
     private ModKeys() {}
 

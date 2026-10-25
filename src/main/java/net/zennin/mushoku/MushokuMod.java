@@ -44,6 +44,7 @@ public class MushokuMod implements ModInitializer {
         GuildSystem.init();
         net.zennin.mushoku.extra.DemonEyes.init();
         net.zennin.mushoku.extra.ExtraTicks.init();
+        net.zennin.mushoku.race.RaceSystem.init();
         MushokuCommands.init();
         LOG.info("Mushoku Tensei (Fabric) cargado");
     }

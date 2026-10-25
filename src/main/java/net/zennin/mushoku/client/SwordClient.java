@@ -28,6 +28,9 @@ public final class SwordClient {
                 if ((swordsman || silentMage) && mc.screen == null) ClientPlayNetworking.send(new SwordActionPayload(SwordActionPayload.USE_SLOT, i, ""));
             }
         }
+        while (ModKeys.ADVENTURER.consumeClick()) if (mc.screen == null) mc.setScreen(new AdventurerScreen());
+        while (ModKeys.RACE_SKILL.consumeClick())
+            if (mc.screen == null) ClientPlayNetworking.send(new net.zennin.mushoku.network.GuildActionPayload(net.zennin.mushoku.network.GuildActionPayload.RACE_SKILL, 0, ""));
         while (ModKeys.EYE_1.consumeClick()) if (mc.screen == null) ClientPlayNetworking.send(new net.zennin.mushoku.network.ActionPayload(net.zennin.mushoku.network.ActionPayload.EYE_ONE));
         while (ModKeys.EYE_2.consumeClick()) if (mc.screen == null) ClientPlayNetworking.send(new net.zennin.mushoku.network.ActionPayload(net.zennin.mushoku.network.ActionPayload.EYE_TWO));
 

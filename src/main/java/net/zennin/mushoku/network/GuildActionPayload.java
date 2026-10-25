@@ -8,7 +8,7 @@ import net.zennin.mushoku.MushokuMod;
 
 /** Cliente -> servidor: acciones del gremio y compras/ventas en tiendas. */
 public record GuildActionPayload(int action, int arg, String shop) implements CustomPacketPayload {
-    public static final int ACCEPT = 0, SUBMIT = 1, COMPLETE = 2, ABANDON = 3, RANK_UP = 4, BUY = 5, SELL = 6, EYE_PICK = 7;
+    public static final int ACCEPT = 0, SUBMIT = 1, COMPLETE = 2, ABANDON = 3, RANK_UP = 4, BUY = 5, SELL = 6, EYE_PICK = 7, RACE_PICK = 8, RACE_TOGGLE = 9, RACE_SKILL = 10;
     public static final Type<GuildActionPayload> TYPE = new Type<>(MushokuMod.id("guild_action"));
     public static final StreamCodec<ByteBuf, GuildActionPayload> CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT, GuildActionPayload::action,

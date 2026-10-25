@@ -43,7 +43,8 @@ public class MagicProjectile extends ThrowableProjectile {
         super(ModEntities.MAGIC_PROJECTILE, owner, level);
         this.entityData.set(KIND, kind);
         // Ultimo Suspiro / Aqua Heartia en la mano amplifican la magia
-        this.damage = owner instanceof net.minecraft.world.entity.player.Player p ? damage * net.zennin.mushoku.extra.ExtraTicks.magicAmp(p) : damage;
+        this.damage = owner instanceof net.minecraft.world.entity.player.Player p
+                ? damage * net.zennin.mushoku.extra.ExtraTicks.magicAmp(p) * net.zennin.mushoku.race.RaceSystem.affinity(p, kind) : damage;
     }
 
     public MagicProjectile size(float s) { this.entityData.set(SIZE, s); return this; }

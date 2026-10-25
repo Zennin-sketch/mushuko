@@ -36,6 +36,7 @@ public class MushokuClient implements ClientModInitializer {
         for (var k : net.zennin.mushoku.companion.CompanionKind.values())
             HumanoidNpcRenderer.register(ModEntities.COMPANIONS.get(k), k.texture, k.slim);
         HumanoidNpcRenderer.register(ModEntities.VILLAGER_GUARD, "villager_guard");
+        ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.RaceSyncPayload.TYPE, (payload, context) -> ClientRaceState.set(payload.data()));
         ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.CompanionStatePayload.TYPE, (payload, context) -> CompanionScreen.receive(payload.state()));
         HumanoidNpcRenderer.register(ModEntities.SG_BANDIT, "sgbandittxt");
         HumanoidNpcRenderer.register(ModEntities.NG_BANDIT, "ngbandittxt");

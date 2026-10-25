@@ -173,6 +173,12 @@ public class CompanionEntity extends PathfinderMob implements RangedAttackMob {
     }
 
     @Override
+    public void die(DamageSource source) {
+        super.die(source);
+        if (kind == CompanionKind.KISHIRIKA && source.getEntity() instanceof ServerPlayer sp) net.zennin.mushoku.race.RaceSystem.grantLaplace(sp);
+    }
+
+    @Override
     protected InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
         if (!level().isClientSide && player instanceof ServerPlayer sp) Interactions.open(this, sp);

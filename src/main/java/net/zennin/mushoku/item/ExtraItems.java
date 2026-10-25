@@ -177,6 +177,27 @@ public final class ExtraItems {
         public void appendHoverText(ItemStack s, TooltipContext c, List<Component> lines, TooltipFlag f) { tip(lines, "tooltip.remushoku.silent_tome"); }
     }
 
+    /** Libro de habilidad: Esquivar (10% de evitar golpes). */
+    public static class DodgeBookItem extends Item {
+        public DodgeBookItem(Properties p) { super(p); }
+
+        @Override
+        public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+            ItemStack stack = player.getItemInHand(hand);
+            if (!(player instanceof ServerPlayer sp)) return InteractionResultHolder.success(stack);
+            if (net.zennin.mushoku.race.RaceSystem.data(sp).dodge()) {
+                sp.displayClientMessage(Component.translatable("msg.remushoku.dodge_have").withStyle(ChatFormatting.GRAY), true);
+                return InteractionResultHolder.fail(stack);
+            }
+            net.zennin.mushoku.race.RaceSystem.grantDodge(sp);
+            if (!sp.getAbilities().instabuild) stack.shrink(1);
+            return InteractionResultHolder.consume(stack);
+        }
+
+        @Override
+        public void appendHoverText(ItemStack s, TooltipContext c, List<Component> lines, TooltipFlag f) { tip(lines, "tooltip.remushoku.dodge_book"); }
+    }
+
     /** Objeto que solo agrega una descripcion (garras de escalada, amplificadores de magia). */
     public static class TipItem extends Item {
         private final String tooltip;

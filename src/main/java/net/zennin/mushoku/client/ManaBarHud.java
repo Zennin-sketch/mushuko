@@ -46,6 +46,10 @@ public final class ManaBarHud {
         int line = Y + H + 4;
         if (ClientManaState.playerClass == 2) line = renderSwordsman(g, mc, line);
         line = renderExtra(g, mc, line);
+        if (ClientManaState.playerClass != 0 && ClientRaceState.data.race().isEmpty()) {
+            g.drawString(mc.font, Component.translatable("hud.remushoku.pick_race", ModKeys.ADVENTURER.getTranslatedKeyMessage()), X + 2, line, 0xFFFFD27F, true);
+            line += 10;
+        }
         if (!CastingClient.casting && ClientManaState.playerClass != 1 && ClientManaState.queued.isEmpty()) return;
         if (ClientManaState.noElement) {
             g.drawString(mc.font, Component.translatable("hud.remushoku.no_element"), X + 2, line, 0xFFD58CFF, true);

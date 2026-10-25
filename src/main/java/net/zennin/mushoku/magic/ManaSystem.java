@@ -27,7 +27,8 @@ public final class ManaSystem {
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 ManaData d = ModAttachments.get(player);
                 if (d.mana() < d.maxMana()) {
-                    ModAttachments.set(player, d.withMana(d.mana() + regenPerTick(d.maxMana())));
+                    ModAttachments.set(player, d.withMana(d.mana() + regenPerTick(d.maxMana())
+                            + (ModAttachments.race(player).laplace() ? net.zennin.mushoku.race.RaceData.laplaceRegen(d.maxMana()) : 0)));
                 }
                 if (syncTick) ModNetworking.syncMana(player);
             }

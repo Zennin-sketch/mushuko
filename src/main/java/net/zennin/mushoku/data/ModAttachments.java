@@ -46,7 +46,25 @@ public final class ModAttachments {
             .initializer(() -> ExtraData.DEFAULT)
             .buildAndRegister(MushokuMod.id("extra"));
 
+    /** Raza y habilidades del addon. */
+    @SuppressWarnings("UnstableApiUsage")
+    public static final AttachmentType<net.zennin.mushoku.race.RaceData> RACE = AttachmentRegistry.<net.zennin.mushoku.race.RaceData>builder()
+            .persistent(net.zennin.mushoku.race.RaceData.CODEC)
+            .copyOnDeath()
+            .initializer(() -> net.zennin.mushoku.race.RaceData.DEFAULT)
+            .buildAndRegister(MushokuMod.id("race"));
+
     private ModAttachments() {}
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static net.zennin.mushoku.race.RaceData race(Player player) {
+        return player.getAttachedOrCreate(RACE);
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static void setRace(Player player, net.zennin.mushoku.race.RaceData data) {
+        player.setAttached(RACE, data);
+    }
 
     @SuppressWarnings("UnstableApiUsage")
     public static ExtraData extra(Player player) {

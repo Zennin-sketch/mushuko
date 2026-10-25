@@ -73,6 +73,7 @@ public final class ModItems {
     public static final Item STAFF_OF_AREOS = staff("staff_of_areos", 0.30f);
     public static final Item ULTIMO_SUSPIRO = register("ultimo_suspiro", new ExtraItems.TipItem("tooltip.remushoku.ultimo_suspiro", new Item.Properties().stacksTo(1)));
 
+    public static final Item DODGE_SKILL_BOOK = register("dodge_skill_book", new ExtraItems.DodgeBookItem(new Item.Properties().stacksTo(1)));
     public static final Item WEDDING_RING = register("wedding_ring", new ExtraItems.TipItem("tooltip.remushoku.wedding_ring", new Item.Properties().stacksTo(1)));
 
     // --- Armadura Magica Mk 2 (defensa y durabilidad del original) ---

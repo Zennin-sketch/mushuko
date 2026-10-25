@@ -62,6 +62,16 @@ public final class MushokuCommands {
                             net.zennin.mushoku.sword.SwordSystem.sync(p);
                             return 1;
                         })))
+                        .then(Commands.literal("raza").then(Commands.argument("raza", StringArgumentType.word())
+                                .suggests((c, b) -> { for (var r : net.zennin.mushoku.race.Race.values()) b.suggest(r.key); return b.buildFuture(); })
+                                .executes(c -> {
+                                    net.zennin.mushoku.race.RaceSystem.choose(c.getSource().getPlayerOrException(), StringArgumentType.getString(c, "raza"), true);
+                                    return 1;
+                                })))
+                        .then(Commands.literal("laplace").executes(c -> {
+                            net.zennin.mushoku.race.RaceSystem.grantLaplace(c.getSource().getPlayerOrException());
+                            return 1;
+                        }))
                         .then(Commands.literal("clase").executes(c -> {
                             PlayerClasses.reset(c.getSource().getPlayerOrException());
                             return 1;
