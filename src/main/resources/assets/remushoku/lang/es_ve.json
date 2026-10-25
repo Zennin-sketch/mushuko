@@ -1527,7 +1527,7 @@
   "gui.remushoku.class_pick.hint": "Esta elección es permanente (usá un Orbe de Cambio de Clase para cambiarla).",
   "hud.remushoku.no_element": "Modo sin elemento",
   "hud.remushoku.queued": "Listo: %s",
-  "hud.remushoku.casting": "Conjurando...",
+  "hud.remushoku.casting": "Conjurando (bloqueado)",
   "msg.remushoku.no_spell": "Esa combinación no es un hechizo",
   "msg.remushoku.not_learned": "Todavía no aprendiste ese nivel de magia",
   "msg.remushoku.queued": "Hechizo listo: %s",
@@ -2422,5 +2422,6 @@
   "item.remushoku.enchanted_shoes": "Zapatos Encantados",
   "item.remushoku.flame_trapping_cloak": "Capa Atrapallamas",
   "item.remushoku.trading_book": "Libro de Intercambio",
-  "item.remushoku.superd_curse_cure": "Cura de la Maldición Superd"
+  "item.remushoku.superd_curse_cure": "Cura de la Maldición Superd",
+  "hud.remushoku.casting_hint": "%s: lanzar  ·  %s: salir"
 }

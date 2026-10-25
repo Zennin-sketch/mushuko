@@ -1527,7 +1527,7 @@
   "gui.remushoku.class_pick.hint": "This choice is permanent (use a Class Change Orb to change it).",
   "hud.remushoku.no_element": "No-element mode",
   "hud.remushoku.queued": "Ready: %s",
-  "hud.remushoku.casting": "Casting...",
+  "hud.remushoku.casting": "Casting (locked)",
   "msg.remushoku.no_spell": "That combination is not a spell",
   "msg.remushoku.not_learned": "You have not learned that level of magic yet",
   "msg.remushoku.queued": "Spell ready: %s",
@@ -2422,5 +2422,6 @@
   "item.remushoku.enchanted_shoes": "Enchanted Shoes",
   "item.remushoku.flame_trapping_cloak": "Flame Trapping Cloak",
   "item.remushoku.trading_book": "Trading Book",
-  "item.remushoku.superd_curse_cure": "Superd Curse Cure"
+  "item.remushoku.superd_curse_cure": "Superd Curse Cure",
+  "hud.remushoku.casting_hint": "%s: cast  ·  %s: exit"
 }

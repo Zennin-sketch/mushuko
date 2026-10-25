@@ -65,7 +65,10 @@ public final class ManaBarHud {
             int size = 16, gap = 2;
             int total = Math.max(1, combo.length()) * (size + gap) - gap;
             int sx = (g.guiWidth() - total) / 2, sy = g.guiHeight() / 2 - 40;
-            g.drawCenteredString(mc.font, Component.translatable("hud.remushoku.casting"), g.guiWidth() / 2, sy - 12, 0xFFFFFFFF);
+            g.drawCenteredString(mc.font, Component.translatable("hud.remushoku.casting"), g.guiWidth() / 2, sy - 22, 0xFFFFFFFF);
+            Component exitKeys = ModKeys.CAST_2.isUnbound() ? ModKeys.CAST_1.getTranslatedKeyMessage()
+                    : Component.empty().append(ModKeys.CAST_1.getTranslatedKeyMessage()).append(" + ").append(ModKeys.CAST_2.getTranslatedKeyMessage());
+            g.drawCenteredString(mc.font, Component.translatable("hud.remushoku.casting_hint", ModKeys.SHOOT.getTranslatedKeyMessage(), exitKeys), g.guiWidth() / 2, sy - 11, 0xFFBFBFBF);
             for (int i = 0; i < combo.length(); i++) {
                 ResourceLocation tex = switch (combo.charAt(i)) {
                     case 'u' -> UP;
