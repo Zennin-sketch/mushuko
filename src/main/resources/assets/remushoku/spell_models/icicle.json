@@ -583,7 +583,18 @@
     "alpha": 0.85,
     "rise": 0.0,
     "drift": 0.6,
-    "outward": 0.15
+    "outward": 0.15,
+    "center": [
+     0,
+     0,
+     0
+    ],
+    "shape": [
+     1,
+     1,
+     1
+    ],
+    "burst": false
    }
   }
  ]

@@ -62,6 +62,7 @@ public final class SpellEffects {
             case MAGIC_SHIELD -> {
                 p.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 300, 1));
                 p.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 300, 0));
+                net.zennin.mushoku.entity.SpellFxEntity.spawn(level, "magic_shield", p.position(), 0, 1f, 300, p);
                 particles(level, ParticleTypes.ENCHANT, p.position().add(0, 1, 0), 30, 0.8);
                 sound(level, p, SoundEvents.EVOKER_CAST_SPELL);
             }
@@ -117,10 +118,10 @@ public final class SpellEffects {
 
     // ---------- hechizos ----------
 
+    /** Flecha de agua: proyectil translucido que vuela recto (modelo water_arrow). */
     private static void waterArrow(ServerPlayer p) {
-        Arrow arrow = new Arrow(p.level(), p, new ItemStack(Items.ARROW), null);
-        arrow.setBaseDamage(4.0);
-        arrow.pickup = AbstractArrow.Pickup.DISALLOWED;
+        MagicProjectile arrow = new MagicProjectile(p.level(), p, MagicProjectile.WATER, 4f).variant(MagicProjectile.VARIANT_ARROW);
+        arrow.setPos(p.getX(), p.getEyeY() - 0.1, p.getZ());
         arrow.shootFromRotation(p, p.getXRot(), p.getYRot(), 0f, 2.5f, 0f);
         p.level().addFreshEntity(arrow);
         sound(p.serverLevel(), p, SoundEvents.PLAYER_SPLASH);
@@ -131,10 +132,12 @@ public final class SpellEffects {
         Direction facing = p.getDirection();
         BlockPos center = p.blockPosition().relative(facing, 3);
         Direction side = facing.getClockWise();
-        BlockState ice = Blocks.PACKED_ICE.defaultBlockState();
+        // Bloques invisibles que frenan golpes y flechas; lo que se ve es la cortina de agua (modelo water_wall)
+        BlockState wall = Blocks.BARRIER.defaultBlockState();
         for (int s = -1; s <= 1; s++)
             for (int h = 0; h <= 1; h++)
-                TempBlocks.place(level, center.relative(side, s).above(h), ice, 160);
+                TempBlocks.place(level, center.relative(side, s).above(h), wall, 160);
+        net.zennin.mushoku.entity.SpellFxEntity.spawn(level, "water_wall", Vec3.atBottomCenterOf(center), facing.toYRot(), 1f, 160, null);
         particles(level, ParticleTypes.SPLASH, Vec3.atCenterOf(center), 30, 1.0);
         sound(level, p, SoundEvents.PLAYER_SPLASH);
     }

@@ -46,7 +46,11 @@ public final class AdvancedSpells {
                 shoot(p, proj(p, MagicProjectile.ICE, 6f).size(1.3f), 2.2f, 4f, null);
             }
             case ICE_PILLAR -> {
-                return pillar(p, level, Blocks.BLUE_ICE.defaultBlockState(), ParticleTypes.SNOWFLAKE, SoundEvents.GLASS_BREAK);
+                BlockHitResult hit = lookBlock(p, 11);
+                boolean ok = pillar(p, level, Blocks.BLUE_ICE.defaultBlockState(), ParticleTypes.SNOWFLAKE, SoundEvents.GLASS_BREAK);
+                if (ok && hit != null)
+                    net.zennin.mushoku.entity.SpellFxEntity.spawn(level, "ice_crystals", Vec3.atBottomCenterOf(hit.getBlockPos().above()), p.getYRot(), 2.2f, 120, null);
+                return ok;
             }
             case FLOOD_FLUSH -> wave(p, level);
             case BLIZZARD_STORM -> {
@@ -59,19 +63,40 @@ public final class AdvancedSpells {
             }
             case ICE_FORTRESS -> dome(p, level, Blocks.PACKED_ICE.defaultBlockState(), 300, SoundEvents.GLASS_PLACE);
             case CUMULONIMBUS -> {
-                level.setWeatherParameters(0, 6000, true, true);
+                // La nube se arma en espiral en el cielo; con el primer rayo empieza a llover un rato corto
                 Vec3 c = targetPoint(p, 40);
-                for (int i = 0; i < 3; i++) {
+                net.zennin.mushoku.entity.SpellFxEntity.spawn(level, "cumulonimbus", c.add(0, 16, 0), p.getRandom().nextFloat() * 360, 6f, net.zennin.mushoku.entity.SpellFxEntity.CUMULO_LIFE, null);
+                sound(level, c, SoundEvents.ELYTRA_FLYING, 0.6f);
+                int[] strikes = {net.zennin.mushoku.entity.SpellFxEntity.CUMULO_FORM, net.zennin.mushoku.entity.SpellFxEntity.CUMULO_FORM + 25, net.zennin.mushoku.entity.SpellFxEntity.CUMULO_FORM + 50};
+                for (int i = 0; i < strikes.length; i++) {
                     final int n = i;
-                    Tasks.later(20 + 20 * i, () -> lightning(level, p, c.add((n - 1) * 3, 0, (n % 2) * 3)));
+                    Tasks.later(strikes[i], () -> {
+                        List<LivingEntity> near = around(level, c, 9, p);
+                        Vec3 at = n < near.size() ? near.get(n).position()
+                                : c.add((p.getRandom().nextDouble() - 0.5) * 10, 0, (p.getRandom().nextDouble() - 0.5) * 10);
+                        lightning(level, p, at);
+                    });
                 }
-                particles(level, ParticleTypes.CLOUD, p.position().add(0, 3, 0), 80, 3.0);
+                Tasks.later(net.zennin.mushoku.entity.SpellFxEntity.CUMULO_FORM, () -> sound(level, c, SoundEvents.WEATHER_RAIN, 2f));
+                Tasks.repeat(net.zennin.mushoku.entity.SpellFxEntity.CUMULO_FORM, 10, net.zennin.mushoku.entity.SpellFxEntity.CUMULO_RAIN_END - net.zennin.mushoku.entity.SpellFxEntity.CUMULO_FORM, tick -> {
+                    // La lluvia apaga a quien este debajo y el fuego del suelo (tambien el que prenden los rayos)
+                    for (LivingEntity e : around(level, c, 10, null)) e.clearFire();
+                    BlockPos b = BlockPos.containing(c);
+                    for (BlockPos pos : BlockPos.betweenClosed(b.offset(-9, -4, -9), b.offset(9, 6, 9)))
+                        if (level.getBlockState(pos).is(Blocks.FIRE)) level.removeBlock(pos, false);
+                    if (tick % 20 == 0) sound(level, c, SoundEvents.WEATHER_RAIN, 1.5f);
+                    return true;
+                });
             }
             case LIGHTNING -> {
+                // Una nube chica se arma en espiral sobre el objetivo y suelta el rayo
                 Vec3 c = targetPoint(p, 50);
-                List<LivingEntity> targets = around(level, c, 8, p);
-                if (targets.isEmpty()) lightning(level, p, c);
-                for (int i = 0; i < Math.min(5, targets.size()); i++) lightning(level, p, targets.get(i).position());
+                net.zennin.mushoku.entity.SpellFxEntity.spawn(level, "storm_cloud", c.add(0, 11, 0), p.getRandom().nextFloat() * 360, 3f, net.zennin.mushoku.entity.SpellFxEntity.STORM_LIFE, null);
+                Tasks.later(net.zennin.mushoku.entity.SpellFxEntity.STORM_FORM, () -> {
+                    List<LivingEntity> targets = around(level, c, 8, p);
+                    if (targets.isEmpty()) lightning(level, p, c);
+                    for (int i = 0; i < Math.min(5, targets.size()); i++) lightning(level, p, targets.get(i).position());
+                });
             }
             case ABSOLUTE_ZERO -> {
                 for (LivingEntity e : around(level, p.position(), 12, p)) {
@@ -85,14 +110,27 @@ public final class AdvancedSpells {
                         level.setBlockAndUpdate(pos, Blocks.ICE.defaultBlockState());
                 }
                 particles(level, ParticleTypes.SNOWFLAKE, p.position().add(0, 1, 0), 400, 8.0);
+                // Grupos de cristales que brotan alrededor
+                for (int i = 0; i < 9; i++) {
+                    double a = i * 0.7 + p.getRandom().nextDouble();
+                    double r = 3 + p.getRandom().nextDouble() * 7;
+                    double x = p.getX() + Math.cos(a) * r, z = p.getZ() + Math.sin(a) * r;
+                    int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, (int) Math.floor(x), (int) Math.floor(z));
+                    if (Math.abs(y - p.getY()) > 6) y = (int) Math.floor(p.getY());
+                    final Vec3 at = new Vec3(x, y, z);
+                    final float sc = 1.1f + p.getRandom().nextFloat() * 0.9f, yaw = p.getRandom().nextFloat() * 360;
+                    Tasks.later(i * 2, () -> net.zennin.mushoku.entity.SpellFxEntity.spawn(level, "ice_crystals", at, yaw, sc, 100, null));
+                }
                 sound(level, p.position(), SoundEvents.GLASS_BREAK, 2f);
             }
 
             // ================= FUEGO =================
             case EX_FLAME -> shoot(p, proj(p, MagicProjectile.FIRE, 8f).size(2f), 1.6f, 0f, SoundEvents.BLAZE_SHOOT);
             case FLAME_SLICE -> {
+                // Se ve un solo tajo de fuego ancho; los costados son golpes invisibles para cubrir el mismo abanico
                 for (float yaw = -10f; yaw <= 10f; yaw += 10f)
-                    shoot(p, proj(p, MagicProjectile.FIRE, 6f), 2f, yaw, null);
+                    shoot(p, yaw == 0f ? proj(p, MagicProjectile.FIRE, 6f).size(1.4f).variant(MagicProjectile.VARIANT_SLICE)
+                            : proj(p, MagicProjectile.FIRE, 6f).variant(MagicProjectile.VARIANT_HIDDEN), 2f, yaw, null);
                 sound(level, p.position(), SoundEvents.BLAZE_SHOOT, 1f);
             }
             case EXPLOSION -> {
@@ -100,6 +138,7 @@ public final class AdvancedSpells {
                 if (b == null) return false;
                 Vec3 at = b.getLocation();
                 particles(level, ParticleTypes.FLAME, at, 60, 1.5);
+                net.zennin.mushoku.entity.SpellFxEntity.spawn(level, "fire_burst", at, 0, 4f, 20, null);
                 level.explode(p, at.x, at.y, at.z, 3f, Level.ExplosionInteraction.MOB);
             }
             case EXODUS_FLAME -> shoot(p, proj(p, MagicProjectile.FIRE, 15f).size(3f).explosion(2f), 1.2f, 0f, SoundEvents.BLAZE_SHOOT);
@@ -451,6 +490,7 @@ public final class AdvancedSpells {
             final int step = i;
             Tasks.later(i * 2, () -> {
                 Vec3 at = p.position().add(look.scale(step));
+                net.zennin.mushoku.entity.SpellFxEntity.spawn(level, "earth_spike", at, step * 47f, 1.6f, 50, null);
                 level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()),
                         at.x, at.y + 0.5, at.z, 25, 0.4, 0.6, 0.4, 0.1);
                 for (LivingEntity e : around(level, at, 1.4, p)) {

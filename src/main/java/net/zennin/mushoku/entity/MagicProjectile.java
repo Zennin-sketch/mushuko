@@ -29,7 +29,8 @@ public class MagicProjectile extends ThrowableProjectile {
     public static final int WATER = 0, ICE = 1, FIRE = 2, ROCK = 3, WIND = 4;
     private static final EntityDataAccessor<Integer> KIND = SynchedEntityData.defineId(MagicProjectile.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Float> SIZE = SynchedEntityData.defineId(MagicProjectile.class, EntityDataSerializers.FLOAT);
-    /** Variante visual (0 = normal; 1 = taladro de viento del Tornado Impact). */
+    /** Variante visual: 0 normal, taladro de viento, flecha de agua, tajo de fuego, invisible (golpes extra de un abanico). */
+    public static final int VARIANT_DRILL = 1, VARIANT_ARROW = 2, VARIANT_SLICE = 3, VARIANT_HIDDEN = 4;
     private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(MagicProjectile.class, EntityDataSerializers.INT);
 
     private float damage = 4f;
@@ -52,7 +53,7 @@ public class MagicProjectile extends ThrowableProjectile {
     public MagicProjectile size(float s) { this.entityData.set(SIZE, s); return this; }
     public MagicProjectile knockback(float k) { this.knockback = k; return this; }
     public MagicProjectile explosion(float power) { this.explosion = power; return this; }
-    public MagicProjectile lift() { this.lift = true; this.entityData.set(VARIANT, 1); return this; }
+    public MagicProjectile lift() { this.lift = true; this.entityData.set(VARIANT, VARIANT_DRILL); return this; }
     public MagicProjectile variant(int v) { this.entityData.set(VARIANT, v); return this; }
     public int variant() { return this.entityData.get(VARIANT); }
 
@@ -74,6 +75,7 @@ public class MagicProjectile extends ThrowableProjectile {
     public void tick() {
         super.tick();
         if (level().isClientSide) {
+            if (variant() == VARIANT_HIDDEN) return;
             float s = sizeScale();
             int count = Math.round(3 * s * s);
             double spread = 0.3 * s;
@@ -145,6 +147,8 @@ public class MagicProjectile extends ThrowableProjectile {
                 sl.sendParticles(particle(), getX(), getY(), getZ(), Math.round(10 * sizeScale()), 0.3 * sizeScale(), 0.3 * sizeScale(), 0.3 * sizeScale(), 0.05);
             }
             if (explosion > 0) {
+                if (level() instanceof ServerLevel sl && kind() == FIRE)
+                    SpellFxEntity.spawn(sl, "fire_burst", position(), 0, explosion * 1.3f, 20, null);
                 level().explode(this, getX(), getY(), getZ(), explosion, Level.ExplosionInteraction.MOB);
             }
             discard();

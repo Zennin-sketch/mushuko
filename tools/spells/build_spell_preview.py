@@ -7,7 +7,7 @@ sys.path.insert(0, HERE)
 import spell_models  # noqa: E402
 
 def main(out):
-    models = {name: fn() for name, fn in spell_models.MODELS.items()}
+    models = {name: fn() for name, fn in spell_models.all_models().items()}
     tdir = os.path.join(spell_models.ASSETS, 'textures', 'entity', 'spell')
     textures = {}
     for f in sorted(os.listdir(tdir)):

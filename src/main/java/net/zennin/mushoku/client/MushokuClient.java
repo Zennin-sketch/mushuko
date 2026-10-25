@@ -25,6 +25,7 @@ public class MushokuClient implements ClientModInitializer {
         CastingClient.init();
         SwordClient.init();
         EntityRendererRegistry.register(ModEntities.MAGIC_PROJECTILE, MagicProjectileRenderer::new);
+        EntityRendererRegistry.register(ModEntities.SPELL_FX, SpellFxRenderer::new);
         net.fabricmc.fabric.api.resource.ResourceManagerHelper.get(net.minecraft.server.packs.PackType.CLIENT_RESOURCES).registerReloadListener(
                 new net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener() {
                     @Override public net.minecraft.resources.ResourceLocation getFabricId() { return net.zennin.mushoku.MushokuMod.id("spell_models"); }

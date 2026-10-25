@@ -10,7 +10,7 @@ Cada grupo: textura, tipo de render (solid / translucent / emissive), 'glow' (br
 'tilt' (inclinacion fija), 'spin' (grados por tick en X,Y,Z, despues del tilt), 'pulse' [amplitud, periodo en ticks],
 'flicker' (parpadeo del alpha) y opcionalmente 'emit': cubitos que nacen, suben/se alejan, se achican y desaparecen.
 """
-import json, math, os, random
+import json, math, os, random, sys
 from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -30,18 +30,29 @@ def seg(p0, p1, width, thick, color, alpha):
     mid = [(a + b) / 2 for a, b in zip(p0, p1)]
     return box(mid, (width, thick, length * 1.08), color, alpha, rot=(-pitch, yaw, 0))
 
-def group(tex, render, boxes, glow=False, spin=(0, 0, 0), pulse=(0, 1), flicker=0.0, tilt=(0, 0, 0), emit=None):
+def group(tex, render, boxes, glow=False, spin=(0, 0, 0), pulse=(0, 1), flicker=0.0, tilt=(0, 0, 0), emit=None, **timeline):
+    """timeline (todo en ticks de edad del efecto):
+      offset=[x,y,z]       traslado fijo del grupo
+      show=[[a,b],...]     ventanas en las que se ve (con fundido de 3 ticks)
+      grow=[a,b]           escala 0 -> 1
+      rise=[a,b,dist]      sube desde -dist hasta su lugar
+      swirl=[a,b,grados,radio]  entra girando en espiral: gira 'grados' de mas y se cierra desde 'radio' veces su tamano
+      stagger=[a,b]        cada caja aparece una tras otra entre a y b"""
     g = dict(texture='remushoku:textures/entity/spell/%s.png' % tex, render=render, glow=glow, tilt=list(tilt),
              spin=list(spin), pulse=list(pulse), flicker=flicker, boxes=boxes)
+    for k, v in timeline.items():
+        g[k] = v
     if emit:
         g['emit'] = emit
     return g
 
-def emitter(count, life, radius, size, colors, alpha=0.9, rise=0.0, drift=0.0, outward=0.0):
-    """Cubitos: cada uno nace en una posicion al azar dentro de 'radius', vive 'life' ticks, sube 'rise' px/tick,
-    se va hacia atras 'drift' px/tick y hacia afuera 'outward' px/tick, mientras se achica y se apaga."""
+def emitter(count, life, radius, size, colors, alpha=0.9, rise=0.0, drift=0.0, outward=0.0, center=(0, 0, 0),
+            shape=(1, 1, 1), burst=False):
+    """Cubitos: cada uno nace en una posicion al azar dentro de 'radius' (alrededor de 'center'), vive 'life' ticks,
+    sube 'rise' px/tick, se va hacia atras 'drift' px/tick y hacia afuera 'outward' px/tick, mientras se achica y se apaga.
+    'shape' estira el cubito (gotas de lluvia); 'burst' = salen todos juntos una sola vez (explosiones)."""
     return dict(count=count, life=life, radius=list(radius), size=list(size), colors=list(colors), alpha=alpha,
-                rise=rise, drift=drift, outward=outward)
+                rise=rise, drift=drift, outward=outward, center=list(center), shape=list(shape), burst=burst)
 
 def lerp_hex(a, b, t):
     ca = [int(a[i:i + 2], 16) for i in (0, 2, 4)]
@@ -214,6 +225,12 @@ def wind_drill():
 MODELS = dict(stone_bullet=stone_bullet, fireball=fireball, water_ball=water_ball, icicle=icicle,
               wind_blade=wind_blade, wind_drill=wind_drill)
 
+def all_models():
+    """Proyectiles de este archivo + efectos de spell_fx.py."""
+    sys.path.insert(0, HERE)
+    from spell_fx import FX_MODELS
+    return {**MODELS, **FX_MODELS}
+
 # ---------------------------------------------------------------- Texturas 16x16 (casi blancas: el color lo pone cada caja)
 def texture(mat):
     rnd = random.Random(sum(map(ord, mat)))
@@ -233,6 +250,8 @@ def texture(mat):
             elif mat == 'ice':
                 v = 0.86 + 0.1 * n
                 if (x - y) % 6 == 0: v = 1.0                           # vetas diagonales
+            elif mat == 'cloud':
+                v = 0.82 + 0.12 * math.sin(x * 0.7) * math.cos(y * 0.6) + 0.06 * n
             else:  # wind
                 v = 0.8 + 0.2 * (0.5 + 0.5 * math.sin(y * 1.3 + x * 0.25)) * (0.7 + 0.3 * n)
             c = max(0, min(255, round(255 * v)))
@@ -244,12 +263,12 @@ def main():
     tdir = os.path.join(ASSETS, 'textures', 'entity', 'spell')
     os.makedirs(mdir, exist_ok=True)
     os.makedirs(tdir, exist_ok=True)
-    for name, fn in MODELS.items():
+    for name, fn in all_models().items():
         with open(os.path.join(mdir, name + '.json'), 'w') as f:
             json.dump(fn(), f, indent=1)
-    for mat in ('stone', 'fire', 'water', 'ice', 'wind'):
+    for mat in ('stone', 'fire', 'water', 'ice', 'wind', 'cloud'):
         texture(mat).save(os.path.join(tdir, mat + '.png'))
-    print(len(MODELS), 'modelos ->', mdir)
+    print(len(all_models()), 'modelos ->', mdir)
 
 if __name__ == '__main__':
     main()

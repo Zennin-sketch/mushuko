@@ -31,6 +31,10 @@ public final class ModEntities {
             MushokuMod.id("magic_projectile"),
             EntityType.Builder.<MagicProjectile>of(MagicProjectile::new, MobCategory.MISC)
                     .sized(0.4f, 0.4f).clientTrackingRange(8).updateInterval(2).build("magic_projectile"));
+    public static final EntityType<net.zennin.mushoku.entity.SpellFxEntity> SPELL_FX = Registry.register(BuiltInRegistries.ENTITY_TYPE,
+            MushokuMod.id("spell_fx"),
+            EntityType.Builder.<net.zennin.mushoku.entity.SpellFxEntity>of(net.zennin.mushoku.entity.SpellFxEntity::new, MobCategory.MISC)
+                    .sized(0.5f, 0.5f).clientTrackingRange(10).updateInterval(20).noSave().build("spell_fx"));
 
     // --- Bandidos (mismos ids que el original, para que las estructuras y comandos funcionen igual) ---
     public static final EntityType<BanditEntity> SG_BANDIT = humanoid("sg_bandit", MobCategory.MONSTER,

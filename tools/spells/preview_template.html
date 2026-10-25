@@ -13,6 +13,7 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { height: 100%; }
 body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 14px; }
 .wrap { display: grid; grid-template-columns: 300px 1fr; gap: 16px; height: 100%;
@@ -29,6 +30,7 @@ h1 { font-family: var(--display); font-weight: 700; font-size: 22px; letter-spac
 .spell b { font-family: var(--display); font-weight: 500; font-size: 15px; letter-spacing: .02em; }
 .spell .el { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); align-self: center; }
 .spell .ids { grid-column: 1 / -1; font-family: var(--mono); font-size: 11px; color: var(--dim); }
+.sec { font-family: var(--display); font-weight: 500; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin: 4px 0 -4px; }
 .note { border-top: 1px solid var(--line); padding-top: 10px; color: var(--dim); line-height: 1.5; }
 .note h2 { font-family: var(--display); font-size: 13px; color: var(--fg); margin: 0 0 4px; letter-spacing: .05em; font-weight: 500; }
 .note p { margin: 0; }
@@ -48,8 +50,11 @@ canvas { display: block; width: 100%; height: 100%; }
 <div class="wrap">
   <aside>
     <h1>Grimorio de Hechizos</h1>
-    <p class="sub">Modelos voxel de los proyectiles, tal cual los dibuja el juego: mismas cajas, texturas, giros y pulsos.</p>
+    <p class="sub">Modelos voxel de los hechizos, tal cual los dibuja el juego: mismas cajas, texturas, giros, pulsos y tiempos.</p>
+    <h2 class="sec">Proyectiles</h2>
     <div class="list" id="list"></div>
+    <h2 class="sec">Efectos</h2>
+    <div class="list" id="listfx"></div>
     <div class="note" id="note"></div>
   </aside>
   <main>
@@ -57,8 +62,9 @@ canvas { display: block; width: 100%; height: 100%; }
     <div class="hud" id="hud"></div>
     <div class="bar">
       <button id="fly" aria-pressed="false">Disparar</button>
+      <button id="replay" hidden>Repetir</button>
       <button id="ref" aria-pressed="true">Jugador de referencia</button>
-      <label for="size">Tamaño
+      <label for="size" id="sizebox">Tamaño
         <select id="size">
           <option value="1">1× (bala, bola)</option>
           <option value="1.3">1.3× (lanza de hielo)</option>
@@ -87,14 +93,23 @@ const INFO = {
   icicle: { el: 'Hielo', note: 'Carámbano de sección romboidal: base gruesa con esquirlas y una punta larga que se afina píxel a píxel hasta un filo blanco. Suelta escarcha.' },
   wind_blade: { el: 'Viento', note: 'Media luna fina: gruesa al centro y con puntas filosas, en tres capas (bruma, cuerpo y filo blanco), con estelas y motas detrás. Wind Slice, Sonic Boom y los tajos de viento de las técnicas de espada.' },
   wind_drill: { el: 'Viento', note: 'Tornado Impact: tres cintas de viento en espiral que forman un cono y terminan en punta, con un cono de bruma adentro que gira al revés.' },
+  water_arrow: { el: 'Agua', note: 'Antes disparaba una flecha común. Ahora es una flecha de agua translúcida con punta romboidal, dos hilos de agua enroscados y gotas detrás. Vuela recta, sin caer.' },
+  fire_crescent: { el: 'Fuego', note: 'Flame Slice: una media luna de fuego (misma forma que la hoja de viento) con filo amarillo y brasas. Se ve un solo tajo ancho; a los costados van dos golpes invisibles para que siga cubriendo el mismo abanico.' },
+  storm_cloud: { el: 'Agua · Rayo', note: 'Lightning: una nube de tormenta chica se arma en espiral sobre el objetivo (unos 0,7 s), destella y cae el rayo. Después se disuelve.' },
+  cumulonimbus: { el: 'Agua · Rayo', note: 'Las nubes se juntan en espiral en el cielo durante 2,5 s, girando y cerrándose. Con el primer rayo empieza a llover debajo de la nube; caen dos rayos más y la lluvia corta a los 3,5 s. La lluvia apaga el fuego de quienes estén debajo. Ya no cambia el clima de todo el mundo.' },
+  earth_spike: { el: 'Tierra', note: 'Earth Lance: en cada paso de la fila brota un pincho de piedra (con dos más chicos inclinados y escombros), se queda un momento y se hunde en el suelo.' },
+  ice_crystals: { el: 'Hielo', note: 'Cristales que brotan uno tras otro con escarcha. Ice Pillar los pone en la base del pilar; Absolute Zero hace brotar varios grupos alrededor tuyo.' },
+  fire_burst: { el: 'Fuego', note: 'Explosion y el impacto de Exodus Flame: cubos de fuego que se expanden, fragmentos que salen volando y humo que sube.' },
+  water_wall: { el: 'Agua', note: 'Water Shield: en vez del muro de hielo, una cortina de agua de 3×2 bloques que sube del suelo, con olas, espuma arriba y agua cayendo. Sigue frenando golpes (bloques invisibles detrás).' },
+  magic_shield: { el: 'Neutral', note: 'Círculo rúnico dorado a tus pies y tres anillos celestes que te rodean girando mientras dura el escudo (15 s). Te sigue al moverte.' },
 };
 
 const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('c'), antialias: true });
 renderer.setPixelRatio(Math.min(2, devicePixelRatio));
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0c0e14);
-scene.fog = new THREE.Fog(0x0c0e14, 14, 40);
-const camera = new THREE.PerspectiveCamera(40, 1, 0.05, 100);
+scene.fog = new THREE.Fog(0x0c0e14, 30, 90);
+const camera = new THREE.PerspectiveCamera(40, 1, 0.05, 300);
 camera.position.set(1.5, 1.85, 1.4);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 1.45, 0);
@@ -102,9 +117,7 @@ controls.enableDamping = true;
 scene.add(new THREE.HemisphereLight(0xc8d4ff, 0x30281c, 1.1));
 const sun = new THREE.DirectionalLight(0xffffff, 1.6); sun.position.set(3, 6, 4); scene.add(sun);
 
-// Suelo de bloques de pasto (1 celda = 1 bloque)
-const grid = new THREE.GridHelper(30, 30, 0x3a4256, 0x232836); scene.add(grid);
-// Jugador de referencia: 0.6 × 1.8 bloques, mano derecha a la altura del pecho
+const grid = new THREE.GridHelper(60, 60, 0x3a4256, 0x232836); scene.add(grid);
 const refGroup = new THREE.Group();
 const refBox = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.8, 0.3), new THREE.MeshLambertMaterial({ color: 0x55607a, transparent: true, opacity: 0.35 }));
 refBox.position.set(-0.9, 0.9, 0);
@@ -126,25 +139,29 @@ const FACES = [
 const NORMALS = [[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
 const AXES = [[2,1],[2,1],[0,2],[0,2],[0,1],[0,1]];
 const D2R = Math.PI / 180;
+const clamp01 = x => Math.max(0, Math.min(1, x));
+const easeOut = k => 1 - Math.pow(1 - k, 3);
 function rotMat(r) { return new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(r[0]*D2R, r[1]*D2R, r[2]*D2R, 'ZYX')); }
 
-function buildGroup(g) {
+// Geometria de una lista de cajas; 'local' = cada caja centrada en su origen (para aparecer una por una)
+function boxesGeometry(boxes, local) {
   const pos = [], nor = [], uv = [], col = [], idx = [];
-  g.boxes.forEach((b, seed) => {
+  boxes.forEach((b, seed) => {
     const m = rotMat(b.rot);
     const c = new THREE.Color('#' + b.color); c.convertSRGBToLinear();
+    const off = local ? [0, 0, 0] : b.at;
     for (let f = 0; f < 6; f++) {
       const base = pos.length / 3;
       for (let v = 0; v < 4; v++) {
         const p = new THREE.Vector3(FACES[f][v][0]*b.size[0]/2, FACES[f][v][1]*b.size[1]/2, FACES[f][v][2]*b.size[2]/2).applyMatrix4(m);
-        pos.push(p.x + b.at[0], p.y + b.at[1], p.z + b.at[2]);
+        pos.push(p.x + off[0], p.y + off[1], p.z + off[2]);
         const n = new THREE.Vector3(...NORMALS[f]).applyMatrix4(m);
         nor.push(n.x, n.y, n.z);
         col.push(c.r, c.g, c.b, b.alpha);
       }
       const w = Math.min(16, Math.max(1, b.size[AXES[f][0]])), h = Math.min(16, Math.max(1, b.size[AXES[f][1]]));
-      const u0 = ((seed*5 + f*3) % 16) % Math.max(1, 17 - w), v0 = ((seed*3 + f*7) % 16) % Math.max(1, 17 - h);
-      // UV de Minecraft: v hacia abajo; three: v hacia arriba
+      const sd = local ? b._seed : seed;
+      const u0 = ((sd*5 + f*3) % 16) % Math.max(1, 17 - w), v0 = ((sd*3 + f*7) % 16) % Math.max(1, 17 - h);
       uv.push(u0/16, 1-(v0+h)/16, (u0+w)/16, 1-(v0+h)/16, (u0+w)/16, 1-v0/16, u0/16, 1-v0/16);
       idx.push(base, base+1, base+2, base, base+2, base+3);
     }
@@ -155,77 +172,162 @@ function buildGroup(g) {
   geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
   geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 4));
   geo.setIndex(idx);
+  return geo;
+}
+
+function buildGroup(g) {
   const tex = TEX[g.texture.split('/').pop().replace('.png', '')];
   const translucent = g.render !== 'solid';
   const opts = { map: tex, vertexColors: true, transparent: translucent, side: THREE.DoubleSide, depthWrite: !translucent, alphaTest: translucent ? 0 : 0.1 };
   const mat = g.render === 'emissive' ? new THREE.MeshBasicMaterial(opts)
     : new THREE.MeshLambertMaterial({ ...opts, emissive: g.glow ? 0x3a3a3a : 0x000000, emissiveMap: g.glow ? tex : null });
   const spinner = new THREE.Group();
-  if (g.boxes.length) spinner.add(new THREE.Mesh(geo, mat));
-  spinner.userData = { g, mat, parts: [] };
+  const ud = { g, mat, parts: [], boxes: [] };
+  if (g.boxes.length) {
+    if (g.stagger) {
+      g.boxes.forEach((b, i) => {
+        const mesh = new THREE.Mesh(boxesGeometry([{ ...b, _seed: i }], true), mat);
+        mesh.position.set(...b.at); spinner.add(mesh); ud.boxes.push(mesh);
+      });
+    } else spinner.add(new THREE.Mesh(boxesGeometry(g.boxes, false), mat));
+  }
   if (g.emit) {
     for (let i = 0; i < g.emit.count; i++) {
       const pm = new THREE.MeshBasicMaterial({ map: tex, transparent: translucent, depthWrite: !translucent });
       const m = new THREE.Mesh(UNIT, pm);
-      spinner.add(m); spinner.userData.parts.push(m);
+      spinner.add(m); ud.parts.push(m);
     }
   }
-  const tilt = new THREE.Group();
+  const radial = new THREE.Group(); radial.add(spinner);   // escala radial del remolino
+  const swirl = new THREE.Group(); swirl.add(radial);
+  const tilt = new THREE.Group(); tilt.add(swirl);
   tilt.rotation.set(g.tilt[0]*D2R, g.tilt[1]*D2R, g.tilt[2]*D2R, 'ZYX');
-  tilt.add(spinner);
-  tilt.userData = spinner.userData; tilt.userData.spinner = spinner;
-  return tilt;
+  const root = new THREE.Group(); root.add(tilt);          // traslado (offset + rise)
+  Object.assign(ud, { spinner, radial, swirl, root });
+  root.userData = ud;
+  return root;
 }
 const UNIT = new THREE.BoxGeometry(1, 1, 1);
 { const uv = UNIT.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) / 16, 1 - (1 - uv.getY(i)) / 16); }
 // Mismo azar que SpellModel.hash en Java
 function hash(i, k) { const v = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return v - Math.floor(v); }
-function lerpHex(a, b, t) {
-  const ca = new THREE.Color('#' + a), cb = new THREE.Color('#' + b);
-  return ca.lerp(cb, t);
-}
-function updateEmitter(ud, t) {
+function lerpHex(a, b, t) { return new THREE.Color('#' + a).lerp(new THREE.Color('#' + b), t); }
+
+function updateEmitter(ud, t, alphaMul) {
   const e = ud.g.emit;
   ud.parts.forEach((m, i) => {
-    let age = t / e.life + hash(i, 4);
-    const cycle = Math.floor(age); age -= cycle;
-    const seed = i * 31 + cycle * 7;
+    let age, seed;
+    if (e.burst) { age = t / e.life; seed = i * 31; if (age >= 1) { m.visible = false; return; } }
+    else { age = t / e.life + hash(i, 4); const cycle = Math.floor(age); age -= cycle; seed = i * 31 + cycle * 7; }
+    m.visible = true;
     const bx = e.radius[0] * (2 * hash(seed, 1) - 1), by = e.radius[1] * (2 * hash(seed, 2) - 1), bz = e.radius[2] * (2 * hash(seed, 3) - 1);
     const len = Math.hypot(bx, by, bz) + 1e-3, tk = age * e.life;
-    m.position.set(bx + e.outward * tk * bx / len, by + e.outward * tk * by / len + e.rise * tk, bz + e.outward * tk * bz / len - e.drift * tk);
-    m.rotation.set(hash(seed, 6) * 90 * D2R, hash(seed, 5) * 90 * D2R, 0, 'XYZ');
-    m.scale.setScalar(e.size[0] + (e.size[1] - e.size[0]) * age);
+    m.position.set(e.center[0] + bx + e.outward * tk * bx / len,
+                   e.center[1] + by + e.outward * tk * by / len + e.rise * tk,
+                   e.center[2] + bz + e.outward * tk * bz / len - e.drift * tk);
+    const sh = e.shape[0] !== 1 || e.shape[1] !== 1 || e.shape[2] !== 1;
+    if (sh) m.rotation.set(0, 0, 0); else m.rotation.set(hash(seed, 6) * 90 * D2R, hash(seed, 5) * 90 * D2R, 0, 'YXZ');
+    const sz = e.size[0] + (e.size[1] - e.size[0]) * age;
+    m.scale.set(sz * e.shape[0], sz * e.shape[1], sz * e.shape[2]);
     m.material.color.copy(lerpHex(e.colors[0], e.colors[1], age));
-    m.material.opacity = ud.g.render === 'solid' ? 1 : e.alpha * (1 - age);
+    m.material.opacity = (ud.g.render === 'solid' ? 1 : e.alpha * (1 - age)) * alphaMul;
   });
 }
 
-const projectile = new THREE.Group(); scene.add(projectile);
-const inner = new THREE.Group(); projectile.add(inner);
-let current = null, groups = [];
+// Ventanas 'show' con fundido de 3 ticks; devuelve 0..1
+function showFade(g, t) {
+  if (!g.show) return 1;
+  let best = 0;
+  for (const [a, b] of g.show) if (t >= a && t <= b) best = Math.max(best, clamp01(Math.min(t - a, b - t) / 3 + 0.001));
+  return best;
+}
+
+// Aplica la linea de tiempo de un grupo en el tick t (igual que SpellModelRenderer.java)
+function updateGroup(root, gi, t) {
+  const ud = root.userData, g = ud.g;
+  let fade = showFade(g, t);
+  root.visible = fade > 0;
+  if (!root.visible) return;
+  const off = g.offset || [0, 0, 0];
+  let riseY = 0;
+  if (g.rise) { const k = easeOut(clamp01((t - g.rise[0]) / Math.max(1, g.rise[1] - g.rise[0]))); riseY = -g.rise[2] * (1 - k); }
+  root.position.set(off[0], off[1] + riseY, off[2]);
+  let swirlDeg = 0, radial = 1;
+  if (g.swirl) { const k = easeOut(clamp01((t - g.swirl[0]) / Math.max(1, g.swirl[1] - g.swirl[0]))); swirlDeg = g.swirl[2] * (1 - k) * (1 - k); radial = 1 + (g.swirl[3] - 1) * (1 - k); }
+  ud.swirl.rotation.set(0, swirlDeg * D2R, 0);
+  ud.spinner.rotation.set(g.spin[0]*t*D2R, g.spin[1]*t*D2R, g.spin[2]*t*D2R, 'ZYX');
+  ud.radial.scale.set(radial, 1, radial);
+  let sc = g.pulse[0] ? 1 + g.pulse[0] * Math.sin(t * 2 * Math.PI / Math.max(1, g.pulse[1])) : 1;
+  if (g.grow) sc *= easeOut(clamp01((t - g.grow[0]) / Math.max(1, g.grow[1] - g.grow[0])));
+  ud.spinner.scale.setScalar(Math.max(1e-4, sc));
+  if (g.stagger) {
+    const n = ud.boxes.length, [a, b] = g.stagger;
+    ud.boxes.forEach((m, i) => { const k = easeOut(clamp01((t - (a + (b - a) * i / n)) / 4)); m.scale.setScalar(Math.max(1e-4, k)); m.visible = k > 0; });
+  }
+  let alpha = fade * outroAlpha;
+  if (g.flicker > 0) alpha *= 1 - g.flicker * Math.abs(Math.sin(t*0.9 + gi*1.7) * Math.sin(t*0.37 + gi));
+  ud.mat.opacity = alpha;
+  if (g.emit) updateEmitter(ud, t, fade * outroAlpha);
+}
+
+const holder = new THREE.Group(); scene.add(holder);
+const inner = new THREE.Group(); holder.add(inner);
+// Rayo (solo en la preview: en el juego es el rayo de Minecraft)
+const boltMat = new THREE.MeshBasicMaterial({ color: 0xe8f0ff, transparent: true, opacity: 0.95 });
+const bolt = new THREE.Group(); scene.add(bolt);
+function buildBolt(h) {
+  bolt.clear();
+  let p = new THREE.Vector3(0, h, 0); let r = 7;
+  while (p.y > 0) {
+    const q = new THREE.Vector3(p.x + (hash(r, 1) - 0.5) * 2.2, Math.max(0, p.y - 1.5 - hash(r, 2) * 1.5), p.z + (hash(r, 3) - 0.5) * 2.2);
+    const d = q.clone().sub(p); const len = d.length();
+    const m = new THREE.Mesh(new THREE.BoxGeometry(0.18, len, 0.18), boltMat);
+    m.position.copy(p.clone().add(q).multiplyScalar(0.5));
+    m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+    bolt.add(m); p = q; r++;
+  }
+}
+
+let current = null, groups = [], model = null, outroAlpha = 1;
 function show(name) {
-  current = name;
+  current = name; model = DATA.models[name];
   inner.clear();
-  groups = DATA.models[name].groups.map(buildGroup);
+  groups = model.groups.map(buildGroup);
   groups.forEach(g => inner.add(g));
   document.querySelectorAll('.spell').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.id === name)));
-  const m = DATA.models[name];
-  document.getElementById('note').innerHTML = `<h2>${m.name}</h2><p>${INFO[name].note}</p>`;
+  document.getElementById('note').innerHTML = `<h2>${model.name}</h2><p>${INFO[name].note}</p>`;
+  const pv = model.preview || { kind: 'projectile' };
+  const isFx = pv.kind === 'fx';
+  document.getElementById('fly').hidden = isFx;
+  document.getElementById('sizebox').hidden = isFx;
+  document.getElementById('replay').hidden = !isFx;
+  if (isFx) {
+    const h = pv.height || 0, d = pv.cam || 4;
+    const ty = h > 3 ? h * 0.55 : Math.max(0.8, d * 0.25);
+    controls.target.set(0, ty, 0);
+    camera.position.set(d * 0.75, ty + d * 0.35, d * 0.85);
+    if (pv.strikes) buildBolt(h); else bolt.clear();
+  } else {
+    controls.target.set(0, 1.45, 0); camera.position.set(1.5, 1.85, 1.4); bolt.clear();
+  }
+  ticks = 0;
   try { localStorage.setItem('grimorio-sel', name); } catch (e) {}
 }
 
-const list = document.getElementById('list');
-for (const [id, m] of Object.entries(DATA.models)) {
+function addButton(listEl, id, m) {
   const b = document.createElement('button');
   b.className = 'spell'; b.dataset.id = id;
   b.innerHTML = `<b>${m.name}</b><span class="el">${INFO[id].el}</span><span class="ids">${m.spells.join(' · ')}</span>`;
   b.onclick = () => show(id);
-  list.appendChild(b);
+  listEl.appendChild(b);
 }
+for (const [id, m] of Object.entries(DATA.models))
+  addButton(document.getElementById(m.preview && m.preview.kind === 'fx' ? 'listfx' : 'list'), id, m);
 
 let flying = false, sizeMul = 1, speed = 1;
 const flyBtn = document.getElementById('fly'), refBtn = document.getElementById('ref');
 flyBtn.onclick = () => { flying = !flying; flyBtn.setAttribute('aria-pressed', String(flying)); flyT = 0; };
+document.getElementById('replay').onclick = () => { ticks = 0; };
 refBtn.onclick = () => { refGroup.visible = !refGroup.visible; refBtn.setAttribute('aria-pressed', String(refGroup.visible)); };
 document.getElementById('size').onchange = e => sizeMul = +e.target.value;
 document.getElementById('speed').onchange = e => speed = +e.target.value;
@@ -244,30 +346,40 @@ const hud = document.getElementById('hud');
 function frame(now) {
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
   ticks += dt * 20 * speed;
-  const t = ticks;
-  // Velocidad de Better Combat no aplica: los hechizos vuelan ~2 bloques/tick
-  if (flying) {
-    flyT += dt * speed;
-    const z = -8 + (flyT * 20 * 0.9) % 20;
-    projectile.position.set(0, 1.45, z);
-  } else projectile.position.set(0, 1.45, 0);
-  const appear = flying ? Math.min(1, Math.max(0.25, ((flyT * 20) % (20 / 0.9)) / 3)) : 1;
-  const s = sizeMul / 16 * appear;
-  projectile.scale.set(s, s, s);
-  groups.forEach((h, gi) => {
-    const ud = h.userData, g = ud.g, sp = ud.spinner;
-    sp.rotation.set(g.spin[0]*t*D2R, g.spin[1]*t*D2R, g.spin[2]*t*D2R, 'ZYX');
-    const p = g.pulse[0] ? 1 + g.pulse[0] * Math.sin(t * 2 * Math.PI / Math.max(1, g.pulse[1])) : 1;
-    sp.scale.setScalar(p);
-    ud.mat.opacity = g.flicker > 0 ? 1 - g.flicker * Math.abs(Math.sin(t*0.9 + gi*1.7) * Math.sin(t*0.37 + gi)) : 1;
-    if (g.emit) updateEmitter(ud, t);
-  });
-  hud.textContent = `tick ${t.toFixed(1)} · ${(sizeMul * (DATA.models[current] ? 1 : 0)).toFixed(1)}× · 1 celda = 1 bloque`;
+  const pv = model.preview || { kind: 'projectile' };
+  let t = ticks, s;
+  outroAlpha = 1;
+  holder.position.set(0, 0, 0);
+  if (pv.kind === 'fx') {
+    t = ticks % (pv.life + 25);           // se repite con una pausa de 25 ticks
+    s = pv.scale / 16;
+    let sink = 0, shrink = 1;
+    if (model.outro && t > pv.life - model.outro[0]) {
+      const o = clamp01((t - (pv.life - model.outro[0])) / model.outro[0]);
+      outroAlpha = 1 - o; sink = model.outro[1] * o; shrink = 1 - model.outro[2] * o;
+    }
+    if (t > pv.life) outroAlpha = 0;
+    holder.position.set(0, (pv.height || 0) - sink * s, 0);
+    holder.scale.setScalar(s * shrink);
+    inner.visible = t <= pv.life;
+    bolt.visible = !!pv.strikes && pv.strikes.some(st => t >= st && t < st + 4);
+    hud.textContent = `tick ${t.toFixed(0)} / ${pv.life} · 1 celda = 1 bloque`;
+  } else {
+    inner.visible = true; bolt.visible = false;
+    if (flying) { flyT += dt * speed; holder.position.set(0, 1.45, -8 + (flyT * 20 * 0.9) % 20); }
+    else holder.position.set(0, 1.45, 0);
+    const appear = flying ? Math.min(1, Math.max(0.25, ((flyT * 20) % (20 / 0.9)) / 3)) : 1;
+    s = sizeMul / 16 * appear;
+    holder.scale.setScalar(s);
+    hud.textContent = `tick ${t.toFixed(0)} · ${sizeMul.toFixed(1)}× · 1 celda = 1 bloque`;
+  }
+  groups.forEach((g, gi) => updateGroup(g, gi, t));
   controls.update();
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }
 let start = 'stone_bullet';
-try { const s = localStorage.getItem('grimorio-sel'); if (s && DATA.models[s]) start = s; } catch (e) {}
+try { const v = localStorage.getItem('grimorio-sel'); if (v && DATA.models[v]) start = v; } catch (e) {}
 show(start); resize(); requestAnimationFrame(frame);
+window.__show = show; window.__setTicks = v => { ticks = v; };
 </script>

@@ -1,0 +1,275 @@
+{
+ "name": "Estallido de fuego",
+ "spells": [
+  "explosion",
+  "exodus_flame"
+ ],
+ "groups": [
+  {
+   "texture": "remushoku:textures/entity/spell/fire.png",
+   "render": "emissive",
+   "glow": true,
+   "tilt": [
+    0,
+    0,
+    0
+   ],
+   "spin": [
+    5,
+    7,
+    0
+   ],
+   "pulse": [
+    0,
+    1
+   ],
+   "flicker": 0.0,
+   "boxes": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      6,
+      6,
+      6
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "fff2c0",
+     "alpha": 1.0
+    }
+   ],
+   "grow": [
+    0,
+    3
+   ],
+   "show": [
+    [
+     0,
+     9
+    ]
+   ]
+  },
+  {
+   "texture": "remushoku:textures/entity/spell/fire.png",
+   "render": "emissive",
+   "glow": true,
+   "tilt": [
+    0,
+    0,
+    0
+   ],
+   "spin": [
+    -4,
+    3,
+    6
+   ],
+   "pulse": [
+    0,
+    1
+   ],
+   "flicker": 0.3,
+   "boxes": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      12,
+      12,
+      12
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "ffa030",
+     "alpha": 0.75
+    }
+   ],
+   "grow": [
+    0,
+    5
+   ],
+   "show": [
+    [
+     0,
+     12
+    ]
+   ]
+  },
+  {
+   "texture": "remushoku:textures/entity/spell/fire.png",
+   "render": "emissive",
+   "glow": true,
+   "tilt": [
+    0,
+    0,
+    0
+   ],
+   "spin": [
+    2,
+    -5,
+    3
+   ],
+   "pulse": [
+    0,
+    1
+   ],
+   "flicker": 0.4,
+   "boxes": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      18,
+      18,
+      18
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "ff5010",
+     "alpha": 0.35
+    }
+   ],
+   "grow": [
+    1,
+    8
+   ],
+   "show": [
+    [
+     1,
+     15
+    ]
+   ]
+  },
+  {
+   "texture": "remushoku:textures/entity/spell/fire.png",
+   "render": "emissive",
+   "glow": true,
+   "tilt": [
+    0,
+    0,
+    0
+   ],
+   "spin": [
+    0,
+    0,
+    0
+   ],
+   "pulse": [
+    0,
+    1
+   ],
+   "flicker": 0.0,
+   "boxes": [],
+   "emit": {
+    "count": 28,
+    "life": 14,
+    "radius": [
+     3,
+     3,
+     3
+    ],
+    "size": [
+     1.4,
+     0.3
+    ],
+    "colors": [
+     "ffd060",
+     "a02008"
+    ],
+    "alpha": 0.95,
+    "rise": 0.3,
+    "drift": 0.0,
+    "outward": 2.6,
+    "center": [
+     0,
+     0,
+     0
+    ],
+    "shape": [
+     1,
+     1,
+     1
+    ],
+    "burst": true
+   }
+  },
+  {
+   "texture": "remushoku:textures/entity/spell/cloud.png",
+   "render": "translucent",
+   "glow": false,
+   "tilt": [
+    0,
+    0,
+    0
+   ],
+   "spin": [
+    0,
+    0,
+    0
+   ],
+   "pulse": [
+    0,
+    1
+   ],
+   "flicker": 0.0,
+   "boxes": [],
+   "emit": {
+    "count": 14,
+    "life": 20,
+    "radius": [
+     4,
+     3,
+     4
+    ],
+    "size": [
+     3.5,
+     5.5
+    ],
+    "colors": [
+     "5a5450",
+     "2a2826"
+    ],
+    "alpha": 0.7,
+    "rise": 0.8,
+    "drift": 0.0,
+    "outward": 0.9,
+    "center": [
+     0,
+     0,
+     0
+    ],
+    "shape": [
+     1,
+     1,
+     1
+    ],
+    "burst": true
+   }
+  }
+ ],
+ "preview": {
+  "kind": "fx",
+  "life": 20,
+  "scale": 2.0,
+  "height": 1,
+  "cam": 8
+ }
+}

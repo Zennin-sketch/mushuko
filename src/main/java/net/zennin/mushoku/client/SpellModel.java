@@ -19,19 +19,35 @@ import java.util.Map;
 /**
  * Modelo voxel de un hechizo, leido de assets/remushoku/spell_models/<nombre>.json
  * (lo genera tools/spells/spell_models.py). Las caras de cada caja ya vienen giradas y con su UV.
+ * Ver SpellModelRenderer para como se anima (giros, pulsos, espiral, aparicion, emisores).
  */
 public final class SpellModel {
     public enum Render { SOLID, TRANSLUCENT, EMISSIVE }
 
-    /** Una cara: 4 vertices (en pixeles), normal, UV y color. */
-    public record Face(float[] xyz, float[] uv, float nx, float ny, float nz, int r, int g, int b, float alpha) {}
-
-    public record Group(ResourceLocation texture, Render render, boolean glow, float[] tilt, float[] spin, float pulseAmp, float pulsePeriod,
-                        float flicker, List<Face> faces, Emitter emitter) {}
+    /** Una cara: 4 vertices (en pixeles), normal, UV, color y el centro/indice de su caja (para que aparezcan una por una). */
+    public record Face(float[] xyz, float[] uv, float nx, float ny, float nz, int r, int g, int b, float alpha,
+                       float cx, float cy, float cz, int box) {}
 
     /** Cubitos tipo particula: nacen al azar dentro de 'radius', suben/se alejan y se achican y apagan en 'life' ticks. */
     public record Emitter(int count, float life, float[] radius, float size0, float size1, int color0, int color1, float alpha,
-                          float rise, float drift, float outward) {}
+                          float rise, float drift, float outward, float[] center, float[] shape, boolean burst) {}
+
+    public static final class Group {
+        public ResourceLocation texture;
+        public Render render;
+        public boolean glow;
+        public float[] tilt = new float[3], spin = new float[3], offset = new float[3];
+        public float pulseAmp, pulsePeriod = 1, flicker;
+        public float[][] show;            // ventanas [a,b] o null = siempre
+        public float[] grow, rise, swirl, stagger;
+        public List<Face> faces = new ArrayList<>();
+        public int boxes;
+        public Emitter emitter;
+    }
+
+    public final List<Group> groups = new ArrayList<>();
+    /** [ticks, hundirse_px, achicarse] o null. */
+    public float[] outro;
 
     /** Cubo de 1x1x1 centrado (para los cubitos de los emisores). */
     public static final List<Face> UNIT_CUBE = new ArrayList<>();
@@ -42,8 +58,6 @@ public final class SpellModel {
         double v = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453;
         return (float) (v - Math.floor(v));
     }
-
-    public final List<Group> groups = new ArrayList<>();
 
     private static final Map<String, SpellModel> CACHE = new HashMap<>();
 
@@ -65,6 +79,7 @@ public final class SpellModel {
             try (Reader reader = res.get().openAsReader()) {
                 JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
                 for (JsonElement ge : root.getAsJsonArray("groups")) m.groups.add(parseGroup(ge.getAsJsonObject()));
+                if (root.has("outro")) m.outro = floats(root.getAsJsonArray("outro"));
             }
         } catch (Exception e) {
             MushokuMod.LOG.error("No se pudo leer el modelo de hechizo {}", loc, e);
@@ -72,37 +87,60 @@ public final class SpellModel {
         return m;
     }
 
-    private static float[] vec(JsonArray a) {
-        return new float[]{a.get(0).getAsFloat(), a.get(1).getAsFloat(), a.get(2).getAsFloat()};
+    private static float[] floats(JsonArray a) {
+        float[] f = new float[a.size()];
+        for (int i = 0; i < f.length; i++) f[i] = a.get(i).getAsFloat();
+        return f;
     }
 
-    private static Group parseGroup(JsonObject g) {
-        Render render = switch (g.get("render").getAsString()) {
+    private static float[] opt(JsonObject o, String key) {
+        return o.has(key) ? floats(o.getAsJsonArray(key)) : null;
+    }
+
+    private static Group parseGroup(JsonObject o) {
+        Group g = new Group();
+        g.render = switch (o.get("render").getAsString()) {
             case "solid" -> Render.SOLID;
             case "emissive" -> Render.EMISSIVE;
             default -> Render.TRANSLUCENT;
         };
-        JsonArray pulse = g.getAsJsonArray("pulse");
-        List<Face> faces = new ArrayList<>();
+        g.texture = ResourceLocation.parse(o.get("texture").getAsString());
+        g.glow = o.get("glow").getAsBoolean();
+        if (o.has("tilt")) g.tilt = floats(o.getAsJsonArray("tilt"));
+        if (o.has("offset")) g.offset = floats(o.getAsJsonArray("offset"));
+        g.spin = floats(o.getAsJsonArray("spin"));
+        float[] pulse = floats(o.getAsJsonArray("pulse"));
+        g.pulseAmp = pulse[0];
+        g.pulsePeriod = Math.max(1f, pulse[1]);
+        g.flicker = o.get("flicker").getAsFloat();
+        if (o.has("show")) {
+            JsonArray s = o.getAsJsonArray("show");
+            g.show = new float[s.size()][];
+            for (int i = 0; i < s.size(); i++) g.show[i] = floats(s.get(i).getAsJsonArray());
+        }
+        g.grow = opt(o, "grow");
+        g.rise = opt(o, "rise");
+        g.swirl = opt(o, "swirl");
+        g.stagger = opt(o, "stagger");
         int seed = 0;
-        for (JsonElement be : g.getAsJsonArray("boxes")) {
+        for (JsonElement be : o.getAsJsonArray("boxes")) {
             JsonObject b = be.getAsJsonObject();
-            addBox(faces, vec(b.getAsJsonArray("at")), vec(b.getAsJsonArray("size")), vec(b.getAsJsonArray("rot")),
+            addBox(g.faces, floats(b.getAsJsonArray("at")), floats(b.getAsJsonArray("size")), floats(b.getAsJsonArray("rot")),
                     Integer.parseInt(b.get("color").getAsString(), 16), b.get("alpha").getAsFloat(), seed++);
         }
-        Emitter emitter = null;
-        if (g.has("emit")) {
-            JsonObject e = g.getAsJsonObject("emit");
+        g.boxes = seed;
+        if (o.has("emit")) {
+            JsonObject e = o.getAsJsonObject("emit");
             JsonArray size = e.getAsJsonArray("size"), colors = e.getAsJsonArray("colors");
-            emitter = new Emitter(e.get("count").getAsInt(), Math.max(1f, e.get("life").getAsFloat()), vec(e.getAsJsonArray("radius")),
+            g.emitter = new Emitter(e.get("count").getAsInt(), Math.max(1f, e.get("life").getAsFloat()), floats(e.getAsJsonArray("radius")),
                     size.get(0).getAsFloat(), size.get(1).getAsFloat(),
                     Integer.parseInt(colors.get(0).getAsString(), 16), Integer.parseInt(colors.get(1).getAsString(), 16),
-                    e.get("alpha").getAsFloat(), e.get("rise").getAsFloat(), e.get("drift").getAsFloat(), e.get("outward").getAsFloat());
+                    e.get("alpha").getAsFloat(), e.get("rise").getAsFloat(), e.get("drift").getAsFloat(), e.get("outward").getAsFloat(),
+                    e.has("center") ? floats(e.getAsJsonArray("center")) : new float[3],
+                    e.has("shape") ? floats(e.getAsJsonArray("shape")) : new float[]{1, 1, 1},
+                    e.has("burst") && e.get("burst").getAsBoolean());
         }
-        float[] tilt = g.has("tilt") ? vec(g.getAsJsonArray("tilt")) : new float[3];
-        return new Group(ResourceLocation.parse(g.get("texture").getAsString()), render, g.get("glow").getAsBoolean(), tilt,
-                vec(g.getAsJsonArray("spin")), pulse.get(0).getAsFloat(), Math.max(1f, pulse.get(1).getAsFloat()),
-                g.get("flicker").getAsFloat(), faces, emitter);
+        return g;
     }
 
     /** Giro X, luego Y, luego Z (igual que la pagina de preview). */
@@ -142,7 +180,7 @@ public final class SpellModel {
             float u0 = ((seed * 5 + f * 3) % 16) % Math.max(1f, 17f - w);
             float v0 = ((seed * 3 + f * 7) % 16) % Math.max(1f, 17f - h);
             float[] uv = {u0 / 16f, (v0 + h) / 16f, (u0 + w) / 16f, (v0 + h) / 16f, (u0 + w) / 16f, v0 / 16f, u0 / 16f, v0 / 16f};
-            out.add(new Face(xyz, uv, n.x, n.y, n.z, cr, cg, cb, alpha));
+            out.add(new Face(xyz, uv, n.x, n.y, n.z, cr, cg, cb, alpha, at[0], at[1], at[2], seed));
         }
     }
 }
