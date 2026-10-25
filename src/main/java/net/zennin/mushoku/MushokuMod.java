@@ -6,6 +6,7 @@ import net.zennin.mushoku.command.MushokuCommands;
 import net.zennin.mushoku.data.ModAttachments;
 import net.zennin.mushoku.magic.PlayerClasses;
 import net.zennin.mushoku.magic.TempBlocks;
+import net.zennin.mushoku.magic.Tasks;
 import net.zennin.mushoku.registry.ModEntities;
 import net.zennin.mushoku.magic.ManaSystem;
 import net.zennin.mushoku.network.ModNetworking;
@@ -31,6 +32,7 @@ public class MushokuMod implements ModInitializer {
         ModNetworking.init();
         ManaSystem.init();
         TempBlocks.init();
+        Tasks.init();
         PlayerClasses.init();
         MushokuCommands.init();
         LOG.info("Mushoku Tensei (Fabric) cargado");

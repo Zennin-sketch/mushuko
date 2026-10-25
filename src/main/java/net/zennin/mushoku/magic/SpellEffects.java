@@ -66,7 +66,7 @@ public final class SpellEffects {
                 sound(level, p, SoundEvents.EVOKER_CAST_SPELL);
             }
             default -> {
-                return false;
+                return AdvancedSpells.cast(spell, p);
             }
         }
         return true;
