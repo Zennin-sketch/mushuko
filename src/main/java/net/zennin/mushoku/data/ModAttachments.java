@@ -30,7 +30,25 @@ public final class ModAttachments {
             .initializer(() -> SwordData.DEFAULT)
             .buildAndRegister(MushokuMod.id("sword"));
 
+    /** Rango del gremio y trabajo activo. */
+    @SuppressWarnings("UnstableApiUsage")
+    public static final AttachmentType<net.zennin.mushoku.guild.GuildData> GUILD = AttachmentRegistry.<net.zennin.mushoku.guild.GuildData>builder()
+            .persistent(net.zennin.mushoku.guild.GuildData.CODEC)
+            .copyOnDeath()
+            .initializer(() -> net.zennin.mushoku.guild.GuildData.DEFAULT)
+            .buildAndRegister(MushokuMod.id("guild"));
+
     private ModAttachments() {}
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static net.zennin.mushoku.guild.GuildData guild(Player player) {
+        return player.getAttachedOrCreate(GUILD);
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static void setGuild(Player player, net.zennin.mushoku.guild.GuildData data) {
+        player.setAttached(GUILD, data);
+    }
 
     @SuppressWarnings("UnstableApiUsage")
     public static SwordData sword(Player player) {

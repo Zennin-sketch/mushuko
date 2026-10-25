@@ -15,7 +15,7 @@ import net.minecraft.util.valueproviders.UniformInt;
 import net.zennin.mushoku.MushokuMod;
 import net.zennin.mushoku.block.BossSpawnerBlock;
 import net.zennin.mushoku.block.DoorLockBlock;
-import net.zennin.mushoku.block.InfoBlock;
+import net.zennin.mushoku.block.JobBoardBlock;
 import net.zennin.mushoku.block.MagicCircleBlock;
 import net.zennin.mushoku.block.MagicCircleBlockEntity;
 import net.zennin.mushoku.block.PassableBlock;
@@ -36,7 +36,7 @@ public final class ModBlocks {
             BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(10f, 15f).requiresCorrectToolForDrops().sound(SoundType.STONE)));
     public static final Block SHELF = withItem("shelf", new ShelfBlock(BlockBehaviour.Properties.of()
             .mapColor(MapColor.WOOD).strength(2f, 10f).sound(SoundType.WOOD).noOcclusion()));
-    public static final Block JOB_BOARD = withItem("job_board", new InfoBlock("msg.remushoku.job_board_soon",
+    public static final Block JOB_BOARD = withItem("job_board", new JobBoardBlock(
             BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(-1f, 3600000f).sound(SoundType.WOOD)));
     public static final Block DOOR_LOCK = withItem("door_lock", new DoorLockBlock(BlockBehaviour.Properties.of()
             .mapColor(MapColor.WOOD).strength(-1f, 3600000f).sound(SoundType.WOOD)));

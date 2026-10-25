@@ -74,7 +74,11 @@ Se mantiene el id `remushoku` para que las texturas, modelos y datos funcionen s
 - [x] Perro de Asalto, Rata Mugrienta (aparición natural), Draca de Nieve, Espectro Letal con sus animaciones
 - [x] Jefes: Tortuga Gigante (mazmorra musgosa) y Draca de Nieve Madre (mazmorra de hielo) con barra de jefe
 - [x] Invocador de jefe en la sala; botín de jefes según la guía del original
-#### 5D — Gremio (trabajos F→A), tiendas y monedas
+#### 5D — Gremio, tiendas y monedas (HECHA, en prueba)
+- [x] Tablón de Trabajos y Recepcionista: rango F→S con la XP del original, 18 trabajos con objetivos y recompensas originales
+- [x] Trabajos de matar, entregar objetos y construir gólems; subir de rango y abandonar
+- [x] Herrero, Tendero y Vendedor de Magia con los precios del original; comprar y vender
+- [x] Pago con cualquier combinación de monedas y cambio automático
 
 ### Fase 6 — Ojos demoníacos y extras
 - 5 ojos demoníacos, armadura Mk2, objetos especiales, libro guía

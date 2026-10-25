@@ -51,8 +51,14 @@ public class TownNpcEntity extends PathfinderMob {
 
     @Override
     protected InteractionResult mobInteract(Player player, InteractionHand hand) {
-        if (!level().isClientSide && hand == InteractionHand.MAIN_HAND) {
-            player.displayClientMessage(Component.translatable("msg.remushoku.npc_" + role).withStyle(ChatFormatting.YELLOW), false);
+        if (!level().isClientSide && hand == InteractionHand.MAIN_HAND && player instanceof net.minecraft.server.level.ServerPlayer sp) {
+            player.displayClientMessage(Component.translatable("msg.remushoku.npc_" + role).withStyle(ChatFormatting.YELLOW), true);
+            net.zennin.mushoku.guild.GuildSystem.open(sp, switch (role) {
+                case "blacksmith" -> net.zennin.mushoku.guild.Shops.BLACKSMITH;
+                case "general_store" -> net.zennin.mushoku.guild.Shops.GENERAL;
+                case "magic_shop" -> net.zennin.mushoku.guild.Shops.MAGIC;
+                default -> "guild";
+            });
         }
         return InteractionResult.sidedSuccess(level().isClientSide);
     }

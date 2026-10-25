@@ -11,6 +11,7 @@ import net.zennin.mushoku.registry.ModEntities;
 import net.zennin.mushoku.magic.ManaSystem;
 import net.zennin.mushoku.network.ModNetworking;
 import net.zennin.mushoku.sword.SwordSystem;
+import net.zennin.mushoku.guild.GuildSystem;
 import net.zennin.mushoku.registry.ModBlocks;
 import net.zennin.mushoku.world.ModWorldgen;
 import net.zennin.mushoku.registry.ModItems;
@@ -40,6 +41,7 @@ public class MushokuMod implements ModInitializer {
         Tasks.init();
         PlayerClasses.init();
         SwordSystem.init();
+        GuildSystem.init();
         MushokuCommands.init();
         LOG.info("Mushoku Tensei (Fabric) cargado");
     }

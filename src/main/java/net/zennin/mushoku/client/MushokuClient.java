@@ -12,6 +12,8 @@ import net.zennin.mushoku.network.ActionPayload;
 import net.zennin.mushoku.network.MagicSyncPayload;
 import net.zennin.mushoku.network.ManaSyncPayload;
 import net.zennin.mushoku.network.SwordSyncPayload;
+import net.zennin.mushoku.network.GuildSyncPayload;
+import net.zennin.mushoku.network.OpenScreenPayload;
 import net.zennin.mushoku.registry.ModEntities;
 
 public class MushokuClient implements ClientModInitializer {
@@ -56,6 +58,9 @@ public class MushokuClient implements ClientModInitializer {
             if (payload.action() == ActionPayload.OPEN_CLASS_SCREEN) context.client().setScreen(new ClassPickScreen());
         });
         ClientPlayNetworking.registerGlobalReceiver(SwordSyncPayload.TYPE, (payload, context) -> ClientSwordState.set(payload.data()));
+        ClientPlayNetworking.registerGlobalReceiver(GuildSyncPayload.TYPE, (payload, context) -> ClientGuildState.set(payload.data()));
+        ClientPlayNetworking.registerGlobalReceiver(OpenScreenPayload.TYPE, (payload, context) ->
+                context.client().setScreen(payload.screen().equals("guild") ? new GuildScreen() : new ShopScreen(payload.screen())));
         HudRenderCallback.EVENT.register(ManaBarHud::render);
     }
 }

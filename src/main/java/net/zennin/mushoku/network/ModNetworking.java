@@ -9,6 +9,8 @@ import net.zennin.mushoku.data.ModAttachments;
 import net.zennin.mushoku.magic.PlayerClasses;
 import net.zennin.mushoku.magic.SpellCasting;
 import net.zennin.mushoku.sword.SwordSkills;
+import net.zennin.mushoku.guild.GuildSystem;
+import net.zennin.mushoku.guild.Shops;
 import net.zennin.mushoku.sword.SwordSystem;
 
 public final class ModNetworking {
@@ -20,6 +22,9 @@ public final class ModNetworking {
         PayloadTypeRegistry.playS2C().register(ActionPayload.TYPE, ActionPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(SwordSyncPayload.TYPE, SwordSyncPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(SwordActionPayload.TYPE, SwordActionPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(GuildSyncPayload.TYPE, GuildSyncPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(OpenScreenPayload.TYPE, OpenScreenPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(GuildActionPayload.TYPE, GuildActionPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(ComboPayload.TYPE, ComboPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(ActionPayload.TYPE, ActionPayload.CODEC);
 
@@ -38,6 +43,21 @@ public final class ModNetworking {
                     case SwordActionPayload.TOUKI_LEVEL -> SwordSystem.buyTouki(p);
                     case SwordActionPayload.TOUKI_TOGGLE -> SwordSystem.toggleTouki(p);
                     case SwordActionPayload.USE_SLOT -> SwordSkills.useSlot(p, payload.slot());
+                    default -> {}
+                }
+            });
+        });
+        ServerPlayNetworking.registerGlobalReceiver(GuildActionPayload.TYPE, (payload, ctx) -> {
+            ServerPlayer p = ctx.player();
+            p.server.execute(() -> {
+                switch (payload.action()) {
+                    case GuildActionPayload.ACCEPT -> GuildSystem.accept(p, payload.arg());
+                    case GuildActionPayload.SUBMIT -> GuildSystem.submit(p);
+                    case GuildActionPayload.COMPLETE -> GuildSystem.complete(p);
+                    case GuildActionPayload.ABANDON -> GuildSystem.abandon(p);
+                    case GuildActionPayload.RANK_UP -> GuildSystem.rankUp(p);
+                    case GuildActionPayload.BUY -> Shops.trade(p, payload.shop(), payload.arg(), true);
+                    case GuildActionPayload.SELL -> Shops.trade(p, payload.shop(), payload.arg(), false);
                     default -> {}
                 }
             });
