@@ -32,10 +32,14 @@ Se mantiene el id `remushoku` para que las texturas, modelos y datos funcionen s
       Caída Suave, Pies Veloces, Curación, Crecimiento, Escudo Mágico
 - [x] Comandos de prueba: /mushoku mana, /mushoku maxmana, /mushoku elemento, /mushoku clase
 
-### Fase 3 — Hechizos completos y círculos mágicos
-- Los ~60 hechizos (Principiante → Imperial)
-- Tiza, círculos mágicos, mejora de piedras, pergaminos, báculos con piedra imbuida
-- Modo sin elemento, curación y magia variada
+### Fase 3A — Hechizos completos (HECHA, en prueba)
+- [x] Los 40 hechizos de Intermedio a Imperial (agua, fuego, tierra, viento)
+- [x] Curación avanzada (X-Curación, Banquete, Curación Sagrada) y Perturbar Magia
+- [x] Proyectil mágico con tamaño, empuje, elevación y explosión; tareas diferidas (tormentas, tornados)
+
+### Fase 3B — Círculos mágicos
+- Tiza, círculos mágicos con flechas, círculo que lanza al pisarlo
+- Mejora de piedras (círculo de mejora), pergaminos, báculos con piedra imbuida
 
 ### Fase 4 — Espadachín
 - Puntos de habilidad, estilos Dios Espada / Agua / Norte
