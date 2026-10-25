@@ -15,6 +15,7 @@ import net.zennin.mushoku.item.ClassChangeItem;
 import net.zennin.mushoku.item.MagicStoneItem;
 import net.zennin.mushoku.item.SpellScrollItem;
 import net.zennin.mushoku.item.StaffItem;
+import net.zennin.mushoku.item.SummonScrollItem;
 import net.zennin.mushoku.item.StaffPickaxeItem;
 import net.zennin.mushoku.item.ElementBookItem;
 import net.zennin.mushoku.magic.Element;
@@ -47,7 +48,7 @@ public final class ModItems {
     public static final Item INKAND_QUILL = single("inkand_quill");
     public static final Item INK_VIAL = simple("ink_vial");
     public static final Item CLASS_CHANGE_ITEM = register("class_change_item", new ClassChangeItem(new Item.Properties().stacksTo(16)));
-    public static final Item SUMMON_SCROLL_KALMAN = single("summon_scroll_kalman");
+    public static final Item SUMMON_SCROLL_KALMAN = register("summon_scroll_kalman", new SummonScrollItem(new Item.Properties().stacksTo(1)));
     public static final Item DEMON_EYE = single("demon_eye");
 
     // --- Monedas ---

@@ -1733,5 +1733,10 @@
   "msg.remushoku.door_locked": "Está cerrada con llave",
   "msg.remushoku.door_opened": "¡La puerta se abre! Algo despierta abajo...",
   "msg.remushoku.job_board_soon": "Tablón de Trabajos: el gremio llega en la parte 5D",
-  "msg.remushoku.boss_soon": "Invocador de jefe: los jefes llegan en la parte 5C"
+  "msg.remushoku.boss_soon": "Invocador de jefe: los jefes llegan en la parte 5C",
+  "msg.remushoku.npc_receptionist": "Recepcionista: ¡Bienvenido al Gremio de Aventureros! (los trabajos llegan en la parte 5D)",
+  "msg.remushoku.npc_blacksmith": "Herrero: ¡Las mejores armas de la ciudad! (la tienda llega en la parte 5D)",
+  "msg.remushoku.npc_general_store": "Tendero: ¡Pasa, pasa! (la tienda llega en la parte 5D)",
+  "msg.remushoku.npc_magic_shop": "Vendedor de Magia: piedras mágicas y libros... (la tienda llega en la parte 5D)",
+  "msg.remushoku.kalman_summoned": "¡El Dios Norte Kalman III ha sido invocado!"
 }

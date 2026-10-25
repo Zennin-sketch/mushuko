@@ -23,6 +23,15 @@ public class MushokuClient implements ClientModInitializer {
         CastingClient.init();
         SwordClient.init();
         EntityRendererRegistry.register(ModEntities.MAGIC_PROJECTILE, NoopRenderer::new);
+        HumanoidNpcRenderer.register(ModEntities.SG_BANDIT, "sgbandittxt");
+        HumanoidNpcRenderer.register(ModEntities.NG_BANDIT, "ngbandittxt");
+        HumanoidNpcRenderer.register(ModEntities.WG_BANDIT, "wgbandittxt");
+        HumanoidNpcRenderer.register(ModEntities.M_BANDIT, "mbandit");
+        HumanoidNpcRenderer.register(ModEntities.KALMAN, "kalmanskin3");
+        HumanoidNpcRenderer.register(ModEntities.GUILD_RECEPTIONIST, "guild_receptionist");
+        HumanoidNpcRenderer.register(ModEntities.BLACK_SMITH_KEEP, "blacksmithskin");
+        HumanoidNpcRenderer.register(ModEntities.GENERAL_STORE_KEEP, "genstoreclerk");
+        HumanoidNpcRenderer.register(ModEntities.MAGIC_SHOP_KEEPER, "magicskin");
 
         ClientPlayNetworking.registerGlobalReceiver(ManaSyncPayload.TYPE, (payload, context) -> {
             ClientManaState.mana = payload.mana();

@@ -64,7 +64,11 @@ Se mantiene el id `remushoku` para que las texturas, modelos y datos funcionen s
       casa de teletransporte, hielo del libro de agua, isla del cielo)
 - [x] Ciudades, ciudad de arena, mazmorra musgosa y de hielo
 - [x] Corregido: el grupo "bighouse" que faltaba en el original (las casas grandes no aparecían)
-#### 5B — NPCs humanos: bandidos (4 estilos), tenderos, recepcionista, Kalman III
+#### 5B — NPCs humanos (HECHA, en prueba)
+- [x] Bandidos Dios Espada / Agua / Norte y Mago con sus stats, técnicas y aparición natural del original
+- [x] Herrero, Tendero, Vendedor de Magia y Recepcionista (aparecen en las ciudades; tiendas en 5D)
+- [x] Kalman III (jefe, 1024 de vida, barra de jefe, Touki por fases) con su pergamino de invocación
+- [x] Huevos de aparición
 #### 5C — Criaturas GeckoLib: perro de asalto, rata, dracos de nieve, tortuga gigante, espectro; jefes
 #### 5D — Gremio (trabajos F→A), tiendas y monedas
 
