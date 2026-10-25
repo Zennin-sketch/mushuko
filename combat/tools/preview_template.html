@@ -321,6 +321,36 @@ function boxGeom(U, V, x, y, z, w, h, d, inf, fa = 0, fb = 1, oy = 0) {
   return geom(pos, uv);
 }
 
+/* ---------------------------------------------------------------- codos y rodillas como Bendy-lib */
+function keepOrig(m) { m.userData.orig = Float32Array.from(m.geometry.attributes.position.array); return m; }
+/**
+ * Igual que Bendy-lib (lo que usa Player Animator en el juego): cada mitad se deforma de forma que la cara de la
+ * articulacion queda cortada en bisel (a la mitad del angulo). Asi las dos mitades se tocan sin hueco ni encimarse.
+ */
+function flexLimb(F, axis, bend) {
+  const k = new THREE.Vector3(Math.cos(-axis), 0, Math.sin(-axis));
+  const e = new THREE.Vector3(k.z, 0, -k.x);              // lateral: perpendicular al eje del miembro y al de giro
+  const t = Math.tan(bend / 2);
+  // signo del bisel: el que hace coincidir las dos caras despues de girar la mitad movil
+  const q = new THREE.Quaternion().setFromAxisAngle(k, bend);
+  const test = sg => new THREE.Vector3(e.x, -sg * t, e.z).applyQuaternion(q).distanceTo(new THREE.Vector3(e.x, sg * t, e.z));
+  const sg = test(1) <= test(-1) ? 1 : -1;
+  const [jx, jy, jz] = F.J;
+  const apply = (m, L, sign, off) => {
+    const o = m.userData.orig, a = m.geometry.attributes.position.array;
+    for (let i = 0; i < o.length; i += 3) {
+      const rx = o[i] - jx, ry = o[i + 1] - jy, rz = o[i + 2] - jz;
+      const d = e.x * rx + e.z * rz;
+      const w = Math.max(0, 1 - Math.abs(ry) / L);
+      a[i] = o[i]; a[i + 2] = o[i + 2];
+      a[i + 1] = o[i + 1] + sign * sg * t * d * w;
+    }
+    m.geometry.attributes.position.needsUpdate = true;
+  };
+  for (const m of F.fixed) apply(m, F.Lf, 1);
+  for (const m of F.moving) apply(m, F.Lm, -1);
+}
+
 /* ---------------------------------------------------------------- jugador */
 // root (cuadro previo al espejado de Minecraft) -> body transform -> espejo (-1,-1,1) -> escala 0.9375 -> -1.501 -> px
 const rig = {};
@@ -341,21 +371,25 @@ function buildPlayer(slim) {
   const b = part('torso', 0, 0, 0);
   // torso: la mitad de abajo queda fija y la de arriba se dobla por la cintura (y = 6), como en Player Animator
   const upper = new THREE.Group(); upper.position.set(0, 6, 0); b.add(upper);
+  const tFixed = [], tMoving = [];
   for (const [U, V, inf] of [[16, 16, 0], [16, 32, 0.25]]) {
-    b.add(mesh(boxGeom(U, V, -4, 0, -2, 8, 12, 4, inf, 0.5, 1)));
-    const up = mesh(boxGeom(U, V, -4, 0, -2, 8, 12, 4, inf, 0, 0.5)); up.position.set(0, -6, 0); upper.add(up);
+    const lo = mesh(boxGeom(U, V, -4, 0, -2, 8, 12, 4, inf, 0.5, 1)); b.add(lo); tFixed.push(keepOrig(lo));
+    const up = mesh(boxGeom(U, V, -4, 0, -2, 8, 12, 4, inf, 0, 0.5)); up.position.set(0, -6, 0); upper.add(up); tMoving.push(keepOrig(up));
   }
   rig.parts.torso.lower = upper;
+  rig.parts.torso.flex = { J: [0, 6, 0], fixed: tFixed, moving: tMoving, Lf: 6, Lm: 6 };
   const limb = (name, px, py, pz, cube, layers, joint) => {
     const p = part(name, px, py, pz);
     const [x, y, z, w, hh, d] = cube, jf = (joint - y) / hh;
     const cx = x + w / 2, cz = z + d / 2;
     const lower = new THREE.Group(); lower.position.set(cx, joint, cz); p.add(lower);
+    const fixed = [], moving = [];
     for (const [U, V, inf] of layers) {
-      const up = mesh(boxGeom(U, V, x, y, z, w, hh, d, inf, 0, jf)); p.add(up);
-      const lo = mesh(boxGeom(U, V, x, y, z, w, hh, d, inf, jf, 1, 0)); lo.position.set(-cx, -joint, -cz); lower.add(lo);
+      const up = mesh(boxGeom(U, V, x, y, z, w, hh, d, inf, 0, jf)); p.add(up); fixed.push(keepOrig(up));
+      const lo = mesh(boxGeom(U, V, x, y, z, w, hh, d, inf, jf, 1, 0)); lo.position.set(-cx, -joint, -cz); lower.add(lo); moving.push(keepOrig(lo));
     }
     rig.parts[name].lower = lower;
+    rig.parts[name].flex = { J: [cx, joint, cz], fixed, moving, Lf: joint - y, Lm: y + hh - joint };
     return p;
   };
   const aw = slim ? 3 : 4;
@@ -530,6 +564,7 @@ function apply(pl) {
     if (P.lower) {
       const axis = v(name, 'axis', 0), bend = v(name, 'bend', 0);
       P.lower.quaternion.setFromAxisAngle(new THREE.Vector3(Math.cos(-axis), 0, Math.sin(-axis)), bend);
+      if (P.flex) flexLimb(P.flex, axis, bend);
     }
     if (P.item) {
       const axis = v(name, 'axis', 0), bend = v(name, 'bend', 0);
