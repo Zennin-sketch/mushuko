@@ -71,35 +71,74 @@ def two(name, desc):
 
 NEUTRAL_P = dict(NEUTRAL)
 
-# =============================================================== ESPADA (una mano)
+# =============================================================== ESPADA (una mano) - estilo Epic Fight
+# Principios (sacados de como Epic Fight arma sus combos, no de sus archivos):
+# * Better Combat reproduce los ticks 0-10 en ~3 ticks reales (el golpe conecta al 25% de la recarga) y estira 10-20.
+#   Por eso: casi sin preparacion (tick 0 ya es la pose cargada), corte de 3 a 10, y pose extendida sostenida 10-14.
+# * La cadera y el torso abren el golpe; el brazo llega despues y se estira al impactar. La otra mano hace contrapeso.
+# * Paso hacia adelante en cada golpe y rodillas flexionadas.
+# * Cada golpe termina en la pose con la que arranca el siguiente: el combo fluye sin volver al reposo.
+# * La mano nunca pasa por detras del torso: la carga va al costado del hombro.
+
+def stance(lead='l', depth=0):
+    """Piernas: un pie adelante (lead), el otro atras, rodillas flexionadas."""
+    f, b = ((-0.06, -0.93, 0.36), (0.1, -0.95, -0.3)) if lead == 'l' else ((0.06, -0.93, 0.36), (-0.1, -0.95, -0.3))
+    d = dict(lleg=(f, 18 + depth), rleg=(b, 10 + depth // 2)) if lead == 'l' else dict(rleg=(f, 18 + depth), lleg=(b, 10 + depth // 2))
+    return d
+
+def look(turn):
+    """La cabeza mira al frente aunque la cadera gire."""
+    return head(yaw=-turn * 0.85, down=4)
+
 GUARD_1H = P(root(lean=3), torso(turn=-10), head(yaw=8),
              dict(rarm=R((3, -8, 8), (0.05, 0.75, 0.65)), larm=L((-6, -11, 3))), legs('guard'))
 
-a = attack('sword_slash_1', 'Espada: tajo diagonal descendente')
-a.key(6, 'stop', **P(root(lean=-3, turn=10), torso(turn=35, lean=-6), head(yaw=-30),
-             dict(rarm=R((7, 6, -1), (0.2, 0.25, -0.95)), larm=L((-2, -5, 9))), legs('guard')))
-a.key(10, 'smooth', **P(root(fwd=0.15, lean=10, turn=-8), torso(turn=-38, lean=8, tilt=-5), head(yaw=32, down=8),
-                      dict(rarm=R((-2, -9, 9), (-0.75, -0.5, 0.4)), larm=L((-8, -10, -4))), legs('lunge', 5)))
-a.key(13, 'stop', **P(root(fwd=0.17, lean=12, turn=-12), torso(turn=-48, lean=10, tilt=-7), head(yaw=38, down=10),
-                     dict(rarm=R((-5, -11, 6), (-0.6, -0.65, -0.45)))))
-a.key(20, 'stop', **GUARD_1H)
+def ef_attack(name, desc):
+    # beginTick 3: transicion de ~1 tick real (Epic Fight usa 0.1 s)
+    return anim(name, desc, begin=3, end=20, stop=26, lag=('head', 'larm'))
 
-a = attack('sword_slash_2', 'Espada: reves ascendente')
-a.key(6, 'stop', **P(root(lean=6, turn=-14, up=-0.03), torso(turn=-42, lean=6), head(yaw=32),
-             dict(rarm=R((-4, -11, 6), (-0.55, -0.6, -0.6)), larm=L((-8, -9, -4))), legs('guard', 6)))
-a.key(10, 'smooth', **P(root(fwd=0.1, lean=0, turn=14, up=0.03), torso(turn=38, lean=-6, tilt=5), head(yaw=-26, down=-6),
-                      dict(rarm=R((9, 3, 6), (0.5, 0.8, -0.2)), larm=L((-4, -8, 7))), legs('stride')))
-a.key(13, 'stop', **P(root(fwd=0.11, lean=-2, turn=18, up=0.04), torso(turn=48, lean=-8, tilt=7),
-                     dict(rarm=R((10, 5, 1), (0.3, 0.9, -0.3)))))
-a.key(20, 'stop', **GUARD_1H)
+# Poses de enlace del combo (fin de un golpe = inicio del siguiente)
+S1_START = P(root(turn=18, lean=-2, up=-0.03), torso(turn=28, lean=-4), look(18),
+             dict(rarm=R((10, 2, 3), (0.35, 0.55, -0.75)), larm=L((-3, -5, 9), (0, 0.3, 1))), stance('l', 4))
+S2_START = P(root(turn=-16, lean=8, up=-0.06, fwd=0.12), torso(turn=-40, lean=8), look(-16),
+             dict(rarm=R((-3, -10, 11), (-0.6, -0.65, -0.4)), larm=L((-10, -8, -2))), stance('l', 14))
+S3_START = P(root(turn=16, lean=-4, up=-0.04, fwd=0.08), torso(turn=36, lean=-6), look(16),
+             dict(rarm=R((9, -8, 2), (0.05, 0.12, 1)), larm=L((-2, -4, 10), (0, 0.4, 1))), stance('r', 6))
 
-a = attack('sword_thrust_3', 'Espada: estocada a fondo (remate)')
-a.key(6, 'stop', **P(root(lean=-3, turn=18, up=-0.07, fwd=-0.05), torso(turn=40, lean=-4), head(yaw=-36),
-             dict(rarm=R((7, -9, -2), (0.02, 0.1, 1)), larm=L((-3, -4, 9), (0, 0.4, 1))), legs('crouch', -35)))
-a.key(10, 'smooth', **P(root(fwd=0.5, lean=14, turn=-10, up=-0.12), torso(turn=-22, lean=6), head(yaw=22, down=4),
-                      dict(rarm=R((2, -2, 12), (0, 0.05, 1)), larm=L((-8, -10, -6), (0, 0, -1))), legs('lunge', 15)))
-a.key(14, 'stop', **P(root(fwd=0.5, lean=14, turn=-10, up=-0.12)))
-a.key(20, 'stop', **GUARD_1H)
+a = ef_attack('sword_slash_1', 'Espada: tajo diagonal descendente')
+a.key(0, 'stop', **S1_START)
+a.key(5, 'smooth', **P(root(turn=6, lean=2, up=-0.04, fwd=0.04), torso(turn=6, lean=2), look(6),
+                       dict(rarm=R((8, -1, 10), (0.15, 0.5, 0.85)))))
+a.key(8, 'smooth', **P(root(turn=-8, lean=7, up=-0.06, fwd=0.1), torso(turn=-24, lean=6, tilt=-4), look(-8),
+                       dict(rarm=R((3, -7, 12), (-0.7, -0.35, 0.6)), larm=L((-9, -8, 1))), stance('l', 12)))
+a.key(10, 'smooth', **P(root(turn=-14, lean=8, up=-0.06, fwd=0.12), torso(turn=-36, lean=8, tilt=-5), look(-14),
+                        dict(rarm=R((-2, -9, 11), (-0.75, -0.55, -0.2)), larm=L((-10, -8, -2)))))
+a.key(14, 'stop', **P(S2_START, root(turn=-17, lean=9, up=-0.065, fwd=0.13)))
+a.key(20, 'stop', **S2_START)
+
+a = ef_attack('sword_slash_2', 'Espada: reves ascendente')
+a.key(0, 'stop', **S2_START)
+a.key(5, 'smooth', **P(root(turn=-4, lean=5, up=-0.05, fwd=0.1), torso(turn=-14, lean=4), look(-4),
+                       dict(rarm=R((0, -9, 12), (-0.25, -0.2, 1)), larm=L((-10, -8, 0)))))
+a.key(8, 'smooth', **P(root(turn=8, lean=1, up=-0.03, fwd=0.08), torso(turn=18, lean=-2, tilt=4), look(8),
+                       dict(rarm=R((7, -2, 11), (0.65, 0.45, 0.6)), larm=L((-5, -8, 5))), stance('r', 8)))
+a.key(10, 'smooth', **P(root(turn=13, lean=-2, up=-0.02, fwd=0.08), torso(turn=32, lean=-5, tilt=6), look(13),
+                        dict(rarm=R((10, 3, 6), (0.55, 0.8, -0.2)))))
+a.key(14, 'stop', **P(root(turn=15, lean=-4, up=-0.02, fwd=0.08), torso(turn=40, lean=-7, tilt=7), look(15),
+                      dict(rarm=R((10, 5, 2), (0.3, 0.9, -0.35)), larm=L((-4, -6, 8), (0, 0.4, 1)))))
+a.key(20, 'stop', **S3_START)
+
+a = ef_attack('sword_thrust_3', 'Espada: estocada a fondo (remate)')
+a.key(0, 'stop', **S3_START)
+a.key(4, 'smooth', **P(root(turn=10, lean=0, up=-0.08, fwd=0.05), torso(turn=24, lean=-2), look(10),
+                       dict(rarm=R((8, -8, 2), (0.03, 0.1, 1))), stance('r', 18)))
+a.key(8, 'smooth', **P(root(turn=-4, lean=10, up=-0.12, fwd=0.35), torso(turn=-8, lean=5), look(-4),
+                       dict(rarm=R((4, -4, 10), (0, 0.06, 1)), larm=L((-11, -7, -3), (0, 0, -1))), stance('r', 30)))
+a.key(10, 'smooth', **P(root(turn=-10, lean=14, up=-0.15, fwd=0.55), torso(turn=-20, lean=6), look(-10),
+                        dict(rarm=R((2, -2, 13), (0, 0.04, 1)), larm=L((-12, -7, -5), (0, 0, -1)))))
+a.key(15, 'stop', **P(root(turn=-11, lean=15, up=-0.16, fwd=0.58), torso(turn=-22, lean=7), look(-11),
+                      dict(rarm=R((2, -2.5, 13), (0, 0.02, 1)))))
+a.key(20, 'stop', **P(GUARD_1H, root(lean=3, fwd=0.2)))
 
 # =============================================================== KATANA (dos manos)
 GUARD_K = P(root(lean=4, turn=-6), torso(turn=-12), head(yaw=10), grip((1, -8, 8), (0.05, 0.75, 0.65)), legs('guard', 4))

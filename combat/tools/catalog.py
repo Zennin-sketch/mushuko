@@ -7,41 +7,41 @@ def atk(anim, hitbox, dmg, angle, sound, upswing=0.5):
 NS = 'mushoku_combat'
 
 FAMILIES = {
-    'sword': dict(slot='hip', label='Espada', two_handed=False, range_bonus=0.0, pose=None, attacks=[
+    'sword': dict(cooldown=12.5, slot='hip', label='Espada', two_handed=False, range_bonus=0.0, pose=None, attacks=[
         atk('sword_slash_1', 'HORIZONTAL_PLANE', 0.9, 140, 'bettercombat:sword_slash'),
         atk('sword_slash_2', 'HORIZONTAL_PLANE', 1.0, 140, 'bettercombat:sword_slash'),
         atk('sword_thrust_3', 'FORWARD_BOX', 1.35, 0, 'bettercombat:rapier_stab'),
     ]),
-    'katana': dict(slot='hip', label='Katana', two_handed=True, range_bonus=0.25, pose='bettercombat:pose_two_handed_katana', attacks=[
+    'katana': dict(cooldown=12.5, slot='hip', label='Katana', two_handed=True, range_bonus=0.25, pose='bettercombat:pose_two_handed_katana', attacks=[
         atk('katana_iai', 'HORIZONTAL_PLANE', 0.95, 150, 'bettercombat:katana_slash'),
         atk('katana_overhead', 'VERTICAL_PLANE', 1.1, 90, 'bettercombat:katana_slash'),
         atk('katana_whirlwind', 'HORIZONTAL_PLANE', 1.3, 360, 'bettercombat:katana_slash'),
     ]),
-    'heavy': dict(slot='back', label='Mandoble', two_handed=True, range_bonus=0.5, pose='bettercombat:pose_two_handed_heavy', attacks=[
+    'heavy': dict(cooldown=20, slot='back', label='Mandoble', two_handed=True, range_bonus=0.5, pose='bettercombat:pose_two_handed_heavy', attacks=[
         atk('heavy_sweep', 'HORIZONTAL_PLANE', 1.0, 160, 'bettercombat:claymore_swing'),
         atk('heavy_rise', 'VERTICAL_PLANE', 1.05, 120, 'bettercombat:claymore_swing'),
         atk('heavy_slam', 'VERTICAL_PLANE', 1.45, 120, 'bettercombat:claymore_slam'),
     ]),
-    'axe': dict(slot='back', label='Hacha de guerra', two_handed=True, range_bonus=0.25, pose='bettercombat:pose_two_handed_heavy', attacks=[
+    'axe': dict(cooldown=20, slot='back', label='Hacha de guerra', two_handed=True, range_bonus=0.25, pose='bettercombat:pose_two_handed_heavy', attacks=[
         atk('heavy_rise', 'VERTICAL_PLANE', 1.0, 120, 'bettercombat:double_axe_swing'),
         atk('heavy_sweep', 'HORIZONTAL_PLANE', 1.0, 160, 'bettercombat:double_axe_swing'),
         atk('heavy_slam', 'VERTICAL_PLANE', 1.5, 120, 'bettercombat:hammer_slam'),
     ]),
-    'scythe': dict(slot='back', label='Guadana', two_handed=True, range_bonus=0.75, pose='bettercombat:pose_two_handed_scythe', attacks=[
+    'scythe': dict(cooldown=16.7, slot='back', label='Guadana', two_handed=True, range_bonus=0.75, pose='bettercombat:pose_two_handed_scythe', attacks=[
         atk('scythe_reap', 'HORIZONTAL_PLANE', 1.0, 170, 'bettercombat:scythe_slash'),
         atk('scythe_backswing', 'HORIZONTAL_PLANE', 1.0, 170, 'bettercombat:scythe_slash'),
         atk('scythe_cyclone', 'HORIZONTAL_PLANE', 1.3, 360, 'bettercombat:scythe_slash'),
     ]),
-    'spear': dict(slot='back', label='Lanza', two_handed=True, range_bonus=1.0, pose=NS + ':pose_spear', attacks=[
+    'spear': dict(cooldown=15.4, slot='back', label='Lanza', two_handed=True, range_bonus=1.0, pose=NS + ':pose_spear', attacks=[
         atk('spear_thrust', 'FORWARD_BOX', 0.9, 0, 'bettercombat:spear_stab'),
         atk('spear_sweep', 'HORIZONTAL_PLANE', 0.85, 160, 'bettercombat:glaive_slash_quick'),
         atk('spear_dragon_pierce', 'FORWARD_BOX', 1.5, 0, 'bettercombat:spear_stab'),
     ]),
-    'staff': dict(slot='back', label='Baston magico', two_handed=True, range_bonus=0.25, pose=NS + ':pose_staff', attacks=[
+    'staff': dict(cooldown=15.4, slot='back', label='Baston magico', two_handed=True, range_bonus=0.25, pose=NS + ':pose_staff', attacks=[
         atk('staff_jab', 'FORWARD_BOX', 0.9, 0, 'bettercombat:staff_stab'),
         atk('staff_crack', 'VERTICAL_PLANE', 1.1, 120, 'bettercombat:staff_slam'),
     ]),
-    'rod': dict(slot='hip', label='Maza', two_handed=False, range_bonus=0.0, pose=None, attacks=[
+    'rod': dict(cooldown=12.5, slot='hip', label='Maza', two_handed=False, range_bonus=0.0, pose=None, attacks=[
         atk('sword_slash_1', 'HORIZONTAL_PLANE', 1.0, 120, 'bettercombat:mace_slash'),
         atk('sword_slash_2', 'HORIZONTAL_PLANE', 1.0, 120, 'bettercombat:mace_slash'),
         atk('staff_crack', 'VERTICAL_PLANE', 1.3, 90, 'bettercombat:mace_slam'),

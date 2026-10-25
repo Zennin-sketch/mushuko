@@ -173,7 +173,19 @@ function defaultOf(part, ax) {
   return 0;
 }
 class Player {
-  constructor(anim) { this.a = anim; this.tick = 0; this.running = true; this.loopStarted = false; this.delta = 0; }
+  constructor(anim) { this.a = anim; this.tick = 0; this.running = true; this.loopStarted = false; this.delta = 0; this.frac = 0; this.real = 0; this.cooldown = 0; }
+  /** Velocidad como Better Combat: los ticks 0..impacto pasan en el 25% de la recarga, el resto se estira. */
+  rate() {
+    if (!this.cooldown) return 1;
+    const S = this.a.end / this.cooldown, up = 0.25;
+    if (this.real < this.cooldown * up) return 2 * S;
+    if (this.real < this.cooldown) return (1 - up) * S;
+    return S;
+  }
+  advance() {
+    this.frac += this.rate(); this.real += 1;
+    while (this.frac >= 1 && this.running) { this.frac -= 1; this.step(); }
+  }
   step() {
     if (!this.running) return;
     this.tick++;
@@ -544,6 +556,7 @@ function start(name) {
   fade = player && player.running ? { prev: player, t: 0, len: Math.max(2, ATTACK.has(name) ? a.begin : 3) } : null;
   if (!Object.values(DATA.sheaths.slots).some(sd => sd.draw === name || sd.sheathe === name)) sheathed = false;
   selected = name; player = new Player(a); idle = 0;
+  player.cooldown = ATTACK.has(name) ? (DATA.families[famOfAnim[name]].cooldown || 0) : 0;
   document.querySelectorAll('.item').forEach(b => b.classList.toggle('sel', b.dataset.anim === name && b.dataset.q === String(queueId)));
   document.getElementById('now').innerHTML = `${desc(name)}<small>${name} · ${(a.stop / 20).toFixed(2)} s</small>`;
 }
@@ -612,7 +625,7 @@ for (const g of DATA.extra) {
   side.appendChild(box);
 }
 const note = document.createElement('p'); note.className = 'note';
-note.textContent = 'En el juego, Better Combat estira cada ataque al tiempo de recarga del arma y el golpe conecta en la marca naranja. ×1.00 es el multiplicador de daño de ese golpe del combo. Las esquivas y la pose de conjuro las reproduce el addon.';
+note.textContent = 'Los ataques se reproducen con la velocidad real de Better Combat: hasta el impacto (marca naranja) pasan en el 25% de la recarga del arma y despues se frena la recuperacion. ×1.00 es el multiplicador de daño de ese golpe del combo. Las esquivas y la pose de conjuro las reproduce el addon.';
 side.appendChild(note);
 
 /* ---------------------------------------------------------------- linea de tiempo */
@@ -651,12 +664,12 @@ function frame(now) {
     acc += dt * 20 * speed;
     while (acc >= 1) {
       acc -= 1;
-      if (fade) { fade.prev.step(); if (++fade.t >= fade.len) fade = null; }
-      if (queue.length && (!player.running || (ATTACK.has(selected) && player.tick >= player.a.end))) { start(queue.shift()); continue; }
-      if (player.running) player.step();
+      if (fade) { fade.prev.advance(); if (++fade.t >= fade.len) fade = null; }
+      if (queue.length && (!player.running || (ATTACK.has(selected) && player.real >= player.cooldown))) { start(queue.shift()); continue; }
+      if (player.running) player.advance();
       else if (document.getElementById('loop').checked && ++idle > 12) { const q = Array.from(document.querySelectorAll(`.item[data-q="${queueId}"]`)).map(b => b.dataset.anim); const all = q.length > 1 && queue.length === 0 && wasCombo ? q : [selected]; queue = all.slice(1); start(all[0]); }
     }
-    player.delta = player.running ? acc : 0;
+    player.delta = player.running ? Math.min(0.999, player.frac + acc * player.rate()) : 0;
   }
   if (player) {
     const a = player.a, t = player.tick + player.delta;
