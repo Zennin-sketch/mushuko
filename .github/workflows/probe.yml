@@ -1,0 +1,15 @@
+name: Buscar bendy-lib
+on: [push, workflow_dispatch]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar y revisar
+        run: |
+          set -x
+          curl -sf https://maven.kosmx.dev/io/github/kosmx/bendy-lib/bendy-lib-fabric/maven-metadata.xml | tr -d ' \n' | head -c 1500 | sed 's/</\n</g' | grep -E "version|release|latest" | while read l; do echo "::warning::$l"; done || echo "::warning::sin metadata"
+          for v in 5.1 5.0; do
+            if curl -sfL -o b$v.jar https://maven.kosmx.dev/io/github/kosmx/bendy-lib/bendy-lib-fabric/$v/bendy-lib-fabric-$v.jar; then
+              unzip -p b$v.jar fabric.mod.json | tr -d '\n ' | head -c 700 | while read l; do echo "::warning::$v $l"; done
+            else echo "::warning::no hay $v"; fi
+          done
