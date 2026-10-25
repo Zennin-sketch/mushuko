@@ -4,3 +4,7 @@ run/
 out/
 *.iml
 .idea/
+
+__pycache__/
+combat/build/
+combat/.gradle/

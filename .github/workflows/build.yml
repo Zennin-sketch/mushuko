@@ -24,3 +24,7 @@ jobs:
         with:
           name: mushoku-tensei-fabric
           path: build/libs/*.jar
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mushoku-combat
+          path: combat/build/libs/*.jar

@@ -1,0 +1,635 @@
+<title>Taller de Combate Mushoku</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Alegreya+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: visor 3D a la izquierda (todo el alto), libro de tecnicas a la derecha; en telefono, visor arriba y libro abajo.
+   Un solo tema oscuro a proposito: es un visor 3D de noche en el patio de entrenamiento. */
+:root {
+  color-scheme: dark;
+  --night: #0e1117;        /* fondo */
+  --slate: #161b23;        /* paneles */
+  --slate-2: #1e2530;      /* controles */
+  --line: #2b3441;         /* bordes */
+  --parchment: #ece3cf;    /* texto */
+  --mist: #9097a3;         /* texto secundario */
+  --gold: #d9ab4e;         /* acento: oro de esquiva perfecta */
+  --ember: #e9803a;        /* estamina / impacto */
+  --mana: #5fb6e8;         /* conjuro */
+  --display: "Cinzel", "Trajan Pro", Georgia, serif;
+  --body: "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+html, body { height: 100%; }
+body { background: var(--night); color: var(--parchment); font-family: var(--body); font-size: 15px; line-height: 1.45; }
+.app { height: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 360px; grid-template-rows: minmax(0, 1fr); }
+.stage { position: relative; min-width: 0; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+.top { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; padding-block: 14px 6px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: 16px; }
+.top h1 { font-family: var(--display); font-size: 20px; letter-spacing: .06em; margin: 0; color: var(--gold); text-wrap: balance; }
+.top .now { font-size: 15px; color: var(--parchment); min-width: 0; }
+.top .now small { color: var(--mist); margin-left: 6px; }
+#view { position: relative; min-height: 0; }
+#view canvas { display: block; width: 100%; height: 100%; outline: none; }
+.hit { position: absolute; left: 50%; top: 18px; transform: translateX(-50%); font-family: var(--display); letter-spacing: .2em;
+  color: var(--ember); font-size: 13px; opacity: 0; transition: opacity .12s; pointer-events: none; text-shadow: 0 0 12px rgba(233,128,58,.6); }
+.hit.on { opacity: 1; }
+.cams { position: absolute; right: 12px; top: 12px; display: flex; gap: 4px; }
+.cams button { font: 500 12px var(--body); }
+.bar { display: grid; gap: 8px; padding-block: 10px 14px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: 16px;
+  border-top: 1px solid var(--line); background: var(--slate); }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+button, select, .file { background: var(--slate-2); color: var(--parchment); border: 1px solid var(--line); border-radius: 6px;
+  padding: 6px 10px; font: 500 14px var(--body); cursor: pointer; }
+button:hover, select:hover, .file:hover { border-color: var(--gold); }
+button:focus-visible, select:focus-visible, input:focus-visible, .file:focus-within { outline: 2px solid var(--gold); outline-offset: 2px; }
+button.primary { background: var(--gold); color: #1a1408; border-color: var(--gold); font-weight: 700; min-width: 92px; }
+.file input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+label.chk { display: inline-flex; gap: 6px; align-items: center; color: var(--mist); font-size: 14px; cursor: pointer; }
+.timeline { position: relative; height: 34px; }
+.timeline canvas { width: 100%; height: 34px; display: block; cursor: pointer; }
+.ticks { font-family: var(--mono); font-size: 12px; color: var(--mist); font-variant-numeric: tabular-nums; }
+.speed { display: inline-flex; gap: 6px; align-items: center; color: var(--mist); font-size: 14px; }
+.speed input { width: 110px; accent-color: var(--gold); }
+aside { min-width: 0; min-height: 0; overflow-y: auto; border-left: 1px solid var(--line); background: var(--slate);
+  padding-block: 14px 24px; padding-left: 16px; padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+aside h2 { font-family: var(--display); font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--mist); margin: 18px 0 8px; }
+aside h2:first-child { margin-top: 0; }
+.fam { border: 1px solid var(--line); border-radius: 8px; padding: 10px 10px 8px; margin-bottom: 10px; background: var(--night); }
+.fam header { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+.fam header b { font-family: var(--display); font-size: 15px; letter-spacing: .04em; }
+.fam header button { font-size: 12px; padding: 3px 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.chip { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: transparent; color: var(--mist); }
+.chip.sel { color: var(--parchment); border-color: var(--gold); }
+.list { display: grid; gap: 2px; }
+.item { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 8px; align-items: baseline; text-align: left;
+  background: transparent; border: 1px solid transparent; padding: 5px 6px; border-radius: 6px; }
+.item:hover { border-color: var(--line); }
+.item.sel { border-color: var(--gold); background: var(--slate-2); }
+.item .n { font-family: var(--mono); font-size: 12px; color: var(--gold); }
+.item .t { min-width: 0; }
+.item .d { font-family: var(--mono); font-size: 12px; color: var(--ember); font-variant-numeric: tabular-nums; }
+.note { color: var(--mist); font-size: 13px; margin: 14px 0 0; max-width: 60ch; }
+.legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--mist); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+@media (max-width: 860px) {
+  .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto; height: auto; }
+  html, body { height: auto; }
+  #view { height: 62vh; min-height: 320px; }
+  aside { border-left: 0; border-top: 1px solid var(--line); padding-left: max(16px, env(safe-area-inset-left, 0px)); }
+}
+@media (prefers-reduced-motion: reduce) { .hit { transition: none; } }
+</style>
+
+<div class="app">
+  <section class="stage">
+    <div class="top">
+      <h1>Taller de Combate</h1>
+      <div class="now" id="now"></div>
+    </div>
+    <div id="view">
+      <div class="hit" id="hit">IMPACTO</div>
+      <div class="cams" role="group" aria-label="Camara">
+        <button id="cam-34">3/4 izq.</button><button id="cam-r34">3/4 der.</button><button id="cam-front">Frente</button><button id="cam-side">Lado</button><button id="cam-back">Atras</button><button id="cam-top">Arriba</button>
+      </div>
+    </div>
+    <div class="bar">
+      <div class="timeline"><canvas id="tl" aria-label="Linea de tiempo en ticks"></canvas></div>
+      <div class="row">
+        <button class="primary" id="play">Pausa</button>
+        <button id="restart">Reiniciar</button>
+        <button id="step" title="Avanzar un tick">+1 tick</button>
+        <span class="ticks" id="ticks"></span>
+        <span class="speed"><label for="spd">Velocidad</label><input id="spd" type="range" min="0.1" max="2" step="0.05" value="1"><span id="spdv" class="ticks">1.00x</span></span>
+        <label class="chk"><input type="checkbox" id="loop" checked> Repetir</label>
+      </div>
+      <div class="row">
+        <select id="weapon" aria-label="Arma en la mano"></select>
+        <label class="file">Cargar tu skin<input type="file" id="skin" accept="image/png"></label>
+        <label class="chk"><input type="checkbox" id="slim"> Brazos finos</label>
+        <span class="legend"><span><i style="background:var(--gold)"></i>inicio/fin</span><span><i style="background:var(--ember)"></i>impacto (Better Combat)</span></span>
+      </div>
+    </div>
+  </section>
+  <aside id="side"></aside>
+</div>
+
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+               "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const DATA = /*__DATA__*/null;
+const PI = Math.PI, D = PI / 180;
+
+/* ================================================================ reproductor (copia de Player Animator) */
+const PART_DEFAULTS = {
+  head: [0,0,0], body: [0,0,0], torso: [0,0,0], rightItem: [0,0,0], leftItem: [0,0,0],
+  rightArm: [-5,2,0], leftArm: [5,2,0], rightLeg: [-1.9,12,0.1], leftLeg: [1.9,12,0.1],
+};
+const ANGLES = new Set(['pitch','yaw','roll','bend','axis']);
+const EASES = {
+  LINEAR: t => t, CONSTANT: () => 0,
+  INSINE: t => 1 - Math.cos(t * PI / 2), OUTSINE: t => Math.sin(t * PI / 2), INOUTSINE: t => -(Math.cos(PI * t) - 1) / 2,
+  INQUAD: t => t * t, OUTQUAD: t => 1 - (1 - t) * (1 - t), INOUTQUAD: t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2,
+  INCUBIC: t => t * t * t, OUTCUBIC: t => 1 - Math.pow(1 - t, 3), INOUTCUBIC: t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
+};
+function easeOf(name) { let n = String(name || 'linear').toUpperCase(); if (n.startsWith('EASE')) n = n.slice(4); return EASES[n] || EASES.LINEAR; }
+function clampRad(x) { const t = PI * 2; return ((x + PI) % t + t) % t - PI; }
+
+function parseAnim(json) {
+  const e = json.emote, version = json.version || 1;
+  const degrees = e.degrees === undefined ? true : e.degrees === true || e.degrees === 'true';
+  const A = { begin: e.beginTick || 0, end: e.endTick, stop: e.stopTick ?? e.endTick,
+    loop: e.isLoop === true || e.isLoop === 'true', ret: e.returnTick || 0, easeBefore: !!e.easeBeforeKeyframe, axes: {} };
+  for (const m of e.moves) {
+    const tick = m.tick, ease = easeOf(m.easing), turn = m.turn || 0;
+    for (const [k, v] of Object.entries(m)) {
+      if (['tick','easing','turn','comment','easingArg'].includes(k) || typeof v !== 'object') continue;
+      const part = (version < 3 && k === 'torso') ? 'body' : k;
+      for (const [ax, raw] of Object.entries(v)) {
+        let val = +raw; const ang = ANGLES.has(ax);
+        if (degrees && ang) val *= D;
+        add(A, part, ax, tick, val, ease);
+        if (ang && turn) add(A, part, ax, tick, val + PI * 2 * turn, ease);
+      }
+    }
+  }
+  return A;
+}
+function add(A, part, ax, tick, value, ease) {
+  const key = part + '.' + ax; const list = A.axes[key] || (A.axes[key] = []);
+  const i = list.findIndex(k => k.tick === tick);
+  const kf = { tick, value, ease };
+  if (i >= 0) list[i] = kf; else { list.push(kf); list.sort((a, b) => a.tick - b.tick); }
+}
+function defaultOf(part, ax) {
+  if (ax === 'x' || ax === 'y' || ax === 'z') { const d = PART_DEFAULTS[part] || [0,0,0]; return d['xyz'.indexOf(ax)]; }
+  if (ax.startsWith('scale')) return 1;
+  return 0;
+}
+class Player {
+  constructor(anim) { this.a = anim; this.tick = 0; this.running = true; this.loopStarted = false; this.delta = 0; }
+  step() {
+    if (!this.running) return;
+    this.tick++;
+    if (this.a.loop && this.tick > this.a.end) { this.tick = this.a.ret; this.loopStarted = true; }
+    if (this.tick >= this.a.stop) this.running = false;
+  }
+  value(part, ax, current) {
+    const ang = ANGLES.has(ax);
+    if (ang) current = clampRad(current);
+    const keys = this.a.axes[part + '.' + ax];
+    if (!keys || !keys.length || !this.running) return current;
+    const v = this.axis(keys, defaultOf(part, ax), current);
+    return ang ? clampRad(v) : v;
+  }
+  axis(keys, dflt, cur) {
+    const a = this.a, t = this.tick;
+    const findAt = tick => { let r = -1; for (let i = 0; i < keys.length; i++) if (keys[i].tick <= tick) r = i; return r; };
+    const before = pos => {
+      if (pos === -1) return t < a.begin ? { tick: 0, value: cur } : t < a.end ? { tick: a.begin, value: dflt } : { tick: a.end, value: dflt };
+      const f = keys[pos];
+      if (!a.loop && t >= a.end && pos === keys.length - 1 && f.tick < a.end) return { tick: a.end, value: f.value, ease: f.ease };
+      return f;
+    };
+    const after = pos => {
+      if (keys.length > pos + 1) return keys[pos + 1];
+      if (a.loop) return { tick: a.end + 1, value: dflt };
+      if (t < a.end && keys.length) { const l = keys[keys.length - 1]; return { tick: a.end, value: l.value, ease: l.ease }; }
+      return t >= a.end ? { tick: a.stop, value: cur } : t >= a.begin ? { tick: a.end, value: dflt } : { tick: a.begin, value: dflt };
+    };
+    const pos = findAt(t);
+    let b = before(pos);
+    if (this.loopStarted && b.tick < a.ret) b = before(findAt(a.end));
+    let f = after(pos);
+    if (a.loop && f.tick > a.end) f = after(findAt(a.ret - 1));
+    let tb = b.tick, ta = f.tick;
+    if (tb >= ta) { if (t < tb) tb -= a.end - a.ret + 1; else ta += a.end - a.ret + 1; }
+    if (tb === ta) return b.value;
+    const x = (t + this.delta - tb) / (ta - tb);
+    const from = a.easeBefore ? f : b;
+    const e = (from.ease || EASES.LINEAR)(x);
+    return b.value + (f.value - b.value) * e;
+  }
+}
+
+/* ================================================================ escena */
+const view = document.getElementById('view');
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setClearColor(0x0e1117);
+view.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x0e1117, 7, 16);
+const camera = new THREE.PerspectiveCamera(38, 1, 0.05, 60);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0.95, 0); controls.enableDamping = true; controls.minDistance = 1.5; controls.maxDistance = 12;
+const CAMS = { '34': [-2.6, 1.7, -3.4], r34: [2.6, 1.5, -3.4], front: [0, 1.3, -4.2], side: [-4.2, 1.3, 0], back: [0, 1.6, 4.2], top: [0.01, 5.5, -0.6] };
+function cam(k) { camera.position.set(...CAMS[k]); controls.target.set(0, 0.95, 0); controls.update(); }
+cam('34');
+for (const k of Object.keys(CAMS)) document.getElementById('cam-' + k).onclick = () => cam(k);
+
+scene.add(new THREE.HemisphereLight(0xfff2dc, 0x223044, 1.15));
+const sun = new THREE.DirectionalLight(0xffffff, 1.5); sun.position.set(-3, 6, -4); scene.add(sun);
+const rim = new THREE.DirectionalLight(0x8fc6ff, 0.6); rim.position.set(3, 3, 5); scene.add(rim);
+
+// suelo: baldosas de 1 bloque para leer distancias (el personaje mide 1.8 bloques)
+{
+  const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
+  g.fillStyle = '#28303a'; g.fillRect(0, 0, 64, 64); g.fillStyle = '#222932'; g.fillRect(0, 0, 32, 32); g.fillRect(32, 32, 32, 32);
+  g.strokeStyle = '#323c48'; g.strokeRect(0.5, 0.5, 63, 63);
+  const tex = new THREE.CanvasTexture(c); tex.magFilter = THREE.NearestFilter; tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(7, 7);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  const floor = new THREE.Mesh(new THREE.CircleGeometry(7, 64), new THREE.MeshLambertMaterial({ map: tex }));
+  floor.rotation.x = -PI / 2; scene.add(floor);
+  const blob = new THREE.Mesh(new THREE.CircleGeometry(0.45, 32), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: .35 }));
+  blob.rotation.x = -PI / 2; blob.position.y = 0.002; scene.add(blob);
+  // marca de "adelante"
+  const arrow = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.22, 3), new THREE.MeshBasicMaterial({ color: 0xd9ab4e }));
+  arrow.rotation.x = -PI / 2; arrow.position.set(0, 0.01, -1.1); scene.add(arrow);
+}
+
+/* ---------------------------------------------------------------- skin */
+function defaultSkin() {
+  const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
+  const box = (u, v, w, h, d, col) => { // pinta todas las caras de una caja con un color por cara
+    const [top, bottom, right, front, left, back] = col;
+    g.fillStyle = top; g.fillRect(u + d, v, w, d); g.fillStyle = bottom; g.fillRect(u + d + w, v, w, d);
+    g.fillStyle = right; g.fillRect(u, v + d, d, h); g.fillStyle = front; g.fillRect(u + d, v + d, w, h);
+    g.fillStyle = left; g.fillRect(u + d + w, v + d, d, h); g.fillStyle = back; g.fillRect(u + 2 * d + w, v + d, w, h);
+  };
+  const skin = '#e8b994', hair = '#8a5a2b', robe = '#f1eee6', robe2 = '#d9d4c7', trim = '#7a2a2a', pants = '#3a3a48', boot = '#4a3324';
+  box(0, 0, 8, 8, 8, [hair, skin, skin, skin, skin, hair]);
+  g.fillStyle = hair; g.fillRect(8, 8, 8, 2); g.fillRect(0, 8, 8, 3); g.fillRect(16, 8, 8, 3); g.fillRect(24, 8, 8, 8);
+  g.fillStyle = '#2b5f9e'; g.fillRect(9, 12, 2, 1); g.fillRect(13, 12, 2, 1); g.fillStyle = '#ffffff'; g.fillRect(10, 12, 1, 1); g.fillRect(13, 12, 1, 1);
+  g.fillStyle = '#b07a5a'; g.fillRect(11, 14, 2, 1);
+  box(16, 16, 8, 12, 4, [robe, robe, robe2, robe, robe2, robe2]);
+  g.fillStyle = trim; g.fillRect(23, 20, 2, 12); g.fillRect(20, 20, 8, 1);
+  box(40, 16, 4, 12, 4, [robe, skin, robe2, robe, robe2, robe2]); g.fillStyle = skin; g.fillRect(40, 28, 16, 4);
+  box(32, 48, 4, 12, 4, [robe, skin, robe2, robe, robe2, robe2]); g.fillStyle = skin; g.fillRect(32, 60, 16, 4);
+  box(0, 16, 4, 12, 4, [pants, boot, pants, pants, pants, pants]); g.fillStyle = boot; g.fillRect(0, 26, 16, 6);
+  box(16, 48, 4, 12, 4, [pants, boot, pants, pants, pants, pants]); g.fillStyle = boot; g.fillRect(16, 58, 16, 6);
+  return c;
+}
+const skinTex = new THREE.CanvasTexture(defaultSkin());
+skinTex.magFilter = THREE.NearestFilter; skinTex.minFilter = THREE.NearestFilter; skinTex.colorSpace = THREE.SRGBColorSpace;
+const skinMat = new THREE.MeshLambertMaterial({ map: skinTex, alphaTest: 0.5, side: THREE.DoubleSide });
+
+/* ---------------------------------------------------------------- geometria tipo Minecraft */
+function quad(pos, uv, verts, uvs) { // verts: TL, TR, BR, BL
+  const [a, b, c, d] = verts, [ua, ub, uc, ud] = uvs;
+  for (const [v, u] of [[a, ua], [b, ub], [c, uc], [a, ua], [c, uc], [d, ud]]) { pos.push(...v); uv.push(...u); }
+}
+function geom(pos, uv) {
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  g.computeVertexNormals(); return g;
+}
+/** Caja con UV de skin (espacio del modelo: y hacia abajo). Devuelve geometria de [fa, fb] de su altura. */
+function boxGeom(U, V, x, y, z, w, h, d, inf, fa = 0, fb = 1, oy = 0) {
+  const x0 = x - inf, x1 = x + w + inf, z0 = z - inf, z1 = z + d + inf;
+  const yy = f => y - inf + (h + 2 * inf) * f - oy;
+  const y0 = yy(fa), y1 = yy(fb);
+  const T = 64, uvr = (u0, v0, u1, v1) => [[u0 / T, 1 - v0 / T], [u1 / T, 1 - v0 / T], [u1 / T, 1 - v1 / T], [u0 / T, 1 - v1 / T]];
+  const vs = (vt) => V + d + h * fa + (vt) * h * (fb - fa);
+  const pos = [], uv = [];
+  quad(pos, uv, [[x0, y0, z0], [x1, y0, z0], [x1, y1, z0], [x0, y1, z0]], uvr(U + d, vs(0), U + d + w, vs(1)));            // frente
+  quad(pos, uv, [[x1, y0, z1], [x0, y0, z1], [x0, y1, z1], [x1, y1, z1]], uvr(U + 2 * d + w, vs(0), U + 2 * d + 2 * w, vs(1))); // espalda
+  quad(pos, uv, [[x0, y0, z1], [x0, y0, z0], [x0, y1, z0], [x0, y1, z1]], uvr(U, vs(0), U + d, vs(1)));                    // lado derecho
+  quad(pos, uv, [[x1, y0, z0], [x1, y0, z1], [x1, y1, z1], [x1, y1, z0]], uvr(U + d + w, vs(0), U + 2 * d + w, vs(1)));    // lado izquierdo
+  if (fa === 0) quad(pos, uv, [[x0, y0, z1], [x1, y0, z1], [x1, y0, z0], [x0, y0, z0]], uvr(U + d, V, U + d + w, V + d));
+  if (fb === 1) quad(pos, uv, [[x0, y1, z0], [x1, y1, z0], [x1, y1, z1], [x0, y1, z1]], uvr(U + d + w, V, U + d + 2 * w, V + d));
+  return geom(pos, uv);
+}
+
+/* ---------------------------------------------------------------- jugador */
+// root (cuadro previo al espejado de Minecraft) -> body transform -> espejo (-1,-1,1) -> escala 0.9375 -> -1.501 -> px
+const rig = {};
+function buildPlayer(slim) {
+  if (rig.root) scene.remove(rig.root);
+  const root = new THREE.Group(); scene.add(root);
+  const bodyT = new THREE.Group(); bodyT.rotation.order = 'ZYX'; root.add(bodyT);
+  const back = new THREE.Group(); back.position.y = -0.7; bodyT.add(back);
+  const flip = new THREE.Group(); flip.scale.set(-1, -1, 1); back.add(flip);
+  const sc = new THREE.Group(); sc.scale.setScalar(0.9375); flip.add(sc);
+  const off = new THREE.Group(); off.position.y = -1.501; sc.add(off);
+  const model = new THREE.Group(); model.scale.setScalar(1 / 16); off.add(model);
+  Object.assign(rig, { root, bodyT, model, slim, parts: {} });
+  const mesh = g => new THREE.Mesh(g, skinMat);
+  const part = (name, px, py, pz) => { const p = new THREE.Group(); p.rotation.order = 'ZYX'; p.position.set(px, py, pz); model.add(p); rig.parts[name] = { g: p }; return p; };
+  const h = part('head', 0, 0, 0);
+  h.add(mesh(boxGeom(0, 0, -4, -8, -4, 8, 8, 8, 0)), mesh(boxGeom(32, 0, -4, -8, -4, 8, 8, 8, 0.5)));
+  const b = part('torso', 0, 0, 0);
+  b.add(mesh(boxGeom(16, 16, -4, 0, -4 + 2, 8, 12, 4, 0)), mesh(boxGeom(16, 32, -4, 0, -2, 8, 12, 4, 0.25)));
+  b.children[0].geometry = boxGeom(16, 16, -4, 0, -2, 8, 12, 4, 0);
+  const limb = (name, px, py, pz, cube, layers, joint) => {
+    const p = part(name, px, py, pz);
+    const [x, y, z, w, hh, d] = cube, jf = (joint - y) / hh;
+    const cx = x + w / 2, cz = z + d / 2;
+    const lower = new THREE.Group(); lower.position.set(cx, joint, cz); p.add(lower);
+    for (const [U, V, inf] of layers) {
+      const up = mesh(boxGeom(U, V, x, y, z, w, hh, d, inf, 0, jf)); p.add(up);
+      const lo = mesh(boxGeom(U, V, x, y, z, w, hh, d, inf, jf, 1, 0)); lo.position.set(-cx, -joint, -cz); lower.add(lo);
+    }
+    rig.parts[name].lower = lower;
+    return p;
+  };
+  const aw = slim ? 3 : 4;
+  limb('rightArm', -5, 2, 0, [-3 + (slim ? 1 : 0), -2, -2, aw, 12, 4], [[40, 16, 0], [40, 32, 0.25]], 4);
+  limb('leftArm', 5, 2, 0, [-1, -2, -2, aw, 12, 4], [[32, 48, 0], [48, 48, 0.25]], 4);
+  limb('rightLeg', -1.9, 12, 0.1, [-2, 0, -2, 4, 12, 4], [[0, 16, 0], [0, 32, 0.25]], 6);
+  limb('leftLeg', 1.9, 12, 0.1, [-2, 0, -2, 4, 12, 4], [[16, 48, 0], [0, 48, 0.25]], 6);
+  // cadena del objeto en la mano (ItemInHandLayer + HeldItemMixin de Player Animator)
+  for (const [arm, item, side] of [['rightArm', 'rightItem', 1], ['leftArm', 'leftItem', -1]]) {
+    const p = rig.parts[arm].g;
+    const slimOff = new THREE.Group(); slimOff.position.x = slim ? 0.5 * side * 16 / 16 : 0; // translateToHand en brazos finos
+    p.add(slimOff);
+    const bend = new THREE.Group(); bend.position.y = 4; slimOff.add(bend);
+    const bendBack = new THREE.Group(); bendBack.position.y = -4; bend.add(bendBack);
+    const r1 = new THREE.Group(); r1.rotation.x = -PI / 2; bendBack.add(r1);
+    const r2 = new THREE.Group(); r2.rotation.y = PI; r1.add(r2);
+    const t = new THREE.Group(); t.position.set(side * 1, 2, -10); r2.add(t);
+    const isc = new THREE.Group(); t.add(isc);
+    const it = new THREE.Group(); it.rotation.order = 'ZYX'; isc.add(it);
+    const slot = new THREE.Group(); it.add(slot);
+    rig.parts[arm].item = { bend, isc, it, slot, side };
+  }
+  if (currentWeapon) equip(currentWeapon);
+}
+
+/* ---------------------------------------------------------------- armas */
+const texCache = {};
+function texture(uri) {
+  if (texCache[uri]) return texCache[uri];
+  const t = new THREE.TextureLoader().load(uri); t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestFilter; t.colorSpace = THREE.SRGBColorSpace;
+  return (texCache[uri] = t);
+}
+const matCache = {};
+function mat(uri) { return matCache[uri] || (matCache[uri] = new THREE.MeshLambertMaterial({ map: texture(uri), alphaTest: 0.1, side: THREE.DoubleSide })); }
+
+function blockFace(dir, f, t) {
+  const [x0, y0, z0] = f, [x1, y1, z1] = t;
+  return {
+    north: [[x1, y1, z0], [x0, y1, z0], [x0, y0, z0], [x1, y0, z0]],
+    south: [[x0, y1, z1], [x1, y1, z1], [x1, y0, z1], [x0, y0, z1]],
+    east: [[x1, y1, z1], [x1, y1, z0], [x1, y0, z0], [x1, y0, z1]],
+    west: [[x0, y1, z0], [x0, y1, z1], [x0, y0, z1], [x0, y0, z0]],
+    up: [[x0, y1, z0], [x1, y1, z0], [x1, y1, z1], [x0, y1, z1]],
+    down: [[x0, y0, z1], [x1, y0, z1], [x1, y0, z0], [x0, y0, z0]],
+  }[dir];
+}
+function autoUv(dir, f, t) {
+  const [x0, y0, z0] = f, [x1, y1, z1] = t;
+  return { north: [16 - x1, 16 - y1, 16 - x0, 16 - y0], south: [x0, 16 - y1, x1, 16 - y0], east: [16 - z1, 16 - y1, 16 - z0, 16 - y0],
+    west: [z0, 16 - y1, z1, 16 - y0], up: [x0, z0, x1, z1], down: [x0, 16 - z1, x1, 16 - z0] }[dir];
+}
+function buildBlockModel(w) {
+  const g = new THREE.Group();
+  if (!w.elements.length && w.textures.layer0) { // item/handheld: sprite plano
+    const pos = [], uv = [];
+    quad(pos, uv, [[0, 16, 8], [16, 16, 8], [16, 0, 8], [0, 0, 8]], [[0, 1], [1, 1], [1, 0], [0, 0]]);
+    g.add(new THREE.Mesh(geom(pos, uv), mat(w.textures.layer0)));
+    return g;
+  }
+  for (const el of w.elements) {
+    const byTex = {};
+    for (const [dir, face] of Object.entries(el.faces || {})) {
+      const key = (face.texture || '').replace('#', ''); const uri = w.textures[key]; if (!uri) continue;
+      const [u1, v1, u2, v2] = face.uv || autoUv(dir, el.from, el.to);
+      let c = [[u1, v1], [u2, v1], [u2, v2], [u1, v2]].map(([u, v]) => [u / 16, 1 - v / 16]);
+      for (let r = (face.rotation || 0) / 90; r > 0; r--) c = [c[3], c[0], c[1], c[2]];
+      const b = byTex[uri] || (byTex[uri] = { pos: [], uv: [] });
+      quad(b.pos, b.uv, blockFace(dir, el.from, el.to), c);
+    }
+    const eg = new THREE.Group();
+    const inner = new THREE.Group(); eg.add(inner);
+    for (const [uri, b] of Object.entries(byTex)) inner.add(new THREE.Mesh(geom(b.pos, b.uv), mat(uri)));
+    if (el.rotation && el.rotation.angle) {
+      const o = el.rotation.origin; eg.position.set(...o); inner.position.set(-o[0], -o[1], -o[2]);
+      eg.rotation[el.rotation.axis] = el.rotation.angle * D;
+    }
+    g.add(eg);
+  }
+  return g;
+}
+function buildGeoModel(w) {
+  const g = new THREE.Group(); g.position.set(8, 8.16, 8); // GeoItemRenderer: translate(0.5, 0.51, 0.5)
+  const TW = w.texW, TH = w.texH, m = mat(w.texture);
+  for (const bone of w.bones) {
+    const pv = bone.pivot || [0, 0, 0];
+    const bg = new THREE.Group(); bg.position.set(-pv[0], pv[1], pv[2]); bg.rotation.order = 'ZYX';
+    if (bone.rotation) bg.rotation.set(-bone.rotation[0] * D, -bone.rotation[1] * D, bone.rotation[2] * D);
+    const inner = new THREE.Group(); inner.position.set(pv[0], -pv[1], -pv[2]); bg.add(inner);
+    const pos = [], uv = [];
+    for (const c of bone.cubes || []) {
+      const inf = c.inflate || 0;
+      const f = [-(c.origin[0] + c.size[0]) - inf, c.origin[1] - inf, c.origin[2] - inf], t = [-c.origin[0] + inf, c.origin[1] + c.size[1] + inf, c.origin[2] + c.size[2] + inf];
+      if (typeof c.uv !== 'object' || Array.isArray(c.uv)) continue;
+      for (const [dir, fu] of Object.entries(c.uv)) {
+        const [u, v] = fu.uv, [us, vs] = fu.uv_size;
+        const map = { east: 'west', west: 'east' }; const d2 = map[dir] || dir;
+        quad(pos, uv, blockFace(d2, f, t), [[u / TW, 1 - v / TH], [(u + us) / TW, 1 - v / TH], [(u + us) / TW, 1 - (v + vs) / TH], [u / TW, 1 - (v + vs) / TH]]);
+      }
+    }
+    if (pos.length) inner.add(new THREE.Mesh(geom(pos, uv), m));
+    g.add(bg);
+  }
+  return g;
+}
+const HANDHELD = { rotation: [0, -90, 55], translation: [0, 4, 0.5], scale: [0.85, 0.85, 0.85] };
+let currentWeapon = null;
+function equip(id) {
+  currentWeapon = id;
+  const slot = rig.parts.rightArm.item.slot;
+  slot.clear();
+  if (!id) return;
+  const w = DATA.weapons[id];
+  const disp = Object.keys(w.display || {}).length ? w.display : (w.kind === 'block' && !w.elements.length ? HANDHELD : {});
+  const tr = disp.translation || [0, 0, 0], ro = disp.rotation || [0, 0, 0], s = disp.scale || [1, 1, 1];
+  const dg = new THREE.Group(); dg.position.set(tr[0], tr[1], tr[2]); dg.rotation.order = 'XYZ'; dg.rotation.set(ro[0] * D, ro[1] * D, ro[2] * D);
+  const sg = new THREE.Group(); sg.scale.set(s[0], s[1], s[2]); dg.add(sg);
+  const og = new THREE.Group(); og.position.set(-8, -8, -8); sg.add(og);
+  og.add(w.kind === 'geo' ? buildGeoModel(w) : buildBlockModel(w));
+  slot.add(dg);
+  const sel = document.getElementById('weapon'); if (sel.value !== id) sel.value = id;
+}
+
+/* ---------------------------------------------------------------- aplicar la animacion */
+const REST = { head: [0, 0, 0], torso: [0, 0, 0], rightArm: [-5, 2, 0], leftArm: [5, 2, 0], rightLeg: [-1.9, 12, 0.1], leftLeg: [1.9, 12, 0.1] };
+function apply(pl) {
+  const v = (p, a, c) => pl ? pl.value(p, a, c) : c;
+  rig.bodyT.position.set(v('body', 'x', 0), v('body', 'y', 0) + 0.7, v('body', 'z', 0));
+  rig.bodyT.rotation.set(v('body', 'pitch', 0), v('body', 'yaw', 0), v('body', 'roll', 0));
+  const bs = [v('body', 'scaleX', 1), v('body', 'scaleY', 1), v('body', 'scaleZ', 1)]; rig.bodyT.scale.set(...bs);
+  for (const [name, rest] of Object.entries(REST)) {
+    const P = rig.parts[name];
+    P.g.position.set(v(name, 'x', rest[0]), v(name, 'y', rest[1]), v(name, 'z', rest[2]));
+    P.g.rotation.set(v(name, 'pitch', 0), v(name, 'yaw', 0), v(name, 'roll', 0));
+    P.g.scale.set(v(name, 'scaleX', 1), v(name, 'scaleY', 1), v(name, 'scaleZ', 1));
+    if (P.lower) {
+      const axis = v(name, 'axis', 0), bend = v(name, 'bend', 0);
+      P.lower.quaternion.setFromAxisAngle(new THREE.Vector3(Math.cos(-axis), 0, Math.sin(-axis)), bend);
+    }
+    if (P.item) {
+      const axis = v(name, 'axis', 0), bend = v(name, 'bend', 0);
+      P.item.bend.quaternion.setFromAxisAngle(new THREE.Vector3(Math.cos(-axis), 0, Math.sin(-axis)), bend);
+      const ip = name === 'rightArm' ? 'rightItem' : 'leftItem';
+      P.item.isc.scale.set(v(ip, 'scaleX', 1), v(ip, 'scaleY', 1), v(ip, 'scaleZ', 1));
+      P.item.it.position.set(v(ip, 'x', 0), v(ip, 'y', 0), v(ip, 'z', 0));
+      P.item.it.rotation.set(v(ip, 'pitch', 0), v(ip, 'yaw', 0), v(ip, 'roll', 0));
+    }
+  }
+}
+
+/* ================================================================ interfaz */
+const parsed = {}; for (const [k, j] of Object.entries(DATA.anims)) parsed[k] = parseAnim(j);
+const desc = k => DATA.anims[k].description || k;
+const ATTACK = new Set(); const famOfAnim = {};
+for (const [fid, f] of Object.entries(DATA.families)) for (const a of f.attacks) { ATTACK.add(a.anim); famOfAnim[a.anim] ??= fid; }
+
+let queue = [], player = null, playing = true, acc = 0, idle = 0, speed = 1, selected = null;
+function start(name) {
+  selected = name; player = new Player(parsed[name]); acc = 0; idle = 0;
+  document.querySelectorAll('.item').forEach(b => b.classList.toggle('sel', b.dataset.anim === name && b.dataset.q === String(queueId)));
+  const a = parsed[name];
+  document.getElementById('now').innerHTML = `${desc(name)}<small>${name} · ${(a.stop / 20).toFixed(2)} s</small>`;
+}
+let queueId = 0;
+function playList(list, weapon, qid) { queueId = qid; if (weapon) equip(weapon); queue = list.slice(1); start(list[0]); setPlaying(true); }
+function setPlaying(p) { playing = p; document.getElementById('play').textContent = p ? 'Pausa' : 'Reproducir'; }
+document.getElementById('play').onclick = () => setPlaying(!playing);
+document.getElementById('restart').onclick = () => selected && start(selected);
+document.getElementById('step').onclick = () => { setPlaying(false); player && player.step(); };
+const spd = document.getElementById('spd');
+spd.oninput = () => { speed = +spd.value; document.getElementById('spdv').textContent = speed.toFixed(2) + 'x'; };
+
+const wsel = document.getElementById('weapon');
+wsel.innerHTML = '<option value="">Sin arma</option>' + Object.entries(DATA.weapons).map(([k, w]) => `<option value="${k}">${w.label}</option>`).join('');
+wsel.onchange = () => equip(wsel.value || null);
+document.getElementById('slim').onchange = e => buildPlayer(e.target.checked);
+document.getElementById('skin').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
+    g.drawImage(img, 0, 0);
+    if (img.height === 32) { // skin vieja: copiar brazo y pierna derechos al lado izquierdo
+      g.drawImage(img, 0, 16, 16, 16, 16, 48, 16, 16); g.drawImage(img, 40, 16, 16, 16, 32, 48, 16, 16);
+    }
+    skinTex.image = c; skinTex.needsUpdate = true;
+  };
+  img.src = URL.createObjectURL(f);
+};
+
+const side = document.getElementById('side');
+let qn = 0;
+function section(title) { const h = document.createElement('h2'); h.textContent = title; side.appendChild(h); }
+section('Combos por arma');
+for (const [fid, f] of Object.entries(DATA.families)) {
+  const weapons = Object.entries(DATA.weapons).filter(([, w]) => w.family === fid);
+  if (!weapons.length) continue;
+  const box = document.createElement('div'); box.className = 'fam';
+  const qid = ++qn; let wpick = weapons[0][0];
+  box.innerHTML = `<header><b>${f.label}</b><button>Combo completo</button></header><div class="chips"></div><div class="list"></div>`;
+  const chips = box.querySelector('.chips');
+  for (const [wid, w] of weapons) {
+    const c = document.createElement('button'); c.className = 'chip' + (wid === wpick ? ' sel' : ''); c.textContent = w.label;
+    c.onclick = () => { wpick = wid; chips.querySelectorAll('.chip').forEach(x => x.classList.toggle('sel', x === c)); equip(wid); };
+    chips.appendChild(c);
+  }
+  const list = box.querySelector('.list');
+  f.attacks.forEach((a, i) => {
+    const b = document.createElement('button'); b.className = 'item'; b.dataset.anim = a.anim; b.dataset.q = qid;
+    b.innerHTML = `<span class="n">${i + 1}º</span><span class="t">${desc(a.anim).replace(/^[^:]+:\s*/, '')}</span><span class="d">×${a.damage.toFixed(2)}</span>`;
+    b.onclick = () => playList([a.anim], wpick, qid);
+    list.appendChild(b);
+  });
+  box.querySelector('header button').onclick = () => playList(f.attacks.map(a => a.anim), wpick, qid);
+  side.appendChild(box);
+}
+for (const g of DATA.extra) {
+  section(g.group);
+  const box = document.createElement('div'); box.className = 'list'; const qid = ++qn;
+  for (const k of g.items) {
+    const b = document.createElement('button'); b.className = 'item'; b.dataset.anim = k; b.dataset.q = qid;
+    b.innerHTML = `<span class="n">▸</span><span class="t">${desc(k)}</span><span class="d">${(parsed[k].loop ? 'loop' : (parsed[k].stop / 20).toFixed(2) + 's')}</span>`;
+    b.onclick = () => playList([k], g.weapon, qid);
+    box.appendChild(b);
+  }
+  side.appendChild(box);
+}
+const note = document.createElement('p'); note.className = 'note';
+note.textContent = 'En el juego, Better Combat estira cada ataque al tiempo de recarga del arma y el golpe conecta en la marca naranja. ×1.00 es el multiplicador de daño de ese golpe del combo. Las esquivas y la pose de conjuro las reproduce el addon.';
+side.appendChild(note);
+
+/* ---------------------------------------------------------------- linea de tiempo */
+const tl = document.getElementById('tl'), tg = tl.getContext('2d');
+function drawTimeline() {
+  const w = tl.clientWidth, h = 34, r = Math.min(devicePixelRatio, 2);
+  if (tl.width !== w * r) { tl.width = w * r; tl.height = h * r; }
+  tg.setTransform(r, 0, 0, r, 0, 0); tg.clearRect(0, 0, w, h);
+  if (!player) return;
+  const a = player.a, total = Math.max(a.loop ? a.end + 1 : a.stop, 1), x = t => 6 + (w - 12) * t / total;
+  tg.fillStyle = '#1e2530'; tg.fillRect(6, 12, w - 12, 10);
+  tg.fillStyle = 'rgba(217,171,78,.25)'; tg.fillRect(x(a.begin), 12, x(a.end) - x(a.begin), 10);
+  tg.fillStyle = '#9097a3'; tg.font = '11px "JetBrains Mono", monospace';
+  for (let t = 0; t <= total; t += total > 40 ? 10 : 5) { tg.fillRect(x(t), 22, 1, 4); tg.fillText(t, x(t) - 3, 34); }
+  tg.fillStyle = '#d9ab4e'; tg.fillRect(x(a.begin) - 1, 8, 2, 18); tg.fillRect(x(a.end) - 1, 8, 2, 18);
+  if (ATTACK.has(selected)) { tg.fillStyle = '#e9803a'; tg.fillRect(x(a.end / 2) - 1.5, 4, 3, 22); }
+  const now = player.running ? player.tick + player.delta : (a.loop ? a.end : a.stop);
+  tg.fillStyle = '#ece3cf'; tg.beginPath(); tg.moveTo(x(now), 12); tg.lineTo(x(now) - 5, 3); tg.lineTo(x(now) + 5, 3); tg.fill();
+  tg.fillRect(x(now) - 0.5, 12, 1, 10);
+}
+tl.onclick = e => {
+  if (!player) return;
+  const a = player.a, total = a.loop ? a.end + 1 : a.stop, rect = tl.getBoundingClientRect();
+  const t = Math.round((e.clientX - rect.left - 6) / (rect.width - 12) * total);
+  player = new Player(a); for (let i = 0; i < t; i++) player.step(); setPlaying(false);
+};
+
+/* ---------------------------------------------------------------- bucle */
+function resize() { const w = view.clientWidth, h = view.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+new ResizeObserver(resize).observe(view);
+let last = performance.now();
+const hit = document.getElementById('hit');
+function frame(now) {
+  const dt = Math.min(0.1, (now - last) / 1000); last = now;
+  if (player && playing) {
+    acc += dt * 20 * speed;
+    while (acc >= 1) {
+      acc -= 1;
+      if (player.running) player.step();
+      else if (queue.length) { start(queue.shift()); }
+      else if (document.getElementById('loop').checked && ++idle > 12) { const q = Array.from(document.querySelectorAll(`.item[data-q="${queueId}"]`)).map(b => b.dataset.anim); const all = q.length > 1 && queue.length === 0 && wasCombo ? q : [selected]; queue = all.slice(1); start(all[0]); }
+    }
+    player.delta = player.running ? acc : 0;
+  }
+  if (player) {
+    const a = player.a, t = player.tick + player.delta;
+    hit.classList.toggle('on', ATTACK.has(selected) && player.running && t >= a.end / 2 - 0.5 && t <= a.end / 2 + 2);
+    document.getElementById('ticks').textContent = `tick ${player.running ? player.tick.toString().padStart(2, '0') : '--'} / ${a.loop ? a.end : a.stop}`;
+  }
+  apply(player && player.running ? player : null);
+  drawTimeline();
+  controls.update(); renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+let wasCombo = false;
+const _playList = playList;
+playList = (list, weapon, qid) => { wasCombo = list.length > 1; _playList(list, weapon, qid); };
+
+buildPlayer(false);
+const firstFam = Object.keys(DATA.families)[0];
+const firstW = Object.entries(DATA.weapons).find(([, w]) => w.family === firstFam)[0];
+equip(firstW);
+playList(DATA.families[firstFam].attacks.map(a => a.anim), firstW, 1);
+resize();
+requestAnimationFrame(frame);
+window.__preview = { start, equip, apply, cam, setPlaying, players: () => player, parsed, Player, step: n => { for (let i = 0; i < n; i++) player.step(); }, render: () => { apply(player && player.running ? player : null); renderer.render(scene, camera); } };
+</script>

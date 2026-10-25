@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "mushoku_combat",
+  "version": "${version}",
+  "name": "Mushoku Tensei: Combate",
+  "description": "Addon de combate para Mushoku Tensei con Better Combat: combos animados para cada arma, estamina, roll y dash con esquiva perfecta, y la pose de conjuro.",
+  "authors": ["Zennin"],
+  "license": "AFL-3.0",
+  "icon": "assets/mushoku_combat/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["net.zennin.mushokucombat.MushokuCombat"],
+    "client": ["net.zennin.mushokucombat.client.CombatClient"]
+  },
+  "mixins": ["mushoku_combat.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*",
+    "remushoku": "*",
+    "bettercombat": ">=2.0.0",
+    "playeranimator": ">=2.0.0"
+  }
+}

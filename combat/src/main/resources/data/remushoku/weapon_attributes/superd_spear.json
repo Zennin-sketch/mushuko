@@ -1,0 +1,40 @@
+{
+  "attributes": {
+    "category": "spear",
+    "two_handed": true,
+    "range_bonus": 1.0,
+    "attacks": [
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 0.9,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "mushoku_combat:spear_thrust",
+        "swing_sound": {
+          "id": "bettercombat:spear_stab"
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 0.85,
+        "angle": 160,
+        "upswing": 0.5,
+        "animation": "mushoku_combat:spear_sweep",
+        "swing_sound": {
+          "id": "bettercombat:glaive_slash_quick"
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1.5,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "mushoku_combat:spear_dragon_pierce",
+        "swing_sound": {
+          "id": "bettercombat:spear_stab"
+        }
+      }
+    ],
+    "pose": "mushoku_combat:pose_spear"
+  }
+}
