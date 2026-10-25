@@ -17,7 +17,7 @@ public final class DodgeClient {
     private static final String[] DIRS = {"forward", "backward", "left", "right"};
     // Velocidad tick a tick (bloques/tick): arranque corto (anticipacion), impulso fuerte y frenada progresiva.
     private static final double[] DASH = {0.15, 0.55, 1.0, 0.95, 0.8, 0.55, 0.3, 0.12};
-    private static final double[] ROLL = {0.1, 0.35, 0.5, 0.55, 0.52, 0.45, 0.38, 0.28, 0.15};
+    private static final double[] ROLL = {0.05, 0.1, 0.18, 0.3, 0.48, 0.55, 0.55, 0.5, 0.42, 0.32, 0.2, 0.1};
 
     private static int cooldown = 0, motionTicks = 0, motionStep = 0;
     private static Vec3 motion = Vec3.ZERO;
