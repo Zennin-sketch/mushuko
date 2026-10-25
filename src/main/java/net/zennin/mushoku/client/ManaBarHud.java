@@ -45,6 +45,7 @@ public final class ManaBarHud {
 
         int line = Y + H + 4;
         if (ClientManaState.playerClass == 2) line = renderSwordsman(g, mc, line);
+        line = renderExtra(g, mc, line);
         if (!CastingClient.casting && ClientManaState.playerClass != 1 && ClientManaState.queued.isEmpty()) return;
         if (ClientManaState.noElement) {
             g.drawString(mc.font, Component.translatable("hud.remushoku.no_element"), X + 2, line, 0xFFD58CFF, true);
@@ -92,5 +93,40 @@ public final class ManaBarHud {
             line += 10;
         }
         return line + 2;
+    }
+
+    /** Ojos demoniacos, conjuro silencioso e Identificacion (nombre de lo que miras bajo la mira). */
+    private static int renderExtra(GuiGraphics g, Minecraft mc, int line) {
+        var d = ClientExtraState.data;
+        KeyMapping[] eyeKeys = {ModKeys.EYE_1, ModKeys.EYE_2};
+        for (int i = 0; i < 2; i++) {
+            if (d.eye(i).isEmpty()) continue;
+            boolean on = d.on(i);
+            g.drawString(mc.font, Component.translatable("hud.remushoku.eye", eyeKeys[i].getTranslatedKeyMessage(),
+                    Component.translatable("eye.remushoku." + d.eye(i))), X + 2, line, on ? 0xFFD58CFF : 0xFF8A7A9A, true);
+            line += 10;
+        }
+        if (ClientManaState.playerClass == 1 && d.silent()) {
+            KeyMapping[] keys = {ModKeys.SKILL_1, ModKeys.SKILL_2, ModKeys.SKILL_3};
+            for (int i = 0; i < 3; i++) {
+                Spell s = d.silentSlot(i).isEmpty() ? null : Spell.byId(d.silentSlot(i));
+                Component name = s == null ? Component.literal("-") : Component.translatable(s.translationKey());
+                g.drawString(mc.font, Component.translatable("hud.remushoku.slot", keys[i].getTranslatedKeyMessage(), name), X + 2, line, 0xFF8FD8FF, true);
+                line += 10;
+            }
+        }
+        if (d.active("identification") && mc.hitResult != null && mc.level != null) {
+            Component what = null;
+            if (mc.hitResult instanceof net.minecraft.world.phys.EntityHitResult eh) {
+                var e = eh.getEntity();
+                what = e instanceof net.minecraft.world.entity.LivingEntity le
+                        ? Component.translatable("hud.remushoku.identify_entity", e.getDisplayName(), (int) Math.ceil(le.getHealth()), (int) le.getMaxHealth())
+                        : e.getDisplayName();
+            } else if (mc.hitResult instanceof net.minecraft.world.phys.BlockHitResult bh && mc.hitResult.getType() != net.minecraft.world.phys.HitResult.Type.MISS) {
+                what = mc.level.getBlockState(bh.getBlockPos()).getBlock().getName();
+            }
+            if (what != null) g.drawCenteredString(mc.font, what, g.guiWidth() / 2, g.guiHeight() / 2 + 12, 0xFFD58CFF);
+        }
+        return line;
     }
 }

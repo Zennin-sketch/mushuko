@@ -23,6 +23,7 @@ public final class ModNetworking {
         PayloadTypeRegistry.playS2C().register(SwordSyncPayload.TYPE, SwordSyncPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(SwordActionPayload.TYPE, SwordActionPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(GuildSyncPayload.TYPE, GuildSyncPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(ExtraSyncPayload.TYPE, ExtraSyncPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(OpenScreenPayload.TYPE, OpenScreenPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(GuildActionPayload.TYPE, GuildActionPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(ComboPayload.TYPE, ComboPayload.CODEC);
@@ -42,7 +43,10 @@ public final class ModNetworking {
                     case SwordActionPayload.TOGGLE -> SwordSystem.toggle(p, payload.arg());
                     case SwordActionPayload.TOUKI_LEVEL -> SwordSystem.buyTouki(p);
                     case SwordActionPayload.TOUKI_TOGGLE -> SwordSystem.toggleTouki(p);
-                    case SwordActionPayload.USE_SLOT -> SwordSkills.useSlot(p, payload.slot());
+                    case SwordActionPayload.USE_SLOT -> {
+                        if (net.zennin.mushoku.sword.SwordSystem.isSwordsman(p)) SwordSkills.useSlot(p, payload.slot());
+                        else net.zennin.mushoku.extra.SilentCasting.useSlot(p, payload.slot());
+                    }
                     default -> {}
                 }
             });
@@ -58,6 +62,7 @@ public final class ModNetworking {
                     case GuildActionPayload.RANK_UP -> GuildSystem.rankUp(p);
                     case GuildActionPayload.BUY -> Shops.trade(p, payload.shop(), payload.arg(), true);
                     case GuildActionPayload.SELL -> Shops.trade(p, payload.shop(), payload.arg(), false);
+                    case GuildActionPayload.EYE_PICK -> net.zennin.mushoku.extra.DemonEyes.pick(p, payload.arg(), payload.shop());
                     default -> {}
                 }
             });
@@ -69,6 +74,8 @@ public final class ModNetworking {
                     case ActionPayload.CAST -> SpellCasting.onActivate(p);
                     case ActionPayload.CHOOSE_MAGE -> PlayerClasses.choose(p, SpellCasting.CLASS_MAGE);
                     case ActionPayload.CHOOSE_SWORDSMAN -> PlayerClasses.choose(p, SpellCasting.CLASS_SWORDSMAN);
+                    case ActionPayload.EYE_ONE -> net.zennin.mushoku.extra.DemonEyes.toggle(p, 0);
+                    case ActionPayload.EYE_TWO -> net.zennin.mushoku.extra.DemonEyes.toggle(p, 1);
                     default -> {}
                 }
             });

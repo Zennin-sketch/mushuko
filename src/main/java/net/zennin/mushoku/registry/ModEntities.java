@@ -63,6 +63,13 @@ public final class ModEntities {
     public static final EntityType<AnimatedMonster> SNOW_DRAKE_MOM = creature("snow_drake_mom", 2f, 5f,
             (t, l) -> new AnimatedBoss(t, l, new AnimatedMonster.Anims("Idle", "Walk", "Bite"), AnimatedBoss.Kind.DRAKE_MOM));
 
+    public static final EntityType<net.zennin.mushoku.entity.ThrownMushokuItem> THROWN_ITEM = Registry.register(BuiltInRegistries.ENTITY_TYPE,
+            MushokuMod.id("thrown_item"), EntityType.Builder.<net.zennin.mushoku.entity.ThrownMushokuItem>of(net.zennin.mushoku.entity.ThrownMushokuItem::new, MobCategory.MISC)
+                    .sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(10).build("thrown_item"));
+    public static final EntityType<net.zennin.mushoku.entity.SwapTotemEntity> SWAP_TOTEM = Registry.register(BuiltInRegistries.ENTITY_TYPE,
+            MushokuMod.id("ent_swap_totem"), EntityType.Builder.<net.zennin.mushoku.entity.SwapTotemEntity>of(net.zennin.mushoku.entity.SwapTotemEntity::new, MobCategory.MISC)
+                    .sized(0.6f, 1.8f).clientTrackingRange(10).build("ent_swap_totem"));
+
     private ModEntities() {}
 
     private static <T extends Mob> EntityType<T> creature(String name, float w, float h, EntityType.EntityFactory<T> factory) {
@@ -90,6 +97,7 @@ public final class ModEntities {
         for (EntityType<TownNpcEntity> t : java.util.List.of(GUILD_RECEPTIONIST, BLACK_SMITH_KEEP, GENERAL_STORE_KEEP, MAGIC_SHOP_KEEPER))
             FabricDefaultAttributeRegistry.register(t, TownNpcEntity.attributes());
 
+        FabricDefaultAttributeRegistry.register(SWAP_TOTEM, net.zennin.mushoku.entity.SwapTotemEntity.attributes());
         FabricDefaultAttributeRegistry.register(ASSAULT_DOG, AnimatedMonster.attributes(30, 5, 0.4, 16));
         FabricDefaultAttributeRegistry.register(MUCKY_RAT, AnimatedMonster.attributes(10, 4, 0.4, 16));
         FabricDefaultAttributeRegistry.register(DEADLY_WRAITH, AnimatedMonster.attributes(400, 6, 0.3, 16));

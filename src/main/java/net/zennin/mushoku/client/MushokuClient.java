@@ -25,6 +25,8 @@ public class MushokuClient implements ClientModInitializer {
         CastingClient.init();
         SwordClient.init();
         EntityRendererRegistry.register(ModEntities.MAGIC_PROJECTILE, NoopRenderer::new);
+        EntityRendererRegistry.register(ModEntities.THROWN_ITEM, net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
+        AnimatedRenderer.register(ModEntities.SWAP_TOTEM, "tptotem", "tptotemtexture", 0.4f);
         AnimatedRenderer.register(ModEntities.ASSAULT_DOG, "assaultdog2", "assaultdog", 0.6f);
         AnimatedRenderer.register(ModEntities.MUCKY_RAT, "muckyrat", "muckyrattxt", 0.15f);
         AnimatedRenderer.register(ModEntities.DEADLY_WRAITH, "deadlywraith", "deadlywraithtxt", 0.5f);
@@ -60,7 +62,14 @@ public class MushokuClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(SwordSyncPayload.TYPE, (payload, context) -> ClientSwordState.set(payload.data()));
         ClientPlayNetworking.registerGlobalReceiver(GuildSyncPayload.TYPE, (payload, context) -> ClientGuildState.set(payload.data()));
         ClientPlayNetworking.registerGlobalReceiver(OpenScreenPayload.TYPE, (payload, context) ->
-                context.client().setScreen(payload.screen().equals("guild") ? new GuildScreen() : new ShopScreen(payload.screen())));
+                context.client().setScreen(switch (payload.screen()) {
+                    case "guild" -> new GuildScreen();
+                    case "guide" -> new GuideScreen();
+                    case "spellbook" -> new SpellBookScreen();
+                    case "demon_eye" -> new DemonEyeScreen();
+                    default -> new ShopScreen(payload.screen());
+                }));
+        ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.ExtraSyncPayload.TYPE, (payload, context) -> ClientExtraState.set(payload.data()));
         HudRenderCallback.EVENT.register(ManaBarHud::render);
     }
 }

@@ -21,6 +21,9 @@ public final class ModKeys {
     public static final KeyMapping SKILL_1 = reg("key.remushoku.skill_one_key", GLFW.GLFW_KEY_Z);
     public static final KeyMapping SKILL_2 = reg("key.remushoku.skill_two_key", GLFW.GLFW_KEY_X);
     public static final KeyMapping SKILL_3 = reg("key.remushoku.skill_three_key", GLFW.GLFW_KEY_C);
+    // Ojos demoniacos: G y H como el original
+    public static final KeyMapping EYE_1 = reg("key.remushoku.key_eye_one", GLFW.GLFW_KEY_G);
+    public static final KeyMapping EYE_2 = reg("key.remushoku.key_eye_twoh", GLFW.GLFW_KEY_H);
 
     private ModKeys() {}
 

@@ -29,6 +29,7 @@ public final class PlayerClasses {
         ModNetworking.syncMana(p);
         SwordSystem.refresh(p);
         SwordSystem.sync(p);
+        net.zennin.mushoku.extra.DemonEyes.maybeBornWithEye(p);
     }
 
     /** Vuelve la clase a "sin elegir" y abre el menu (orbe de cambio de clase). */

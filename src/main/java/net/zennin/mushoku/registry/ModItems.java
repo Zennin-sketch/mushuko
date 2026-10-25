@@ -11,6 +11,8 @@ import net.minecraft.world.item.Tier;
 import net.zennin.mushoku.MushokuMod;
 import net.zennin.mushoku.item.AdhesiveBombItem;
 import net.zennin.mushoku.item.ChalkItem;
+import net.zennin.mushoku.item.ExtraItems;
+import net.zennin.mushoku.item.Mk2ArmorItem;
 import net.zennin.mushoku.item.ClassChangeItem;
 import net.zennin.mushoku.item.MagicStoneItem;
 import net.zennin.mushoku.item.SpellScrollItem;
@@ -40,16 +42,16 @@ public final class ModItems {
     public static final Item EARTH_BOOK = register("earth_book", new ElementBookItem(Element.EARTH, new Item.Properties().stacksTo(1)));
     public static final Item WIND_BOOK = register("wind_book", new ElementBookItem(Element.WIND, new Item.Properties().stacksTo(1)));
     public static final Item WATER_BOOK = register("water_book", new ElementBookItem(Element.WATER, new Item.Properties().stacksTo(1)));
-    public static final Item SPELL_BOOK = single("spell_book");
-    public static final Item GUIDE_BOOK = single("guide_book");
-    public static final Item SILENT_TOME = single("silent_tome");
+    public static final Item SPELL_BOOK = register("spell_book", new ExtraItems.ScreenItem("spellbook", "tooltip.remushoku.spell_book", new Item.Properties().stacksTo(1)));
+    public static final Item GUIDE_BOOK = register("guide_book", new ExtraItems.ScreenItem("guide", "tooltip.remushoku.guide_book", new Item.Properties().stacksTo(1)));
+    public static final Item SILENT_TOME = register("silent_tome", new ExtraItems.SilentTomeItem(new Item.Properties().stacksTo(1)));
     public static final Item SCROLL = register("scroll", new SpellScrollItem(new Item.Properties().stacksTo(16)));
     public static final Item CHALK = register("chalk", new ChalkItem(new Item.Properties().durability(32)));
     public static final Item INKAND_QUILL = single("inkand_quill");
     public static final Item INK_VIAL = simple("ink_vial");
     public static final Item CLASS_CHANGE_ITEM = register("class_change_item", new ClassChangeItem(new Item.Properties().stacksTo(16)));
     public static final Item SUMMON_SCROLL_KALMAN = register("summon_scroll_kalman", new SummonScrollItem(new Item.Properties().stacksTo(1)));
-    public static final Item DEMON_EYE = single("demon_eye");
+    public static final Item DEMON_EYE = register("demon_eye", new ExtraItems.ScreenItem("demon_eye", "tooltip.remushoku.demon_eye", new Item.Properties().stacksTo(16)));
 
     // --- Monedas ---
     public static final Item SMALL_COPPER = simple("small_copper");
@@ -60,16 +62,32 @@ public final class ModItems {
     // --- Llaves y objetos varios ---
     public static final Item MOSSY_KEY = simple("mossy_key");
     public static final Item ICE_KEY = simple("ice_key");
-    public static final Item SPICE_BAG = simple("spice_bag");
-    public static final Item ROCK = simple("rock");
+    public static final Item SPICE_BAG = register("spice_bag", new ExtraItems.ThrowItem(0f, "tooltip.remushoku.spice_bag", new Item.Properties().stacksTo(16)));
+    public static final Item ROCK = register("rock", new ExtraItems.ThrowItem(4f, "tooltip.remushoku.rock", new Item.Properties().stacksTo(16)));
     public static final Item ADHESIVE_BOMB = register("adhesive_bomb", new AdhesiveBombItem(new Item.Properties().stacksTo(16)));
-    public static final Item SWAP_TOTEM = single("swap_totem");
-    public static final Item SWAP_CLOAK = single("swap_cloak");
-    public static final Item METAL_CLAWS = single("metal_claws");
+    public static final Item SWAP_TOTEM = register("swap_totem", new ExtraItems.SwapTotemItem(new Item.Properties().stacksTo(1)));
+    public static final Item SWAP_CLOAK = register("swap_cloak", new ExtraItems.SwapCloakItem(new Item.Properties().stacksTo(1)));
+    public static final Item METAL_CLAWS = register("metal_claws", new ExtraItems.TipItem("tooltip.remushoku.metal_claws", new Item.Properties().stacksTo(1)));
     public static final Item AQUA_HEARTIA = staff("aqua_heartia", 0.25f);
     public static final Item DRAGON_STAFF = staff("dragon_staff", 0.20f);
     public static final Item STAFF_OF_AREOS = staff("staff_of_areos", 0.30f);
-    public static final Item ULTIMO_SUSPIRO = single("ultimo_suspiro");
+    public static final Item ULTIMO_SUSPIRO = register("ultimo_suspiro", new ExtraItems.TipItem("tooltip.remushoku.ultimo_suspiro", new Item.Properties().stacksTo(1)));
+
+    // --- Armadura Magica Mk 2 (defensa y durabilidad del original) ---
+    public static final net.minecraft.core.Holder<net.minecraft.world.item.ArmorMaterial> MK2_MATERIAL = Registry.registerForHolder(
+            BuiltInRegistries.ARMOR_MATERIAL, MushokuMod.id("mk2"), new net.minecraft.world.item.ArmorMaterial(
+                    java.util.Map.of(net.minecraft.world.item.ArmorItem.Type.BOOTS, 3, net.minecraft.world.item.ArmorItem.Type.LEGGINGS, 6,
+                            net.minecraft.world.item.ArmorItem.Type.CHESTPLATE, 8, net.minecraft.world.item.ArmorItem.Type.HELMET, 3,
+                            net.minecraft.world.item.ArmorItem.Type.BODY, 8),
+                    9, net.minecraft.sounds.SoundEvents.ARMOR_EQUIP_NETHERITE,
+                    () -> net.minecraft.world.item.crafting.Ingredient.of(net.minecraft.world.item.Items.NETHERITE_SCRAP),
+                    java.util.List.of(new net.minecraft.world.item.ArmorMaterial.Layer(MushokuMod.id("mk2"))), 3f, 0.1f));
+    public static final Item MK2_CHESTPLATE = register("magic_armor_mk_2_chestplate", new Mk2ArmorItem(MK2_MATERIAL,
+            net.minecraft.world.item.ArmorItem.Type.CHESTPLATE, new Item.Properties().durability(16 * 40)));
+    public static final Item MK2_LEGGINGS = register("magic_armor_mk_2_leggings", new Mk2ArmorItem(MK2_MATERIAL,
+            net.minecraft.world.item.ArmorItem.Type.LEGGINGS, new Item.Properties().durability(15 * 40)));
+    public static final Item MK2_BOOTS = register("magic_armor_mk_2_boots", new Mk2ArmorItem(MK2_MATERIAL,
+            net.minecraft.world.item.ArmorItem.Type.BOOTS, new Item.Properties().durability(13 * 40)));
 
     // --- Armas (mismas stats que el original: dano base + bonus del material, velocidad) ---
     public static final Item ALMANFI_SWORD = sword("almanfi_sword", ModTiers.ALMANFI, 3, -1.0f);

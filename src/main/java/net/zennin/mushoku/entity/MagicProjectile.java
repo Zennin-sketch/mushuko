@@ -42,7 +42,8 @@ public class MagicProjectile extends ThrowableProjectile {
     public MagicProjectile(Level level, LivingEntity owner, int kind, float damage) {
         super(ModEntities.MAGIC_PROJECTILE, owner, level);
         this.entityData.set(KIND, kind);
-        this.damage = damage;
+        // Ultimo Suspiro / Aqua Heartia en la mano amplifican la magia
+        this.damage = owner instanceof net.minecraft.world.entity.player.Player p ? damage * net.zennin.mushoku.extra.ExtraTicks.magicAmp(p) : damage;
     }
 
     public MagicProjectile size(float s) { this.entityData.set(SIZE, s); return this; }

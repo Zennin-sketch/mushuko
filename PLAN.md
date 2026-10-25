@@ -81,8 +81,14 @@ Se mantiene el id `remushoku` para que las texturas, modelos y datos funcionen s
 - [x] Pago con cualquier combinación de monedas y cambio automático
 
 ### Fase 6 — Ojos demoníacos y extras
-- 5 ojos demoníacos, armadura Mk2, objetos especiales, libro guía
-- Capas 3D (3D Skin Layers) y personajes extra (Eris, Sylphiette)
+#### 6A (HECHA, en prueba)
+- [x] Menús medievales (tablón con pergaminos, tiendas en fichas, libros)
+- [x] 5 ojos demoníacos en 2 ranuras (G / H): Clarividencia, Absorción, Identificación, Vacío Absoluto, Poder Mágico
+- [x] Armadura Mágica Mk 2 (modelo 3D GeckoLib) con bonus de set completo
+- [x] Roca, Bolsa de Especias, Tótem y Capa de Intercambio, Garras de escalada (Objetos del Dios Norte)
+- [x] Último Suspiro (+50% magia) y Aqua Heartia (+20%); Tomo de Conjuro Silencioso
+- [x] Libro Guía (textos originales + capítulos nuevos) y Libro de Hechizos
+#### 6B — Personajes extra (Eris, Sylphiette) y capas 3D de skin
 
 ## Cómo se compila
 1. Subir este proyecto a un repositorio de GitHub.

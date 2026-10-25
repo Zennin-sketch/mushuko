@@ -38,7 +38,25 @@ public final class ModAttachments {
             .initializer(() -> net.zennin.mushoku.guild.GuildData.DEFAULT)
             .buildAndRegister(MushokuMod.id("guild"));
 
+    /** Ojos demoniacos, conjuro silencioso y estados de la Fase 6. */
+    @SuppressWarnings("UnstableApiUsage")
+    public static final AttachmentType<ExtraData> EXTRA = AttachmentRegistry.<ExtraData>builder()
+            .persistent(ExtraData.CODEC)
+            .copyOnDeath()
+            .initializer(() -> ExtraData.DEFAULT)
+            .buildAndRegister(MushokuMod.id("extra"));
+
     private ModAttachments() {}
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static ExtraData extra(Player player) {
+        return player.getAttachedOrCreate(EXTRA);
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static void setExtra(Player player, ExtraData data) {
+        player.setAttached(EXTRA, data);
+    }
 
     @SuppressWarnings("UnstableApiUsage")
     public static net.zennin.mushoku.guild.GuildData guild(Player player) {
