@@ -9,6 +9,7 @@ base { archivesName = 'mushoku-combat' }
 repositories {
     maven { url = 'https://maven.fabricmc.net/' }
     maven { url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
+    maven { url = 'https://maven.kosmx.dev/' }
 }
 
 // Copia minima de la API de Better Combat: solo para compilar el mixin (no va dentro del .jar).
@@ -31,6 +32,9 @@ dependencies {
     modCompileOnly("software.bernie.geckolib:geckolib-fabric-1.21.1:${project.geckolib_version}") { transitive = false }
     // Player Animator (MIT) solo para compilar; en el juego lo trae el jugador junto con Better Combat.
     modCompileOnly files('libs/player-animation-lib-fabric-2.0.4+1.21.1.jar')
+    // Bendy-lib (MIT): dobla codos, rodillas y cintura sin dejar huecos. Player Animator la usa pero no la trae;
+    // sin ella las articulaciones quedan rectas. Va dentro del .jar del addon (misma version que usa Player Animator 2.0.4).
+    include("io.github.kosmx.bendy-lib:bendy-lib-fabric:5.1") { transitive = false }
 }
 
 processResources {
