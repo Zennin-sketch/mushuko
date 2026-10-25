@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "aaa",
+    "aba",
+    "c c"
+  ],
+  "key": {
+    "a": {
+      "item": "remushoku:saint_stone"
+    },
+    "b": {
+      "item": "remushoku:king_stone"
+    },
+    "c": {
+      "item": "minecraft:iron_ingot"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "remushoku:curse_suppressing_helmet"
+  }
+}

@@ -1,0 +1,80 @@
+{
+ "credit": "Made with Blockbench",
+ "parent": "builtin/entity",
+ "texture_size": [
+  64,
+  64
+ ],
+ "display": {
+  "thirdperson_righthand": {
+   "translation": [
+    0,
+    -11,
+    2
+   ]
+  },
+  "thirdperson_lefthand": {
+   "translation": [
+    0,
+    -11,
+    2
+   ]
+  },
+  "firstperson_righthand": {
+   "rotation": [
+    -5,
+    13,
+    -9
+   ],
+   "translation": [
+    0,
+    -11,
+    0
+   ]
+  },
+  "firstperson_lefthand": {
+   "rotation": [
+    -5,
+    13,
+    -9
+   ],
+   "translation": [
+    0,
+    -11,
+    0
+   ]
+  },
+  "ground": {
+   "rotation": [
+    -9.320000000000164,
+    9.7199999999998,
+    -92.23999999999978
+   ],
+   "translation": [
+    -11.5,
+    0,
+    0.25
+   ]
+  },
+  "gui": {
+   "rotation": [
+    68.4699999999998,
+    50.4699999999998,
+    -73.05000000000018
+   ],
+   "translation": [
+    -2.25,
+    -4.25,
+    0
+   ],
+   "scale": [
+    0.37,
+    0.41258,
+    0.48945
+   ]
+  }
+ },
+ "textures": {
+  "particle": "remushoku:item/addon_ruijerd_spear_icon"
+ }
+}

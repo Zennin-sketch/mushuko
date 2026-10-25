@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "a"
+  ],
+  "key": {
+    "a": {
+      "item": "remushoku:imperial_stone"
+    }
+  },
+  "result": {
+    "count": 4,
+    "id": "remushoku:king_stone"
+  }
+}

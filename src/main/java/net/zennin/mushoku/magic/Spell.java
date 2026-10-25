@@ -68,7 +68,25 @@ public enum Spell {
     X_HEALING("x_healing", "ldur", Element.NONE, true),
     FEAST("feast", "rudl", Element.NONE, true),
     SHRINE_HEALING("shrine_healing", "ldudl", Element.NONE, true),
-    DISTURB_MAGIC("disturb_magic", "lrrddl", Element.NONE, true);
+    DISTURB_MAGIC("disturb_magic", "lrrddl", Element.NONE, true),
+    // --- Addon: magia variada (modo sin elemento) ---
+    STRENGTH("strength", "rrr", Element.NONE, true),
+    JUMP_BOOST("jump_boost", "uuu", Element.NONE, true),
+    NIGHT_VISION("night_vision", "lll", Element.NONE, true),
+    WATER_BREATHING("water_breathing", "ldl", Element.NONE, true),
+    FIRE_RESISTANCE("fire_resistance", "rrdd", Element.NONE, true),
+    INVISIBILITY("invisibility", "lluu", Element.NONE, true),
+    REPAIR("repair", "dduu", Element.NONE, true),
+    CLEANSE("cleanse", "uudd", Element.NONE, true),
+    // --- Addon: hechizos combinados (se forman con la tecla Combinar, no con flechas) ---
+    FIRE_RAIN("fire_rain", "+fire_rain", Element.FIRE, true, SpellLevel.INTERMEDIATE),
+    FREEZING_RAIN("freezing_rain", "+freezing_rain", Element.WATER, true, SpellLevel.ADVANCED),
+    SPIKE_RAIN("spike_rain", "+spike_rain", Element.EARTH, true, SpellLevel.ADVANCED),
+    DEEP_MIST("deep_mist", "+deep_mist", Element.WATER, true, SpellLevel.ADVANCED),
+    POISON_MIST("poison_mist", "+poison_mist", Element.WATER, true, SpellLevel.ADVANCED),
+    QUAGMIRE("quagmire", "+quagmire", Element.EARTH, true, SpellLevel.ADVANCED),
+    STONE_BLADE("stone_blade", "+stone_blade", Element.EARTH, true, SpellLevel.ADVANCED),
+    FROST_WIND("frost_wind", "+frost_wind", Element.WATER, true, SpellLevel.SAINT);
 
     public final String id;
     public final String combo;
@@ -88,11 +106,29 @@ public enum Spell {
     }
 
     Spell(String id, String combo, Element element, boolean implemented) {
+        this(id, combo, element, implemented, SpellLevel.fromComboLength(combo.length()));
+    }
+
+    Spell(String id, String combo, Element element, boolean implemented, SpellLevel level) {
         this.id = id;
         this.combo = combo;
         this.element = element;
-        this.level = SpellLevel.fromComboLength(combo.length());
+        this.level = level;
         this.implemented = implemented;
+    }
+
+    /** Hechizo combinado (no se forma con flechas). */
+    public boolean combined() { return combo.startsWith("+"); }
+
+    /** Combinaciones del addon: primer hechizo + segundo hechizo (en cualquier orden). */
+    public static Spell combine(Spell a, Spell b) {
+        for (Spell[] c : new Spell[][]{
+                {FIREBALL, FIREBALL, FIRE_RAIN}, {ICICLE_LANCE, ICICLE_LANCE, FREEZING_RAIN}, {STONE_CANNON, STONE_CANNON, SPIKE_RAIN},
+                {WATER_SHIELD, BURNING_PLACE, DEEP_MIST}, {DEEP_MIST, WATER_BALL, POISON_MIST}, {FLOOD_FLUSH, SAND_CLOUD, QUAGMIRE},
+                {ICE_BLADE, EARTH_PILLAR, STONE_BLADE}, {DEEP_MIST, ICE_FORTRESS, FROST_WIND}}) {
+            if ((c[0] == a && c[1] == b) || (c[0] == b && c[1] == a)) return c[2];
+        }
+        return null;
     }
 
     public String translationKey() { return "spell.remushoku." + id; }

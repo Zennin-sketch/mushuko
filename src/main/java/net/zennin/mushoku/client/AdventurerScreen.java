@@ -25,13 +25,18 @@ public class AdventurerScreen extends Screen {
 
     @Override
     protected void init() {
-        seen = ClientRaceState.version;
+        seen = ClientRaceState.version + ClientPartyState.version * 1000;
         left = (width - W) / 2;
         top = Math.max(2, (height - H) / 2);
         RaceData d = ClientRaceState.data;
         if (d.raceOrNull() != null) selected = d.raceOrNull();
         addRenderableWidget(new MButton(left + 12, top + 22, 70, 14, Component.translatable("gui.remushoku.adventurer.tab.race"), b -> { tab = "race"; rebuildWidgets(); }, tab.equals("race")));
         addRenderableWidget(new MButton(left + 84, top + 22, 70, 14, Component.translatable("gui.remushoku.adventurer.tab.skills"), b -> { tab = "skills"; rebuildWidgets(); }, tab.equals("skills")));
+        addRenderableWidget(new MButton(left + 156, top + 22, 70, 14, Component.translatable("gui.remushoku.adventurer.tab.party"), b -> { tab = "party"; rebuildWidgets(); }, tab.equals("party")));
+        if (tab.equals("party")) {
+            initParty();
+            return;
+        }
         if (tab.equals("race")) {
             Race[] rs = Race.values();
             for (int i = 0; i < rs.length; i++) {
@@ -56,10 +61,47 @@ public class AdventurerScreen extends Screen {
         }
     }
 
+    private void party(String a) { send(GuildActionPayload.PARTY, a); }
+
+    /** Pestaña Grupo: crear, invitar a jugadores cercanos, aceptar invitaciones, salir y expulsar. */
+    private void initParty() {
+        int x = left + 14, y = top + 44;
+        boolean inParty = !ClientPartyState.leader.isEmpty();
+        boolean leader = inParty && minecraft.player != null && ClientPartyState.leader.equals(minecraft.player.getGameProfile().getName());
+        if (!ClientPartyState.invite.isEmpty() && !inParty) {
+            addRenderableWidget(new MButton(x, y + 14, 70, 14, Component.translatable("gui.remushoku.guild.accept"), b -> party("accept")));
+            addRenderableWidget(new MButton(x + 74, y + 14, 70, 14, Component.translatable("gui.remushoku.adventurer.decline"), b -> party("decline")));
+            y += 36;
+        }
+        if (!inParty) {
+            addRenderableWidget(new MButton(x, y, 110, 16, Component.translatable("gui.remushoku.adventurer.create_party"), b -> party("create")));
+            return;
+        }
+        addRenderableWidget(new MButton(left + W - 90, top + H - 26, 76, 16, Component.translatable("gui.remushoku.adventurer.leave_party"), b -> party("leave")));
+        // Miembros (el lider puede expulsar)
+        int my = top + 58;
+        for (String name : ClientPartyState.members) {
+            if (leader && !name.equals(ClientPartyState.leader))
+                addRenderableWidget(new MButton(left + 150, my - 2, 50, 12, Component.translatable("gui.remushoku.adventurer.kick"), b -> party("kick:" + name)));
+            my += 14;
+        }
+        // Jugadores cercanos para invitar
+        if (leader && minecraft.level != null) {
+            int iy = top + 58;
+            for (var pl : minecraft.level.players()) {
+                String name = pl.getGameProfile().getName();
+                if (pl == minecraft.player || ClientPartyState.members.contains(name) || pl.distanceTo(minecraft.player) > 32) continue;
+                if (iy > top + H - 50) break;
+                addRenderableWidget(new MButton(left + W - 70, iy - 2, 56, 12, Component.translatable("gui.remushoku.adventurer.invite"), b -> party("invite:" + name)));
+                iy += 14;
+            }
+        }
+    }
+
     @Override
     public void tick() {
         super.tick();
-        if (seen != ClientRaceState.version) rebuildWidgets();
+        if (seen != ClientRaceState.version + ClientPartyState.version * 1000) rebuildWidgets();
     }
 
     private String sign(double v, boolean pct) {
@@ -76,6 +118,10 @@ public class AdventurerScreen extends Screen {
         g.blitSprite(WOOD, left, top + 8, W, H - 8);
         title(g, title, width / 2, top);
         RaceData d = ClientRaceState.data;
+        if (tab.equals("party")) {
+            renderParty(g);
+            return;
+        }
         int px = left + 112, py = top + 42, pw = W - 124, ph = H - 54;
         g.blitSprite(PARCHMENT, px, py, pw, ph);
         if (tab.equals("race")) {
@@ -128,6 +174,31 @@ public class AdventurerScreen extends Screen {
             g.drawString(font, Component.translatable(r == null ? "gui.remushoku.adventurer.no_race" : "race.remushoku." + r.key + ".skill",
                     ModKeys.RACE_SKILL.getTranslatedKeyMessage()), px + 8, y + 11, INK_SOFT, false);
         }
+    }
+
+    private void renderParty(GuiGraphics g) {
+        g.blitSprite(PARCHMENT, left + 10, top + 40, W - 20, H - 70);
+        boolean inParty = !ClientPartyState.leader.isEmpty();
+        if (!inParty) {
+            int y = top + 48;
+            if (!ClientPartyState.invite.isEmpty()) {
+                ink(g, Component.translatable("gui.remushoku.adventurer.invite_from", ClientPartyState.invite), left + 16, y, INK_RED);
+                y += 36;
+            }
+            for (var line : font.split(Component.translatable("gui.remushoku.adventurer.party_info"), W - 40)) {
+                g.drawString(font, line, left + 16, y + 22, INK_SOFT, false);
+                y += 9;
+            }
+            return;
+        }
+        ink(g, Component.translatable("gui.remushoku.adventurer.members", ClientPartyState.members.size(), net.zennin.mushoku.party.Parties.MAX), left + 16, top + 46, INK_RED);
+        int y = top + 58;
+        for (String name : ClientPartyState.members) {
+            g.drawString(font, (name.equals(ClientPartyState.leader) ? "★ " : "• ") + name, left + 18, y, INK, false);
+            y += 14;
+        }
+        if (minecraft.player != null && ClientPartyState.leader.equals(minecraft.player.getGameProfile().getName()))
+            ink(g, Component.translatable("gui.remushoku.adventurer.nearby"), left + W - 130, top + 46, INK_RED);
     }
 
     @Override

@@ -28,6 +28,7 @@ public class ShopScreen extends Screen {
         super(Component.translatable("entity.remushoku." + switch (shop) {
             case Shops.BLACKSMITH -> "black_smith_keep";
             case Shops.MAGIC -> "magic_shop_keeper";
+            case Shops.TRADING -> "trading_book_title";
             default -> "general_store_keep";
         }));
         this.shop = shop;

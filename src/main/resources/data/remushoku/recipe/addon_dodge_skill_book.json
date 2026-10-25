@@ -1,0 +1,3 @@
+{"type":"minecraft:crafting_shaped","category":"misc","pattern":[" f ","fbf"," s "],
+ "key":{"f":{"item":"minecraft:feather"},"b":{"item":"minecraft:book"},"s":{"item":"remushoku:advanced_stone"}},
+ "result":{"count":1,"id":"remushoku:dodge_skill_book"}}

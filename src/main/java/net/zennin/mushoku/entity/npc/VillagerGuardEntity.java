@@ -40,6 +40,8 @@ public class VillagerGuardEntity extends PathfinderMob {
         goalSelector.addGoal(6, new RandomLookAroundGoal(this));
         targetSelector.addGoal(1, new HurtByTargetGoal(this));
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Monster.class, 6, true, false, e -> true));
+        targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
+                e -> e instanceof Player p && net.zennin.mushoku.addon.AddonSystem.cursed(p)));
     }
 
     @Override

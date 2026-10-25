@@ -27,6 +27,7 @@ public final class ModKeys {
     // Addon: N abre el Menu del Aventurero, R usa la habilidad de raza (como el addon original)
     public static final KeyMapping ADVENTURER = reg("key.remushoku.adventurer_menu", GLFW.GLFW_KEY_N);
     public static final KeyMapping RACE_SKILL = reg("key.remushoku.race_skill", GLFW.GLFW_KEY_R);
+    public static final KeyMapping COMBINE = reg("key.remushoku.spell_combine", GLFW.GLFW_KEY_KP_ADD);
 
     private ModKeys() {}
 

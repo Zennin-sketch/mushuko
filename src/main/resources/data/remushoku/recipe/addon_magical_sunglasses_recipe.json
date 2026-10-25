@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "aaa",
+    "bcb"
+  ],
+  "key": {
+    "a": {
+      "item": "minecraft:iron_ingot"
+    },
+    "b": {
+      "item": "remushoku:intermediate_stone"
+    },
+    "c": {
+      "item": "minecraft:glass"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "remushoku:magical_sunglasses"
+  }
+}

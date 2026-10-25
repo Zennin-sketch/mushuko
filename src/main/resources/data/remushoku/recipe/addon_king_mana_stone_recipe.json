@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " a ",
+    "aba",
+    " a "
+  ],
+  "key": {
+    "a": {
+      "item": "remushoku:king_stone"
+    },
+    "b": {
+      "item": "remushoku:saint_mana_stone"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "remushoku:king_mana_stone"
+  }
+}

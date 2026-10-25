@@ -71,6 +71,10 @@ public final class SpellCasting {
             return;
         }
         if (SpellEffects.cast(spell, p)) {
+            // Curaciones de grupo del addon: tambien curan a tu grupo a 30 bloques
+            if (spell == Spell.HEALING) net.zennin.mushoku.party.Parties.healMembers(p, 4f);
+            else if (spell == Spell.X_HEALING) net.zennin.mushoku.party.Parties.healMembers(p, 8f);
+            else if (spell == Spell.SHRINE_HEALING) net.zennin.mushoku.party.Parties.healMembers(p, 16f);
             ManaData after = mana.withMana(mana.mana() - spell.level.cost);
             after = after.withMaxMana(after.maxMana() + spell.level.maxManaGain);
             ModAttachments.set(p, after);
@@ -78,6 +82,45 @@ public final class SpellCasting {
         ModAttachments.setMagic(p, m.withQueued(""));
         ModNetworking.syncMana(p);
         ModNetworking.syncMagic(p);
+    }
+
+    private static final java.util.Map<java.util.UUID, String> COMBINE_FIRST = new java.util.HashMap<>();
+
+    /**
+     * Tecla Combinar (como el addon): con un hechizo en cola, la primera vez lo guarda como primer hechizo;
+     * formas el segundo y al pulsar Combinar otra vez queda en cola el hechizo combinado.
+     */
+    public static void onCombine(ServerPlayer p) {
+        if (!canCast(p)) return;
+        MagicData m = ModAttachments.magic(p);
+        Spell queued = m.queued().isEmpty() ? null : Spell.byId(m.queued());
+        String first = COMBINE_FIRST.get(p.getUUID());
+        if (queued == null) {
+            msg(p, Component.translatable("msg.remushoku.combine_need").withStyle(ChatFormatting.GRAY));
+            return;
+        }
+        if (first == null) {
+            COMBINE_FIRST.put(p.getUUID(), queued.id);
+            ModAttachments.setMagic(p, m.withQueued(""));
+            ModNetworking.syncMagic(p);
+            msg(p, Component.translatable("msg.remushoku.combine_first", Component.translatable(queued.translationKey())).withStyle(ChatFormatting.AQUA));
+            return;
+        }
+        COMBINE_FIRST.remove(p.getUUID());
+        Spell result = Spell.combine(Spell.byId(first), queued);
+        if (result == null) {
+            ModAttachments.setMagic(p, m.withQueued(""));
+            ModNetworking.syncMagic(p);
+            msg(p, Component.translatable("msg.remushoku.combine_fail").withStyle(ChatFormatting.RED));
+            return;
+        }
+        if (ModAttachments.get(p).playerClass() == CLASS_SWORDSMAN && result.level.tier > 2) {
+            msg(p, Component.translatable("msg.remushoku.swordsman_spell_limit").withStyle(ChatFormatting.RED));
+            return;
+        }
+        ModAttachments.setMagic(p, m.withQueued(result.id));
+        ModNetworking.syncMagic(p);
+        msg(p, Component.translatable("msg.remushoku.combine_ok", Component.translatable(result.translationKey())).withStyle(ChatFormatting.LIGHT_PURPLE));
     }
 
     private static void msg(ServerPlayer p, Component c) {

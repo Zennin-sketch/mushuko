@@ -53,6 +53,10 @@ public final class RaceSystem {
         ModAttachments.setRace(p, d.withRace(r.key));
         refresh(p);
         p.setHealth(p.getMaxHealth());
+        if (r == Race.SUPERD) {
+            ItemStack spear = new ItemStack(net.zennin.mushoku.addon.AddonItems.SUPERD_SPEAR);
+            if (!p.getInventory().add(spear)) p.drop(spear, false);
+        }
         p.level().playSound(null, p.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1f, 0.8f);
         p.displayClientMessage(Component.translatable("msg.remushoku.race_chosen", Component.translatable("race.remushoku." + r.key))
                 .withStyle(ChatFormatting.GOLD), false);

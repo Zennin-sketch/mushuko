@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "aaa",
+    "bcb",
+    "aca"
+  ],
+  "key": {
+    "a": {
+      "item": "minecraft:leather"
+    },
+    "b": {
+      "item": "remushoku:intermediate_stone"
+    },
+    "c": {
+      "item": "minecraft:magma_cream"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "remushoku:flame_trapping_cloak"
+  }
+}

@@ -20,7 +20,13 @@ public final class Shops {
         static Offer of(Supplier<Item> item, int count, int buy, int sell) { return new Offer(item, count, buy, sell, null, 0); }
     }
 
-    public static final String GENERAL = "general_store", BLACKSMITH = "blacksmith", MAGIC = "magic_shop";
+    public static final String GENERAL = "general_store", BLACKSMITH = "blacksmith", MAGIC = "magic_shop", TRADING = "trading";
+
+    /** Libro de Intercambio del addon: vender materiales por monedas en cualquier lugar. */
+    public static final List<Offer> TRADING_OFFERS = List.of(
+            Offer.of(() -> Items.COBBLED_DEEPSLATE, 32, Coins.SMALL, Coins.SMALL),
+            Offer.of(() -> Items.IRON_INGOT, 1, 2 * Coins.SMALL, 2 * Coins.SMALL),
+            Offer.of(() -> Items.EMERALD, 1, 3 * Coins.SMALL, 3 * Coins.SMALL));
 
     public static final List<Offer> GENERAL_OFFERS = List.of(
             Offer.of(() -> Items.BREAD, 3, Coins.SMALL, Coins.SMALL),
@@ -59,6 +65,7 @@ public final class Shops {
         return switch (shop) {
             case BLACKSMITH -> BLACKSMITH_OFFERS;
             case MAGIC -> MAGIC_OFFERS;
+            case TRADING -> TRADING_OFFERS;
             default -> GENERAL_OFFERS;
         };
     }

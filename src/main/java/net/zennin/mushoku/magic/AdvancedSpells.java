@@ -329,7 +329,7 @@ public final class AdvancedSpells {
                 sound(level, p.position(), SoundEvents.ILLUSIONER_CAST_SPELL, 1f);
             }
             default -> {
-                return false;
+                return AddonSpells.cast(spell, p);
             }
         }
         return true;

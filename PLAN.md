@@ -104,7 +104,12 @@ Se mantiene el id `remushoku` para que las texturas, modelos y datos funcionen s
 - [x] 7 razas con las stats y afinidades mágicas del addon; tamaño con el atributo de escala de 1.21
 - [x] Menú del Aventurero (N) y habilidad de raza (R): bendición élfica, visión nocturna, minería enana
 - [x] Piel de Maná (magos, por maná máximo), Esquivar (libro de habilidad), Factor Laplace (derrotar a Kishirika)
-#### A3 — Hechizos combinados, grupo, maldición Superd, objetos (piedras de maná, capa, casco, botas, gafas, lanza Superd...)
+#### A3 — Hechizos, grupo, maldición y objetos (HECHA, en prueba)
+- [x] 8 hechizos combinados con la tecla Combinar (+ del teclado numérico) y 8 de magia variada (modo sin elemento)
+- [x] Grupos de hasta 6 (pestaña Grupo del menú N): sin daño entre miembros, curaciones de grupo
+- [x] Maldición Superd (Lanza Superd), guardias que persiguen a los malditos, Casco Supresor y Cura
+- [x] Piedras de Maná, Hoja de Piedra, Lanza Superd 3D, Lentes, Zapatos, Capa, Libro de Intercambio, Libro de Esquivar
+- [x] Recetas del addon (incluida la conversión de piedras hacia abajo)
 
 ## Cómo se compila
 1. Subir este proyecto a un repositorio de GitHub.

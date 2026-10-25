@@ -26,6 +26,7 @@ public final class ModNetworking {
         PayloadTypeRegistry.playS2C().register(ExtraSyncPayload.TYPE, ExtraSyncPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(CompanionStatePayload.TYPE, CompanionStatePayload.CODEC);
         PayloadTypeRegistry.playS2C().register(RaceSyncPayload.TYPE, RaceSyncPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(PartySyncPayload.TYPE, PartySyncPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(CompanionActionPayload.TYPE, CompanionActionPayload.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(CompanionActionPayload.TYPE, (payload, ctx) -> {
             ServerPlayer p = ctx.player();
@@ -73,6 +74,12 @@ public final class ModNetworking {
                     case GuildActionPayload.RACE_PICK -> net.zennin.mushoku.race.RaceSystem.choose(p, payload.shop(), false);
                     case GuildActionPayload.RACE_TOGGLE -> net.zennin.mushoku.race.RaceSystem.toggle(p, payload.shop());
                     case GuildActionPayload.RACE_SKILL -> net.zennin.mushoku.race.RaceSystem.raceSkill(p);
+                    case GuildActionPayload.PARTY -> {
+                        String[] a = payload.shop().split(":", 2);
+                        net.zennin.mushoku.party.Parties.action(p, a[0], a.length > 1 ? a[1] : "");
+                    }
+                    case GuildActionPayload.COMBINE -> SpellCasting.onCombine(p);
+                    case GuildActionPayload.TRADE_BOOK -> net.zennin.mushoku.guild.GuildSystem.open(p, "trading");
                     default -> {}
                 }
             });
