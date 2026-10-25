@@ -9,6 +9,7 @@ import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.Tier;
 import net.zennin.mushoku.MushokuMod;
+import net.zennin.mushoku.item.AdhesiveBombItem;
 import net.zennin.mushoku.item.ChalkItem;
 import net.zennin.mushoku.item.ClassChangeItem;
 import net.zennin.mushoku.item.MagicStoneItem;
@@ -60,7 +61,7 @@ public final class ModItems {
     public static final Item ICE_KEY = simple("ice_key");
     public static final Item SPICE_BAG = simple("spice_bag");
     public static final Item ROCK = simple("rock");
-    public static final Item ADHESIVE_BOMB = simple("adhesive_bomb");
+    public static final Item ADHESIVE_BOMB = register("adhesive_bomb", new AdhesiveBombItem(new Item.Properties().stacksTo(16)));
     public static final Item SWAP_TOTEM = single("swap_totem");
     public static final Item SWAP_CLOAK = single("swap_cloak");
     public static final Item METAL_CLAWS = single("metal_claws");

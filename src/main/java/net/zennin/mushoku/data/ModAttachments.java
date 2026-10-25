@@ -22,7 +22,25 @@ public final class ModAttachments {
             .initializer(() -> MagicData.DEFAULT)
             .buildAndRegister(MushokuMod.id("magic"));
 
+    /** Estilo, puntos de habilidad, Touki y habilidades del espadachin. */
+    @SuppressWarnings("UnstableApiUsage")
+    public static final AttachmentType<SwordData> SWORD = AttachmentRegistry.<SwordData>builder()
+            .persistent(SwordData.CODEC)
+            .copyOnDeath()
+            .initializer(() -> SwordData.DEFAULT)
+            .buildAndRegister(MushokuMod.id("sword"));
+
     private ModAttachments() {}
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static SwordData sword(Player player) {
+        return player.getAttachedOrCreate(SWORD);
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static void setSword(Player player, SwordData data) {
+        player.setAttached(SWORD, data);
+    }
 
     @SuppressWarnings("UnstableApiUsage")
     public static MagicData magic(Player player) {

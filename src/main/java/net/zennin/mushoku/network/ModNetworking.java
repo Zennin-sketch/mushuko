@@ -8,6 +8,8 @@ import net.zennin.mushoku.data.ManaData;
 import net.zennin.mushoku.data.ModAttachments;
 import net.zennin.mushoku.magic.PlayerClasses;
 import net.zennin.mushoku.magic.SpellCasting;
+import net.zennin.mushoku.sword.SwordSkills;
+import net.zennin.mushoku.sword.SwordSystem;
 
 public final class ModNetworking {
     private ModNetworking() {}
@@ -16,12 +18,29 @@ public final class ModNetworking {
         PayloadTypeRegistry.playS2C().register(ManaSyncPayload.TYPE, ManaSyncPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(MagicSyncPayload.TYPE, MagicSyncPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ActionPayload.TYPE, ActionPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(SwordSyncPayload.TYPE, SwordSyncPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(SwordActionPayload.TYPE, SwordActionPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(ComboPayload.TYPE, ComboPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(ActionPayload.TYPE, ActionPayload.CODEC);
 
         ServerPlayNetworking.registerGlobalReceiver(ComboPayload.TYPE, (payload, ctx) -> {
             ServerPlayer p = ctx.player();
             p.server.execute(() -> SpellCasting.onCombo(p, payload.combo()));
+        });
+        ServerPlayNetworking.registerGlobalReceiver(SwordActionPayload.TYPE, (payload, ctx) -> {
+            ServerPlayer p = ctx.player();
+            p.server.execute(() -> {
+                switch (payload.action()) {
+                    case SwordActionPayload.AFFINITY -> SwordSystem.chooseAffinity(p, payload.arg());
+                    case SwordActionPayload.LEARN -> SwordSystem.learn(p, payload.arg());
+                    case SwordActionPayload.BIND -> SwordSystem.bind(p, payload.slot(), payload.arg());
+                    case SwordActionPayload.TOGGLE -> SwordSystem.toggle(p, payload.arg());
+                    case SwordActionPayload.TOUKI_LEVEL -> SwordSystem.buyTouki(p);
+                    case SwordActionPayload.TOUKI_TOGGLE -> SwordSystem.toggleTouki(p);
+                    case SwordActionPayload.USE_SLOT -> SwordSkills.useSlot(p, payload.slot());
+                    default -> {}
+                }
+            });
         });
         ServerPlayNetworking.registerGlobalReceiver(ActionPayload.TYPE, (payload, ctx) -> {
             ServerPlayer p = ctx.player();

@@ -7,6 +7,7 @@ import net.zennin.mushoku.data.ManaData;
 import net.zennin.mushoku.data.MagicData;
 import net.zennin.mushoku.data.ModAttachments;
 import net.zennin.mushoku.network.ModNetworking;
+import net.zennin.mushoku.sword.SwordSkill;
 
 /** Logica del servidor: armar el hechizo con flechas, lanzarlo y cobrar el mana. */
 public final class SpellCasting {
@@ -15,8 +16,14 @@ public final class SpellCasting {
     private SpellCasting() {}
 
     /** El jugador solto las teclas de conjuro con esta combinacion de flechas. */
+    /** Mago, o espadachin con la habilidad Magia del Dios Norte (hasta nivel Intermedio). */
+    public static boolean canCast(ServerPlayer p) {
+        int cls = ModAttachments.get(p).playerClass();
+        return cls == CLASS_MAGE || (cls == CLASS_SWORDSMAN && ModAttachments.sword(p).knows(SwordSkill.NG_MAGIC.id));
+    }
+
     public static void onCombo(ServerPlayer p, String combo) {
-        if (ModAttachments.get(p).playerClass() != CLASS_MAGE) return;
+        if (!canCast(p)) return;
         if (combo == null || combo.length() < 3 || combo.length() > 8 || !combo.matches("[udlr]+")) {
             msg(p, Component.translatable("msg.remushoku.no_spell").withStyle(ChatFormatting.GRAY));
             return;
@@ -25,6 +32,10 @@ public final class SpellCasting {
         Spell spell = Spell.fromCombo(combo, m.noElement());
         if (spell == null) {
             msg(p, Component.translatable("msg.remushoku.no_spell").withStyle(ChatFormatting.GRAY));
+            return;
+        }
+        if (ModAttachments.get(p).playerClass() == CLASS_SWORDSMAN && spell.level.tier > 2) {
+            msg(p, Component.translatable("msg.remushoku.swordsman_spell_limit").withStyle(ChatFormatting.RED));
             return;
         }
         if (m.level(spell.element) < spell.level.tier) {
@@ -38,7 +49,7 @@ public final class SpellCasting {
 
     /** Tecla de activacion: lanza el hechizo en cola, o alterna el modo sin elemento si no hay ninguno. */
     public static void onActivate(ServerPlayer p) {
-        if (ModAttachments.get(p).playerClass() != CLASS_MAGE) return;
+        if (!canCast(p)) return;
         MagicData m = ModAttachments.magic(p);
         Spell spell = m.queued().isEmpty() ? null : Spell.byId(m.queued());
         if (spell == null) {

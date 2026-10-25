@@ -16,6 +16,11 @@ public final class ModKeys {
     public static final KeyMapping LEFT = reg("key.remushoku.left_arrow", GLFW.GLFW_KEY_A);
     public static final KeyMapping RIGHT = reg("key.remushoku.right_arrow", GLFW.GLFW_KEY_D);
     public static final KeyMapping SHOOT = reg("key.remushoku.spell_shoot", GLFW.GLFW_KEY_TAB);
+    // Espadachin: igual que el original, V abre el menu y Z / X / C usan las habilidades asignadas.
+    public static final KeyMapping MENU = reg("key.remushoku.swordsman_menu_key", GLFW.GLFW_KEY_V);
+    public static final KeyMapping SKILL_1 = reg("key.remushoku.skill_one_key", GLFW.GLFW_KEY_Z);
+    public static final KeyMapping SKILL_2 = reg("key.remushoku.skill_two_key", GLFW.GLFW_KEY_X);
+    public static final KeyMapping SKILL_3 = reg("key.remushoku.skill_three_key", GLFW.GLFW_KEY_C);
 
     private ModKeys() {}
 

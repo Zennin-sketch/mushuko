@@ -47,9 +47,14 @@ Se mantiene el id `remushoku` para que las texturas, modelos y datos funcionen s
 - [x] Báculos (Varita, Migurd, Dragón, Areos, Aqua Heartia) con piedra imbuida y descuento de maná
 - Pendiente: el minijuego original de colocar flechas de tiza (simplificado por ahora)
 
-### Fase 4 — Espadachín
-- Puntos de habilidad, estilos Dios Espada / Agua / Norte
-- Habilidades activas y pasivas, Touki, 3 ranuras asignables
+### Fase 4 — Espadachín (HECHA, en prueba)
+- [x] Afinidad al elegir Espadachín (Dios Espada +3 daño, Dios Agua +2 corazones, Dios Norte +20% velocidad)
+- [x] Puntos de habilidad: 1 por monstruo hostil, 5 por bandido (los bandidos llegan en la Fase 5)
+- [x] Menú con V: los 3 árboles con los costos originales; fuera de tu afinidad solo hasta Avanzado
+- [x] 23 habilidades: activas (Z / X / C), pasivas y encendibles
+- [x] Touki por niveles (100 puntos, +100 maná máximo cada uno); encendido da daño, vida y velocidad y gasta maná
+- [x] Magia del Dios Norte (hechizos hasta Intermedio), Bomba Adhesiva con Objetos
+- [x] Comando de prueba: /mushoku puntos <n>
 
 ### Fase 5 — Mundo y NPCs
 - Bloques (mena mágica, tablón de trabajos, estantes, puertas, etc.)

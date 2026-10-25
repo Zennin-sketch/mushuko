@@ -8,6 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.zennin.mushoku.data.ManaData;
 import net.zennin.mushoku.data.ModAttachments;
 import net.zennin.mushoku.network.ModNetworking;
+import net.zennin.mushoku.sword.SwordSystem;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,11 +27,14 @@ public final class PlayerClasses {
         p.displayClientMessage(Component.translatable(cls == SpellCasting.CLASS_MAGE ? "msg.remushoku.class_mage" : "msg.remushoku.class_swordsman")
                 .withStyle(ChatFormatting.GOLD), false);
         ModNetworking.syncMana(p);
+        SwordSystem.refresh(p);
+        SwordSystem.sync(p);
     }
 
     /** Vuelve la clase a "sin elegir" y abre el menu (orbe de cambio de clase). */
     public static void reset(ServerPlayer p) {
         ModAttachments.set(p, ModAttachments.get(p).withClass(0));
+        SwordSystem.reset(p);
         ModNetworking.syncMana(p);
         ModNetworking.openClassScreen(p);
     }

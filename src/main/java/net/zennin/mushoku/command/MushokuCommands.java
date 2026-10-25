@@ -56,6 +56,12 @@ public final class MushokuCommands {
                                     ModNetworking.syncMagic(p);
                                     return 1;
                                 }))))
+                        .then(Commands.literal("puntos").then(Commands.argument("valor", IntegerArgumentType.integer(0)).executes(c -> {
+                            ServerPlayer p = c.getSource().getPlayerOrException();
+                            ModAttachments.setSword(p, ModAttachments.sword(p).withPoints(IntegerArgumentType.getInteger(c, "valor")));
+                            net.zennin.mushoku.sword.SwordSystem.sync(p);
+                            return 1;
+                        })))
                         .then(Commands.literal("clase").executes(c -> {
                             PlayerClasses.reset(c.getSource().getPlayerOrException());
                             return 1;

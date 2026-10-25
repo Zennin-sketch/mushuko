@@ -2,7 +2,10 @@ package net.zennin.mushoku.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.zennin.mushoku.data.SwordData;
+import net.zennin.mushoku.sword.SwordSkill;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -40,8 +43,9 @@ public final class ManaBarHud {
         int tw = mc.font.width(text);
         g.drawString(mc.font, text, X + FX + (FW - tw) / 2, Y + FY + 1, 0xFFFFFFFF, true);
 
-        if (ClientManaState.playerClass != 1) return;
         int line = Y + H + 4;
+        if (ClientManaState.playerClass == 2) line = renderSwordsman(g, mc, line);
+        if (!CastingClient.casting && ClientManaState.playerClass != 1 && ClientManaState.queued.isEmpty()) return;
         if (ClientManaState.noElement) {
             g.drawString(mc.font, Component.translatable("hud.remushoku.no_element"), X + 2, line, 0xFFD58CFF, true);
             line += 11;
@@ -67,5 +71,26 @@ public final class ManaBarHud {
                 g.blit(tex, sx + i * (size + gap), sy, 0f, 0f, size, size, size, size);
             }
         }
+    }
+
+    private static int renderSwordsman(GuiGraphics g, Minecraft mc, int line) {
+        SwordData d = ClientSwordState.data;
+        if (d.style().isEmpty()) {
+            g.drawString(mc.font, Component.translatable("hud.remushoku.pick_affinity", ModKeys.MENU.getTranslatedKeyMessage()), X + 2, line, 0xFFFFD27F, true);
+            return line + 11;
+        }
+        KeyMapping[] keys = {ModKeys.SKILL_1, ModKeys.SKILL_2, ModKeys.SKILL_3};
+        for (int i = 0; i < 3; i++) {
+            SwordSkill s = SwordSkill.byId(d.slot(i));
+            Component name = s == null ? Component.literal("-") : Component.translatable(s.translationKey());
+            g.drawString(mc.font, Component.translatable("hud.remushoku.slot", keys[i].getTranslatedKeyMessage(), name), X + 2, line, 0xFFE0E0E0, true);
+            line += 10;
+        }
+        if (d.touki() > 0) {
+            g.drawString(mc.font, Component.translatable(d.toukiOn() ? "hud.remushoku.touki_on" : "hud.remushoku.touki_off", d.touki()),
+                    X + 2, line, d.toukiOn() ? 0xFFFFB347 : 0xFF999999, true);
+            line += 10;
+        }
+        return line + 2;
     }
 }

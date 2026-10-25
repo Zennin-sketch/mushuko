@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.zennin.mushoku.network.ActionPayload;
 import net.zennin.mushoku.network.MagicSyncPayload;
 import net.zennin.mushoku.network.ManaSyncPayload;
+import net.zennin.mushoku.network.SwordSyncPayload;
 import net.zennin.mushoku.registry.ModEntities;
 
 public class MushokuClient implements ClientModInitializer {
@@ -19,6 +20,7 @@ public class MushokuClient implements ClientModInitializer {
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.MAGIC_CIRCLE, RenderType.cutout());
         ModKeys.init();
         CastingClient.init();
+        SwordClient.init();
         EntityRendererRegistry.register(ModEntities.MAGIC_PROJECTILE, NoopRenderer::new);
 
         ClientPlayNetworking.registerGlobalReceiver(ManaSyncPayload.TYPE, (payload, context) -> {
@@ -37,6 +39,7 @@ public class MushokuClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(ActionPayload.TYPE, (payload, context) -> {
             if (payload.action() == ActionPayload.OPEN_CLASS_SCREEN) context.client().setScreen(new ClassPickScreen());
         });
+        ClientPlayNetworking.registerGlobalReceiver(SwordSyncPayload.TYPE, (payload, context) -> ClientSwordState.set(payload.data()));
         HudRenderCallback.EVENT.register(ManaBarHud::render);
     }
 }

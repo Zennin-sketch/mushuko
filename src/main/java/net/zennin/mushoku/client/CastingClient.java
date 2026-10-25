@@ -24,7 +24,8 @@ public final class CastingClient {
             combo = "";
             return;
         }
-        boolean isMage = ClientManaState.playerClass == 1;
+        boolean isMage = ClientManaState.playerClass == 1
+                || (ClientManaState.playerClass == 2 && ClientSwordState.data.knows("ng_magic"));
         boolean nowCasting = isMage && ModKeys.isDown(ModKeys.CAST_1) && ModKeys.isDown(ModKeys.CAST_2);
         boolean up = ModKeys.isDown(ModKeys.UP), down = ModKeys.isDown(ModKeys.DOWN),
                 left = ModKeys.isDown(ModKeys.LEFT), right = ModKeys.isDown(ModKeys.RIGHT);
