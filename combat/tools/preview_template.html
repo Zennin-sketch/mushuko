@@ -163,9 +163,9 @@ function parseAnim(json) {
 }
 function add(A, part, ax, tick, value, ease) {
   const key = part + '.' + ax; const list = A.axes[key] || (A.axes[key] = []);
-  const i = list.findIndex(k => k.tick === tick);
-  const kf = { tick, value, ease };
-  if (i >= 0) list[i] = kf; else { list.push(kf); list.sort((a, b) => a.tick - b.tick); }
+  // igual que Player Animator: un keyframe en el mismo tick se agrega despues (asi funcionan los "turn")
+  let i = list.length; while (i > 0 && list[i - 1].tick > tick) i--;
+  list.splice(i, 0, { tick, value, ease });
 }
 function defaultOf(part, ax) {
   if (ax === 'x' || ax === 'y' || ax === 'z') { const d = PART_DEFAULTS[part] || [0,0,0]; return d['xyz'.indexOf(ax)]; }
@@ -462,8 +462,16 @@ function equip(id) {
 
 /* ---------------------------------------------------------------- aplicar la animacion */
 const REST = { head: [0, 0, 0], torso: [0, 0, 0], rightArm: [-5, 2, 0], leftArm: [5, 2, 0], rightLeg: [-1.9, 12, 0.1], leftLeg: [1.9, 12, 0.1] };
+const fadeEase = x => -(Math.cos(PI * Math.min(1, Math.max(0, x))) - 1) / 2;
 function apply(pl) {
-  const v = (p, a, c) => pl ? pl.value(p, a, c) : c;
+  // Transicion como AbstractFadeModifier: mezcla la animacion anterior (que sigue corriendo) con la nueva
+  const one = (q, p, a, c) => q && q.running ? q.value(p, a, c) : c;
+  const v = (p, a, c) => {
+    const cur = one(pl, p, a, c);
+    if (!fade) return cur;
+    const prev = one(fade.prev, p, a, c), k = fadeEase((fade.t + (pl ? pl.delta : 0)) / fade.len);
+    return prev + (cur - prev) * k;
+  };
   rig.bodyT.position.set(v('body', 'x', 0), v('body', 'y', 0) + 0.7, v('body', 'z', 0));
   rig.bodyT.rotation.set(v('body', 'pitch', 0), v('body', 'yaw', 0), v('body', 'roll', 0));
   const bs = [v('body', 'scaleX', 1), v('body', 'scaleY', 1), v('body', 'scaleZ', 1)]; rig.bodyT.scale.set(...bs);
@@ -494,17 +502,20 @@ const ATTACK = new Set(); const famOfAnim = {};
 for (const [fid, f] of Object.entries(DATA.families)) for (const a of f.attacks) { ATTACK.add(a.anim); famOfAnim[a.anim] ??= fid; }
 
 let queue = [], player = null, playing = true, acc = 0, idle = 0, speed = 1, selected = null;
+let fade = null;
 function start(name) {
-  selected = name; player = new Player(parsed[name]); acc = 0; idle = 0;
-  document.querySelectorAll('.item').forEach(b => b.classList.toggle('sel', b.dataset.anim === name && b.dataset.q === String(queueId)));
   const a = parsed[name];
+  // si hay una animacion en curso, la nueva arranca desde ahi (Better Combat usa beginTick ticks de transicion)
+  fade = player && player.running ? { prev: player, t: 0, len: Math.max(2, ATTACK.has(name) ? a.begin : 3) } : null;
+  selected = name; player = new Player(a); idle = 0;
+  document.querySelectorAll('.item').forEach(b => b.classList.toggle('sel', b.dataset.anim === name && b.dataset.q === String(queueId)));
   document.getElementById('now').innerHTML = `${desc(name)}<small>${name} · ${(a.stop / 20).toFixed(2)} s</small>`;
 }
 let queueId = 0;
 function playList(list, weapon, qid) { queueId = qid; if (weapon) equip(weapon); queue = list.slice(1); start(list[0]); setPlaying(true); }
 function setPlaying(p) { playing = p; document.getElementById('play').textContent = p ? 'Pausa' : 'Reproducir'; }
 document.getElementById('play').onclick = () => setPlaying(!playing);
-document.getElementById('restart').onclick = () => selected && start(selected);
+document.getElementById('restart').onclick = () => { if (selected) { player = null; fade = null; start(selected); } };
 document.getElementById('step').onclick = () => { setPlaying(false); player && player.step(); };
 const spd = document.getElementById('spd');
 spd.oninput = () => { speed = +spd.value; document.getElementById('spdv').textContent = speed.toFixed(2) + 'x'; };
@@ -590,7 +601,7 @@ tl.onclick = e => {
   if (!player) return;
   const a = player.a, total = a.loop ? a.end + 1 : a.stop, rect = tl.getBoundingClientRect();
   const t = Math.round((e.clientX - rect.left - 6) / (rect.width - 12) * total);
-  player = new Player(a); for (let i = 0; i < t; i++) player.step(); setPlaying(false);
+  fade = null; player = new Player(a); for (let i = 0; i < t; i++) player.step(); setPlaying(false);
 };
 
 /* ---------------------------------------------------------------- bucle */
@@ -604,8 +615,9 @@ function frame(now) {
     acc += dt * 20 * speed;
     while (acc >= 1) {
       acc -= 1;
+      if (fade) { fade.prev.step(); if (++fade.t >= fade.len) fade = null; }
+      if (queue.length && (!player.running || (ATTACK.has(selected) && player.tick >= player.a.end))) { start(queue.shift()); continue; }
       if (player.running) player.step();
-      else if (queue.length) { start(queue.shift()); }
       else if (document.getElementById('loop').checked && ++idle > 12) { const q = Array.from(document.querySelectorAll(`.item[data-q="${queueId}"]`)).map(b => b.dataset.anim); const all = q.length > 1 && queue.length === 0 && wasCombo ? q : [selected]; queue = all.slice(1); start(all[0]); }
     }
     player.delta = player.running ? acc : 0;
@@ -615,7 +627,8 @@ function frame(now) {
     hit.classList.toggle('on', ATTACK.has(selected) && player.running && t >= a.end / 2 - 0.5 && t <= a.end / 2 + 2);
     document.getElementById('ticks').textContent = `tick ${player.running ? player.tick.toString().padStart(2, '0') : '--'} / ${a.loop ? a.end : a.stop}`;
   }
-  apply(player && player.running ? player : null);
+  if (fade && fade.prev) fade.prev.delta = player ? player.delta : 0;
+  apply(player);
   drawTimeline();
   controls.update(); renderer.render(scene, camera);
   requestAnimationFrame(frame);
@@ -631,5 +644,5 @@ equip(firstW);
 playList(DATA.families[firstFam].attacks.map(a => a.anim), firstW, 1);
 resize();
 requestAnimationFrame(frame);
-window.__preview = { start, equip, apply, cam, setPlaying, players: () => player, parsed, Player, step: n => { for (let i = 0; i < n; i++) player.step(); }, render: () => { apply(player && player.running ? player : null); renderer.render(scene, camera); } };
+window.__preview = { start: n => { player = null; fade = null; start(n); }, chain: (list, at) => { player = null; fade = null; start(list[0]); for (const n of list.slice(1)) { while (player.tick < at) { player.step(); if (fade) { fade.prev.step(); if (++fade.t >= fade.len) fade = null; } } start(n); } }, stepBoth: n => { for (let i = 0; i < n; i++) { if (fade) { fade.prev.step(); if (++fade.t >= fade.len) fade = null; } player.step(); } }, equip, apply, cam, setPlaying, players: () => player, parsed, Player, step: n => { for (let i = 0; i < n; i++) { if (fade) { fade.prev.step(); if (++fade.t >= fade.len) fade = null; } player.step(); } }, render: () => { apply(player); renderer.render(scene, camera); } };
 </script>

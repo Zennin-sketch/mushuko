@@ -15,10 +15,11 @@ import net.zennin.mushokucombat.net.DodgePayload;
  */
 public final class DodgeClient {
     private static final String[] DIRS = {"forward", "backward", "left", "right"};
-    private static final double ROLL_SPEED = 0.46, DASH_SPEED = 0.8;
-    private static final int ROLL_TICKS = 8, DASH_TICKS = 5;
+    // Velocidad tick a tick (bloques/tick): arranque corto (anticipacion), impulso fuerte y frenada progresiva.
+    private static final double[] DASH = {0.15, 0.55, 1.0, 0.95, 0.8, 0.55, 0.3, 0.12};
+    private static final double[] ROLL = {0.1, 0.35, 0.5, 0.55, 0.52, 0.45, 0.38, 0.28, 0.15};
 
-    private static int cooldown = 0, motionTicks = 0;
+    private static int cooldown = 0, motionTicks = 0, motionStep = 0;
     private static Vec3 motion = Vec3.ZERO;
     private static boolean dashing = false, airDashUsed = false;
 
@@ -53,7 +54,8 @@ public final class DodgeClient {
         Vec3 left = new Vec3(Math.cos(yaw), 0, Math.sin(yaw));
         motion = forward.scale(f).add(left.scale(l)).normalize();
         dashing = !roll;
-        motionTicks = roll ? ROLL_TICKS : DASH_TICKS;
+        motionTicks = roll ? ROLL.length : DASH.length;
+        motionStep = 0;
         cooldown = roll ? 14 : 10;
         if (!roll && !p.onGround()) airDashUsed = true;
         if (!p.isCreative()) ClientStamina.spend(Stamina.DODGE_COST);
@@ -73,8 +75,8 @@ public final class DodgeClient {
         if (p == null || motionTicks <= 0) return;
         motionTicks--;
         Vec3 v = p.getDeltaMovement();
-        double speed = dashing ? DASH_SPEED : ROLL_SPEED;
-        if (motionTicks == 0) speed *= 0.5; // frena al final
+        double speed = (dashing ? DASH : ROLL)[Math.min(motionStep++, (dashing ? DASH : ROLL).length - 1)];
+        // el dash flota un instante (no cae mientras empuja); el roll respeta la gravedad
         p.setDeltaMovement(motion.x * speed, dashing ? Math.max(0.0, v.y * 0.2) : v.y, motion.z * speed);
         if (!dashing && mc.level != null && p.onGround() && motionTicks % 2 == 0) {
             mc.level.addParticle(ParticleTypes.POOF, p.getX(), p.getY() + 0.1, p.getZ(), 0, 0.02, 0);

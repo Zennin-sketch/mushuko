@@ -68,6 +68,12 @@ public class CompanionEntity extends PathfinderMob implements RangedAttackMob {
         setPersistenceRequired();
     }
 
+    private static CompanionKind kindOf(EntityType<?> type) {
+        for (Map.Entry<CompanionKind, EntityType<CompanionEntity>> e : net.zennin.mushoku.registry.ModEntities.COMPANIONS.entrySet())
+            if (e.getValue() == type) return e.getKey();
+        return CompanionKind.ERIS;
+    }
+
     public static AttributeSupplier.Builder attributes(CompanionKind k) {
         return PathfinderMob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, k.health).add(Attributes.ARMOR, k.armor).add(Attributes.ATTACK_DAMAGE, k.damage)
@@ -139,7 +145,8 @@ public class CompanionEntity extends PathfinderMob implements RangedAttackMob {
     @Override
     protected void registerGoals() {
         goalSelector.addGoal(0, new FloatGoal(this));
-        if (kind.ranged()) goalSelector.addGoal(2, new RangedAttackGoal(this, 1.1, 40, 20f));
+        // Ojo: registerGoals corre dentro del constructor de Mob, antes de que se asigne 'kind'; se saca del tipo de entidad.
+        if (kindOf(getType()).ranged()) goalSelector.addGoal(2, new RangedAttackGoal(this, 1.1, 40, 20f));
         else goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2, false));
         goalSelector.addGoal(3, new FollowLeaderGoal());
         goalSelector.addGoal(4, new ReturnHomeGoal());
