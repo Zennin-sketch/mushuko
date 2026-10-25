@@ -47,6 +47,10 @@ def head(yaw=0, down=0, tilt=0):
 def item(pitch=0, yaw=0, roll=0, x=0, y=0, z=0):
     return dict(ritem=(pitch, yaw, roll, x, y, z))
 
+def curl(deg):
+    """Espalda enrollada hacia adelante (cabeza y brazos acompanian)."""
+    return dict(curl=(deg,))
+
 def P(*dicts):
     out = {}
     for d in dicts:
@@ -246,7 +250,7 @@ def dash(name, desc, d):
     """d = direccion: (der, adelante). Inclinacion hacia donde va, brazos al reves."""
     dx, df = d
     lean, tilt = 1 if df > 0 else -1 if df < 0 else 0, 1 if dx > 0 else -1 if dx < 0 else 0
-    x = anim(name, desc, end=13, stop=17, lag=LIMBS_LAG)
+    x = anim(name, desc, end=13, stop=17, lag=LIMBS_LAG, ground='contact')
     def arms(k):  # k > 0: brazos atras respecto del movimiento; k < 0: adelante
         return dict(rarm=R((6 + 2 * dx * -k, -9 + abs(k), -k * 6 * df + 1), (0, 0, 1)),
                     larm=L((-6 + 2 * dx * -k, -9 + abs(k), -k * 6 * df + 1), (0, 0, 1)))
@@ -268,7 +272,7 @@ def roll(name, desc, lean=0, tilt=0, lean_in=None):
     """Roll en 5 tiempos: 1) se inclina y da un paso hacia donde va a rodar, 2) se zambulle encogiendose,
     3) gira, 4) cae amortiguando con los brazos abiertos, 5) se levanta."""
     sl, st = (1 if lean > 0 else -1 if lean < 0 else 0), (1 if tilt > 0 else -1 if tilt < 0 else 0)
-    x = anim(name, desc, end=17, stop=21, lag=LIMBS_LAG)
+    x = anim(name, desc, end=17, stop=21, lag=LIMBS_LAG, ground='contact')
     balance = dict(rarm=R((10, -7, 2)), larm=L((-10, -7, 2)))
     x.key(0, 'stop', **NEUTRAL_P)
     half = {k: v for k, v in lean_in.items()}
@@ -276,10 +280,11 @@ def roll(name, desc, lean=0, tilt=0, lean_in=None):
     half['root'] = tuple(r)
     x.key(2, 'smooth', **P(half, head(down=8)))
     x.key(4, 'stop', **P(lean_in, head(down=18)))
-    x.key(6, 'smooth', **P(root(up=-0.3, lean=lean * 0.25 + lean_in['root'][3] * 0.3, tilt=tilt * 0.25 + lean_in['root'][5] * 0.3, plant=0.3), TUCK))
-    x.key(10, 'smooth', **P(root(up=-0.4, lean=lean * 0.7, tilt=tilt * 0.7, plant=0)))
-    x.key(13, 'smooth', **P(root(up=-0.3, lean=lean * 0.97, tilt=tilt * 0.97, plant=0), legs('crouch', 15)))
-    x.key(14, 'stop', **P(root(up=-0.24, lean=lean + 6 * sl, tilt=tilt + 6 * st, plant=0), balance, legs('crouch', 15), head(down=5)))
+    c = 70 if tilt == 0 else 62  # cuanto se enrolla la espalda
+    x.key(6, 'smooth', **P(root(up=-0.3, lean=lean * 0.25 + lean_in['root'][3] * 0.3, tilt=tilt * 0.25 + lean_in['root'][5] * 0.3, plant=0.3), TUCK, curl(c * 0.8)))
+    x.key(10, 'smooth', **P(root(up=-0.4, lean=lean * 0.7, tilt=tilt * 0.7, plant=0), curl(c)))
+    x.key(13, 'smooth', **P(root(up=-0.3, lean=lean * 0.97, tilt=tilt * 0.97, plant=0), legs('crouch', 15), curl(c * 0.45)))
+    x.key(14, 'stop', **P(root(up=-0.24, lean=lean + 6 * sl, tilt=tilt + 6 * st, plant=0), balance, legs('crouch', 15), head(down=5), curl(c * 0.15)))
     x.key(17, 'stop', **P(NEUTRAL_P, root(lean=lean, tilt=tilt, plant=0)))
 
 TUCK = P(dict(rarm=R((3, -6, 6), (0, 1, 0)), larm=L((-3, -6, 6), (0, 1, 0))), legs('tuck'), head(down=30))

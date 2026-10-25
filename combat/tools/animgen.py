@@ -104,6 +104,7 @@ NEUTRAL = {
     'lleg': [[0, -1, 0], 0],
     'ritem': [0, 0, 0, 0, 0, 0],         # ajuste extra del objeto en mano (grados, px)
     'litem': [0, 0, 0, 0, 0, 0],
+    'curl': [0],                         # columna enrollada hacia adelante (grados), dobla por la cintura
 }
 ORDER = list(NEUTRAL)
 
@@ -215,6 +216,29 @@ def solve(p):
         pos = mat_vec(R_t, [sx, 2, 0])
         o[part] = dict(vals=dict(x=pos[0], y=pos[1], z=pos[2], bend=bend), R=U, axis=axis)
         wrist[part] = Qi
+    curl = p['curl'][0] * D
+    if abs(curl) > 1e-5:
+        # Se dobla la malla del torso y se giran cabeza y brazos alrededor de la cintura (0, 6, 0)
+        Rc = rx(curl)
+        W = [0.0, 6.0, 0.0]
+        o['torso']['vals']['bend'] = curl
+        o['torso']['axis'] = 0.0
+        for part in ('head', 'rightArm', 'leftArm'):
+            d = o[part]
+            if part == 'head':
+                d['R'] = mat_mul(Rc, zyx(*d.pop('rot')))
+                pos = [0.0, 0.0, 0.0]
+            else:
+                d['R'] = mat_mul(Rc, d['R'])
+                pos = [d['vals']['x'], d['vals']['y'], d['vals']['z']]
+            q = mat_vec(Rc, [pos[i] - W[i] for i in range(3)])
+            d['vals']['x'], d['vals']['y'], d['vals']['z'] = q[0] + W[0], q[1] + W[1], q[2] + W[2]
+    else:
+        o['torso']['vals']['bend'] = 0.0
+        o['torso']['axis'] = 0.0
+        h = o['head'].pop('rot')
+        o['head']['R'] = zyx(*h)
+        o['head']['vals'].update(x=0.0, y=0.0, z=0.0)
     for key, part, sx in (('rleg', 'rightLeg', -1.9), ('lleg', 'leftLeg', 1.9)):
         d, knee = p[key]
         R = mat_mul(frame(to_model(d), [0, 0, -1]), rx(-knee * D / 2))  # el muslo va adelante y la pierna atras
@@ -269,17 +293,83 @@ def spring(series, idx, omega, zeta=0.7, sub=8):
         out.append(row)
     return out
 
+# ---------------------------------------------------------------- piso
+
+# Cubos del modelo del jugador (px, espacio del modelo): parte -> (min, tamanio, altura de la articulacion, centro x)
+CUBES = {
+    'head': ((-4, -8, -4), (8, 8, 8), None, 0),
+    'torso': ((-4, 0, -2), (8, 12, 4), 6, 0),
+    'rightArm': ((-3, -2, -2), (4, 12, 4), 4, -1),
+    'leftArm': ((-1, -2, -2), (4, 12, 4), 4, 1),
+    'rightLeg': ((-2, 0, -2), (4, 12, 4), 6, 0),
+    'leftLeg': ((-2, 0, -2), (4, 12, 4), 6, 0),
+}
+GROUND_MARGIN = 0.03  # bloques
+
+def model_points(s):
+    """Esquinas de todos los cubos en el cuadro de la entidad (bloques, y hacia arriba, pies en 0).
+    Misma cadena que el render: cuerpo (pivote a 0.7) -> espejo -> escala 0.9375 -> -1.501 -> px/16."""
+    b = s['body']
+    Rb = zyx(*b['rot'])
+    bv = b['vals']
+    pts = []
+    for part, (mn, sz, joint, cx) in CUBES.items():
+        d = s[part]
+        if 'R' in d:
+            R = d['R']
+        else:
+            R = zyx(*d['rot'])
+        v = d['vals']
+        pos = [v.get('x', 0.0), v.get('y', 0.0), v.get('z', 0.0)]
+        bend = v.get('bend', 0.0) if joint is not None else 0.0
+        axis = d.get('axis') or 0.0
+        B = axis_rot([math.cos(-axis), 0.0, math.sin(-axis)], bend) if bend else None
+        for ix in (0, 1):
+            for iy in (0, 0.5, 1) if joint is not None else (0, 1):
+                for iz in (0, 1):
+                    loc = [mn[0] + sz[0] * ix, mn[1] + sz[1] * iy, mn[2] + sz[2] * iz]
+                    moving = loc[1] < joint if part == 'torso' else (joint is not None and loc[1] > joint)
+                    if B is not None and moving:
+                        rel = [loc[0] - cx, loc[1] - joint, loc[2]]
+                        rr = mat_vec(B, rel)
+                        loc = [rr[0] + cx, rr[1] + joint, rr[2]]
+                    m = [pos[i] + c for i, c in enumerate(mat_vec(R, loc))]
+                    p = [m[0] / 16, m[1] / 16 - 1.501, m[2] / 16]
+                    p = [-p[0] * 0.9375, -p[1] * 0.9375, p[2] * 0.9375]
+                    p[1] -= 0.7
+                    w = mat_vec(Rb, p)
+                    pts.append((w[0] + bv['x'], w[1] + bv['y'] + 0.7, w[2] + bv['z']))
+    return pts
+
+def ground_contact(solved, mode='push'):
+    """'push': si algo queda bajo el piso, sube el cuerpo lo justo. 'contact': ademas baja lo que flota (rolls y dash
+    siempre apoyados). La correccion es una curva suave que nunca deja atravesar el piso."""
+    low = [min(p[1] for p in model_points(s)) for s in solved]
+    n = len(low)
+    need = [max(0.0, GROUND_MARGIN - m) if m < GROUND_MARGIN else 0.0 for m in low]  # minimo para no atravesar
+    if mode == 'contact':
+        lift = [GROUND_MARGIN - m for m in low]   # apoyado exacto en cada tick
+        for i in (0, n - 1):                       # empieza y termina parado como siempre
+            if abs(low[i]) < 0.05:
+                lift[i] = 0.0
+    else:
+        wide = [max(need[max(0, i - 1):i + 2]) for i in range(n)]
+        lift = [max(need[i], sum(wide[max(0, i - 1):i + 2]) / len(wide[max(0, i - 1):i + 2])) for i in range(n)]
+    for s, l in zip(solved, lift):
+        s['body']['vals']['y'] += l
+
 # ---------------------------------------------------------------- animacion
 
 ROT_AXES = ('pitch', 'yaw', 'roll')
 
 class Anim:
-    def __init__(self, name, desc, end, begin=0, stop=None, loop=False, ret=0, start=None, lag=('head',), settle=0):
+    def __init__(self, name, desc, end, begin=0, stop=None, loop=False, ret=0, start=None, lag=('head',), settle=0, ground=True):
         self.name, self.desc = name, desc
         self.begin, self.end = begin, end
         self.stop = stop if stop is not None else end
         self.loop, self.ret = loop, ret
         self.lag = lag          # partes con inercia (resorte)
+        self.ground = ground    # nada del modelo atraviesa el piso
         self.keys = []
         base = json.loads(json.dumps(NEUTRAL)); base.update(json.loads(json.dumps(start or {})))
         self.cur = base
@@ -317,6 +407,8 @@ class Anim:
     def build(self):
         first, poses = self.series()
         solved = [solve(p) for p in poses]
+        if self.ground:
+            ground_contact(solved, self.ground if isinstance(self.ground, str) else 'push')
         ticks = list(range(first, first + len(poses)))
         out = {}  # (parte, eje) -> [(tick, valor)]
         for part in solved[0]:

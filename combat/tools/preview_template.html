@@ -327,7 +327,13 @@ function buildPlayer(slim) {
   const h = part('head', 0, 0, 0);
   h.add(mesh(boxGeom(0, 0, -4, -8, -4, 8, 8, 8, 0)), mesh(boxGeom(32, 0, -4, -8, -4, 8, 8, 8, 0.5)));
   const b = part('torso', 0, 0, 0);
-  b.add(mesh(boxGeom(16, 16, -4, 0, -2, 8, 12, 4, 0)), mesh(boxGeom(16, 32, -4, 0, -2, 8, 12, 4, 0.25)));
+  // torso: la mitad de abajo queda fija y la de arriba se dobla por la cintura (y = 6), como en Player Animator
+  const upper = new THREE.Group(); upper.position.set(0, 6, 0); b.add(upper);
+  for (const [U, V, inf] of [[16, 16, 0], [16, 32, 0.25]]) {
+    b.add(mesh(boxGeom(U, V, -4, 0, -2, 8, 12, 4, inf, 0.5, 1)));
+    const up = mesh(boxGeom(U, V, -4, 0, -2, 8, 12, 4, inf, 0, 0.5)); up.position.set(0, -6, 0); upper.add(up);
+  }
+  rig.parts.torso.lower = upper;
   const limb = (name, px, py, pz, cube, layers, joint) => {
     const p = part(name, px, py, pz);
     const [x, y, z, w, hh, d] = cube, jf = (joint - y) / hh;
