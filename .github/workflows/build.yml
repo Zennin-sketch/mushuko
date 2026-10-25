@@ -10,7 +10,16 @@ jobs:
           distribution: temurin
           java-version: 21
       - name: Compilar
-        run: chmod +x gradlew && ./gradlew build --no-daemon --stacktrace
+        run: |
+          chmod +x gradlew
+          set -o pipefail
+          if ! ./gradlew build --no-daemon --stacktrace 2>&1 | tee build.log; then
+            # Publica los errores como anotaciones para poder leerlos sin descargar el log
+            grep -E "error:|What went wrong|Caused by|> " build.log | head -40 | while IFS= read -r line; do
+              echo "::error::${line//%/%25}"
+            done
+            exit 1
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: mushoku-tensei-fabric
