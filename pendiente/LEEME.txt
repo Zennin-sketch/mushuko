@@ -1,0 +1,2 @@
+Archivos de worldgen del original que dependen de bloques y features que todavia no existen en el port.
+Se vuelven a activar en la Fase 5 (mundo y estructuras).
