@@ -115,3 +115,16 @@ Se mantiene el id `remushoku` para que las texturas, modelos y datos funcionen s
 1. Subir este proyecto a un repositorio de GitHub.
 2. GitHub Actions lo compila solo en cada cambio ("Compilar mod").
 3. El .jar queda en Actions → la última ejecución → Artifacts → `mushoku-tensei-fabric`.
+
+## Addon de combate (`combat/`, mod id `mushoku_combat`)
+Requiere Better Combat 2.4+, Player Animator 2.0.4 y Cloth Config 15 (Fabric 1.21.1).
+- Combos de 2-3 golpes por familia de arma (espada, katana, mandoble, hacha, guadaña, lanza, bastón, maza) en
+  `data/remushoku/weapon_attributes`. Animaciones propias en `assets/mushoku_combat/player_animations`.
+- Las animaciones se generan con `combat/tools/animgen.py` + `anims.py` (poses por posición de mano con IK);
+  `catalog.py` define qué arma usa qué combo; `build_preview.py` arma la página de previsualización.
+- Estamina: 3 esquivas, recarga 1 cada 4.5 s, correr gasta muy poco. Barra arriba de la XP (corazones suben 5 px).
+- Esquiva (Alt izq.): roll para espadachín, dash para mago. Esquiva perfecta: golpe en los primeros 6 ticks → sin daño,
+  sonido metálico y aura dorada.
+- Pose de conjuro estilo Rudeus mientras el modo conjuro está activo; empuje del bastón al lanzar (Tab).
+- Pendiente: NPCs (Eris, Ghislaine, Ruijerd, Orsted, Roxy) con las mismas animaciones y ataques especiales;
+  animación propia por hechizo (bala de tierra con el rombo girando en la mano, etc.).

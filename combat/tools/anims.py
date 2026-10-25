@@ -271,7 +271,7 @@ dash('dash_right', 'Dash a la derecha (mago)', tilt=22, arms='right')
 # Cuerpo de perfil con el hombro derecho adelante, brazo derecho extendido hacia el objetivo con el baston
 # apuntando adelante, mano izquierda abierta abajo y atras, piernas abiertas.
 CAST = P(root(up=-0.03, turn=-20), torso(turn=-22, lean=2), head(yaw=8, down=2),
-         dict(rarm=R((3, -2, 10), (0.05, 0.25, 1)), larm=L((-10, -9, -4), (0, -0.3, -1))),
+         dict(rarm=R((3, -2, 10), (0.05, 0.25, 1)), larm=L((-11, -6, -3), (0, -0.3, -1))),
          dict(rleg=((0.2, -0.95, 0.32), 12), lleg=((-0.18, -0.95, -0.28), 6)))
 
 a = anim('cast_pose', 'Pose de conjuro estilo Rudeus (loop mientras el modo conjuro esta activo)',
@@ -285,6 +285,6 @@ a = anim('cast_release', 'Lanzamiento del hechizo: empuje del baston', end=14, s
 a.key(0, 'linear', **CAST)
 a.key(3, 'inout', **P(CAST, root(up=-0.02, turn=-18, fwd=-0.04), dict(rarm=R((4, 0, 7), (0.05, 0.4, 1)))))
 a.key(5, 'snap', **P(CAST, root(up=-0.05, turn=-22, fwd=0.1, lean=5), dict(rarm=R((2, -2, 12), (0.03, 0.15, 1))),
-                     dict(larm=L((-10, -8, -6), (0, -0.3, -1)))))
+                     dict(larm=L((-11, -5, -5), (0, -0.3, -1)))))
 a.key(9, 'hold', **P(CAST, root(up=-0.05, turn=-22, fwd=0.1, lean=5)))
 a.key(14, 'inout', **NEUTRAL_P)

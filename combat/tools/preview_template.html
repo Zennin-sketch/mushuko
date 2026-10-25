@@ -230,7 +230,8 @@ const camera = new THREE.PerspectiveCamera(38, 1, 0.05, 60);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 0.95, 0); controls.enableDamping = true; controls.minDistance = 1.5; controls.maxDistance = 12;
 const CAMS = { '34': [-2.6, 1.7, -3.4], r34: [2.6, 1.5, -3.4], front: [0, 1.3, -4.2], side: [-4.2, 1.3, 0], back: [0, 1.6, 4.2], top: [0.01, 5.5, -0.6] };
-function cam(k) { camera.position.set(...CAMS[k]); controls.target.set(0, 0.95, 0); controls.update(); }
+let camKey = '34';
+function cam(k) { camKey = k; const f = camera.aspect < 0.9 ? 1.6 : 1; camera.position.set(...CAMS[k].map((v, i) => i === 1 ? v : v * f)); controls.target.set(0, 0.95, 0); controls.update(); }
 cam('34');
 for (const k of Object.keys(CAMS)) document.getElementById('cam-' + k).onclick = () => cam(k);
 
@@ -326,8 +327,7 @@ function buildPlayer(slim) {
   const h = part('head', 0, 0, 0);
   h.add(mesh(boxGeom(0, 0, -4, -8, -4, 8, 8, 8, 0)), mesh(boxGeom(32, 0, -4, -8, -4, 8, 8, 8, 0.5)));
   const b = part('torso', 0, 0, 0);
-  b.add(mesh(boxGeom(16, 16, -4, 0, -4 + 2, 8, 12, 4, 0)), mesh(boxGeom(16, 32, -4, 0, -2, 8, 12, 4, 0.25)));
-  b.children[0].geometry = boxGeom(16, 16, -4, 0, -2, 8, 12, 4, 0);
+  b.add(mesh(boxGeom(16, 16, -4, 0, -2, 8, 12, 4, 0)), mesh(boxGeom(16, 32, -4, 0, -2, 8, 12, 4, 0.25)));
   const limb = (name, px, py, pz, cube, layers, joint) => {
     const p = part(name, px, py, pz);
     const [x, y, z, w, hh, d] = cube, jf = (joint - y) / hh;
@@ -348,7 +348,7 @@ function buildPlayer(slim) {
   // cadena del objeto en la mano (ItemInHandLayer + HeldItemMixin de Player Animator)
   for (const [arm, item, side] of [['rightArm', 'rightItem', 1], ['leftArm', 'leftItem', -1]]) {
     const p = rig.parts[arm].g;
-    const slimOff = new THREE.Group(); slimOff.position.x = slim ? 0.5 * side * 16 / 16 : 0; // translateToHand en brazos finos
+    const slimOff = new THREE.Group(); slimOff.position.x = slim ? 0.5 * side : 0; // translateToHand en brazos finos
     p.add(slimOff);
     const bend = new THREE.Group(); bend.position.y = 4; slimOff.add(bend);
     const bendBack = new THREE.Group(); bendBack.position.y = -4; bend.add(bendBack);
@@ -594,7 +594,7 @@ tl.onclick = e => {
 };
 
 /* ---------------------------------------------------------------- bucle */
-function resize() { const w = view.clientWidth, h = view.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+function resize() { const w = view.clientWidth, h = view.clientHeight; if (!w || !h) return; const narrow = camera.aspect < 0.9; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); if (narrow !== camera.aspect < 0.9) cam(camKey); }
 new ResizeObserver(resize).observe(view);
 let last = performance.now();
 const hit = document.getElementById('hit');
