@@ -8,6 +8,10 @@ Ataques de Better Combat: el golpe conecta a mitad de la animacion (tick 10 de 2
 hace la transicion desde la pose actual, asi que el primer keyframe es la preparacion del golpe.
 """
 from animgen import anim, NEUTRAL, norm
+import animgen as _G
+
+def ANIMS_REF():
+    return _G.ANIMS
 
 def R(p, blade=(0, 0, 1)):
     return (list(p), list(norm(blade)))
@@ -19,7 +23,7 @@ def grip(p, blade, spread=3.5):
     spread negativo = la izquierda va adelante (lanza)."""
     b = norm(blade)
     other = [p[i] - b[i] * spread for i in range(3)]
-    return dict(rarm=R(p, b), larm=R(other, b))
+    return dict(rarm=R(p, b), larm=R(other, b), grip=(1, spread))
 
 def legs(stance='neutral', k=0):
     s = {
@@ -273,15 +277,24 @@ def roll(name, desc, lean=0, tilt=0, lean_in=None):
     3) gira, 4) cae amortiguando con los brazos abiertos, 5) se levanta."""
     sl, st = (1 if lean > 0 else -1 if lean < 0 else 0), (1 if tilt > 0 else -1 if tilt < 0 else 0)
     x = anim(name, desc, end=17, stop=21, lag=LIMBS_LAG, ground='contact')
-    balance = dict(rarm=R((10, -7, 2)), larm=L((-10, -7, 2)))
+    # El arma va a lo largo del eje de giro (no gira con el cuerpo, asi no toca ni el cuerpo ni el piso):
+    # hacia la derecha en los rolls adelante/atras y hacia atras en los laterales.
+    side_roll = tilt != 0
+    wb = (0.25, 0.15, -1) if side_roll else (1, 0.15, -0.1)
+    hold = R((10, -5, -3), wb) if side_roll else R((6, -7, 4), wb)
+    # al caer ya no gira: el arma vuelve de a poco hacia adelante
+    balance = dict(rarm=R((10, -7, 2), (0.6, 0.3, 0.75) if side_roll else wb), larm=L((-10, -7, 2)))
+    tuck = P(TUCK, dict(rarm=hold, larm=TUCK['larm']))
     x.key(0, 'stop', **NEUTRAL_P)
     half = {k: v for k, v in lean_in.items()}
     r = list(half['root']); r[1] *= 0.4; r[3] *= 0.4; r[5] *= 0.4
     half['root'] = tuple(r)
+    li = dict(lean_in); li['rarm'] = R(list(lean_in['rarm'][0][:1]) + [lean_in['rarm'][0][1] + 3, lean_in['rarm'][0][2] - 2], wb)
+    half['rarm'] = R(li['rarm'][0], (0.8, 0.5, 0.3) if side_roll else (0.7, 0.2, 0.7))  # transicion hacia el eje de giro
     x.key(2, 'smooth', **P(half, head(down=8)))
-    x.key(4, 'stop', **P(lean_in, head(down=18)))
+    x.key(4, 'stop', **P(li, head(down=18)))
     c = 70 if tilt == 0 else 62  # cuanto se enrolla la espalda
-    x.key(6, 'smooth', **P(root(up=-0.3, lean=lean * 0.25 + lean_in['root'][3] * 0.3, tilt=tilt * 0.25 + lean_in['root'][5] * 0.3, plant=0.3), TUCK, curl(c * 0.8)))
+    x.key(6, 'smooth', **P(root(up=-0.3, lean=lean * 0.25 + lean_in['root'][3] * 0.3, tilt=tilt * 0.25 + lean_in['root'][5] * 0.3, plant=0.3), tuck, curl(c * 0.8)))
     x.key(10, 'smooth', **P(root(up=-0.4, lean=lean * 0.7, tilt=tilt * 0.7, plant=0), curl(c)))
     x.key(13, 'smooth', **P(root(up=-0.3, lean=lean * 0.97, tilt=tilt * 0.97, plant=0), legs('crouch', 15), curl(c * 0.45)))
     x.key(14, 'stop', **P(root(up=-0.24, lean=lean + 6 * sl, tilt=tilt + 6 * st, plant=0), balance, legs('crouch', 15), head(down=5), curl(c * 0.15)))
@@ -348,6 +361,9 @@ def sheathe_back():
     x.key(13, 'stop', **NEUTRAL_P)
 
 draw_hip(); sheathe_hip(); draw_back(); sheathe_back()
+for _a in ANIMS_REF():
+    if _a.name.endswith(('_draw', '_sheathe')):
+        _a.continuity = False
 
 # =============================================================== CONJURO (pose de Rudeus)
 # Cuerpo de perfil con el hombro derecho adelante, brazo derecho extendido hacia el objetivo con el baston

@@ -16,8 +16,8 @@
    "axis": 0.0,
    "wrist": [
     -0.1434,
-    -0.0,
-    -0.0
+    0.0,
+    0.0
    ],
    "draw": "hip_draw",
    "sheathe": "hip_sheathe",

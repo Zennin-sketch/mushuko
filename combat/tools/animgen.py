@@ -105,6 +105,7 @@ NEUTRAL = {
     'ritem': [0, 0, 0, 0, 0, 0],         # ajuste extra del objeto en mano (grados, px)
     'litem': [0, 0, 0, 0, 0, 0],
     'curl': [0],                         # columna enrollada hacia adelante (grados), dobla por la cintura
+    'grip': [0, 0],                      # agarre a dos manos: peso (0..1) y distancia de la mano izquierda sobre el mango
 }
 ORDER = list(NEUTRAL)
 
@@ -143,7 +144,7 @@ def slice_of(key):
 
 UPPER, FORE = 4.0, 6.0  # pivote del brazo -> codo (y=4 en el cubo), codo -> mano
 
-def arm_ik(R_t, sx, hand_p, blade):
+def arm_ik(R_t, sx, hand_p, blade, prev_front=None):
     """Hombro -> codo -> mano con el codo hacia abajo/afuera/atras. Devuelve (matriz del brazo, bend, axis, muneca)."""
     side = -1 if sx < 0 else 1
     S = [sx, 2.0, 0.0]
@@ -168,7 +169,31 @@ def arm_ik(R_t, sx, hand_p, blade):
         e = math.acos(max(-1.0, min(1.0, dot(ua, fore))))
     ua, fore = mat_vec(R_t, ua), mat_vec(R_t, fore)
     bm = mat_vec(R_t, norm(to_model(blade)))
-    Lf = frame(fore, bm)
+    # Giro del antebrazo (el "rolido" del arma sobre su eje): se elige el que minimiza a la vez cuanto se tuerce
+    # el arma respecto del puno y cuanto gira respecto del tick anterior. Asi no hay vueltas bruscas.
+    perp = [c - dot(bm, fore) * a for c, a in zip(bm, fore)]
+    mag = math.sqrt(dot(perp, perp))
+    pn = norm(perp) if mag > 1e-6 else None
+    pf = None
+    if prev_front is not None:
+        pf = [c - dot(prev_front, fore) * a for c, a in zip(prev_front, fore)]
+        pf = norm(pf) if math.sqrt(dot(pf, pf)) > 1e-4 else None
+    if pn is None:
+        pn = pf or frame(fore, [0, 0, -1])[0:3] and mat_vec(frame(fore, [0, 0, -1]), [0, 0, -1])
+    front = pn
+    if pf is not None:
+        side = cross(fore, pn)
+        best = None
+        for k in range(48):
+            th = k * TAU / 48
+            f = [pn[j] * math.cos(th) + side[j] * math.sin(th) for j in range(3)]
+            wrist_a = math.acos(max(-1.0, min(1.0, dot(f, bm))))
+            twist_a = math.acos(max(-1.0, min(1.0, dot(f, pf))))
+            cost = wrist_a ** 2 + 0.7 * twist_a ** 2
+            if best is None or cost < best[0]:
+                best = (cost, f)
+        front = best[1]
+    Lf = frame(fore, front if math.sqrt(dot(front, front)) > 1e-6 else bm)
     if e > 1e-4:
         k = norm(cross(fore, ua))
         U = mat_mul(axis_rot(k, e), Lf)
@@ -177,6 +202,7 @@ def arm_ik(R_t, sx, hand_p, blade):
         bend = -e
     else:
         U, axis, bend = Lf, None, 0.0
+    front_out = mat_vec(Lf, [0.0, 0.0, -1.0])
     # muneca: el objeto sale perpendicular al antebrazo; si la hoja pedida no lo es, se gira el objeto en la mano
     bl = mat_vec(transpose(Lf), bm)
     n = [0.0, 0.0, -1.0]
@@ -185,11 +211,20 @@ def arm_ik(R_t, sx, hand_p, blade):
     if ang > 1e-3:
         Q = axis_rot(norm(cross(n, bl)), ang)
         Qi = mat_mul(mat_mul(transpose(ITEM_M), Q), ITEM_M)
+    arm_ik.front = front_out
     return U, bend, axis, Qi
 
-def solve(p):
-    """Pose intuitiva -> por parte: valores escalares y matrices de rotacion (se pasan a Euler despues)."""
+def solve(p, prev=None):
+    """Pose intuitiva -> por parte: valores escalares y matrices de rotacion (se pasan a Euler despues).
+    prev: resultado del tick anterior (para que el giro del antebrazo sea continuo)."""
     o = {}
+    w, spread = p['grip']
+    if w > 1e-4:  # la mano izquierda sigue al mango aunque la hoja cambie (correccion de colision)
+        rp, b = p['rarm']
+        hand = [rp[i] - b[i] * spread for i in range(3)]
+        lp, lb = p['larm']
+        p = dict(p)
+        p['larm'] = [[lp[i] + (hand[i] - lp[i]) * w for i in range(3)], norm([lb[i] + (b[i] - lb[i]) * w for i in range(3)])]
     r = p['root']
     plant = r[6]
     lean, tilt = r[3] * D * plant, r[5] * D * plant
@@ -212,9 +247,10 @@ def solve(p):
     wrist = {}
     for key, part, sx in (('rarm', 'rightArm', -5), ('larm', 'leftArm', 5)):
         hand_p, blade = p[key]
-        U, bend, axis, Qi = arm_ik(R_t, sx, hand_p, blade)
+        pf = prev[part].get('front') if prev else None
+        U, bend, axis, Qi = arm_ik(R_t, sx, hand_p, blade, pf)
         pos = mat_vec(R_t, [sx, 2, 0])
-        o[part] = dict(vals=dict(x=pos[0], y=pos[1], z=pos[2], bend=bend), R=U, axis=axis)
+        o[part] = dict(vals=dict(x=pos[0], y=pos[1], z=pos[2], bend=bend), R=U, axis=axis, front=arm_ik.front)
         wrist[part] = Qi
     curl = p['curl'][0] * D
     if abs(curl) > 1e-5:
@@ -358,6 +394,198 @@ def ground_contact(solved, mode='push'):
     for s, l in zip(solved, lift):
         s['body']['vals']['y'] += l
 
+# ---------------------------------------------------------------- colision del arma con el cuerpo
+
+def solve_all(poses, continuity=True):
+    out, prev = [], None
+    for p in poses:
+        prev = solve(p, prev if continuity else None)
+        out.append(prev)
+    return out
+
+def body_point(s, part, loc, joint=None, cx=0.0, upper_moves=False):
+    """Punto local de una parte (px) -> espacio del modelo (px), con la flexion de codo/rodilla."""
+    d = s[part]
+    v = d['vals']
+    bend = v.get('bend', 0.0)
+    if joint is not None and bend:
+        moving = loc[1] < joint if upper_moves else loc[1] > joint
+        if moving:
+            ax = d.get('axis') or 0.0
+            B = axis_rot([math.cos(-ax), 0.0, math.sin(-ax)], bend)
+            r = mat_vec(B, [loc[0] - cx, loc[1] - joint, loc[2]])
+            loc = [r[0] + cx, r[1] + joint, r[2]]
+    R = d['R']
+    m = mat_vec(R, loc)
+    return [v.get('x', 0.0) + m[0], v.get('y', 0.0) + m[1], v.get('z', 0.0) + m[2]]
+
+def weapon_points(s, seg, n=10):
+    """Puntos a lo largo del arma (espacio del modelo, px)."""
+    d = s['rightArm']
+    U, v = d['R'], d['vals']
+    bend = v.get('bend', 0.0)
+    ax = d.get('axis') or 0.0
+    B = axis_rot([math.cos(-ax), 0.0, math.sin(-ax)], bend) if bend else None
+    W = s['rightItem']['R']
+    pts = []
+    a, b = seg
+    for i in range(n + 1):
+        f = i / n
+        q = [a[j] + (b[j] - a[j]) * f for j in range(3)]
+        q = mat_vec(W, q)
+        q = mat_vec(ITEM_M, [q[0] + 1, q[1] + 2, q[2] - 10])
+        if B is not None:
+            r = mat_vec(B, [q[0], q[1] - 4, q[2]])
+            q = [r[0], r[1] + 4, r[2]]
+        m = mat_vec(U, q)
+        pts.append([v['x'] + m[0], v['y'] + m[1], v['z'] + m[2]])
+    return pts
+
+# cajas con las que choca el arma: (parte, min, tamanio, articulacion, centro x, mitad de arriba se mueve)
+COLLIDERS = [
+    ('torso', (-4, 0, -2), (8, 12, 4), 6, 0.0, True),
+    ('head', (-4, -8, -4), (8, 8, 8), None, 0.0, False),
+    ('rightLeg', (-2, 0, -2), (4, 12, 4), 6, 0.0, False),
+    ('leftLeg', (-2, 0, -2), (4, 12, 4), 6, 0.0, False),
+]
+LEFT_ARM = ('leftArm', (-1, -2, -2), (4, 12, 4), 4, 1.0, False)
+BLADE_R = 0.7  # grosor del arma (px)
+
+def _inv_point(s, part, pt, joint, cx, upper_moves):
+    """Espacio del modelo -> local de la parte (sin flexion: se prueba contra las dos mitades por separado)."""
+    d = s[part]
+    v = d['vals']
+    rel = [pt[0] - v.get('x', 0.0), pt[1] - v.get('y', 0.0), pt[2] - v.get('z', 0.0)]
+    return mat_vec(transpose(d['R']), rel)
+
+def penetration(s, seg, with_left_arm, ground_world=None):
+    """Cuanto se mete el arma en el cuerpo (px, suma de profundidades) y en el piso."""
+    pts = weapon_points(s, seg)
+    total = 0.0
+    cols = COLLIDERS + ([LEFT_ARM] if with_left_arm else [])
+    for part, mn, sz, joint, cx, up in cols:
+        d = s[part]
+        bend = d['vals'].get('bend', 0.0)
+        halves = [(mn, sz, None)]
+        if joint is not None and abs(bend) > 0.05:
+            top = (mn, (sz[0], joint - mn[1], sz[2]))
+            bot = ((mn[0], joint, mn[2]), (sz[0], mn[1] + sz[1] - joint, sz[2]))
+            halves = [(top[0], top[1], 'top'), (bot[0], bot[1], 'bot')]
+        for hmn, hsz, which in halves:
+            B = None
+            moving = which == ('top' if up else 'bot')
+            if which and moving:
+                ax = d.get('axis') or 0.0
+                B = axis_rot([math.cos(-ax), 0.0, math.sin(-ax)], bend)
+            for pt in pts:
+                l = _inv_point(s, part, pt, joint, cx, up)
+                if B is not None:  # deshacer la flexion de esa mitad
+                    r = mat_vec(transpose(B), [l[0] - cx, l[1] - joint, l[2]])
+                    l = [r[0] + cx, r[1] + joint, r[2]]
+                depth = min(min(l[i] - (hmn[i] - BLADE_R), (hmn[i] + hsz[i] + BLADE_R) - l[i]) for i in range(3))
+                if depth > 0:
+                    total += depth
+    if ground_world is not None:
+        for pt in pts:
+            y = ground_world(s, pt)
+            if y < 0:
+                total += -y * 16
+    return total
+
+def world_y(s, m):
+    """Altura en el mundo (bloques) de un punto del espacio del modelo."""
+    b = s['body']
+    p = [m[0] / 16, m[1] / 16 - 1.501, m[2] / 16]
+    p = [-p[0] * 0.9375, -p[1] * 0.9375, p[2] * 0.9375]
+    p[1] -= 0.7
+    w = mat_vec(zyx(*b['rot']), p)
+    return w[1] + b['vals']['y'] + 0.7
+
+def _rotate_toward(b, u, ang):
+    return norm([b[i] * math.cos(ang) + u[i] * math.sin(ang) for i in range(3)])
+
+def _ang(a, b):
+    return math.acos(max(-1.0, min(1.0, dot(a, b))))
+
+def resolve_weapon(poses, seg, from_tick=0, sweeps=10):
+    """Recorrido del arma sin atravesar el cuerpo ni el piso, optimizando la animacion entera a la vez:
+    se busca que no choque (muy caro), que se aparte poco de la pose original y que entre tick y tick
+    la hoja y el giro de la muneca cambien lo menos posible (sin vueltas bruscas)."""
+    poses = [json.loads(json.dumps(p)) for p in poses]
+    n = len(poses)
+    orig = [list(p['rarm'][1]) for p in poses]
+    cur = [list(b) for b in orig]
+    left = [p['grip'][0] < 0.5 for p in poses]
+    W_PEN, W_DEV, W_SMOOTH, W_TWIST = 400.0, 0.6, 6.0, 0.6
+
+    def evaluate(i, b, prev_s):
+        q = dict(poses[i]); q['rarm'] = [poses[i]['rarm'][0], b]
+        s_ = solve(q, prev_s)
+        return s_, penetration(s_, seg, left[i], world_y)
+
+    # estado resuelto de cada tick (para el giro de la muneca del vecino)
+    def solve_seq(blades):
+        out, prev = [], None
+        for i in range(n):
+            q = dict(poses[i]); q['rarm'] = [poses[i]['rarm'][0], blades[i]]
+            prev = solve(q, prev)
+            out.append(prev)
+        return out
+
+    states = solve_seq(cur)
+    if all(penetration(states[i], seg, left[i], world_y) <= 0.05 for i in range(from_tick, n)):
+        return poses  # nada que corregir
+    radii = [6 * D, 15 * D, 30 * D]
+    # el primer y el ultimo tick quedan como estan (empalman con la animacion anterior y con la pose de reposo)
+    anchored = {i for i in (0, n - 1) if penetration(states[i], seg, left[i], world_y) <= 0.05}
+    def around(b0, rs):
+        ref = [0, 1, 0] if abs(b0[1]) < 0.9 else [1, 0, 0]
+        u1 = norm(cross(b0, ref)); u2 = cross(b0, u1)
+        out = []
+        for r in rs:
+            for k in range(12):
+                az = k * TAU / 12
+                u = [u1[j] * math.cos(az) + u2[j] * math.sin(az) for j in range(3)]
+                out.append(_rotate_toward(b0, u, r))
+        return out
+
+    for sweep in range(sweeps):
+        changed = False
+        order = range(max(from_tick, 0), n) if sweep % 2 == 0 else range(n - 1, max(from_tick, 0) - 1, -1)
+        for i in order:
+            if i in anchored:
+                continue
+            b0 = cur[i]
+            cands = [b0] + around(b0, radii)
+            # copiar la solucion de los vecinos: asi el arma esquiva el cuerpo siempre por el mismo lado
+            neigh = [cur[j] for j in (i - 1, i + 1) if 0 <= j < n]
+            if len(neigh) == 2:
+                neigh.append(norm([neigh[0][k] + neigh[1][k] for k in range(3)]))
+            for nb in neigh:
+                cands += [nb] + around(nb, [8 * D])
+            prev_s = states[i - 1] if i > 0 else None
+            best = None
+            for b in cands:
+                s_, pen = evaluate(i, b, prev_s)
+                cost = W_PEN * pen + W_DEV * _ang(b, orig[i]) ** 2
+                if i > 0:
+                    cost += W_SMOOTH * _ang(b, cur[i - 1]) ** 2
+                    cost += W_TWIST * _ang(s_['rightArm']['front'], states[i - 1]['rightArm']['front']) ** 2
+                if i < n - 1:
+                    cost += W_SMOOTH * _ang(b, cur[i + 1]) ** 2
+                if best is None or cost < best[0] - 1e-9:
+                    best = (cost, b, s_)
+            if best[1] is not b0:
+                changed = True
+            cur[i] = best[1]
+            states[i] = best[2]
+        states = solve_seq(cur)
+        if not changed:
+            break
+    for i in range(n):
+        poses[i]['rarm'][1] = cur[i]
+    return poses
+
 # ---------------------------------------------------------------- animacion
 
 ROT_AXES = ('pitch', 'yaw', 'roll')
@@ -370,6 +598,9 @@ class Anim:
         self.loop, self.ret = loop, ret
         self.lag = lag          # partes con inercia (resorte)
         self.ground = ground    # nada del modelo atraviesa el piso
+        self.weapon = None      # segmento del arma (lo pone build_data segun la familia); None = sin colision de arma
+        self.weapon_from = 0    # tick desde el que el arma esta en la mano (desenvainar)
+        self.continuity = True  # giro de muneca continuo; sacar/guardar lo apagan para que el agarre sea identico
         self.keys = []
         base = json.loads(json.dumps(NEUTRAL)); base.update(json.loads(json.dumps(start or {})))
         self.cur = base
@@ -377,6 +608,8 @@ class Anim:
     def key(self, tick, mode='smooth', **changes):
         """mode: 'smooth' (pasa con velocidad) o 'stop' (frena en esta pose). Las demas palabras de antes = smooth."""
         p = json.loads(json.dumps(self.cur))
+        if 'larm' in changes and 'grip' not in changes:
+            p['grip'] = [0, 0]
         for k, v in changes.items():
             if k in ('rarm', 'larm', 'rleg', 'lleg'):
                 v = list(v)
@@ -406,7 +639,9 @@ class Anim:
 
     def build(self):
         first, poses = self.series()
-        solved = [solve(p) for p in poses]
+        if self.weapon is not None:
+            poses = resolve_weapon(poses, self.weapon, self.weapon_from)
+        solved = solve_all(poses, self.continuity)
         if self.ground:
             ground_contact(solved, self.ground if isinstance(self.ground, str) else 'push')
         ticks = list(range(first, first + len(poses)))
@@ -550,16 +785,15 @@ def quat(m):
     return ((m[0][2] + m[2][0]) / s, (m[1][2] + m[2][1]) / s, 0.25 * s, (m[1][0] - m[0][1]) / s)
 
 def hand_slot(anim_obj, tick):
-    """Donde queda el arma en la mano derecha en ese tick, relativo al torso (para dibujarla guardada)."""
+    """Donde queda el arma en la mano derecha en ese tick, relativo al torso (para dibujarla guardada).
+    Se resuelve la animacion entera en orden, igual que al exportarla (el giro de la muneca depende del tick anterior)."""
     first, poses = anim_obj.series()
-    p = poses[tick - first]
-    t = p['torso']
-    R_t = zyx(t[1] * D, t[0] * D, -t[2] * D)
-    U, bend, axis, Qi = arm_ik(R_t, -5, *p['rarm'])
+    s = solve_all(poses, anim_obj.continuity)[tick - first]
+    R_t = s['torso']['R']
     Rti = transpose(R_t)
-    F = mat_mul(Rti, U)
-    pos = mat_vec(Rti, mat_vec(R_t, [-5, 2, 0]))
-    wrist = euler_candidates(Qi)[0] if Qi is not None else (0.0, 0.0, 0.0)
+    F = mat_mul(Rti, s['rightArm']['R'])
+    pos = mat_vec(Rti, [s['rightArm']['vals'][k] for k in ('x', 'y', 'z')])
+    wrist = euler_candidates(s['rightItem']['R'])[0]
     r = lambda v: round(v, 5)
-    return dict(pos=[r(v) for v in pos], rot=[r(v) for v in quat(F)], bend=r(bend), axis=r(axis or 0.0),
-                wrist=[r(v) for v in wrist])
+    return dict(pos=[r(v) for v in pos], rot=[r(v) for v in quat(F)], bend=r(s['rightArm']['vals']['bend']),
+                axis=r(s['rightArm'].get('axis') or 0.0), wrist=[r(v) for v in wrist])
