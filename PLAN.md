@@ -37,9 +37,15 @@ Se mantiene el id `remushoku` para que las texturas, modelos y datos funcionen s
 - [x] Curación avanzada (X-Curación, Banquete, Curación Sagrada) y Perturbar Magia
 - [x] Proyectil mágico con tamaño, empuje, elevación y explosión; tareas diferidas (tormentas, tornados)
 
-### Fase 3B — Círculos mágicos
-- Tiza, círculos mágicos con flechas, círculo que lanza al pisarlo
-- Mejora de piedras (círculo de mejora), pergaminos, báculos con piedra imbuida
+### Fase 3B — Círculos mágicos (HECHA, en prueba)
+- [x] Tiza (32 usos): clic derecho al suelo dibuja un círculo mágico
+- [x] Inscribir: formar el hechizo con flechas (sin lanzarlo) + clic derecho al círculo con la mano vacía
+- [x] Trampa: piedra del mismo nivel → se activa al pisarla (efecto según elemento y nivel; los de curación curan a quien los pisa)
+- [x] Piedra imbuida: agachado + piedra del mismo nivel
+- [x] Pergaminos: papel o pergamino en blanco sobre el círculo (cuesta el maná del hechizo), se lanzan gratis una vez
+- [x] Mejora de piedras: 4 piedras iguales sobre un círculo vacío → 1 del nivel siguiente
+- [x] Báculos (Varita, Migurd, Dragón, Areos, Aqua Heartia) con piedra imbuida y descuento de maná
+- Pendiente: el minijuego original de colocar flechas de tiza (simplificado por ahora)
 
 ### Fase 4 — Espadachín
 - Puntos de habilidad, estilos Dios Espada / Agua / Norte

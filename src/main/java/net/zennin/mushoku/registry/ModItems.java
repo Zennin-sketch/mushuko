@@ -9,7 +9,12 @@ import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.Tier;
 import net.zennin.mushoku.MushokuMod;
+import net.zennin.mushoku.item.ChalkItem;
 import net.zennin.mushoku.item.ClassChangeItem;
+import net.zennin.mushoku.item.MagicStoneItem;
+import net.zennin.mushoku.item.SpellScrollItem;
+import net.zennin.mushoku.item.StaffItem;
+import net.zennin.mushoku.item.StaffPickaxeItem;
 import net.zennin.mushoku.item.ElementBookItem;
 import net.zennin.mushoku.magic.Element;
 
@@ -21,12 +26,12 @@ public final class ModItems {
     public static final List<Item> ALL = new ArrayList<>();
 
     // --- Piedras mágicas ---
-    public static final Item ELEMENTARY_STONE = simple("elementary_stone");
-    public static final Item INTERMEDIATE_STONE = simple("intermediate_stone");
-    public static final Item ADVANCED_STONE = simple("advanced_stone");
-    public static final Item SAINT_STONE = simple("saint_stone");
-    public static final Item KING_STONE = simple("king_stone");
-    public static final Item IMPERIAL_STONE = simple("imperial_stone");
+    public static final Item ELEMENTARY_STONE = stone("elementary_stone");
+    public static final Item INTERMEDIATE_STONE = stone("intermediate_stone");
+    public static final Item ADVANCED_STONE = stone("advanced_stone");
+    public static final Item SAINT_STONE = stone("saint_stone");
+    public static final Item KING_STONE = stone("king_stone");
+    public static final Item IMPERIAL_STONE = stone("imperial_stone");
 
     // --- Libros y magia (funcionalidad en fases siguientes) ---
     public static final Item FIRE_BOOK = register("fire_book", new ElementBookItem(Element.FIRE, new Item.Properties().stacksTo(1)));
@@ -36,8 +41,8 @@ public final class ModItems {
     public static final Item SPELL_BOOK = single("spell_book");
     public static final Item GUIDE_BOOK = single("guide_book");
     public static final Item SILENT_TOME = single("silent_tome");
-    public static final Item SCROLL = simple("scroll");
-    public static final Item CHALK = single("chalk");
+    public static final Item SCROLL = register("scroll", new SpellScrollItem(new Item.Properties().stacksTo(16)));
+    public static final Item CHALK = register("chalk", new ChalkItem(new Item.Properties().durability(32)));
     public static final Item INKAND_QUILL = single("inkand_quill");
     public static final Item INK_VIAL = simple("ink_vial");
     public static final Item CLASS_CHANGE_ITEM = register("class_change_item", new ClassChangeItem(new Item.Properties().stacksTo(16)));
@@ -59,9 +64,9 @@ public final class ModItems {
     public static final Item SWAP_TOTEM = single("swap_totem");
     public static final Item SWAP_CLOAK = single("swap_cloak");
     public static final Item METAL_CLAWS = single("metal_claws");
-    public static final Item AQUA_HEARTIA = single("aqua_heartia");
-    public static final Item DRAGON_STAFF = single("dragon_staff");
-    public static final Item STAFF_OF_AREOS = single("staff_of_areos");
+    public static final Item AQUA_HEARTIA = staff("aqua_heartia", 0.25f);
+    public static final Item DRAGON_STAFF = staff("dragon_staff", 0.20f);
+    public static final Item STAFF_OF_AREOS = staff("staff_of_areos", 0.30f);
     public static final Item ULTIMO_SUSPIRO = single("ultimo_suspiro");
 
     // --- Armas (mismas stats que el original: dano base + bonus del material, velocidad) ---
@@ -76,8 +81,8 @@ public final class ModItems {
     public static final Item SCYTHE = sword("scythe", ModTiers.SCYTHE, 3, -2.7f);
     public static final Item METAL_ROD = axe("metal_rod", ModTiers.METAL_ROD, 1f, -2.6f);
     public static final Item WAR_AXE = axe("war_axe", ModTiers.WAR_AXE, 1f, -3.2f);
-    public static final Item MIGURD_STAFF = pickaxe("migurd_staff", ModTiers.MIGURD_STAFF, 1f, -3.0f);
-    public static final Item WAND = pickaxe("wand", ModTiers.WAND, 1f, -3.0f);
+    public static final Item MIGURD_STAFF = staffWeapon("migurd_staff", ModTiers.MIGURD_STAFF, 0.10f, 1f, -3.0f);
+    public static final Item WAND = staffWeapon("wand", ModTiers.WAND, 0.05f, 1f, -3.0f);
 
     private ModItems() {}
 
@@ -88,6 +93,16 @@ public final class ModItems {
     }
 
     private static Item simple(String name) { return register(name, new Item(new Item.Properties())); }
+
+    private static Item stone(String name) { return register(name, new MagicStoneItem(new Item.Properties())); }
+
+    private static Item staff(String name, float discount) {
+        return register(name, new StaffItem(discount, new Item.Properties().stacksTo(1)));
+    }
+
+    private static Item staffWeapon(String name, Tier tier, float discount, float damage, float speed) {
+        return register(name, new StaffPickaxeItem(tier, discount, new Item.Properties().attributes(DiggerItem.createAttributes(tier, damage, speed))));
+    }
 
     private static Item single(String name) { return register(name, new Item(new Item.Properties().stacksTo(1))); }
 
