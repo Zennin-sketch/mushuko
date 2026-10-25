@@ -1,0 +1,267 @@
+{
+ "name": "Bola de agua",
+ "spells": [
+  "water_ball",
+  "water_cannon"
+ ],
+ "groups": [
+  {
+   "texture": "remushoku:textures/entity/spell/water.png",
+   "render": "translucent",
+   "glow": false,
+   "spin": [
+    0,
+    3,
+    1.5
+   ],
+   "pulse": [
+    0.06,
+    12
+   ],
+   "flicker": 0.0,
+   "boxes": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      8,
+      8,
+      8
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "4aa2f2",
+     "alpha": 0.5
+    },
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      10,
+      6,
+      6
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "4aa2f2",
+     "alpha": 0.5
+    },
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      6,
+      10,
+      6
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "4aa2f2",
+     "alpha": 0.5
+    },
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      6,
+      6,
+      10
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "4aa2f2",
+     "alpha": 0.5
+    }
+   ]
+  },
+  {
+   "texture": "remushoku:textures/entity/spell/water.png",
+   "render": "translucent",
+   "glow": true,
+   "spin": [
+    2,
+    -4,
+    0
+   ],
+   "pulse": [
+    0.1,
+    8
+   ],
+   "flicker": 0.0,
+   "boxes": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      5,
+      5,
+      5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "8fd2ff",
+     "alpha": 0.45
+    }
+   ]
+  },
+  {
+   "texture": "remushoku:textures/entity/spell/water.png",
+   "render": "translucent",
+   "glow": true,
+   "spin": [
+    0,
+    0,
+    0
+   ],
+   "pulse": [
+    0,
+    1
+   ],
+   "flicker": 0.0,
+   "boxes": [
+    {
+     "at": [
+      -2.2,
+      2.6,
+      2.6
+     ],
+     "size": [
+      1.6,
+      1.6,
+      1
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "ffffff",
+     "alpha": 0.9
+    },
+    {
+     "at": [
+      -3.1,
+      1.4,
+      2.6
+     ],
+     "size": [
+      0.8,
+      0.8,
+      0.8
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "ffffff",
+     "alpha": 0.7
+    }
+   ]
+  },
+  {
+   "texture": "remushoku:textures/entity/spell/water.png",
+   "render": "translucent",
+   "glow": false,
+   "spin": [
+    0,
+    0,
+    0
+   ],
+   "pulse": [
+    0.2,
+    6
+   ],
+   "flicker": 0.0,
+   "boxes": [
+    {
+     "at": [
+      1.5,
+      -1,
+      -7
+     ],
+     "size": [
+      1.6,
+      1.6,
+      1.6
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "4a98e8",
+     "alpha": 0.6
+    },
+    {
+     "at": [
+      -1.2,
+      1,
+      -9
+     ],
+     "size": [
+      1.1,
+      1.1,
+      1.1
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "4a98e8",
+     "alpha": 0.5
+    },
+    {
+     "at": [
+      0.4,
+      0.3,
+      -10.8
+     ],
+     "size": [
+      0.8,
+      0.8,
+      0.8
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "4a98e8",
+     "alpha": 0.45
+    }
+   ]
+  }
+ ]
+}

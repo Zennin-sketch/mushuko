@@ -29,6 +29,8 @@ public class MagicProjectile extends ThrowableProjectile {
     public static final int WATER = 0, ICE = 1, FIRE = 2, ROCK = 3, WIND = 4;
     private static final EntityDataAccessor<Integer> KIND = SynchedEntityData.defineId(MagicProjectile.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Float> SIZE = SynchedEntityData.defineId(MagicProjectile.class, EntityDataSerializers.FLOAT);
+    /** Variante visual (0 = normal; 1 = taladro de viento del Tornado Impact). */
+    private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(MagicProjectile.class, EntityDataSerializers.INT);
 
     private float damage = 4f;
     private float knockback = 0f;
@@ -50,12 +52,15 @@ public class MagicProjectile extends ThrowableProjectile {
     public MagicProjectile size(float s) { this.entityData.set(SIZE, s); return this; }
     public MagicProjectile knockback(float k) { this.knockback = k; return this; }
     public MagicProjectile explosion(float power) { this.explosion = power; return this; }
-    public MagicProjectile lift() { this.lift = true; return this; }
+    public MagicProjectile lift() { this.lift = true; this.entityData.set(VARIANT, 1); return this; }
+    public MagicProjectile variant(int v) { this.entityData.set(VARIANT, v); return this; }
+    public int variant() { return this.entityData.get(VARIANT); }
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(KIND, WATER);
         builder.define(SIZE, 1f);
+        builder.define(VARIANT, 0);
     }
 
     public int kind() { return this.entityData.get(KIND); }

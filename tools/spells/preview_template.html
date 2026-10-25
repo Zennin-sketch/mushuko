@@ -1,0 +1,239 @@
+<title>Grimorio de Hechizos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Nunito+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+/* Layout: lista de hechizos a la izquierda como paginas de grimorio, visor 3D grande a la derecha. Un solo look nocturno a proposito. */
+:root {
+  --bg: #12141c; --panel: #1b1e29; --line: #2c3142; --fg: #e9e6dc; --dim: #9a9db0;
+  --gold: #d9b45a; --rune: #7fb6ff;
+  --display: 'Cinzel', 'Trajan Pro', Georgia, serif;
+  --body: 'Nunito Sans', 'Segoe UI', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 14px; }
+.wrap { display: grid; grid-template-columns: 300px 1fr; gap: 16px; height: 100%;
+  padding-block: 16px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+aside { display: flex; flex-direction: column; gap: 12px; min-width: 0; overflow-y: auto; }
+h1 { font-family: var(--display); font-weight: 700; font-size: 22px; letter-spacing: .04em; margin: 0; color: var(--gold); text-wrap: balance; }
+.sub { color: var(--dim); margin: 0; line-height: 1.45; }
+.list { display: flex; flex-direction: column; gap: 6px; }
+.spell { text-align: left; background: transparent; border: 1px solid var(--line); border-radius: 6px; color: var(--fg);
+  padding: 10px 12px; cursor: pointer; display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; font: inherit; }
+.spell:hover { border-color: #4a5170; }
+.spell:focus-visible, button:focus-visible, select:focus-visible { outline: 2px solid var(--rune); outline-offset: 2px; }
+.spell[aria-pressed="true"] { border-color: var(--gold); background: #231f17; }
+.spell b { font-family: var(--display); font-weight: 500; font-size: 15px; letter-spacing: .02em; }
+.spell .el { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); align-self: center; }
+.spell .ids { grid-column: 1 / -1; font-family: var(--mono); font-size: 11px; color: var(--dim); }
+.note { border-top: 1px solid var(--line); padding-top: 10px; color: var(--dim); line-height: 1.5; }
+.note h2 { font-family: var(--display); font-size: 13px; color: var(--fg); margin: 0 0 4px; letter-spacing: .05em; font-weight: 500; }
+.note p { margin: 0; }
+main { position: relative; min-width: 0; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #0c0e14; }
+canvas { display: block; width: 100%; height: 100%; }
+.bar { position: absolute; left: 12px; right: 12px; bottom: 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.bar button, .bar select { background: rgba(27,30,41,.92); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 7px 11px; font: inherit; cursor: pointer; }
+.bar button[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); }
+.bar label { color: var(--dim); font-size: 12px; display: flex; gap: 6px; align-items: center; background: rgba(27,30,41,.92); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; }
+.hud { position: absolute; left: 12px; top: 12px; font-family: var(--mono); font-size: 12px; color: var(--dim); background: rgba(12,14,20,.7); padding: 6px 8px; border-radius: 4px; }
+@media (max-width: 760px) {
+  .wrap { grid-template-columns: 1fr; grid-template-rows: auto 60vh; height: auto; }
+  aside { overflow: visible; }
+}
+</style>
+
+<div class="wrap">
+  <aside>
+    <h1>Grimorio de Hechizos</h1>
+    <p class="sub">Modelos voxel de los proyectiles, tal cual los dibuja el juego: mismas cajas, texturas, giros y pulsos.</p>
+    <div class="list" id="list"></div>
+    <div class="note" id="note"></div>
+  </aside>
+  <main>
+    <canvas id="c"></canvas>
+    <div class="hud" id="hud"></div>
+    <div class="bar">
+      <button id="fly" aria-pressed="false">Disparar</button>
+      <button id="ref" aria-pressed="true">Jugador de referencia</button>
+      <label for="size">Tamaño
+        <select id="size">
+          <option value="1">1× (bala, bola)</option>
+          <option value="1.3">1.3× (lanza de hielo)</option>
+          <option value="1.6">1.6× (cañón de piedra)</option>
+          <option value="2">2× (Ex-Flame, cañón de agua)</option>
+          <option value="3">3× (Exodus Flame)</option>
+        </select>
+      </label>
+      <label for="speed">Velocidad
+        <select id="speed"><option value="1">normal</option><option value="0.25">lenta ×¼</option><option value="0">pausa</option></select>
+      </label>
+    </div>
+  </main>
+</div>
+
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+const DATA = /*__DATA__*/null;
+
+const INFO = {
+  stone_bullet: { el: 'Tierra', note: 'El "rombo" de Rudeus: perfil de diamante con la punta más larga adelante, sección cuadrada girada 45° y estrías en espiral como una mecha. En la novela el Stone Cannon tiene punta de taladro y gira para perforar; acá gira 45° por tick.' },
+  fireball: { el: 'Fuego', note: 'Fuego cúbico: núcleo casi blanco, capa naranja y cáscara roja translúcida girando en sentidos opuestos, con lenguas de fuego que quedan atrás. Ex-Flame es la misma bola a 2× (unos 2 m en el anime).' },
+  water_ball: { el: 'Agua', note: 'Esfera de agua voxel (cruz de cajas + núcleo), translúcida, con un brillo blanco fijo y gotas que se desprenden detrás. Water Cannon usa el mismo modelo a 2×.' },
+  icicle: { el: 'Hielo', note: 'Carámbano largo de sección romboidal con núcleo blanco y cuatro esquirlas hacia atrás. Lo usan Ice Smash, Icicle Lance y la lluvia helada.' },
+  wind_blade: { el: 'Viento', note: 'Media luna horizontal, convexa hacia adelante, con el filo blanco. Wind Slice, Sonic Boom y los tajos de viento de las técnicas de espada.' },
+  wind_drill: { el: 'Viento', note: 'Tornado Impact: viento con forma de taladro que gira y perfora. Anillos en espiral que se achican hacia la punta.' },
+};
+
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('c'), antialias: true });
+renderer.setPixelRatio(Math.min(2, devicePixelRatio));
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0c0e14);
+scene.fog = new THREE.Fog(0x0c0e14, 14, 40);
+const camera = new THREE.PerspectiveCamera(40, 1, 0.05, 100);
+camera.position.set(1.5, 1.85, 1.4);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 1.45, 0);
+controls.enableDamping = true;
+scene.add(new THREE.HemisphereLight(0xc8d4ff, 0x30281c, 1.1));
+const sun = new THREE.DirectionalLight(0xffffff, 1.6); sun.position.set(3, 6, 4); scene.add(sun);
+
+// Suelo de bloques de pasto (1 celda = 1 bloque)
+const grid = new THREE.GridHelper(30, 30, 0x3a4256, 0x232836); scene.add(grid);
+// Jugador de referencia: 0.6 × 1.8 bloques, mano derecha a la altura del pecho
+const refGroup = new THREE.Group();
+const refBox = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.8, 0.3), new THREE.MeshLambertMaterial({ color: 0x55607a, transparent: true, opacity: 0.35 }));
+refBox.position.set(-0.9, 0.9, 0);
+const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), new THREE.MeshLambertMaterial({ color: 0x7a86a3, transparent: true, opacity: 0.45 }));
+head.position.set(-0.9, 2.05, 0);
+refGroup.add(refBox, head); scene.add(refGroup);
+
+const loader = new THREE.TextureLoader();
+const TEX = {};
+for (const [k, uri] of Object.entries(DATA.textures)) {
+  const t = loader.load(uri); t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestFilter; t.colorSpace = THREE.SRGBColorSpace; TEX[k] = t;
+}
+
+// Igual que SpellModel.java: giro X, luego Y, luego Z
+const FACES = [
+  [[1,-1,1],[1,-1,-1],[1,1,-1],[1,1,1]], [[-1,-1,-1],[-1,-1,1],[-1,1,1],[-1,1,-1]],
+  [[-1,1,1],[1,1,1],[1,1,-1],[-1,1,-1]], [[-1,-1,-1],[1,-1,-1],[1,-1,1],[-1,-1,1]],
+  [[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]], [[1,-1,-1],[-1,-1,-1],[-1,1,-1],[1,1,-1]]];
+const NORMALS = [[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
+const AXES = [[2,1],[2,1],[0,2],[0,2],[0,1],[0,1]];
+const D2R = Math.PI / 180;
+function rotMat(r) { return new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(r[0]*D2R, r[1]*D2R, r[2]*D2R, 'ZYX')); }
+
+function buildGroup(g) {
+  const pos = [], nor = [], uv = [], col = [], idx = [];
+  g.boxes.forEach((b, seed) => {
+    const m = rotMat(b.rot);
+    const c = new THREE.Color('#' + b.color); c.convertSRGBToLinear();
+    for (let f = 0; f < 6; f++) {
+      const base = pos.length / 3;
+      for (let v = 0; v < 4; v++) {
+        const p = new THREE.Vector3(FACES[f][v][0]*b.size[0]/2, FACES[f][v][1]*b.size[1]/2, FACES[f][v][2]*b.size[2]/2).applyMatrix4(m);
+        pos.push(p.x + b.at[0], p.y + b.at[1], p.z + b.at[2]);
+        const n = new THREE.Vector3(...NORMALS[f]).applyMatrix4(m);
+        nor.push(n.x, n.y, n.z);
+        col.push(c.r, c.g, c.b, b.alpha);
+      }
+      const w = Math.min(16, Math.max(1, b.size[AXES[f][0]])), h = Math.min(16, Math.max(1, b.size[AXES[f][1]]));
+      const u0 = ((seed*5 + f*3) % 16) % Math.max(1, 17 - w), v0 = ((seed*3 + f*7) % 16) % Math.max(1, 17 - h);
+      // UV de Minecraft: v hacia abajo; three: v hacia arriba
+      uv.push(u0/16, 1-(v0+h)/16, (u0+w)/16, 1-(v0+h)/16, (u0+w)/16, 1-v0/16, u0/16, 1-v0/16);
+      idx.push(base, base+1, base+2, base, base+2, base+3);
+    }
+  });
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 4));
+  geo.setIndex(idx);
+  const tex = TEX[g.texture.split('/').pop().replace('.png', '')];
+  const translucent = g.render !== 'solid';
+  const opts = { map: tex, vertexColors: true, transparent: translucent, side: THREE.DoubleSide, depthWrite: !translucent, alphaTest: translucent ? 0 : 0.1 };
+  const mat = g.render === 'emissive' ? new THREE.MeshBasicMaterial(opts)
+    : new THREE.MeshLambertMaterial({ ...opts, emissive: g.glow ? 0x3a3a3a : 0x000000, emissiveMap: g.glow ? tex : null });
+  const mesh = new THREE.Mesh(geo, mat);
+  const holder = new THREE.Group(); holder.add(mesh);
+  holder.userData = g;
+  return holder;
+}
+
+const projectile = new THREE.Group(); scene.add(projectile);
+const inner = new THREE.Group(); projectile.add(inner);
+let current = null, groups = [];
+function show(name) {
+  current = name;
+  inner.clear();
+  groups = DATA.models[name].groups.map(buildGroup);
+  groups.forEach(g => inner.add(g));
+  document.querySelectorAll('.spell').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.id === name)));
+  const m = DATA.models[name];
+  document.getElementById('note').innerHTML = `<h2>${m.name}</h2><p>${INFO[name].note}</p>`;
+  try { localStorage.setItem('grimorio-sel', name); } catch (e) {}
+}
+
+const list = document.getElementById('list');
+for (const [id, m] of Object.entries(DATA.models)) {
+  const b = document.createElement('button');
+  b.className = 'spell'; b.dataset.id = id;
+  b.innerHTML = `<b>${m.name}</b><span class="el">${INFO[id].el}</span><span class="ids">${m.spells.join(' · ')}</span>`;
+  b.onclick = () => show(id);
+  list.appendChild(b);
+}
+
+let flying = false, sizeMul = 1, speed = 1;
+const flyBtn = document.getElementById('fly'), refBtn = document.getElementById('ref');
+flyBtn.onclick = () => { flying = !flying; flyBtn.setAttribute('aria-pressed', String(flying)); flyT = 0; };
+refBtn.onclick = () => { refGroup.visible = !refGroup.visible; refBtn.setAttribute('aria-pressed', String(refGroup.visible)); };
+document.getElementById('size').onchange = e => sizeMul = +e.target.value;
+document.getElementById('speed').onchange = e => speed = +e.target.value;
+
+function resize() {
+  const el = renderer.domElement.parentElement;
+  renderer.setSize(el.clientWidth, el.clientHeight, false);
+  camera.aspect = el.clientWidth / el.clientHeight; camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(renderer.domElement.parentElement);
+
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (reduce) { speed = 0.25; document.getElementById('speed').value = '0.25'; }
+let ticks = 0, flyT = 0, last = performance.now();
+const hud = document.getElementById('hud');
+function frame(now) {
+  const dt = Math.min(0.1, (now - last) / 1000); last = now;
+  ticks += dt * 20 * speed;
+  const t = ticks;
+  // Velocidad de Better Combat no aplica: los hechizos vuelan ~2 bloques/tick
+  if (flying) {
+    flyT += dt * speed;
+    const z = -8 + (flyT * 20 * 0.9) % 20;
+    projectile.position.set(0, 1.45, z);
+  } else projectile.position.set(0, 1.45, 0);
+  const appear = flying ? Math.min(1, Math.max(0.25, ((flyT * 20) % (20 / 0.9)) / 3)) : 1;
+  const s = sizeMul / 16 * appear;
+  projectile.scale.set(s, s, s);
+  groups.forEach((h, gi) => {
+    const g = h.userData;
+    h.rotation.set(g.spin[0]*t*D2R, g.spin[1]*t*D2R, g.spin[2]*t*D2R, 'ZYX');
+    const p = g.pulse[0] ? 1 + g.pulse[0] * Math.sin(t * 2 * Math.PI / Math.max(1, g.pulse[1])) : 1;
+    h.scale.setScalar(p);
+    const mat = h.children[0].material;
+    mat.opacity = g.flicker > 0 ? 1 - g.flicker * Math.abs(Math.sin(t*0.9 + gi*1.7) * Math.sin(t*0.37 + gi)) : 1;
+  });
+  hud.textContent = `tick ${t.toFixed(1)} · ${(sizeMul * (DATA.models[current] ? 1 : 0)).toFixed(1)}× · 1 celda = 1 bloque`;
+  controls.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+let start = 'stone_bullet';
+try { const s = localStorage.getItem('grimorio-sel'); if (s && DATA.models[s]) start = s; } catch (e) {}
+show(start); resize(); requestAnimationFrame(frame);
+</script>

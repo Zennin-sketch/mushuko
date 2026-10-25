@@ -24,7 +24,12 @@ public class MushokuClient implements ClientModInitializer {
         ModKeys.init();
         CastingClient.init();
         SwordClient.init();
-        EntityRendererRegistry.register(ModEntities.MAGIC_PROJECTILE, NoopRenderer::new);
+        EntityRendererRegistry.register(ModEntities.MAGIC_PROJECTILE, MagicProjectileRenderer::new);
+        net.fabricmc.fabric.api.resource.ResourceManagerHelper.get(net.minecraft.server.packs.PackType.CLIENT_RESOURCES).registerReloadListener(
+                new net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener() {
+                    @Override public net.minecraft.resources.ResourceLocation getFabricId() { return net.zennin.mushoku.MushokuMod.id("spell_models"); }
+                    @Override public void onResourceManagerReload(net.minecraft.server.packs.resources.ResourceManager manager) { SpellModel.clearCache(); }
+                });
         EntityRendererRegistry.register(ModEntities.THROWN_ITEM, net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.PartySyncPayload.TYPE, (payload, context) -> ClientPartyState.set(payload));
         AnimatedRenderer.register(ModEntities.SWAP_TOTEM, "tptotem", "tptotemtexture", 0.4f);

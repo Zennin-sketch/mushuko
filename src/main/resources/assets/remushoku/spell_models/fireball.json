@@ -1,0 +1,250 @@
+{
+ "name": "Bola de fuego",
+ "spells": [
+  "fireball",
+  "ex_flame",
+  "exodus_flame",
+  "fire_rain"
+ ],
+ "groups": [
+  {
+   "texture": "remushoku:textures/entity/spell/fire.png",
+   "render": "emissive",
+   "glow": true,
+   "spin": [
+    0,
+    0,
+    0
+   ],
+   "pulse": [
+    0.12,
+    5
+   ],
+   "flicker": 0.0,
+   "boxes": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      4,
+      4,
+      4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "fff6c8",
+     "alpha": 1.0
+    }
+   ]
+  },
+  {
+   "texture": "remushoku:textures/entity/spell/fire.png",
+   "render": "emissive",
+   "glow": true,
+   "spin": [
+    4,
+    6,
+    0
+   ],
+   "pulse": [
+    0.06,
+    7
+   ],
+   "flicker": 0.0,
+   "boxes": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      7,
+      7,
+      7
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "ffb83a",
+     "alpha": 0.85
+    }
+   ]
+  },
+  {
+   "texture": "remushoku:textures/entity/spell/fire.png",
+   "render": "emissive",
+   "glow": true,
+   "spin": [
+    -3,
+    2,
+    5
+   ],
+   "pulse": [
+    0.08,
+    9
+   ],
+   "flicker": 0.3,
+   "boxes": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      10,
+      10,
+      10
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "ff6a1e",
+     "alpha": 0.3
+    }
+   ]
+  },
+  {
+   "texture": "remushoku:textures/entity/spell/fire.png",
+   "render": "emissive",
+   "glow": true,
+   "spin": [
+    0,
+    0,
+    0
+   ],
+   "pulse": [
+    0.15,
+    4
+   ],
+   "flicker": 0.45,
+   "boxes": [
+    {
+     "at": [
+      -0.881,
+      -1.246,
+      -6
+     ],
+     "size": [
+      3.2,
+      3.2,
+      3.2
+     ],
+     "rot": [
+      29.29,
+      3.26,
+      0
+     ],
+     "color": "ff9a20",
+     "alpha": 0.75
+    },
+    {
+     "at": [
+      0.179,
+      -0.172,
+      -8.5
+     ],
+     "size": [
+      2.4,
+      2.4,
+      2.4
+     ],
+     "rot": [
+      2.61,
+      22.83,
+      0
+     ],
+     "color": "f7851c",
+     "alpha": 0.75
+    },
+    {
+     "at": [
+      -2.313,
+      0.168,
+      -10.5
+     ],
+     "size": [
+      1.8,
+      1.8,
+      1.8
+     ],
+     "rot": [
+      3.14,
+      4.08,
+      0
+     ],
+     "color": "ef7019",
+     "alpha": 0.75
+    },
+    {
+     "at": [
+      -0.377,
+      2.134,
+      -12.5
+     ],
+     "size": [
+      1.2,
+      1.2,
+      1.2
+     ],
+     "rot": [
+      5.57,
+      10.05,
+      0
+     ],
+     "color": "e85a15",
+     "alpha": 0.75
+    },
+    {
+     "at": [
+      0.637,
+      2.739,
+      -5.5
+     ],
+     "size": [
+      2.4,
+      2.4,
+      2.4
+     ],
+     "rot": [
+      25.97,
+      17.85,
+      0
+     ],
+     "color": "e04512",
+     "alpha": 0.75
+    },
+    {
+     "at": [
+      2.381,
+      -1.767,
+      -7.5
+     ],
+     "size": [
+      1.6,
+      1.6,
+      1.6
+     ],
+     "rot": [
+      38.63,
+      13.03,
+      0
+     ],
+     "color": "d8300e",
+     "alpha": 0.75
+    }
+   ]
+  }
+ ]
+}

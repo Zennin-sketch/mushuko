@@ -1,0 +1,253 @@
+{
+ "name": "Lanza de hielo",
+ "spells": [
+  "ice_smash",
+  "icicle_lance",
+  "freezing_rain"
+ ],
+ "groups": [
+  {
+   "texture": "remushoku:textures/entity/spell/ice.png",
+   "render": "translucent",
+   "glow": true,
+   "spin": [
+    0,
+    0,
+    8
+   ],
+   "pulse": [
+    0,
+    1
+   ],
+   "flicker": 0.0,
+   "boxes": [
+    {
+     "at": [
+      0,
+      0,
+      -8.0
+     ],
+     "size": [
+      3.0,
+      3.0,
+      2
+     ],
+     "rot": [
+      0,
+      0,
+      45
+     ],
+     "color": "8fcdf5",
+     "alpha": 0.72
+    },
+    {
+     "at": [
+      0,
+      0,
+      -5.5
+     ],
+     "size": [
+      4.5,
+      4.5,
+      3
+     ],
+     "rot": [
+      0,
+      0,
+      45
+     ],
+     "color": "a0d5f7",
+     "alpha": 0.72
+    },
+    {
+     "at": [
+      0,
+      0,
+      -2.0
+     ],
+     "size": [
+      4.0,
+      4.0,
+      4
+     ],
+     "rot": [
+      0,
+      0,
+      45
+     ],
+     "color": "b2def9",
+     "alpha": 0.72
+    },
+    {
+     "at": [
+      0,
+      0,
+      2.0
+     ],
+     "size": [
+      3.0,
+      3.0,
+      4
+     ],
+     "rot": [
+      0,
+      0,
+      45
+     ],
+     "color": "c3e6fb",
+     "alpha": 0.72
+    },
+    {
+     "at": [
+      0,
+      0,
+      5.5
+     ],
+     "size": [
+      2.0,
+      2.0,
+      3
+     ],
+     "rot": [
+      0,
+      0,
+      45
+     ],
+     "color": "d5effd",
+     "alpha": 0.72
+    },
+    {
+     "at": [
+      0,
+      0,
+      8.5
+     ],
+     "size": [
+      1.0,
+      1.0,
+      3
+     ],
+     "rot": [
+      0,
+      0,
+      45
+     ],
+     "color": "e6f7ff",
+     "alpha": 0.72
+    },
+    {
+     "at": [
+      2.6,
+      0.0,
+      -5.5
+     ],
+     "size": [
+      1.1,
+      1.1,
+      4.5
+     ],
+     "rot": [
+      0,
+      28,
+      45
+     ],
+     "color": "b7e2ff",
+     "alpha": 0.7
+    },
+    {
+     "at": [
+      -2.6,
+      0.0,
+      -5.5
+     ],
+     "size": [
+      1.1,
+      1.1,
+      4.5
+     ],
+     "rot": [
+      0,
+      -28,
+      45
+     ],
+     "color": "b7e2ff",
+     "alpha": 0.7
+    },
+    {
+     "at": [
+      0.0,
+      2.6,
+      -5.5
+     ],
+     "size": [
+      1.1,
+      1.1,
+      4.5
+     ],
+     "rot": [
+      -28,
+      0,
+      45
+     ],
+     "color": "b7e2ff",
+     "alpha": 0.7
+    },
+    {
+     "at": [
+      0.0,
+      -2.6,
+      -5.5
+     ],
+     "size": [
+      1.1,
+      1.1,
+      4.5
+     ],
+     "rot": [
+      28,
+      0,
+      45
+     ],
+     "color": "b7e2ff",
+     "alpha": 0.7
+    }
+   ]
+  },
+  {
+   "texture": "remushoku:textures/entity/spell/ice.png",
+   "render": "translucent",
+   "glow": true,
+   "spin": [
+    0,
+    0,
+    8
+   ],
+   "pulse": [
+    0,
+    1
+   ],
+   "flicker": 0.2,
+   "boxes": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      0.8,
+      0.8,
+      16
+     ],
+     "rot": [
+      0,
+      0,
+      45
+     ],
+     "color": "ffffff",
+     "alpha": 0.85
+    }
+   ]
+  }
+ ]
+}
