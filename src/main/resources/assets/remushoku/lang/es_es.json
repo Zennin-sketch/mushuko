@@ -1729,5 +1729,9 @@
   "skill.remushoku.arsenal_mastery": "Dominio de Arsenal",
   "skill.remushoku.arsenal_mastery.desc": "Encendible: puedes usar las habilidades con hachas, picos y otras herramientas, no solo espadas.",
   "skill.remushoku.touki_amplification": "Amplificar Touki",
-  "skill.remushoku.touki_amplification.desc": "Con el Touki activo, lo amplificas: fuerza II, velocidad II y regeneración por 20 segundos."
+  "skill.remushoku.touki_amplification.desc": "Con el Touki activo, lo amplificas: fuerza II, velocidad II y regeneración por 20 segundos.",
+  "msg.remushoku.door_locked": "Está cerrada con llave",
+  "msg.remushoku.door_opened": "¡La puerta se abre! Algo despierta abajo...",
+  "msg.remushoku.job_board_soon": "Tablón de Trabajos: el gremio llega en la parte 5D",
+  "msg.remushoku.boss_soon": "Invocador de jefe: los jefes llegan en la parte 5C"
 }

@@ -56,11 +56,17 @@ Se mantiene el id `remushoku` para que las texturas, modelos y datos funcionen s
 - [x] Magia del Dios Norte (hechizos hasta Intermedio), Bomba Adhesiva con Objetos
 - [x] Comando de prueba: /mushoku puntos <n>
 
-### Fase 5 — Mundo y NPCs
-- Bloques (mena mágica, tablón de trabajos, estantes, puertas, etc.)
-- Entidades: bandidos, tenderos, recepcionista, Kalman III, dracos, jefes (GeckoLib para Fabric)
-- Gremio: trabajos de rango F→A, tiendas, monedas
-- Mazmorras y estructuras con su worldgen (los 12 "biome modifiers" de Forge se pasan a código)
+### Fase 5 — Mundo y NPCs (en partes)
+#### 5A — Bloques y generación del mundo (HECHA, en prueba)
+- [x] Mena mágica, estante (9 espacios), tablón de trabajos, puertas con cerradura, bloques de mazmorra
+- [x] Llave Musgosa / de Hielo: abre la puerta y construye la sala del jefe (igual que el original)
+- [x] Feature de estructuras + los 6 modificadores de bioma de mundo (mena, torre de fuego, árbol de tierra,
+      casa de teletransporte, hielo del libro de agua, isla del cielo)
+- [x] Ciudades, ciudad de arena, mazmorra musgosa y de hielo
+- [x] Corregido: el grupo "bighouse" que faltaba en el original (las casas grandes no aparecían)
+#### 5B — NPCs humanos: bandidos (4 estilos), tenderos, recepcionista, Kalman III
+#### 5C — Criaturas GeckoLib: perro de asalto, rata, dracos de nieve, tortuga gigante, espectro; jefes
+#### 5D — Gremio (trabajos F→A), tiendas y monedas
 
 ### Fase 6 — Ojos demoníacos y extras
 - 5 ojos demoníacos, armadura Mk2, objetos especiales, libro guía

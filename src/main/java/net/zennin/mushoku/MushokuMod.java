@@ -12,6 +12,7 @@ import net.zennin.mushoku.magic.ManaSystem;
 import net.zennin.mushoku.network.ModNetworking;
 import net.zennin.mushoku.sword.SwordSystem;
 import net.zennin.mushoku.registry.ModBlocks;
+import net.zennin.mushoku.world.ModWorldgen;
 import net.zennin.mushoku.registry.ModItems;
 import net.zennin.mushoku.registry.ModTabs;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ public class MushokuMod implements ModInitializer {
     @Override
     public void onInitialize() {
         ModBlocks.init();
+        ModWorldgen.init();
         ModItems.init();
         ModEntities.init();
         ModTabs.init();

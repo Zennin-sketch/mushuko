@@ -1729,5 +1729,9 @@
   "skill.remushoku.arsenal_mastery": "Arsenal Mastery",
   "skill.remushoku.arsenal_mastery.desc": "Toggle: use your skills with axes, pickaxes and other tools, not just swords.",
   "skill.remushoku.touki_amplification": "Touki Amplification",
-  "skill.remushoku.touki_amplification.desc": "With Touki active, amplify it: strength II, speed II and regeneration for 20 seconds."
+  "skill.remushoku.touki_amplification.desc": "With Touki active, amplify it: strength II, speed II and regeneration for 20 seconds.",
+  "msg.remushoku.door_locked": "It's locked",
+  "msg.remushoku.door_opened": "The door opens! Something awakens below...",
+  "msg.remushoku.job_board_soon": "Job Board: the guild arrives in part 5D",
+  "msg.remushoku.boss_soon": "Boss spawner: bosses arrive in part 5C"
 }
