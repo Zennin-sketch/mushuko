@@ -1016,7 +1016,11 @@ function edKey(e) {
   if (k === 'escape' && tool.mode) { edCancel(); return; }
   if (k === 'enter' && tool.mode) { edConfirm(); return; }
   if (k === 'r') { // R: eje X; otra vez R: eje Y; otra vez: eje Z (como BBS)
-    if (tool.mode === 'rotate') { tool.axis = (tool.axis + 1) % edRotChannels().length; tool.base = clone(ED.pose); tool.x0 = mouseXY[0]; edToolMsg(); }
+    if (tool.mode === 'rotate') { // cambiar de eje descarta lo movido en el eje anterior: solo el clic guarda
+      tool.axis = (tool.axis + 1) % edRotChannels().length;
+      tool.base = clone(tool.snap); ED.pose = clone(tool.snap); tool.x0 = mouseXY[0];
+      edPanelValues(); edToolMsg();
+    }
     else if (!tool.mode) edBegin('rotate');
     e.preventDefault();
   }
@@ -1029,7 +1033,7 @@ function edRotChannels() { return SEG[ED.seg].kind === 'q' ? [['rx', 'X'], ['ry'
 function edToolMsg() {
   if (tool.mode === 'rotate') {
     const ch = edRotChannels()[tool.axis];
-    setStatus(`Rotando ${SEG[ED.seg].label} en ${ch[1]} — mové el mouse a los costados · R cambia de eje · clic confirma · Esc cancela`);
+    setStatus(`Rotando ${SEG[ED.seg].label} en ${ch[1]} — mové el mouse a los costados · R cambia de eje (descarta lo movido) · clic izquierdo confirma · Esc cancela`);
   } else {
     const ax = tool.lock ? ` en ${tool.lock.toUpperCase()}` : '';
     setStatus(`Moviendo ${SEG[moveTarget(ED.seg)].label}${ax} — X/Y/Z fija el eje · clic confirma · Esc cancela`);
