@@ -3,6 +3,15 @@
   "minVersion": "0.8",
   "package": "net.zennin.mushoku.mixin",
   "compatibilityLevel": "JAVA_21",
-  "client": ["KeyMappingMixin", "HumanoidModelMixin", "AbstractClientPlayerMixin"],
-  "injectors": { "defaultRequire": 1 }
+  "client": [
+    "KeyMappingMixin",
+    "HumanoidModelMixin",
+    "AbstractClientPlayerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "mixins": [
+    "PlayerAccessor"
+  ]
 }

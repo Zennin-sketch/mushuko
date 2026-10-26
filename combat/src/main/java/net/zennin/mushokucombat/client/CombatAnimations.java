@@ -42,7 +42,7 @@ public final class CombatAnimations {
     private static final Map<AbstractClientPlayer, String> CURRENT = new WeakHashMap<>();
 
     private static boolean aims(String name) {
-        return name != null && (name.startsWith("cast") || name.startsWith("magic_"));
+        return name != null && (name.startsWith("cast") || name.startsWith("magic_") || name.startsWith("bow_draw"));
     }
 
     private static Optional<AdjustmentModifier.PartModifier> aim(AbstractClientPlayer player, String part) {

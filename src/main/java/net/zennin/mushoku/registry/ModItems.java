@@ -113,6 +113,13 @@ public final class ModItems {
     public static final Item QUIVER = register("quiver", new net.zennin.mushoku.item.QuiverItem(new Item.Properties().stacksTo(1)
             .component(net.minecraft.core.component.DataComponents.BUNDLE_CONTENTS, net.minecraft.world.item.component.BundleContents.EMPTY)));
 
+    /** Arcos con modelo 3D (tools/bows/bows.py): velocidad de tensado y multiplicador de dano. */
+    public static final Item HUNTER_BOW = register("hunter_bow", new net.zennin.mushoku.item.MushokuBowItem(new Item.Properties().durability(500), 1.0f, 1.1f));
+    public static final Item ELVEN_BOW = register("elven_bow", new net.zennin.mushoku.item.MushokuBowItem(new Item.Properties().durability(700), 1.25f, 1.0f));
+    public static final Item BEAST_BOW = register("beast_bow", new net.zennin.mushoku.item.MushokuBowItem(new Item.Properties().durability(900), 0.85f, 1.35f));
+    public static final Item MANA_BOW = register("mana_bow", new net.zennin.mushoku.item.MushokuBowItem(new Item.Properties().durability(800), 1.1f, 1.2f));
+    public static final Item DEMON_BOW = register("demon_bow", new net.zennin.mushoku.item.MushokuBowItem(new Item.Properties().durability(1200), 0.9f, 1.5f));
+
     /** Creativo: todas las clases a la vez. */
     public static final Item ALL_CLASSES = register("all_classes_scroll", new net.zennin.mushoku.item.AllClassesItem(new Item.Properties().stacksTo(1)
             .rarity(net.minecraft.world.item.Rarity.EPIC)));

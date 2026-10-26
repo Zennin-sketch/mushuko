@@ -131,6 +131,7 @@ EXTRA = [
     dict(group='Desenvainar y guardar (cintura)', items=['hip_draw', 'hip_sheathe'], weapon='migurd_sword'),
     dict(group='Desenvainar y guardar (espalda)', items=['back_draw', 'back_sheathe'], weapon='kajakut'),
     dict(group='Poses', items=['pose_staff', 'pose_spear'], weapon='aqua_heartia'),
+    dict(group='Arco', items=['bow_draw', 'bow_release'], weapon='hunter_bow'),
 ]
 
 def attributes(family):

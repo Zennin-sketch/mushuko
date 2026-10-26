@@ -117,6 +117,8 @@ public final class VisualTest {
                 if (dummy == null) {
                     dummy = new RemotePlayer(mc.level, new GameProfile(UUID.nameUUIDFromBytes("vt".getBytes()), "Maniqui"));
                     mc.level.addEntity(dummy);
+                    // todas las capas de la skin visibles (chaqueta, mangas, pantalon, sombrero)
+                    dummy.getEntityData().set(net.zennin.mushoku.mixin.PlayerAccessor.remushoku$customisation(), (byte) 0x7F);
                 }
                 dummyYaw = s.has("yaw") ? s.get("yaw").getAsInt() : 180;
                 double dist = s.has("dist") ? s.get("dist").getAsDouble() : 3.2;

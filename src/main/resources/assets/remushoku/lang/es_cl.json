@@ -2575,5 +2575,12 @@
   "tooltip.remushoku.outfit_eris": "Ropa de Eris Boreas Greyrat",
   "item.remushoku.all_classes_scroll": "Pergamino de todas las clases",
   "tooltip.remushoku.all_classes": "Creativo: te da Mago, Espadachín y Arquero a la vez.",
-  "msg.remushoku.class_all": "Ahora tenés todas las clases: Mago, Espadachín y Arquero."
+  "msg.remushoku.class_all": "Ahora tenés todas las clases: Mago, Espadachín y Arquero.",
+  "item.remushoku.hunter_bow": "Arco de cazador",
+  "item.remushoku.elven_bow": "Arco élfico del bosque",
+  "item.remushoku.beast_bow": "Arco de hueso de bestia",
+  "item.remushoku.mana_bow": "Arco de cristal de maná",
+  "item.remushoku.demon_bow": "Arco del Rey Demonio",
+  "tooltip.remushoku.bow_speed": "Velocidad de tensado: %s",
+  "tooltip.remushoku.bow_damage": "Daño de la flecha: %s"
 }

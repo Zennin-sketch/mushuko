@@ -2575,5 +2575,12 @@
   "tooltip.remushoku.outfit_eris": "Eris Boreas Greyrat's outfit",
   "item.remushoku.all_classes_scroll": "Scroll of All Classes",
   "tooltip.remushoku.all_classes": "Creative: grants Mage, Swordsman and Archer at once.",
-  "msg.remushoku.class_all": "You now have every class: Mage, Swordsman and Archer."
+  "msg.remushoku.class_all": "You now have every class: Mage, Swordsman and Archer.",
+  "item.remushoku.hunter_bow": "Hunter's Bow",
+  "item.remushoku.elven_bow": "Elven Forest Bow",
+  "item.remushoku.beast_bow": "Beastbone Bow",
+  "item.remushoku.mana_bow": "Mana Crystal Bow",
+  "item.remushoku.demon_bow": "Demon King Bow",
+  "tooltip.remushoku.bow_speed": "Draw speed: %s",
+  "tooltip.remushoku.bow_damage": "Arrow damage: %s"
 }

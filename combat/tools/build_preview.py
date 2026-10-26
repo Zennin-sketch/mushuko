@@ -75,6 +75,13 @@ def main(anim_dir, out):
         families[wid] = dict(f, label=w['label'], attacks=[dict(anim='%s_%d' % (wid, i + 1), hitbox=catalog.move_info()[m][0], damage=c['dmg'][i], angle=catalog.move_info()[m][1])
                                                              for i, m in enumerate(c['moves'])])
         weapons[wid]['family'] = wid
+    # Arcos del mod (solo para ver las animaciones de arco): modelo tensado
+    for bid in ('hunter_bow', 'elven_bow', 'beast_bow', 'mana_bow', 'demon_bow'):
+        if os.path.exists(res('remushoku:item/%s_pulling_2' % bid, 'models', '.json')):
+            m = load_model(bid + '_pulling_2')
+            m['label'] = bid
+            m['family'] = None
+            weapons[bid] = m
     sheaths = json.load(open(os.path.join(REPO, 'combat', 'src', 'main', 'resources', 'assets', 'mushoku_combat', 'sheaths.json')))
     data = dict(anims=anims, weapons=weapons, families=families, extra=catalog.EXTRA, sheaths=sheaths)
     tpl = open(os.path.join(HERE, 'preview_template.html'), encoding='utf-8').read()

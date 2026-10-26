@@ -3,15 +3,16 @@
  "steps": [
   {
    "op": "setup",
-   "fov": 28
+   "fov": 30
   },
   {
    "op": "cam",
-   "pitch": 13
+   "pitch": 12
   },
   {
    "op": "dummy",
-   "yaw": 180
+   "yaw": 180,
+   "dist": 3.6
   },
   {
    "op": "wait",
@@ -23,7 +24,8 @@
   },
   {
    "op": "dummy",
-   "yaw": 180
+   "yaw": 180,
+   "dist": 3.6
   },
   {
    "op": "anim",
@@ -39,7 +41,8 @@
   },
   {
    "op": "dummy",
-   "yaw": 135
+   "yaw": 135,
+   "dist": 3.6
   },
   {
    "op": "anim",
@@ -55,7 +58,8 @@
   },
   {
    "op": "dummy",
-   "yaw": 90
+   "yaw": 90,
+   "dist": 3.6
   },
   {
    "op": "anim",
@@ -71,7 +75,8 @@
   },
   {
    "op": "dummy",
-   "yaw": 0
+   "yaw": 0,
+   "dist": 3.6
   },
   {
    "op": "anim",
@@ -87,7 +92,8 @@
   },
   {
    "op": "dummy",
-   "yaw": 150
+   "yaw": 150,
+   "dist": 3.6
   },
   {
    "op": "anim",
@@ -103,7 +109,8 @@
   },
   {
    "op": "dummy",
-   "yaw": 60
+   "yaw": 60,
+   "dist": 3.6
   },
   {
    "op": "anim",
@@ -119,7 +126,8 @@
   },
   {
    "op": "dummy",
-   "yaw": 90
+   "yaw": 90,
+   "dist": 3.6
   },
   {
    "op": "anim",
@@ -135,7 +143,8 @@
   },
   {
    "op": "dummy",
-   "yaw": 150
+   "yaw": 150,
+   "dist": 3.6
   },
   {
    "op": "anim",
@@ -151,7 +160,8 @@
   },
   {
    "op": "dummy",
-   "yaw": 40
+   "yaw": 40,
+   "dist": 3.6
   },
   {
    "op": "anim",
@@ -167,7 +177,8 @@
   },
   {
    "op": "dummy",
-   "yaw": 150
+   "yaw": 150,
+   "dist": 3.6
   },
   {
    "op": "anim",
@@ -183,7 +194,8 @@
   },
   {
    "op": "dummy",
-   "yaw": 90
+   "yaw": 90,
+   "dist": 3.6
   },
   {
    "op": "anim",
@@ -199,7 +211,8 @@
   },
   {
    "op": "dummy",
-   "yaw": 90
+   "yaw": 90,
+   "dist": 3.6
   },
   {
    "op": "anim",
@@ -219,7 +232,8 @@
   },
   {
    "op": "dummy",
-   "yaw": 180
+   "yaw": 180,
+   "dist": 3.6
   },
   {
    "op": "ready",
@@ -239,7 +253,8 @@
   },
   {
    "op": "dummy",
-   "yaw": 120
+   "yaw": 120,
+   "dist": 3.6
   },
   {
    "op": "wait",

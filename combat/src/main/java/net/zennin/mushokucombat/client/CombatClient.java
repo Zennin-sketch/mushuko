@@ -52,6 +52,7 @@ public final class CombatClient implements ClientModInitializer {
             ClientSheath.tick(mc);
             DodgeClient.tick(mc);
             CastPoseClient.tick(mc);
+            BowAnimClient.tick(mc);
             GoldenGlow.tick(mc);
         });
         HudRenderCallback.EVENT.register(StaminaHud::render);

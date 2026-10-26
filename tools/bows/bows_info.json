@@ -1,0 +1,32 @@
+{
+ "hunter_bow": {
+  "name": "Arco de cazador",
+  "speed": 1.0,
+  "damage": 1.1,
+  "durability": 500
+ },
+ "elven_bow": {
+  "name": "Arco élfico del bosque",
+  "speed": 1.25,
+  "damage": 1.0,
+  "durability": 700
+ },
+ "beast_bow": {
+  "name": "Arco de hueso de bestia",
+  "speed": 0.85,
+  "damage": 1.35,
+  "durability": 900
+ },
+ "mana_bow": {
+  "name": "Arco de cristal de maná",
+  "speed": 1.1,
+  "damage": 1.2,
+  "durability": 800
+ },
+ "demon_bow": {
+  "name": "Arco del Rey Demonio",
+  "speed": 0.9,
+  "damage": 1.5,
+  "durability": 1200
+ }
+}

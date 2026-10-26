@@ -20,6 +20,14 @@ public class MushokuClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         VisualTest.init();
+        // Arcos del mod: el modelo cambia al tensar (pull/pulling como el arco de vanilla, con la velocidad de cada arco)
+        for (net.minecraft.world.item.Item it : net.zennin.mushoku.registry.ModItems.ALL) {
+            if (!(it instanceof net.zennin.mushoku.item.MushokuBowItem bow)) continue;
+            net.minecraft.client.renderer.item.ItemProperties.register(bow, net.minecraft.resources.ResourceLocation.withDefaultNamespace("pull"),
+                    (stack, level, entity, seed) -> bow.pull(stack, entity));
+            net.minecraft.client.renderer.item.ItemProperties.register(bow, net.minecraft.resources.ResourceLocation.withDefaultNamespace("pulling"),
+                    (stack, level, entity, seed) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1f : 0f);
+        }
         BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.cutout(), ModBlocks.MAGIC_CIRCLE, ModBlocks.GLOW, ModBlocks.SHELF);
         BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.translucent(), ModBlocks.CLIMB_BLOCK, ModBlocks.ABSOLUTE_BARRIER, ModBlocks.BLOCK_SAND_CLOUD);
         ModKeys.init();
