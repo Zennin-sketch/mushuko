@@ -1,0 +1,45 @@
+{
+ "multipart": [
+  {
+   "apply": {
+    "model": "remushoku:block/chalk_line_dot"
+   }
+  },
+  {
+   "when": {
+    "north": "true"
+   },
+   "apply": {
+    "model": "remushoku:block/chalk_line_side",
+    "y": 0
+   }
+  },
+  {
+   "when": {
+    "east": "true"
+   },
+   "apply": {
+    "model": "remushoku:block/chalk_line_side",
+    "y": 90
+   }
+  },
+  {
+   "when": {
+    "south": "true"
+   },
+   "apply": {
+    "model": "remushoku:block/chalk_line_side",
+    "y": 180
+   }
+  },
+  {
+   "when": {
+    "west": "true"
+   },
+   "apply": {
+    "model": "remushoku:block/chalk_line_side",
+    "y": 270
+   }
+  }
+ ]
+}

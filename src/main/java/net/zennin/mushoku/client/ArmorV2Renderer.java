@@ -1,5 +1,7 @@
 package net.zennin.mushoku.client;
 
+import org.joml.Matrix4f;
+
 import net.minecraft.resources.ResourceLocation;
 import net.zennin.mushoku.MushokuMod;
 import net.zennin.mushoku.item.ArmorV2Item;
@@ -51,7 +53,8 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
         cloth(model, "clothFL", fwdL, 1, 0);
         cloth(model, "clothB", Math.max(backR, backL), -1, 0);
         // Tela por zonas (ring_*_ANG): cada pano sigue a la pierna de su lado
-        rings(model, -r, -l, base.rightLeg.zRot, base.leftLeg.zRot);
+        // (los panos ring_* ya no giran: se deforman vertice a vertice con las piernas, ver renderCube)
+        skinSetup(base);
         // Costados: van sobre la pierna de su lado, asi que se balancean adelante y atras con ella (misma tela)
         side(model, "clothR", r, base.rightLeg.zRot);
         side(model, "clothL", l, base.leftLeg.zRot);
@@ -131,4 +134,119 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
     }
 
     public static Object create(String model, boolean glows, boolean fullBody) { return new ArmorV2Renderer(model, glows, fullBody); }
+
+    // ================================================================ tela pegada a las piernas (pesos por vertice)
+    // Como bendy-lib / Epic Fight: cada vertice de los panos ring_* esta atado al cuerpo y a cada pierna con un peso
+    // (mas pierna cuanto mas abajo, y mas de la pierna de su lado). Se mueve con la misma cuenta que la pierna, asi que
+    // nunca se separa; el ruedo ademas sigue a una copia "atrasada" de las piernas (balanceo de tela).
+    private static final Matrix4f F = new Matrix4f().translate(0, 24, 0).scale(-1, -1, 1);
+    private static final Matrix4f F_INV = new Matrix4f(F).invert();
+    private final Matrix4f skinR = new Matrix4f(), skinL = new Matrix4f(), lagR = new Matrix4f(), lagL = new Matrix4f();
+    private final java.util.Map<Integer, float[]> springs = new java.util.HashMap<>();
+    private String curBone;
+
+    private static Matrix4f partMatrix(net.minecraft.client.model.geom.ModelPart p) {
+        return new Matrix4f().translate(p.x, p.y, p.z).rotateZYX(p.zRot, p.yRot, p.xRot);
+    }
+
+    /** Del reposo al estado actual de una pierna, en el marco del torso (pixeles del modelo de GeckoLib). */
+    private static Matrix4f legSkin(Matrix4f bodyInv, net.minecraft.client.model.geom.ModelPart leg, float restX) {
+        Matrix4f t = new Matrix4f(bodyInv).mul(partMatrix(leg)).mul(new Matrix4f().translate(-restX, -12, 0));
+        return new Matrix4f(F).mul(t).mul(F_INV);
+    }
+
+    private static Matrix4f legAngle(float restX, float xRot, float zRot) {
+        Matrix4f t = new Matrix4f().translate(restX, 12, 0).rotateZYX(zRot, 0, xRot).translate(-restX, -12, 0);
+        return new Matrix4f(F).mul(t).mul(F_INV);
+    }
+
+    private void skinSetup(net.minecraft.client.model.HumanoidModel<?> base) {
+        Matrix4f bodyInv = partMatrix(base.body).invert();
+        skinR.set(legSkin(bodyInv, base.rightLeg, -1.9f));
+        skinL.set(legSkin(bodyInv, base.leftLeg, 1.9f));
+        // copia atrasada (resorte) de las piernas para el ruedo
+        float rx = base.rightLeg.xRot - base.body.xRot, lx = base.leftLeg.xRot - base.body.xRot;
+        int id = currentEntity == null ? 0 : currentEntity.getId();
+        float[] st = springs.computeIfAbsent(id, k -> new float[]{rx, 0, lx, 0, net.minecraft.Util.getMillis()});
+        float now = net.minecraft.Util.getMillis();
+        float dt = Math.min(0.1f, Math.max(0f, (now - st[4]) / 1000f));
+        st[4] = now;
+        for (int i = 0; i < 2; i++) {
+            float target = i == 0 ? rx : lx;
+            int a = i * 2;
+            for (int k = 0; k < 4; k++) {
+                float h = dt / 4;
+                st[a + 1] += ((target - st[a]) * 55f - st[a + 1] * 9f) * h;
+                st[a] += st[a + 1] * h;
+            }
+        }
+        lagR.set(legAngle(-1.9f, st[0] + base.body.xRot * 0, base.rightLeg.zRot));
+        lagL.set(legAngle(1.9f, st[2], base.leftLeg.zRot));
+        // las piernas reales de este cuadro, para mezclar el angulo atrasado con su posicion
+        if (springs.size() > 64) springs.clear();
+    }
+
+    @Override
+    public void renderRecursively(com.mojang.blaze3d.vertex.PoseStack poseStack, ArmorV2Item animatable,
+                                  software.bernie.geckolib.cache.object.GeoBone bone, net.minecraft.client.renderer.RenderType renderType,
+                                  net.minecraft.client.renderer.MultiBufferSource bufferSource, com.mojang.blaze3d.vertex.VertexConsumer buffer,
+                                  boolean isReRender, float partialTick, int packedLight, int packedOverlay, int colour) {
+        String prev = curBone;
+        curBone = bone.getName();
+        super.renderRecursively(poseStack, animatable, bone, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);
+        curBone = prev;
+    }
+
+    @Override
+    public void renderCube(com.mojang.blaze3d.vertex.PoseStack poseStack, software.bernie.geckolib.cache.object.GeoCube cube,
+                           com.mojang.blaze3d.vertex.VertexConsumer buffer, int packedLight, int packedOverlay, int colour) {
+        if (curBone == null || !curBone.startsWith("ring_")) {
+            super.renderCube(poseStack, cube, buffer, packedLight, packedOverlay, colour);
+            return;
+        }
+        Matrix4f bodyPose = new Matrix4f(poseStack.last().pose());
+        org.joml.Matrix3f bodyNormal = new org.joml.Matrix3f(poseStack.last().normal());
+        software.bernie.geckolib.util.RenderUtil.translateToPivotPoint(poseStack, cube);
+        software.bernie.geckolib.util.RenderUtil.rotateMatrixAroundCube(poseStack, cube);
+        software.bernie.geckolib.util.RenderUtil.translateAwayFromPivotPoint(poseStack, cube);
+        // giro propio del pano (vuelo de la falda), en el marco del torso
+        Matrix4f cubeRot = new Matrix4f(bodyPose).invert().mul(poseStack.last().pose());
+        org.joml.Matrix3f nrm = poseStack.last().normal();
+        org.joml.Vector3f p = new org.joml.Vector3f(), a = new org.joml.Vector3f(), b = new org.joml.Vector3f();
+        for (software.bernie.geckolib.cache.object.GeoQuad quad : cube.quads()) {
+            if (quad == null) continue;
+            org.joml.Vector3f normal = nrm.transform(new org.joml.Vector3f(quad.normal()));
+            for (software.bernie.geckolib.cache.object.GeoVertex v : quad.vertices()) {
+                // a pixeles en el marco del torso
+                p.set(v.position()).mul(16f);
+                cubeRot.transformPosition(p);
+                float dh = 12f - p.y;                      // cuanto esta por debajo de la cadera
+                float w = smoothstep((dh + 1.5f) / 10.5f) * 0.92f;
+                float dr = Math.abs(p.x - 1.9f), dl = Math.abs(p.x + 1.9f);
+                float sR = Math.max(0, Math.min(1, 0.5f + (dl - dr) / 6.5f));
+                float wr = w * sR, wl = w * (1 - sR);
+                org.joml.Vector3f out = new org.joml.Vector3f(p).mul(1 - wr - wl);
+                skinR.transformPosition(a.set(p));
+                skinL.transformPosition(b.set(p));
+                out.add(a.mul(wr)).add(b.mul(wl));
+                // ruedo: parte del movimiento viene de las piernas atrasadas
+                float hem = smoothstep((dh - 5f) / 6f) * 0.45f;
+                if (hem > 0) {
+                    lagR.transformPosition(a.set(p));
+                    lagL.transformPosition(b.set(p));
+                    org.joml.Vector3f lagged = new org.joml.Vector3f(p).mul(1 - wr - wl).add(a.mul(wr)).add(b.mul(wl));
+                    out.lerp(lagged, hem);
+                }
+                out.div(16f);
+                org.joml.Vector4f w4 = bodyPose.transform(new org.joml.Vector4f(out, 1f));
+                buffer.addVertex(w4.x(), w4.y(), w4.z(), colour, v.texU(), v.texV(), packedOverlay, packedLight, normal.x(), normal.y(), normal.z());
+            }
+        }
+        if (bodyNormal == null) return;
+    }
+
+    private static float smoothstep(float t) {
+        t = Math.max(0, Math.min(1, t));
+        return t * t * (3 - 2 * t);
+    }
 }

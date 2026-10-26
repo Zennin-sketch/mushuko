@@ -197,6 +197,46 @@ public class MagicCircleBlock extends BaseEntityBlock {
         CircleTraps.trigger((ServerLevel) level, pos, spell, owner, target);
     }
 
+    // ---------- Linea de tiza azul ----------
+
+    /** Una linea de tiza azul con senal pegada al circulo lo activa, como si alguien lo pisara. */
+    @Override
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos from, boolean moving) {
+        super.neighborChanged(state, level, pos, block, from, moving);
+        if (level.isClientSide || !(level.getBlockEntity(pos) instanceof MagicCircleBlockEntity be)) return;
+        boolean powered = false;
+        for (Direction d : Direction.values()) {
+            BlockState n = level.getBlockState(pos.relative(d));
+            if (n.getBlock() instanceof ChalkLineBlock && n.getValue(ChalkLineBlock.CHARGED) && n.getValue(ChalkLineBlock.POWER) > 0) powered = true;
+        }
+        boolean rising = powered && !be.linePowered;
+        be.linePowered = powered;
+        if (!rising || !state.getValue(POWERED) || !be.armed()) return;
+        Spell spell = be.spell();
+        if (spell == null) return;
+        // el objetivo: lo mas cercano al circulo (como si lo pisara); si no hay nadie, el hechizo no se gasta
+        boolean friendly = CircleTraps.isFriendly(spell);
+        LivingEntity target = null;
+        double best = Double.MAX_VALUE;
+        net.minecraft.world.phys.Vec3 c = net.minecraft.world.phys.Vec3.atBottomCenterOf(pos);
+        for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(pos).inflate(4))) {
+            if (!e.isAlive() || e.isSpectator()) continue;
+            boolean isOwner = be.owner() != null && be.owner().equals(e.getUUID());
+            if (isOwner && !friendly) continue;
+            double dd = e.distanceToSqr(c);
+            if (dd < best) { best = dd; target = e; }
+        }
+        if (target == null) {
+            ((ServerLevel) level).sendParticles(net.minecraft.core.particles.ParticleTypes.ENCHANT, c.x, c.y + 0.3, c.z, 20, 0.4, 0.1, 0.4, 0.3);
+            level.playSound(null, pos, SoundEvents.BEACON_AMBIENT, SoundSource.BLOCKS, 0.6f, 1.6f);
+            return;
+        }
+        be.setArmed(false);
+        level.setBlock(pos, state.setValue(POWERED, false), Block.UPDATE_ALL);
+        Player owner = be.owner() == null ? null : level.getPlayerByUUID(be.owner());
+        CircleTraps.trigger((ServerLevel) level, pos, spell, owner, target);
+    }
+
     // ---------- Ayudas ----------
 
     private static void upgradeStones(ServerPlayer sp, ItemStack stack, int tier, Level level, BlockPos pos) {

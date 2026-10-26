@@ -1,0 +1,510 @@
+{
+ "skin": "remushoku:textures/entities/rudeus_greyrat.png",
+ "steps": [
+  {
+   "op": "setup",
+   "fov": 50
+  },
+  {
+   "op": "cam",
+   "pitch": 35,
+   "h": 2
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -3 120 3 remushoku:chalk_line"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -3 120 5 remushoku:chalk_line[charged=true]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -2 120 3 remushoku:chalk_line"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -2 120 5 remushoku:chalk_line[charged=true]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -1 120 3 remushoku:chalk_line"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -1 120 5 remushoku:chalk_line[charged=true]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 0 120 3 remushoku:chalk_line"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 0 120 5 remushoku:chalk_line[charged=true]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 1 120 3 remushoku:chalk_line"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 1 120 5 remushoku:chalk_line[charged=true]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 2 120 3 remushoku:chalk_line"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 2 120 5 remushoku:chalk_line[charged=true]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 3 120 3 remushoku:chalk_line"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 3 120 5 remushoku:chalk_line[charged=true]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -4 120 5 minecraft:lever[face=floor,facing=east]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 4 120 5 minecraft:redstone_lamp"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 0 120 6 remushoku:magic_circle[powered=true]{Spell:\"ice_smash\",Armed:1b}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon minecraft:zombie 0.5 120 7.5 {NoAI:1b}"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "shot",
+   "v": "chalk_off"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -4 120 5 minecraft:lever[face=floor,facing=east,powered=true]"
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "shot",
+   "v": "chalk_on"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -4 120 3 minecraft:redstone_block"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 4 120 3 minecraft:redstone_lamp"
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "shot",
+   "v": "chalk_red_nothing"
+  },
+  {
+   "op": "cmd",
+   "v": "kill @e[type=minecraft:zombie]"
+  },
+  {
+   "op": "cam",
+   "pitch": 4,
+   "h": 0
+  },
+  {
+   "op": "equip",
+   "slot": "chest",
+   "v": ""
+  },
+  {
+   "op": "equip",
+   "slot": "legs",
+   "v": ""
+  },
+  {
+   "op": "equip",
+   "slot": "chest",
+   "v": "remushoku:roxy_robe"
+  },
+  {
+   "op": "equip",
+   "slot": "legs",
+   "v": "remushoku:roxy_stockings"
+  },
+  {
+   "op": "dummy",
+   "yaw": 90,
+   "dist": 3.6
+  },
+  {
+   "op": "walk",
+   "t": 60
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "roxy_side_a"
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "roxy_side_b"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "dummy",
+   "yaw": 180,
+   "dist": 3.6
+  },
+  {
+   "op": "walk",
+   "t": 60
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "roxy_front_a"
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "roxy_front_b"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "dummy",
+   "yaw": -30,
+   "dist": 3.6
+  },
+  {
+   "op": "walk",
+   "t": 60
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "roxy_34_a"
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "roxy_34_b"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "dummy",
+   "yaw": -30,
+   "dist": 3.6
+  },
+  {
+   "op": "anim",
+   "v": "roll_forward"
+  },
+  {
+   "op": "wait",
+   "t": 5
+  },
+  {
+   "op": "shot",
+   "v": "roxy_roll"
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "equip",
+   "slot": "chest",
+   "v": ""
+  },
+  {
+   "op": "equip",
+   "slot": "legs",
+   "v": ""
+  },
+  {
+   "op": "equip",
+   "slot": "chest",
+   "v": "remushoku:magic_armor_mk_2_v2_chestplate"
+  },
+  {
+   "op": "equip",
+   "slot": "legs",
+   "v": "remushoku:magic_armor_mk_2_v2_leggings"
+  },
+  {
+   "op": "dummy",
+   "yaw": 90,
+   "dist": 3.6
+  },
+  {
+   "op": "walk",
+   "t": 60
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "mk2_side_a"
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "mk2_side_b"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "dummy",
+   "yaw": 180,
+   "dist": 3.6
+  },
+  {
+   "op": "walk",
+   "t": 60
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "mk2_front_a"
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "mk2_front_b"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "dummy",
+   "yaw": -30,
+   "dist": 3.6
+  },
+  {
+   "op": "walk",
+   "t": 60
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "mk2_34_a"
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "mk2_34_b"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "dummy",
+   "yaw": -30,
+   "dist": 3.6
+  },
+  {
+   "op": "anim",
+   "v": "roll_forward"
+  },
+  {
+   "op": "wait",
+   "t": 5
+  },
+  {
+   "op": "shot",
+   "v": "mk2_roll"
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "equip",
+   "slot": "chest",
+   "v": ""
+  },
+  {
+   "op": "equip",
+   "slot": "legs",
+   "v": ""
+  },
+  {
+   "op": "equip",
+   "slot": "chest",
+   "v": "remushoku:flame_trapping_cloak_v2"
+  },
+  {
+   "op": "dummy",
+   "yaw": 90,
+   "dist": 3.6
+  },
+  {
+   "op": "walk",
+   "t": 60
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "cloak_side_a"
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "cloak_side_b"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "dummy",
+   "yaw": 180,
+   "dist": 3.6
+  },
+  {
+   "op": "walk",
+   "t": 60
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "cloak_front_a"
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "cloak_front_b"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "dummy",
+   "yaw": -30,
+   "dist": 3.6
+  },
+  {
+   "op": "walk",
+   "t": 60
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "cloak_34_a"
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "cloak_34_b"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "dummy",
+   "yaw": -30,
+   "dist": 3.6
+  },
+  {
+   "op": "anim",
+   "v": "roll_forward"
+  },
+  {
+   "op": "wait",
+   "t": 5
+  },
+  {
+   "op": "shot",
+   "v": "cloak_roll"
+  },
+  {
+   "op": "wait",
+   "t": 20
+  }
+ ]
+}

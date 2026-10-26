@@ -2587,5 +2587,11 @@
   "msg.remushoku.no_arrows": "You have no arrows (put them in the quiver or your inventory)",
   "msg.remushoku.bow_reload_hint": "Load an arrow with %s",
   "key.remushoku.bow_reload": "Load arrow (mod bows)",
-  "tooltip.remushoku.quiver_count": "%s / %s arrows"
+  "tooltip.remushoku.quiver_count": "%s / %s arrows",
+  "item.remushoku.redstone_chalk": "Reddish Chalk",
+  "block.remushoku.chalk_line": "Chalk Line",
+  "tooltip.remushoku.redstone_chalk": "Right click the ground: draws a line. Cast Mana Infusion on it to turn it blue and carry redstone (triggers armed magic circles)",
+  "spell.remushoku.mana_infusion": "Mana Infusion",
+  "msg.remushoku.infusion_nothing": "Look at a reddish chalk line to infuse it with mana",
+  "msg.remushoku.infusion_done": "The chalk absorbs the mana (%s blocks)"
 }

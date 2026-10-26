@@ -193,6 +193,19 @@ def chain(bone, base, segs, mat, det=None, side=0.0):
 _RING = [0]
 
 
+def seg_panel(bone, piv, w, length, mat, det=None, yaw=0, flare=0, thick=0.5, n=3):
+    """Pano partido en n tramos de arriba a abajo (mismo pivote y giro): la tela se curva al deformarse con las
+    piernas. Solo el tramo de abajo lleva el detalle del borde."""
+    px, py, pz = piv
+    out = []
+    for k in range(n):
+        top = py - length * k / n
+        h = length / n + (0.15 if k < n - 1 else 0)
+        d = det if k == n - 1 else ('folds' if det else None)
+        out.append(rbox(bone, [px - w / 2, top - h, pz - thick], [w, h, thick], mat, d, pivot=piv, e=(flare, yaw, 0)))
+    return out
+
+
 def ring_bone(tag, x, z):
     """Hueso de tela segun donde esta alrededor de la cintura (0 adelante, 90 derecha = -X, 180 atras): el renderer lo
     mueve con la pierna de ese lado (adelante empuja la pierna que va adelante, atras la que va atras)."""
@@ -205,7 +218,7 @@ def ring_panel(tag, piv, w, length, mat, det=None, yaw=None, flare=0, thick=0.5)
     """Pano en su propio hueso de tela (con pivote en su borde de arriba)."""
     x, y, z = piv
     yw = yaw if yaw is not None else math.degrees(math.atan2(-x, -z))
-    return panel(ring_bone(tag, x, z), piv, w, length, mat, det, yw, flare, thick)
+    return seg_panel(ring_bone(tag, x, z), piv, w, length, mat, det, yw, flare, thick, n=4 if length > 12 else 3)
 
 
 def ring_skirt(tag, y, length, hw, hd, flare, mat, det=None, n=16, thick=0.5, gap=0.0, cz=0.0):
@@ -223,7 +236,7 @@ def ring_skirt(tag, y, length, hw, hd, flare, mat, det=None, n=16, thick=0.5, ga
             continue
         r = math.radians(a)
         x, z = -math.sin(r) * hw, cz - math.cos(r) * hd
-        out.append(panel(ring_bone(tag, x, z - cz), (x, y, z), w, length, mat, det, a, flare, thick))
+        out += seg_panel(ring_bone(tag, x, z - cz), (x, y, z), w, length, mat, det, a, flare, thick, n=3 if length > 4 else 2)
     return out
 
 
@@ -309,17 +322,15 @@ def flame_cloak():
     # cuerpo de la capa: frente en dos hojas, costados, esquinas y espalda en cuatro pliegues
     L_ = 21.4
     top = 22.2
-    out += xm(ring_panel('c', (-4.6, top, -3.4), 7.4, L_, 'cloak', 'cloakflame', yaw=-6, flare=6))
-    out += xm(ring_panel('c', (-8.6, top, 0), 6.6, L_, 'cloak', 'cloakflame', yaw=90, flare=7))
-    out += xm(ring_panel('c', (-7.6, top, -2.9), 2.8, L_, 'cloak', 'cloakflame', yaw=45, flare=8))
-    out += xm(ring_panel('c', (-7.6, top, 2.9), 2.8, L_, 'cloak', 'cloakflame', yaw=135, flare=8))
+    out += xm(*ring_panel('c', (-4.6, top, -3.4), 7.4, L_, 'cloak', 'cloakflame', yaw=-6, flare=6))
+    out += xm(*ring_panel('c', (-8.6, top, 0), 6.6, L_, 'cloak', 'cloakflame', yaw=90, flare=7))
+    out += xm(*ring_panel('c', (-7.6, top, -2.9), 2.8, L_, 'cloak', 'cloakflame', yaw=45, flare=8))
+    out += xm(*ring_panel('c', (-7.6, top, 2.9), 2.8, L_, 'cloak', 'cloakflame', yaw=135, flare=8))
     for x, dz, yw in ((-6.0, 0, 192), (-2.1, 0.8, 168), (2.1, 0.8, 192), (6.0, 0, 168)):
-        out.append(ring_panel('c', (x, top, 3.4 + dz), 4.6, L_ - dz * 0.5, 'cloak', 'cloakflame', yaw=yw, flare=7))
+        out += (ring_panel('c', (x, top, 3.4 + dz), 4.6, L_ - dz * 0.5, 'cloak', 'cloakflame', yaw=yw, flare=7))
     # forro oscuro que se ve por la abertura del frente: dos mitades, cada una con su pierna
     for x0 in (-3.2, 0.0):
-        lb = box(ring_bone('i', x0 + 1.6, -2.6), [x0, 1.4, -2.6], [3.2, 20.8, 0.3], 'cloak_in', 'folds')
-        lb['rot'], lb['pivot'] = [0, 0, 0], [x0 + 1.6, 22.2, -2.45]
-        out.append(lb)
+        out += seg_panel(ring_bone('i', x0 + 1.6, -2.6), (x0 + 1.6, 22.2, -2.3), 3.2, 20.8, 'cloak_in', 'folds', 0, 0, 0.3, n=5)
     # mangas (los brazos salen de la capa con la misma tela) y punos con brasas
     out += sym([
         box(RA, [-8.7, 13.2, -2.7], [5.0, 10.9, 5.4], 'cloak', 'folds'),

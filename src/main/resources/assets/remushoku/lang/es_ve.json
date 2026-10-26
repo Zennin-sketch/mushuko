@@ -2587,5 +2587,11 @@
   "msg.remushoku.no_arrows": "No tenés flechas (ponelas en el carcaj o en el inventario)",
   "msg.remushoku.bow_reload_hint": "Cargá la flecha con %s",
   "key.remushoku.bow_reload": "Cargar flecha (arcos del mod)",
-  "tooltip.remushoku.quiver_count": "%s / %s flechas"
+  "tooltip.remushoku.quiver_count": "%s / %s flechas",
+  "item.remushoku.redstone_chalk": "Tiza Rojiza",
+  "block.remushoku.chalk_line": "Línea de Tiza",
+  "tooltip.remushoku.redstone_chalk": "Clic derecho en el suelo: dibuja una línea. Lanzale Infusión de Maná para que se vuelva azul y conduzca redstone (activa círculos mágicos cargados)",
+  "spell.remushoku.mana_infusion": "Infusión de Maná",
+  "msg.remushoku.infusion_nothing": "Mirá una línea de tiza rojiza para infundirle maná",
+  "msg.remushoku.infusion_done": "La tiza absorbe el maná (%s bloques)"
 }

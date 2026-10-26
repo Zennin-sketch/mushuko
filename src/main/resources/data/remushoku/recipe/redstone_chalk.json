@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "rrr",
+    "rcr",
+    "rrr"
+  ],
+  "key": {
+    "r": { "item": "minecraft:redstone" },
+    "c": { "item": "remushoku:chalk" }
+  },
+  "result": { "count": 1, "id": "remushoku:redstone_chalk" }
+}

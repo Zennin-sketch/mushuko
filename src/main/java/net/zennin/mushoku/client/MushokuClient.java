@@ -27,6 +27,10 @@ public class MushokuClient implements ClientModInitializer {
         }
         net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry.INSTANCE.register(net.zennin.mushoku.registry.ModItems.QUIVER, ItemModels::quiver);
         BowClient.init();
+        // Linea de tiza: roja apagada, azul cargada (mas clara con mas senal)
+        BlockRenderLayerMap.INSTANCE.putBlock(net.zennin.mushoku.registry.ModBlocks.CHALK_LINE, RenderType.cutout());
+        net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry.BLOCK.register((state, level, pos, tint) ->
+                net.zennin.mushoku.block.ChalkLineBlock.color(state), net.zennin.mushoku.registry.ModBlocks.CHALK_LINE);
         ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.QuiverSyncPayload.TYPE, (payload, context) -> context.client().execute(() -> {
             if (context.client().level == null) return;
             if (context.client().level.getEntity(payload.entityId()) instanceof net.minecraft.world.entity.player.Player pl)

@@ -47,6 +47,8 @@ public final class ModItems {
     public static final Item SILENT_TOME = register("silent_tome", new ExtraItems.SilentTomeItem(new Item.Properties().stacksTo(1)));
     public static final Item SCROLL = register("scroll", new SpellScrollItem(new Item.Properties().stacksTo(16)));
     public static final Item CHALK = register("chalk", new ChalkItem(new Item.Properties().durability(32)));
+    /** Tiza rojiza (tiza rodeada de redstone): dibuja lineas que, imbuidas con Infusion de Mana, conducen redstone. */
+    public static final Item REDSTONE_CHALK = register("redstone_chalk", new net.zennin.mushoku.item.RedstoneChalkItem(new Item.Properties().durability(64)));
     public static final Item INKAND_QUILL = single("inkand_quill");
     public static final Item INK_VIAL = simple("ink_vial");
     public static final Item CLASS_CHANGE_ITEM = register("class_change_item", new ClassChangeItem(new Item.Properties().stacksTo(16)));

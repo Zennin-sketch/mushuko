@@ -78,6 +78,8 @@ public enum Spell {
     INVISIBILITY("invisibility", "lluu", Element.NONE, true),
     REPAIR("repair", "dduu", Element.NONE, true),
     CLEANSE("cleanse", "uudd", Element.NONE, true),
+    /** Infusion de Mana: la linea de tiza rojiza que miras pasa a azul y conduce redstone. */
+    MANA_INFUSION("mana_infusion", "rlr", Element.NONE, true),
     // --- Addon: hechizos combinados (se forman con la tecla Combinar, no con flechas) ---
     FIRE_RAIN("fire_rain", "+fire_rain", Element.FIRE, true, SpellLevel.INTERMEDIATE),
     FREEZING_RAIN("freezing_rain", "+freezing_rain", Element.WATER, true, SpellLevel.ADVANCED),

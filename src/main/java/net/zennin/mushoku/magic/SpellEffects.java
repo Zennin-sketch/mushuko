@@ -59,6 +59,25 @@ public final class SpellEffects {
                 sound(level, p, SoundEvents.AMETHYST_BLOCK_CHIME);
             }
             case GROW -> grow(p, level);
+            case MANA_INFUSION -> {
+                // la linea de tiza rojiza que miras (hasta 8 bloques) pasa a azul
+                net.minecraft.world.phys.Vec3 eye = p.getEyePosition();
+                net.minecraft.world.phys.BlockHitResult hit = level.clip(new net.minecraft.world.level.ClipContext(eye,
+                        eye.add(p.getLookAngle().scale(8)), net.minecraft.world.level.ClipContext.Block.OUTLINE,
+                        net.minecraft.world.level.ClipContext.Fluid.NONE, p));
+                net.minecraft.core.BlockPos at = hit.getBlockPos();
+                if (!(level.getBlockState(at).getBlock() instanceof net.zennin.mushoku.block.ChalkLineBlock)) at = at.above();
+                int n = level.getBlockState(at).getBlock() instanceof net.zennin.mushoku.block.ChalkLineBlock
+                        ? net.zennin.mushoku.block.ChalkLineBlock.infuse(level, at) : 0;
+                if (n == 0) {
+                    p.displayClientMessage(net.minecraft.network.chat.Component.translatable("msg.remushoku.infusion_nothing")
+                            .withStyle(net.minecraft.ChatFormatting.GRAY), true);
+                    return false;
+                }
+                level.playSound(null, at, SoundEvents.AMETHYST_BLOCK_RESONATE, net.minecraft.sounds.SoundSource.PLAYERS, 1f, 1.3f);
+                p.displayClientMessage(net.minecraft.network.chat.Component.translatable("msg.remushoku.infusion_done", n)
+                        .withStyle(net.minecraft.ChatFormatting.AQUA), true);
+            }
             case MAGIC_SHIELD -> {
                 p.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 300, 1));
                 p.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 300, 0));

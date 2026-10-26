@@ -31,6 +31,13 @@ public final class ModBlocks {
                     .pushReaction(PushReaction.DESTROY)
                     .lightLevel(s -> s.getValue(MagicCircleBlock.POWERED) ? 7 : 2)));
 
+    /** Linea de tiza rojiza / azul (la dibuja la tiza rojiza; azul conduce redstone). No suelta nada. */
+    public static final Block CHALK_LINE = Registry.register(BuiltInRegistries.BLOCK, MushokuMod.id("chalk_line"),
+            new net.zennin.mushoku.block.ChalkLineBlock(BlockBehaviour.Properties.of()
+                    .noCollission().noOcclusion().instabreak().sound(SoundType.CALCITE).pushReaction(PushReaction.DESTROY)
+                    .lightLevel(s -> s.getValue(net.zennin.mushoku.block.ChalkLineBlock.CHARGED)
+                            ? (s.getValue(net.zennin.mushoku.block.ChalkLineBlock.POWER) > 0 ? 7 : 4) : 0)));
+
     // --- Mundo (mismas durezas que el original; -1 = irrompible) ---
     public static final Block MAGIC_ORE = withItem("magic_ore", new DropExperienceBlock(UniformInt.of(2, 5),
             BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(10f, 15f).requiresCorrectToolForDrops().sound(SoundType.STONE)));

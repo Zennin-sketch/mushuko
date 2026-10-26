@@ -15,6 +15,8 @@ public class MagicCircleBlockEntity extends BlockEntity {
     private String spell = "";
     private UUID owner;
     private boolean armed;
+    /** Venia senal de una linea de tiza azul (para activarse solo al encenderse). */
+    public boolean linePowered;
 
     public MagicCircleBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlocks.MAGIC_CIRCLE_BE, pos, state);
