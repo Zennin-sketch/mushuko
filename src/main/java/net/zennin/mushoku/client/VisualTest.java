@@ -148,9 +148,10 @@ public final class VisualTest {
             case "walk" -> walkTicks = s.get("t").getAsInt();
             case "use" -> {
                 // usar el item de la mano (para arcos): mantiene 'useTicks' ticks
-                dummy.startUsingItem(net.minecraft.world.InteractionHand.MAIN_HAND);
+                ((net.zennin.mushoku.mixin.LivingEntityAccessor) dummy).remushoku$setFlag(2, false);
+                ((net.zennin.mushoku.mixin.LivingEntityAccessor) dummy).remushoku$setFlag(1, true);
             }
-            case "stopuse" -> dummy.stopUsingItem();
+            case "stopuse" -> ((net.zennin.mushoku.mixin.LivingEntityAccessor) dummy).remushoku$setFlag(1, false);
             case "shot" -> {
                 String name = s.get("v").getAsString();
                 Screenshot.grab(mc.gameDirectory, name + ".png", mc.getMainRenderTarget(), m -> log("captura " + name));

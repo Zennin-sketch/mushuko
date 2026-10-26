@@ -538,7 +538,7 @@ function equip(id) {
   for (const c of Object.values(rig.sheaths)) c.slot.clear();
   if (!id) return;
   const w = DATA.weapons[id];
-  const sheath = rig.sheaths[DATA.families[w.family].slot];
+  const sheath = w.family && DATA.families[w.family] ? rig.sheaths[DATA.families[w.family].slot] : null;
   const disp = Object.keys(w.display || {}).length ? w.display : (w.kind === 'block' && !w.elements.length ? HANDHELD : {});
   const tr = disp.translation || [0, 0, 0], ro = disp.rotation || [0, 0, 0], s = disp.scale || [1, 1, 1];
   const dg = new THREE.Group(); dg.position.set(tr[0], tr[1], tr[2]); dg.rotation.order = 'XYZ'; dg.rotation.set(ro[0] * D, ro[1] * D, ro[2] * D);
@@ -1161,7 +1161,7 @@ function edSetField(id, val, undo = true) {
 }
 function edRender() {
   const wsel = $('ed-weapon');
-  if (!wsel.options.length) for (const [k, w] of Object.entries(DATA.weapons)) wsel.insertAdjacentHTML('beforeend', `<option value="${k}">${w.label} (${DATA.families[w.family].label})</option>`);
+  if (!wsel.options.length) for (const [k, w] of Object.entries(DATA.weapons)) wsel.insertAdjacentHTML('beforeend', `<option value="${k}">${w.label} (${w.family && DATA.families[w.family] ? DATA.families[w.family].label : "arco"})</option>`);
   wsel.value = ED.weapon;
   const fam = DATA.families[DATA.weapons[ED.weapon].family], n = Math.max(3, fam.attacks.length);
   $('ed-hits').innerHTML = Array.from({ length: n }, (_, i) => `<button data-h="${i + 1}" class="${ED.hit === i + 1 ? 'gold' : ''}">Golpe ${i + 1}</button>`).join('');

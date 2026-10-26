@@ -1,0 +1,597 @@
+{
+ "skin": "remushoku:textures/entities/rudeus_greyrat.png",
+ "steps": [
+  {
+   "op": "setup",
+   "fov": 30
+  },
+  {
+   "op": "cam",
+   "pitch": 12
+  },
+  {
+   "op": "dummy",
+   "yaw": 90,
+   "dist": 3.6
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "equip",
+   "slot": "head",
+   "v": "remushoku:roxy_hat"
+  },
+  {
+   "op": "equip",
+   "slot": "chest",
+   "v": "remushoku:roxy_robe"
+  },
+  {
+   "op": "equip",
+   "slot": "legs",
+   "v": "remushoku:roxy_stockings"
+  },
+  {
+   "op": "equip",
+   "slot": "feet",
+   "v": "remushoku:roxy_boots"
+  },
+  {
+   "op": "dummy",
+   "yaw": 90,
+   "dist": 3.6
+  },
+  {
+   "op": "walk",
+   "t": 40
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "roxy_walk_a"
+  },
+  {
+   "op": "wait",
+   "t": 3
+  },
+  {
+   "op": "shot",
+   "v": "roxy_walk_b"
+  },
+  {
+   "op": "dummy",
+   "yaw": 150,
+   "dist": 3.6
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "roxy_walk_34"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "equip",
+   "slot": "head",
+   "v": ""
+  },
+  {
+   "op": "equip",
+   "slot": "chest",
+   "v": "remushoku:magic_armor_mk_2_v2_chestplate"
+  },
+  {
+   "op": "equip",
+   "slot": "legs",
+   "v": "remushoku:magic_armor_mk_2_v2_leggings"
+  },
+  {
+   "op": "equip",
+   "slot": "feet",
+   "v": "remushoku:magic_armor_mk_2_v2_boots"
+  },
+  {
+   "op": "dummy",
+   "yaw": 90,
+   "dist": 3.6
+  },
+  {
+   "op": "walk",
+   "t": 40
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "mk2_walk_a"
+  },
+  {
+   "op": "wait",
+   "t": 3
+  },
+  {
+   "op": "shot",
+   "v": "mk2_walk_b"
+  },
+  {
+   "op": "dummy",
+   "yaw": 150,
+   "dist": 3.6
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "mk2_walk_34"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "equip",
+   "slot": "head",
+   "v": ""
+  },
+  {
+   "op": "equip",
+   "slot": "chest",
+   "v": "remushoku:flame_trapping_cloak_v2"
+  },
+  {
+   "op": "equip",
+   "slot": "legs",
+   "v": ""
+  },
+  {
+   "op": "equip",
+   "slot": "feet",
+   "v": ""
+  },
+  {
+   "op": "dummy",
+   "yaw": 90,
+   "dist": 3.6
+  },
+  {
+   "op": "walk",
+   "t": 40
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "cloak_walk_a"
+  },
+  {
+   "op": "wait",
+   "t": 3
+  },
+  {
+   "op": "shot",
+   "v": "cloak_walk_b"
+  },
+  {
+   "op": "dummy",
+   "yaw": 150,
+   "dist": 3.6
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "cloak_walk_34"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "equip",
+   "slot": "head",
+   "v": "remushoku:ghislaine_eyepatch"
+  },
+  {
+   "op": "equip",
+   "slot": "chest",
+   "v": "remushoku:ghislaine_top"
+  },
+  {
+   "op": "equip",
+   "slot": "legs",
+   "v": "remushoku:ghislaine_straps"
+  },
+  {
+   "op": "equip",
+   "slot": "feet",
+   "v": "remushoku:ghislaine_boots"
+  },
+  {
+   "op": "dummy",
+   "yaw": 90,
+   "dist": 3.6
+  },
+  {
+   "op": "walk",
+   "t": 40
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "ghislaine_walk_a"
+  },
+  {
+   "op": "wait",
+   "t": 3
+  },
+  {
+   "op": "shot",
+   "v": "ghislaine_walk_b"
+  },
+  {
+   "op": "dummy",
+   "yaw": 150,
+   "dist": 3.6
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "ghislaine_walk_34"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "equip",
+   "slot": "head",
+   "v": "remushoku:eris_hairband"
+  },
+  {
+   "op": "equip",
+   "slot": "chest",
+   "v": "remushoku:eris_blouse"
+  },
+  {
+   "op": "equip",
+   "slot": "legs",
+   "v": "remushoku:eris_shorts"
+  },
+  {
+   "op": "equip",
+   "slot": "feet",
+   "v": "remushoku:eris_boots"
+  },
+  {
+   "op": "dummy",
+   "yaw": 90,
+   "dist": 3.6
+  },
+  {
+   "op": "walk",
+   "t": 40
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "eris_walk_a"
+  },
+  {
+   "op": "wait",
+   "t": 3
+  },
+  {
+   "op": "shot",
+   "v": "eris_walk_b"
+  },
+  {
+   "op": "dummy",
+   "yaw": 150,
+   "dist": 3.6
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "eris_walk_34"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "equip",
+   "slot": "head",
+   "v": ""
+  },
+  {
+   "op": "equip",
+   "slot": "chest",
+   "v": "remushoku:paul_armor"
+  },
+  {
+   "op": "equip",
+   "slot": "legs",
+   "v": "remushoku:paul_pants"
+  },
+  {
+   "op": "equip",
+   "slot": "feet",
+   "v": "remushoku:paul_boots"
+  },
+  {
+   "op": "dummy",
+   "yaw": 90,
+   "dist": 3.6
+  },
+  {
+   "op": "walk",
+   "t": 40
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "paul_walk_a"
+  },
+  {
+   "op": "wait",
+   "t": 3
+  },
+  {
+   "op": "shot",
+   "v": "paul_walk_b"
+  },
+  {
+   "op": "dummy",
+   "yaw": 150,
+   "dist": 3.6
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "paul_walk_34"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "equip",
+   "slot": "head",
+   "v": ""
+  },
+  {
+   "op": "equip",
+   "slot": "chest",
+   "v": ""
+  },
+  {
+   "op": "equip",
+   "slot": "legs",
+   "v": ""
+  },
+  {
+   "op": "equip",
+   "slot": "feet",
+   "v": ""
+  },
+  {
+   "op": "equip",
+   "slot": "mainhand",
+   "v": "remushoku:hunter_bow"
+  },
+  {
+   "op": "dummy",
+   "yaw": 110,
+   "dist": 3.6
+  },
+  {
+   "op": "wait",
+   "t": 5
+  },
+  {
+   "op": "use"
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "hunter_bow_nock"
+  },
+  {
+   "op": "wait",
+   "t": 12
+  },
+  {
+   "op": "shot",
+   "v": "hunter_bow_drawn"
+  },
+  {
+   "op": "dummy",
+   "yaw": 160,
+   "dist": 3.6
+  },
+  {
+   "op": "wait",
+   "t": 3
+  },
+  {
+   "op": "shot",
+   "v": "hunter_bow_drawn_front"
+  },
+  {
+   "op": "stopuse"
+  },
+  {
+   "op": "wait",
+   "t": 2
+  },
+  {
+   "op": "shot",
+   "v": "hunter_bow_release"
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "equip",
+   "slot": "mainhand",
+   "v": "remushoku:mana_bow"
+  },
+  {
+   "op": "dummy",
+   "yaw": 110,
+   "dist": 3.6
+  },
+  {
+   "op": "wait",
+   "t": 5
+  },
+  {
+   "op": "use"
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "mana_bow_nock"
+  },
+  {
+   "op": "wait",
+   "t": 12
+  },
+  {
+   "op": "shot",
+   "v": "mana_bow_drawn"
+  },
+  {
+   "op": "dummy",
+   "yaw": 160,
+   "dist": 3.6
+  },
+  {
+   "op": "wait",
+   "t": 3
+  },
+  {
+   "op": "shot",
+   "v": "mana_bow_drawn_front"
+  },
+  {
+   "op": "stopuse"
+  },
+  {
+   "op": "wait",
+   "t": 2
+  },
+  {
+   "op": "shot",
+   "v": "mana_bow_release"
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "equip",
+   "slot": "mainhand",
+   "v": "remushoku:demon_bow"
+  },
+  {
+   "op": "dummy",
+   "yaw": 110,
+   "dist": 3.6
+  },
+  {
+   "op": "wait",
+   "t": 5
+  },
+  {
+   "op": "use"
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "demon_bow_nock"
+  },
+  {
+   "op": "wait",
+   "t": 12
+  },
+  {
+   "op": "shot",
+   "v": "demon_bow_drawn"
+  },
+  {
+   "op": "dummy",
+   "yaw": 160,
+   "dist": 3.6
+  },
+  {
+   "op": "wait",
+   "t": 3
+  },
+  {
+   "op": "shot",
+   "v": "demon_bow_drawn_front"
+  },
+  {
+   "op": "stopuse"
+  },
+  {
+   "op": "wait",
+   "t": 2
+  },
+  {
+   "op": "shot",
+   "v": "demon_bow_release"
+  },
+  {
+   "op": "wait",
+   "t": 20
+  }
+ ]
+}
