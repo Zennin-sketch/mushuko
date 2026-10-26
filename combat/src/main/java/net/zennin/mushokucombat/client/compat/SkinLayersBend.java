@@ -26,7 +26,7 @@ final class SkinLayersBend {
     private SkinLayersBend() {}
 
     private static final boolean DEBUG = Boolean.getBoolean("mushoku.debuglayers");
-    private static int calls;
+    private static int calls, vcalls;
 
     static void install() {
         // 1) Cada malla 3D se dobla igual que la parte del cuerpo que cubre (mismo calculo que bendy-lib).
@@ -101,6 +101,8 @@ final class SkinLayersBend {
         @Override
         public void transform(Vector3f normal, Vector4f[] v) {
             int n = Math.min(4, v.length);
+            boolean dbg = DEBUG && (++vcalls % 4001) == 0;
+            float ox = v[0].x, oy = v[0].y, oz = v[0].z;
             for (int i = 0; i < n; i++) {
                 Vector3f p = new Vector3f(v[i].x, v[i].y, v[i].z);
                 float mid = (Math.abs(other.distanceTo(p)) - Math.abs(base.distanceTo(p))) / 2f;
@@ -111,6 +113,9 @@ final class SkinLayersBend {
                         .translate(-bx, -by, -bz));
                 v[i].set(q.x, q.y, q.z, 1f);
             }
+            if (dbg) org.slf4j.LoggerFactory.getLogger("mushoku_combat").info(
+                    "[capas] v0 ({},{},{}) -> ({},{},{}) centro=({},{},{}) eje={} doblez={} base={} otro={}", ox, oy, oz, v[0].x, v[0].y, v[0].z,
+                    bx, by, bz, axisVec, value, base.distanceTo(new Vector3f(ox, oy, oz)), other.distanceTo(new Vector3f(ox, oy, oz)));
             if (n >= 4) {
                 Vector3f a = new Vector3f(v[0].x - v[2].x, v[0].y - v[2].y, v[0].z - v[2].z);
                 Vector3f c = new Vector3f(v[1].x - v[3].x, v[1].y - v[3].y, v[1].z - v[3].z);
