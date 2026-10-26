@@ -44,13 +44,13 @@ public final class ManaBarHud {
         g.drawString(mc.font, text, X + FX + (FW - tw) / 2, Y + FY + 1, 0xFFFFFFFF, true);
 
         int line = Y + H + 4;
-        if (ClientManaState.playerClass == 2) line = renderSwordsman(g, mc, line);
+        if (net.zennin.mushoku.magic.SpellCasting.isSwordsmanClass(ClientManaState.playerClass)) line = renderSwordsman(g, mc, line);
         line = renderExtra(g, mc, line);
         if (ClientManaState.playerClass != 0 && ClientRaceState.data.race().isEmpty()) {
             g.drawString(mc.font, Component.translatable("hud.remushoku.pick_race", ModKeys.ADVENTURER.getTranslatedKeyMessage()), X + 2, line, 0xFFFFD27F, true);
             line += 10;
         }
-        if (!CastingClient.casting && ClientManaState.playerClass != 1 && ClientManaState.queued.isEmpty()) return;
+        if (!CastingClient.casting && !net.zennin.mushoku.magic.SpellCasting.isMageClass(ClientManaState.playerClass) && ClientManaState.queued.isEmpty()) return;
         if (ClientManaState.noElement) {
             g.drawString(mc.font, Component.translatable("hud.remushoku.no_element"), X + 2, line, 0xFFD58CFF, true);
             line += 11;
@@ -113,7 +113,7 @@ public final class ManaBarHud {
                     Component.translatable("eye.remushoku." + d.eye(i))), X + 2, line, on ? 0xFFD58CFF : 0xFF8A7A9A, true);
             line += 10;
         }
-        if (ClientManaState.playerClass == 1 && d.silent()) {
+        if (net.zennin.mushoku.magic.SpellCasting.isMageClass(ClientManaState.playerClass) && d.silent()) {
             KeyMapping[] keys = {ModKeys.SKILL_1, ModKeys.SKILL_2, ModKeys.SKILL_3};
             for (int i = 0; i < 3; i++) {
                 Spell s = d.silentSlot(i).isEmpty() ? null : Spell.byId(d.silentSlot(i));

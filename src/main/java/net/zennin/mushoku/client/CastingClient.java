@@ -40,7 +40,7 @@ public final class CastingClient {
     private static void tick(Minecraft mc) {
         if (mc.player == null) { casting = false; combo = ""; return; }
         if (mc.screen != null) { toggleHeld = false; return; } // abrir el chat o el inventario no cancela el modo
-        boolean isMage = ClientManaState.playerClass == 1
+        boolean isMage = net.zennin.mushoku.magic.SpellCasting.isMageClass(ClientManaState.playerClass)
                 || (ClientManaState.playerClass == 2 && ClientSwordState.data.knows("ng_magic"));
         if (!isMage) { casting = false; combo = ""; }
 

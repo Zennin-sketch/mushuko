@@ -23,8 +23,8 @@ public final class ClientReadySpell {
 
     private static final Map<Integer, Ready> READY = new HashMap<>();
     /** Proyectiles que pueden ir en la mano (los efectos grandes como nubes o muros no). */
-    private static final String[] HAND_MODELS = {"fireball", "water_ball", "stone_bullet", "icicle", "wind_blade", "wind_drill",
-            "water_arrow", "fire_crescent"};
+    private static final String[] HAND_MODELS = {"fire_crescent", "water_arrow", "wind_drill", "icicle", "stone_bullet", "wind_blade",
+            "fireball", "water_ball"};
     private static Map<String, String> bySpell;
 
     private ClientReadySpell() {}
@@ -74,12 +74,13 @@ public final class ClientReadySpell {
         if (m != null) return m;
         Spell s = Spell.byId(spell);
         if (s == null) return null;
+        // Hechizos que crean estructuras (muros, pinchos, nubes, curaciones): solo un brillo del elemento
         return switch (s.element) {
-            case FIRE -> "fireball";
-            case WATER -> "water_ball";
-            case EARTH -> "stone_bullet";
-            case WIND -> "wind_blade";
-            default -> null;
+            case FIRE -> "glow_fire";
+            case WATER -> "glow_water";
+            case EARTH -> "glow_earth";
+            case WIND -> "glow_wind";
+            default -> "glow_none";
         };
     }
 

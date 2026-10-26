@@ -30,7 +30,7 @@ public class ArcherSchoolScreen extends Screen {
     }
 
     private void pick(ArcherSchool s) {
-        if (ClientManaState.playerClass != 3) ClientPlayNetworking.send(new ActionPayload(ActionPayload.CHOOSE_ARCHER));
+        if (!net.zennin.mushoku.magic.SpellCasting.isArcherClass(ClientManaState.playerClass)) ClientPlayNetworking.send(new ActionPayload(ActionPayload.CHOOSE_ARCHER));
         ClientPlayNetworking.send(new ArcherActionPayload(ArcherActionPayload.SCHOOL, 0, s.key));
         onClose();
     }

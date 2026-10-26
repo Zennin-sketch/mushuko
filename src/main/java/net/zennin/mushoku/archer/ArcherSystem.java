@@ -93,7 +93,7 @@ public final class ArcherSystem {
 
     private ArcherSystem() {}
 
-    public static boolean isArcher(Player p) { return ModAttachments.get(p).playerClass() == SpellCasting.CLASS_ARCHER; }
+    public static boolean isArcher(Player p) { return SpellCasting.isArcherClass(ModAttachments.get(p).playerClass()); }
 
     public static boolean isBow(ItemStack s) { return !s.isEmpty() && s.getItem() instanceof ProjectileWeaponItem; }
 

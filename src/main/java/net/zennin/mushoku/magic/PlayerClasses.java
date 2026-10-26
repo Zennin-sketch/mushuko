@@ -35,6 +35,20 @@ public final class PlayerClasses {
         net.zennin.mushoku.extra.DemonEyes.maybeBornWithEye(p);
     }
 
+    /** Item de creativo: todas las clases a la vez. Si no tenia estilo de espada o escuela de arco, se le da uno. */
+    public static void grantAll(ServerPlayer p) {
+        ModAttachments.set(p, ModAttachments.get(p).withClass(SpellCasting.CLASS_ALL));
+        ModNetworking.syncMana(p);
+        SwordSystem.refresh(p);
+        if (ModAttachments.sword(p).style().isEmpty()) SwordSystem.chooseAffinity(p, net.zennin.mushoku.sword.SwordStyle.values()[0].key);
+        net.zennin.mushoku.archer.ArcherSystem.refresh(p);
+        if (ModAttachments.archer(p).school().isEmpty())
+            net.zennin.mushoku.archer.ArcherSystem.chooseSchool(p, net.zennin.mushoku.archer.ArcherSchool.values()[0].key);
+        SwordSystem.sync(p);
+        net.zennin.mushoku.archer.ArcherSystem.sync(p);
+        p.displayClientMessage(Component.translatable("msg.remushoku.class_all").withStyle(ChatFormatting.GOLD), false);
+    }
+
     /** Vuelve la clase a "sin elegir" y abre el menu (orbe de cambio de clase). */
     public static void reset(ServerPlayer p) {
         ModAttachments.set(p, ModAttachments.get(p).withClass(0));

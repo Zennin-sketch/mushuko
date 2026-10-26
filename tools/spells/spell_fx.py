@@ -307,7 +307,89 @@ def water_ball_form():
     return fx('Bola de agua: se forma en la mano', [], [gather, core, sphere, lights, shine, *ribbons, drops],
               life=FORM, scale=1.0, height=0.6, cam=2.0)
 
+def _gather(tex, render, count, life, colors, size=(1.3, 0.4), radius=(12, 11, 12), speed=-0.95, until=18):
+    """Particulas que llegan a la mano desde alrededor durante la formacion."""
+    return group(tex, render, [], glow=True, show=[[0, until]],
+                 emit=emitter(count, life, radius, size, colors, alpha=0.95, outward=speed))
 
-FX_MODELS = dict(fireball_form=fireball_form, water_ball_form=water_ball_form, water_arrow=water_arrow, fire_crescent=fire_crescent, storm_cloud=storm_cloud_small, cumulonimbus=cumulonimbus,
+def stone_bullet_form():
+    from spell_models import stone_bullet
+    body, dust = stone_bullet()['groups']
+    body['stagger'] = [2, 17]
+    body['grow'] = [0, 6]
+    dust['show'] = [[16, 40]]
+    chips = group('stone', 'solid', _spiral(3, 6, 10, 3, 280, 1.4, 0.8, '8c7c66', 'c8baa0', 1.0),
+                  spin=(0, 50, 0), show=[[0, 15]], swirl=[0, 14, 360, 1.5])
+    return fx('Bala de piedra: se forma en la mano', [], [_gather('stone', 'solid', 22, 12, ('a89a82', '6a5c4a')), chips, body, dust],
+              life=FORM, scale=1.0, height=0.6, cam=2.0)
+
+def icicle_form():
+    from spell_models import icicle
+    body, core, frost = icicle()['groups']
+    body['stagger'] = [3, 19]
+    core['show'] = [[12, 40]]
+    frost['show'] = [[16, 40]]
+    return fx('Lanza de hielo: se forma en la mano', [], [_gather('ice', 'translucent', 26, 12, ('ffffff', '9ad4f7')), body, core, frost],
+              life=FORM, scale=1.0, height=0.6, cam=2.2)
+
+def wind_blade_form():
+    from spell_models import wind_blade
+    haze, body, edge, streaks, motes = wind_blade()['groups']
+    haze['grow'] = [2, 12]
+    body['stagger'] = [5, 16]
+    edge['show'] = [[13, 40]]
+    streaks['show'] = [[16, 40]]
+    motes['show'] = [[15, 40]]
+    swirl = group('wind', 'translucent', _spiral(3, 8, 11, 4, 320, 1.0, 0.5, 'd4fff0', 'ffffff', 0.7), glow=True,
+                  spin=(0, 70, 0), show=[[0, 15]], swirl=[0, 14, 420, 1.6])
+    return fx('Hoja de viento: se forma en la mano', [], [_gather('wind', 'translucent', 20, 10, ('ffffff', 'c6eedd'), size=(0.9, 0.2)),
+                                                           swirl, haze, body, edge, streaks, motes],
+              life=FORM, scale=1.0, height=0.6, cam=2.2)
+
+def wind_drill_form():
+    from spell_models import wind_drill
+    strands, cone, motes = wind_drill()['groups']
+    strands['swirl'] = [0, 18, 540, 2.2]
+    cone['grow'] = [6, 18]
+    motes['show'] = [[15, 40]]
+    return fx('Taladro de viento: se forma en la mano', [], [_gather('wind', 'translucent', 20, 10, ('ffffff', 'c6eedd'), size=(0.9, 0.2)),
+                                                              strands, cone, motes],
+              life=FORM, scale=1.0, height=0.6, cam=2.2)
+
+def water_arrow_form():
+    shaft_head, helix, drops = water_arrow()['groups']
+    shaft_head['stagger'] = [4, 17]
+    helix['swirl'] = [0, 18, 360, 2.0]
+    drops['show'] = [[15, 40]]
+    return fx('Flecha de agua: se forma en la mano', [], [_gather('water', 'translucent', 22, 12, ('7cc8ff', 'ffffff')), helix, shaft_head, drops],
+              life=FORM, scale=1.0, height=0.6, cam=2.2)
+
+def fire_crescent_form():
+    haze, body, edge, embers = fire_crescent()['groups']
+    haze['grow'] = [3, 13]
+    body['stagger'] = [5, 17]
+    edge['show'] = [[14, 40]]
+    embers['show'] = [[15, 40]]
+    return fx('Tajo de fuego: se forma en la mano', [], [_gather('fire', 'emissive', 28, 12, ('ffe07a', 'ff4a0e')), haze, body, edge, embers],
+              life=FORM, scale=1.0, height=0.6, cam=2.2)
+
+def _glow(name, tex, render, c0, c1, c2):
+    """Hechizos que crean estructuras: solo un brillo del elemento en la mano (sin formacion)."""
+    core = group(tex, render, [box((0, 0, 0), (2.4, 2.4, 2.4), c0, 0.9)], glow=True, spin=(30, 45, 0), pulse=(0.15, 8))
+    shell = group(tex, render, [box((0, 0, 0), (4.2, 4.2, 4.2), c1, 0.35)], glow=True, spin=(-20, 30, 15), pulse=(0.1, 11))
+    motes = group(tex, render, [], glow=True, emit=emitter(10, 12, (3.5, 3.5, 3.5), (0.8, 0.2), (c2, c1), alpha=0.85, rise=0.25))
+    return projectile(name, [], [core, shell, motes])
+
+def glow_fire(): return _glow('Brillo de fuego (hechizos de estructura)', 'fire', 'emissive', 'fff2b0', 'ff7a1a', 'ffd84a')
+def glow_water(): return _glow('Brillo de agua (hechizos de estructura)', 'water', 'translucent', 'e6f6ff', '5cb2f6', 'b8e4ff')
+def glow_earth(): return _glow('Brillo de tierra (hechizos de estructura)', 'stone', 'solid', 'c8baa0', '8c7c66', 'a89a82')
+def glow_wind(): return _glow('Brillo de viento (hechizos de estructura)', 'wind', 'translucent', 'ffffff', 'c6eedd', 'eafff8')
+def glow_none(): return _glow('Brillo de mana (sin elemento)', 'water', 'translucent', 'fffbe0', 'ffd86a', 'ffffff')
+
+
+FX_MODELS = dict(fireball_form=fireball_form, water_ball_form=water_ball_form, stone_bullet_form=stone_bullet_form,
+                 icicle_form=icicle_form, wind_blade_form=wind_blade_form, wind_drill_form=wind_drill_form,
+                 water_arrow_form=water_arrow_form, fire_crescent_form=fire_crescent_form,
+                 glow_fire=glow_fire, glow_water=glow_water, glow_earth=glow_earth, glow_wind=glow_wind, glow_none=glow_none, water_arrow=water_arrow, fire_crescent=fire_crescent, storm_cloud=storm_cloud_small, cumulonimbus=cumulonimbus,
                  earth_spike=earth_spike, ice_crystals=ice_crystals, fire_burst=fire_burst, water_wall=water_wall,
                  magic_shield=magic_shield)

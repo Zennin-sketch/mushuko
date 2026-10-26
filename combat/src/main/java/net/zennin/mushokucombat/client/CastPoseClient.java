@@ -25,7 +25,7 @@ public final class CastPoseClient {
             posed = false;
             return;
         }
-        boolean mage = ClientManaState.playerClass == 1
+        boolean mage = net.zennin.mushoku.magic.SpellCasting.isMageClass(ClientManaState.playerClass)
                 || (ClientManaState.playerClass == 2 && ClientSwordState.data.knows("ng_magic"));
         boolean shoot = mc.screen == null && ModKeys.isDown(ModKeys.SHOOT);
         if (mage && shoot && !shootPrev && (CastingClient.casting || posed || !ClientManaState.queued.isEmpty())) {

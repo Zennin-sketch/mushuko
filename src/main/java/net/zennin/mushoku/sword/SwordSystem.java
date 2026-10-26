@@ -64,7 +64,7 @@ public final class SwordSystem {
     private SwordSystem() {}
 
     public static boolean isSwordsman(Player p) {
-        return ModAttachments.get(p).playerClass() == SpellCasting.CLASS_SWORDSMAN;
+        return SpellCasting.isSwordsmanClass(ModAttachments.get(p).playerClass());
     }
 
     public static void sync(ServerPlayer p) {

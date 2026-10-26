@@ -1,0 +1,144 @@
+{
+ "name": "Brillo de tierra (hechizos de estructura)",
+ "spells": [],
+ "groups": [
+  {
+   "texture": "remushoku:textures/entity/spell/stone.png",
+   "render": "solid",
+   "glow": true,
+   "tilt": [
+    0,
+    0,
+    0
+   ],
+   "spin": [
+    30,
+    45,
+    0
+   ],
+   "pulse": [
+    0.15,
+    8
+   ],
+   "flicker": 0.0,
+   "boxes": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      2.4,
+      2.4,
+      2.4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "c8baa0",
+     "alpha": 0.9
+    }
+   ]
+  },
+  {
+   "texture": "remushoku:textures/entity/spell/stone.png",
+   "render": "solid",
+   "glow": true,
+   "tilt": [
+    0,
+    0,
+    0
+   ],
+   "spin": [
+    -20,
+    30,
+    15
+   ],
+   "pulse": [
+    0.1,
+    11
+   ],
+   "flicker": 0.0,
+   "boxes": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      4.2,
+      4.2,
+      4.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "8c7c66",
+     "alpha": 0.35
+    }
+   ]
+  },
+  {
+   "texture": "remushoku:textures/entity/spell/stone.png",
+   "render": "solid",
+   "glow": true,
+   "tilt": [
+    0,
+    0,
+    0
+   ],
+   "spin": [
+    0,
+    0,
+    0
+   ],
+   "pulse": [
+    0,
+    1
+   ],
+   "flicker": 0.0,
+   "boxes": [],
+   "emit": {
+    "count": 10,
+    "life": 12,
+    "radius": [
+     3.5,
+     3.5,
+     3.5
+    ],
+    "size": [
+     0.8,
+     0.2
+    ],
+    "colors": [
+     "a89a82",
+     "8c7c66"
+    ],
+    "alpha": 0.85,
+    "rise": 0.25,
+    "drift": 0.0,
+    "outward": 0.0,
+    "center": [
+     0,
+     0,
+     0
+    ],
+    "shape": [
+     1,
+     1,
+     1
+    ],
+    "burst": false
+   }
+  }
+ ],
+ "preview": {
+  "kind": "projectile"
+ }
+}

@@ -2572,5 +2572,8 @@
   "tooltip.remushoku.outfit_roxy": "Ropa de Roxy Migurdia",
   "tooltip.remushoku.outfit_ghislaine": "Ropa de Ghislaine Dedoldia",
   "tooltip.remushoku.outfit_paul": "Ropa de Paul Greyrat",
-  "tooltip.remushoku.outfit_eris": "Ropa de Eris Boreas Greyrat"
+  "tooltip.remushoku.outfit_eris": "Ropa de Eris Boreas Greyrat",
+  "item.remushoku.all_classes_scroll": "Pergamino de todas las clases",
+  "tooltip.remushoku.all_classes": "Creativo: te da Mago, Espadachín y Arquero a la vez.",
+  "msg.remushoku.class_all": "Ahora tenés todas las clases: Mago, Espadachín y Arquero."
 }

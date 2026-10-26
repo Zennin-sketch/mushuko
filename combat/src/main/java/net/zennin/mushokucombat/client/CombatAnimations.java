@@ -4,11 +4,18 @@ import dev.kosmx.playerAnim.api.IPlayable;
 import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.ModifierLayer;
 import dev.kosmx.playerAnim.api.layered.modifier.AbstractFadeModifier;
+import dev.kosmx.playerAnim.api.layered.modifier.AdjustmentModifier;
+import dev.kosmx.playerAnim.core.util.Vec3f;
 import dev.kosmx.playerAnim.core.util.Ease;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.WeakHashMap;
 import net.zennin.mushokucombat.MushokuCombat;
 
 /**
@@ -24,9 +31,29 @@ public final class CombatAnimations {
     static void init() {
         PlayerAnimationAccess.REGISTER_ANIMATION_EVENT.register((player, stack) -> {
             ModifierLayer<IAnimation> layer = new ModifierLayer<>();
+            // Los conjuros apuntan a donde mira el jugador: cabeza y brazos suman el giro de la mirada
+            layer.addModifierLast(new AdjustmentModifier(part -> aim(player, part)));
             stack.addAnimLayer(PRIORITY, layer);
             PlayerAnimationAccess.getPlayerAssociatedData(player).set(LAYER, layer);
         });
+    }
+
+    /** Animacion que esta sonando en cada jugador (para saber si es un conjuro que tiene que apuntar). */
+    private static final Map<AbstractClientPlayer, String> CURRENT = new WeakHashMap<>();
+
+    private static boolean aims(String name) {
+        return name != null && (name.startsWith("cast") || name.startsWith("magic_"));
+    }
+
+    private static Optional<AdjustmentModifier.PartModifier> aim(AbstractClientPlayer player, String part) {
+        if (!aims(CURRENT.get(player))) return Optional.empty();
+        float pitch = player.getXRot() * Mth.DEG_TO_RAD;
+        float yaw = Mth.wrapDegrees(player.getYHeadRot() - player.yBodyRot) * Mth.DEG_TO_RAD;
+        return switch (part) {
+            case "head" -> Optional.of(new AdjustmentModifier.PartModifier(new Vec3f(pitch, yaw, 0), Vec3f.ZERO));
+            case "rightArm", "leftArm" -> Optional.of(new AdjustmentModifier.PartModifier(new Vec3f(pitch, yaw, 0), Vec3f.ZERO));
+            default -> Optional.empty();
+        };
     }
 
     @SuppressWarnings("unchecked")
@@ -43,6 +70,7 @@ public final class CombatAnimations {
     public static void play(AbstractClientPlayer player, String name, int fadeTicks) {
         ModifierLayer<IAnimation> layer = layer(player);
         if (layer == null) return;
+        CURRENT.put(player, name);
         AbstractFadeModifier fade = AbstractFadeModifier.standardFadeIn(Math.max(1, fadeTicks), Ease.INOUTSINE);
         if (name == null || name.isEmpty()) {
             if (layer.getAnimation() != null) layer.replaceAnimationWithFade(fade, null);

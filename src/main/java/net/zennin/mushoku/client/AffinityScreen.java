@@ -30,7 +30,7 @@ public class AffinityScreen extends Screen {
     }
 
     private void pick(SwordStyle st) {
-        if (ClientManaState.playerClass != 2) ClientPlayNetworking.send(new ActionPayload(ActionPayload.CHOOSE_SWORDSMAN));
+        if (!net.zennin.mushoku.magic.SpellCasting.isSwordsmanClass(ClientManaState.playerClass)) ClientPlayNetworking.send(new ActionPayload(ActionPayload.CHOOSE_SWORDSMAN));
         ClientPlayNetworking.send(new SwordActionPayload(SwordActionPayload.AFFINITY, 0, st.key));
         onClose();
     }

@@ -12,6 +12,12 @@ import net.zennin.mushoku.sword.SwordSkill;
 /** Logica del servidor: armar el hechizo con flechas, lanzarlo y cobrar el mana. */
 public final class SpellCasting {
     public static final int CLASS_MAGE = 1, CLASS_SWORDSMAN = 2, CLASS_ARCHER = 3;
+    /** Todas las clases a la vez (item de creativo para probar). */
+    public static final int CLASS_ALL = 4;
+
+    public static boolean isMageClass(int c) { return c == CLASS_MAGE || c == CLASS_ALL; }
+    public static boolean isSwordsmanClass(int c) { return c == CLASS_SWORDSMAN || c == CLASS_ALL; }
+    public static boolean isArcherClass(int c) { return c == CLASS_ARCHER || c == CLASS_ALL; }
 
     private SpellCasting() {}
 
@@ -19,7 +25,7 @@ public final class SpellCasting {
     /** Mago, o espadachin con la habilidad Magia del Dios Norte (hasta nivel Intermedio). */
     public static boolean canCast(ServerPlayer p) {
         int cls = ModAttachments.get(p).playerClass();
-        return cls == CLASS_MAGE || (cls == CLASS_SWORDSMAN && ModAttachments.sword(p).knows(SwordSkill.NG_MAGIC.id));
+        return isMageClass(cls) || (cls == CLASS_SWORDSMAN && ModAttachments.sword(p).knows(SwordSkill.NG_MAGIC.id));
     }
 
     public static void onCombo(ServerPlayer p, String combo) {

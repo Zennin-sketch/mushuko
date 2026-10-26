@@ -172,7 +172,7 @@ public final class RaceSystem {
         }
         // Piel de Mana (magos): 10 / 15 / 20 / 25% menos daño segun el mana maximo
         int lvl = RaceData.manaSkinLevel(ModAttachments.get(p).maxMana());
-        if (lvl > 0 && d.manaSkinOn() && ModAttachments.get(p).playerClass() == SpellCasting.CLASS_MAGE) {
+        if (lvl > 0 && d.manaSkinOn() && SpellCasting.isMageClass(ModAttachments.get(p).playerClass())) {
             float mult = 1f - (0.05f + 0.05f * lvl);
             REENTRY.set(true);
             try { p.hurt(source, amount * mult); } finally { REENTRY.set(false); }

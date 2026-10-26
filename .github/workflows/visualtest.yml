@@ -5,6 +5,8 @@ on:
       scenario:
         description: Escenario (tools/visualtest/<nombre>.json)
         default: skinlayers
+permissions:
+  contents: write
 jobs:
   visual:
     runs-on: ubuntu-latest
@@ -37,6 +39,17 @@ jobs:
             --jvm-args="-Xmx3G -Dmushoku.visualtest=$PWD/tools/visualtest/${{ inputs.scenario }}.json" || true
           ls mc/screenshots || true
           grep -E "visualtest|Exception|ERROR" mc/logs/latest.log | head -80 || true
+      - name: Subir capturas a la rama vt-results
+        if: always()
+        run: |
+          mkdir -p /tmp/res && cp mc/screenshots/*.png /tmp/res/ 2>/dev/null || true
+          grep -E "visualtest|Exception|ERROR|Caused by|at net.zennin|skinlayers|Compatibilidad" mc/logs/latest.log | head -300 > /tmp/res/log.txt || true
+          cd /tmp/res
+          git init -q && git checkout -q -b vt-results
+          git config user.name "visualtest" && git config user.email "visualtest@users.noreply.github.com"
+          echo "${{ inputs.scenario }} ${{ github.sha }}" > info.txt
+          git add -A && git commit -q -m "Resultados ${{ inputs.scenario }}"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" vt-results
       - uses: actions/upload-artifact@v4
         if: always()
         with:

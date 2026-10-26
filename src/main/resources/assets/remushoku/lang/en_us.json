@@ -2572,5 +2572,8 @@
   "tooltip.remushoku.outfit_roxy": "Roxy Migurdia's outfit",
   "tooltip.remushoku.outfit_ghislaine": "Ghislaine Dedoldia's outfit",
   "tooltip.remushoku.outfit_paul": "Paul Greyrat's outfit",
-  "tooltip.remushoku.outfit_eris": "Eris Boreas Greyrat's outfit"
+  "tooltip.remushoku.outfit_eris": "Eris Boreas Greyrat's outfit",
+  "item.remushoku.all_classes_scroll": "Scroll of All Classes",
+  "tooltip.remushoku.all_classes": "Creative: grants Mage, Swordsman and Archer at once.",
+  "msg.remushoku.class_all": "You now have every class: Mage, Swordsman and Archer."
 }
