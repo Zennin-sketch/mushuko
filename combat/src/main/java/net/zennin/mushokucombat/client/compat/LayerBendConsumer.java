@@ -31,14 +31,17 @@ public final class LayerBendConsumer implements VertexConsumer {
     /** Media franja (en bloques) donde el giro pasa de 0 al total. */
     private static final float BAND = 1.5f / 16f;
     /** Cortes dentro de la franja (en unidades de "mid"). */
-    private static final float[] CUTS = {-BAND, -BAND / 2f, 0f, BAND / 2f, BAND};
+    private static final float[] CUTS = {0f};
 
     private final VertexConsumer out;
     private final Matrix4f pose, inv;
     private final Matrix3f normal, invNormal;
     private final float cx, cy, cz, value;
     private final Vector3f axis;
-    private final IBendable.Plane base, other;
+    private final IBendable.Plane base, other, bendPlane;
+    private final Vector3f dir;
+    private final float half;
+    private final boolean inverted;
 
     // cuadrado en armado: posicion local (x,y,z), uv, color, overlay, luz, normal local
     private final float[][] pos = new float[4][3];
@@ -63,6 +66,10 @@ public final class LayerBendConsumer implements VertexConsumer {
         value = b.getBend();
         axis = new Vector3f((float) Math.cos(b.getBendAxis()), 0, (float) Math.sin(b.getBendAxis()))
                 .mul(new Matrix3f().set(b.getBendDirection().getRotation()));
+        dir = b.getBendDirection().step();
+        bendPlane = new IBendable.Plane(new Vector3f(dir).cross(axis), new Vector3f(cx, cy, cz));
+        half = b.bendHeight() / 32f;
+        inverted = b.isBendInverted();
     }
 
     /** El mismo plano, corrido: un punto p del marco nuevo es p - shift en el viejo. */
@@ -208,14 +215,18 @@ public final class LayerBendConsumer implements VertexConsumer {
     }
 
     private void vertex(float[] p, int c, int o, int l) {
-        float t = Math.max(0f, Math.min(1f, (p[5] + BAND) / (2 * BAND)));
-        float w = t * t * (3 - 2 * t);
-        Vector4f v = new Vector4f(p[0], p[1], p[2], 1f);
+        // igual que bendy-lib: estira cada mitad hasta el plano bisector (inglete) y gira la mitad de la base
+        Vector3f q = new Vector3f(p[0], p[1], p[2]);
+        float dB = inverted ? -bendPlane.distanceTo(q) : bendPlane.distanceTo(q);
+        float dBase = base.distanceTo(q), dOther = other.distanceTo(q);
+        double sh = Math.tan(value / 2) * dB;
+        boolean rot = Math.abs(dBase) < Math.abs(dOther);
+        q.add(new Vector3f(dir).mul((float) ((rot ? -dBase : -dOther) / half * sh)));
+        Vector4f v = new Vector4f(q, 1f);
         Vector3f nr = new Vector3f(quadNormal);
-        if (w > 0f) {
-            float ang = value * w;
-            new Matrix4f().translate(cx, cy, cz).rotate(ang, axis).translate(-cx, -cy, -cz).transform(v);
-            new Matrix3f().rotate(ang, axis).transform(nr);
+        if (rot) {
+            new Matrix4f().translate(cx, cy, cz).rotate(value, axis).translate(-cx, -cy, -cz).transform(v);
+            new Matrix3f().rotate(value, axis).transform(nr);
         }
         pose.transform(v);
         normal.transform(nr);
