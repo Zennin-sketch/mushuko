@@ -51,7 +51,6 @@ public final class SpellModel {
 
     /** Cubo de 1x1x1 centrado (para los cubitos de los emisores). */
     public static final List<Face> UNIT_CUBE = new ArrayList<>();
-    static { addBox(UNIT_CUBE, new float[]{0, 0, 0}, new float[]{1, 1, 1}, new float[]{0, 0, 0}, 0xffffff, 1f, 0); }
 
     /** Azar deterministico (identico al de la pagina de preview). */
     public static float hash(int i, int k) {
@@ -160,6 +159,8 @@ public final class SpellModel {
     private static final float[][] NORMALS = {{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1}};
     // Que ejes de la caja forman el ancho/alto de la textura en cada cara
     private static final int[][] FACE_AXES = {{2, 1}, {2, 1}, {0, 2}, {0, 2}, {0, 1}, {0, 1}};
+    // Va despues de FACES/NORMALS/FACE_AXES: los inicializadores estaticos corren en orden y antes eran null.
+    static { addBox(UNIT_CUBE, new float[]{0, 0, 0}, new float[]{1, 1, 1}, new float[]{0, 0, 0}, 0xffffff, 1f, 0); }
 
     static void addBox(List<Face> out, float[] at, float[] size, float[] rot, int rgb, float alpha, int seed) {
         Matrix3f r = rotation(rot[0], rot[1], rot[2]);
