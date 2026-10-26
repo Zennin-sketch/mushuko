@@ -19,6 +19,75 @@
    "t": 40
   },
   {
+   "op": "anim",
+   "v": "vt_bend"
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "dummy",
+   "yaw": 90,
+   "dist": 3.6
+  },
+  {
+   "op": "wait",
+   "t": 3
+  },
+  {
+   "op": "shot",
+   "v": "bend_90"
+  },
+  {
+   "op": "dummy",
+   "yaw": 150,
+   "dist": 3.6
+  },
+  {
+   "op": "wait",
+   "t": 3
+  },
+  {
+   "op": "shot",
+   "v": "bend_150"
+  },
+  {
+   "op": "dummy",
+   "yaw": 180,
+   "dist": 3.6
+  },
+  {
+   "op": "wait",
+   "t": 3
+  },
+  {
+   "op": "shot",
+   "v": "bend_180"
+  },
+  {
+   "op": "dummy",
+   "yaw": 0,
+   "dist": 3.6
+  },
+  {
+   "op": "wait",
+   "t": 3
+  },
+  {
+   "op": "shot",
+   "v": "bend_0"
+  },
+  {
+   "op": "dummy",
+   "yaw": 180,
+   "dist": 3.6
+  },
+  {
+   "op": "wait",
+   "t": 40
+  },
+  {
    "op": "shot",
    "v": "01_idle_front"
   },

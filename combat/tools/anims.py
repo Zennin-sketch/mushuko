@@ -581,3 +581,9 @@ a.key(9, 'stop', **P(root(up=-0.06, lean=6), torso(lean=4), head(down=4),
                      dict(rarm=R((5, -5, 8), (0, 1, 0.05)), larm=L((-3, -2, 11), (0, 1, 0.2))), legs('guard', 14)))
 a.key(20, 'stop', **P(root(up=-0.07, lean=7), dict(larm=L((-3, -1.5, 11.5), (0, 1, 0.2)))))
 a.key(30, 'stop', **NEUTRAL_P)
+
+# =============================================================== PRUEBA (solo para la prueba visual: pose fija con codos, rodillas y cintura doblados)
+_t = anim('vt_bend', 'Prueba: pose fija con dobleces grandes', end=20, loop=True, ret=10, stop=100000)
+_t.key(0, 'smooth', **NEUTRAL_P)
+_t.key(10, 'stop', **P(root(lean=25), dict(rarm=R((7, -4, 6)), larm=L((-7, -4, 6))), legs('crouch', 0)))
+_t.key(20, 'stop', **P(root(lean=25), dict(rarm=R((7, -4, 6)), larm=L((-7, -4, 6))), legs('crouch', 0)))

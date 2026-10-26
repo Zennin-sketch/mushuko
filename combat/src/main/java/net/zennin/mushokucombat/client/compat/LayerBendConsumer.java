@@ -26,6 +26,7 @@ public final class LayerBendConsumer implements VertexConsumer {
             && !Boolean.getBoolean("mushoku.nolayercompat");
     /** Media franja (en bloques) donde el giro pasa de 0 al total. */
     private static final float BAND = 1.5f / 16f;
+    private static int LOGS;
 
     private final VertexConsumer out;
     private final Matrix4f pose, inv;
@@ -59,6 +60,7 @@ public final class LayerBendConsumer implements VertexConsumer {
             if (c.isEmpty()) return null;
             Tuple<String, ?> m = c.get().getActiveMutator();
             if (m == null || !(m.getB() instanceof BendableCuboid b) || Math.abs(b.getBend()) < 1.0e-4f) return null;
+            if (LOGS < 3) { LOGS++; org.slf4j.LoggerFactory.getLogger("mushoku_combat").info("[capas] doblando la capa 3D de una parte (doblez {})", b.getBend()); }
             return new LayerBendConsumer(vc, pose, b);
         } catch (Throwable t) {
             return null;
