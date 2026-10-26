@@ -2452,9 +2452,9 @@
   "gui.remushoku.cc.trait_title.elf": "Elf ears",
   "gui.remushoku.cc.trait_title.demon": "Demon horns",
   "gui.remushoku.cc.trait_title.beast": "Beast ears",
-  "gui.remushoku.cc.trait.elf": "Choose how high your elf ears sit.\nThey take your skin's skin tone.",
+  "gui.remushoku.cc.trait.elf": "Choose how high your elf ears sit and their color.\nBy default they take your skin's tone.",
   "gui.remushoku.cc.trait.demon": "Choose where your spiral horns grow, like those of Demon Empress Kishirika.",
-  "gui.remushoku.cc.trait.beast": "Choose your ears: cat, dog or bear.\nThey take your skin's hair color.",
+  "gui.remushoku.cc.trait.beast": "Choose your ears: cat, dog or bear, and the fur color on the right.\nBy default they take your skin's hair color.",
   "gui.remushoku.cc.stat.health": "Health",
   "gui.remushoku.cc.stat.speed": "Speed",
   "gui.remushoku.cc.stat.armor": "Armor",
@@ -2481,5 +2481,12 @@
   "class.remushoku.archer.lore": "This class is not available yet.",
   "class.remushoku.mage.features": "• Mana and water, fire, earth and wind spells\n• Non-elemental magic, healing and barriers\n• Mana skin: less damage the more mana you have",
   "class.remushoku.swordsman.features": "• Battle aura (Touki)\n• Sword skills with points\n• One style to choose:",
-  "class.remushoku.archer.features": "• Coming soon"
+  "class.remushoku.archer.features": "• Coming soon",
+  "gui.remushoku.cc.color_ear": "Ear color",
+  "gui.remushoku.cc.color_fur": "Fur color",
+  "gui.remushoku.cc.color_auto": "Use my skin's color",
+  "gui.remushoku.cc.color_auto_hint": "(taken from your skin)",
+  "gui.remushoku.cc.hue": "Hue: %s",
+  "gui.remushoku.cc.sat": "Saturation: %s",
+  "gui.remushoku.cc.bright": "Brightness: %s"
 }

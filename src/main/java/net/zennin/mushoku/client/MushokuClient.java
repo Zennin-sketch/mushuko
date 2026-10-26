@@ -32,7 +32,7 @@ public class MushokuClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.HitogamiScreenPayload.TYPE, (payload, context) ->
                 context.client().setScreen(new HitogamiDialogScreen(payload.mode(), payload.text())));
         ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.AppearancePayload.TYPE, (payload, context) ->
-                ClientAppearance.set(payload.entityId(), new net.zennin.mushoku.race.Appearance(payload.kind(), payload.variant(), payload.height())));
+                ClientAppearance.set(payload.entityId(), new net.zennin.mushoku.race.Appearance(payload.kind(), payload.variant(), payload.height(), payload.color())));
         net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((h, c) -> ClientAppearance.clear());
         net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback.EVENT.register((type, renderer, helper, ctx) -> {
             if (renderer instanceof net.minecraft.client.renderer.entity.player.PlayerRenderer pr) helper.register(new CosmeticLayer(pr));

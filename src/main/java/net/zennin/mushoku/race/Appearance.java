@@ -7,26 +7,29 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
  * Rasgo visible de la raza que se dibuja sobre la cabeza.
  * kind: "" (nada), "elf_ears", "demon_horns", "beast_ears", "superd_gem".
  * variant: animal de las orejas de bestia (0 gato, 1 perro, 2 oso). height: 0 baja, 1 media, 2 alta.
+ * color: color elegido para la piel de las orejas de elfo o el pelaje de las de bestia (RGB), o -1 = tomarlo de la skin.
  */
-public record Appearance(String kind, int variant, int height) {
-    public static final Appearance NONE = new Appearance("", 0, 1);
+public record Appearance(String kind, int variant, int height, int color) {
+    public static final Appearance NONE = new Appearance("", 0, 1, -1);
     public static final Codec<Appearance> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.STRING.optionalFieldOf("kind", "").forGetter(Appearance::kind),
             Codec.INT.optionalFieldOf("variant", 0).forGetter(Appearance::variant),
-            Codec.INT.optionalFieldOf("height", 1).forGetter(Appearance::height)
+            Codec.INT.optionalFieldOf("height", 1).forGetter(Appearance::height),
+            Codec.INT.optionalFieldOf("color", -1).forGetter(Appearance::color)
     ).apply(i, Appearance::new));
 
     public static final String[] BEAST_MODELS = {"beast_cat", "beast_dog", "beast_bear"};
 
     /** Rasgo que corresponde a cada raza. */
-    public static Appearance forRace(Race r, int variant, int height) {
+    public static Appearance forRace(Race r, int variant, int height, int color) {
         if (r == null) return NONE;
         int v = Math.max(0, Math.min(2, variant)), h = Math.max(0, Math.min(2, height));
+        int c = color < 0 ? -1 : color & 0xFFFFFF;
         return switch (r) {
-            case ELF -> new Appearance("elf_ears", 0, h);
-            case DEMON -> new Appearance("demon_horns", 0, h);
-            case BEAST -> new Appearance("beast_ears", v, 0);
-            case SUPERD -> new Appearance("superd_gem", 0, 0);
+            case ELF -> new Appearance("elf_ears", 0, h, c);
+            case DEMON -> new Appearance("demon_horns", 0, h, -1);
+            case BEAST -> new Appearance("beast_ears", v, 0, c);
+            case SUPERD -> new Appearance("superd_gem", 0, 0, -1);
             default -> NONE;
         };
     }

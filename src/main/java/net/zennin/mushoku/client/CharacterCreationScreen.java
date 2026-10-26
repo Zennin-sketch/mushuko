@@ -37,6 +37,15 @@ public class CharacterCreationScreen extends Screen {
 
     private Stage stage = Stage.RACE;
     private int race = 0, variant = 0, height = 1, cls = 0, aff = 0;
+    /** Color de las orejas: -1 = el de tu skin. hue/sat/bri = el mismo color en los deslizadores. */
+    private int color = -1;
+    private double hue = 0.08, sat = 0.35, bri = 0.85;
+
+    // Tonos de piel para las orejas de elfo (incluye algunos de fantasia) y pelajes para las de bestia
+    private static final int[] ELF_COLORS = {0xF6D7C3, 0xEEC1A0, 0xE0A882, 0xC68A5E, 0x9C6440, 0x6B4329,
+            0x4A2E1E, 0xD7E3EF, 0xB9D2A8, 0xA7C7E7, 0xE6C7E8, 0xC8C0B0};
+    private static final int[] FUR_COLORS = {0x1E1A18, 0x3B2A20, 0x5C3A24, 0x8A5A32, 0xC46A2A, 0xE09A4A,
+            0xD9B26A, 0xEFE3C8, 0xF4F1EA, 0x9A9A9A, 0x5A5E66, 0xB9BFCC};
 
     public CharacterCreationScreen() {
         super(Component.translatable("gui.remushoku.cc.title"));
@@ -46,7 +55,9 @@ public class CharacterCreationScreen extends Screen {
 
     private boolean hasTrait() { Race r = race(); return r == Race.ELF || r == Race.DEMON || r == Race.BEAST; }
 
-    private Appearance appearance() { return Appearance.forRace(race(), variant, height); }
+    private Appearance appearance() { return Appearance.forRace(race(), variant, height, color); }
+
+    private boolean hasColor() { return race() == Race.ELF || race() == Race.BEAST; }
 
     @Override
     protected void init() {
@@ -60,6 +71,7 @@ public class CharacterCreationScreen extends Screen {
         }
         if (stage != Stage.RACE)
             addRenderableWidget(Button.builder(Component.translatable("gui.remushoku.cc.back"), b -> back()).bounds(cx - 190, height - 26, 90, 20).build());
+        if (stage == Stage.TRAIT && hasColor()) addColorPicker();
         boolean last = stage == Stage.CLASS;
         Button next = Button.builder(Component.translatable(last ? "gui.remushoku.cc.confirm" : "gui.remushoku.cc.next"), b -> next())
                 .bounds(cx + 100, height - 26, 90, 20).build();
@@ -69,7 +81,7 @@ public class CharacterCreationScreen extends Screen {
 
     private void cycle(int dir) {
         switch (stage) {
-            case RACE -> { race = (race + dir + RACES.length) % RACES.length; variant = 0; height = 1; }
+            case RACE -> { race = (race + dir + RACES.length) % RACES.length; variant = 0; height = 1; color = -1; }
             case TRAIT -> {
                 if (race() == Race.BEAST) variant = (variant + dir + 3) % 3;
                 else height = (height + dir + 3) % 3;
@@ -90,7 +102,7 @@ public class CharacterCreationScreen extends Screen {
             case TRAIT -> stage = Stage.CLASS;
             case CLASS -> {
                 if (cls == 2) return;
-                ClientPlayNetworking.send(new HitogamiActionPayload(HitogamiActionPayload.CREATE, race().key, variant, height,
+                ClientPlayNetworking.send(new HitogamiActionPayload(HitogamiActionPayload.CREATE, race().key, variant, height, hasColor() ? color : -1,
                         cls == 0 ? SpellCasting.CLASS_MAGE : SpellCasting.CLASS_SWORDSMAN, cls == 1 ? SwordStyle.values()[aff].key : ""));
                 onClose();
                 return;
@@ -127,9 +139,17 @@ public class CharacterCreationScreen extends Screen {
             selectorBox(g, cx, sy + 24, Component.translatable("style.remushoku." + SwordStyle.values()[aff].key), TEXT);
 
         // Paneles
-        int side = Math.max(110, Math.min(180, cx - 120));
+        int side = sideWidth();
         panel(g, 10, 40, side, height - 120, leftTitle(), leftText());
         panel(g, width - 10 - side, 40, side, height - 120, rightTitle(), rightText());
+        if (stage == Stage.TRAIT && hasColor()) {
+            // Muestra del color elegido (o "de tu skin")
+            int x0 = width - 10 - side + 8, y0 = 40 + 26 + 2 * 16 + 3 + 17 + 47;
+            if (y0 + 12 < 40 + height - 120) {
+                if (color >= 0) g.fill(x0, y0, x0 + side - 16, y0 + 10, 0xFF000000 | color);
+                else g.drawString(font, Component.translatable("gui.remushoku.cc.color_auto_hint"), x0, y0 + 1, DIM, false);
+            }
+        }
     }
 
     private void drawSteps(GuiGraphics g, int cx, int y) {
@@ -242,11 +262,104 @@ public class CharacterCreationScreen extends Screen {
     }
 
     private Component rightTitle() {
+        if (stage == Stage.TRAIT && hasColor())
+            return Component.translatable(race() == Race.ELF ? "gui.remushoku.cc.color_ear" : "gui.remushoku.cc.color_fur");
         return Component.translatable(stage == Stage.CLASS ? "gui.remushoku.cc.features" : "gui.remushoku.cc.stats");
+    }
+
+    private int sideWidth() { return Math.max(110, Math.min(180, width / 2 - 120)); }
+
+    /** Muestras de color, boton "de tu skin" y deslizadores de tono, saturacion y brillo (dentro del panel derecho). */
+    private void addColorPicker() {
+        int side = sideWidth(), x0 = width - 10 - side + 8, y = 40 + 26;
+        int[] colors = race() == Race.ELF ? ELF_COLORS : FUR_COLORS;
+        int cols = 6, size = Math.min(14, (side - 16 - (cols - 1) * 2) / cols);
+        for (int i = 0; i < colors.length; i++) {
+            int c = colors[i];
+            addRenderableWidget(new Swatch(x0 + (i % cols) * (size + 2), y + (i / cols) * (size + 2), size, c));
+        }
+        y += 2 * (size + 2) + 3;
+        addRenderableWidget(Button.builder(Component.translatable("gui.remushoku.cc.color_auto"), b -> { color = -1; rebuildWidgets(); })
+                .bounds(x0, y, side - 16, 14).build());
+        y += 17;
+        addRenderableWidget(new HsvSlider(x0, y, side - 16, "gui.remushoku.cc.hue", hue, v -> hue = v));
+        addRenderableWidget(new HsvSlider(x0, y + 15, side - 16, "gui.remushoku.cc.sat", sat, v -> sat = v));
+        addRenderableWidget(new HsvSlider(x0, y + 30, side - 16, "gui.remushoku.cc.bright", bri, v -> bri = v));
+    }
+
+    private void pickColor(int c) {
+        color = c;
+        float[] hsv = rgbToHsv(c);
+        hue = hsv[0]; sat = hsv[1]; bri = hsv[2];
+        rebuildWidgets();
+    }
+
+    private static float[] rgbToHsv(int c) {
+        float r = ((c >> 16) & 255) / 255f, g = ((c >> 8) & 255) / 255f, b = (c & 255) / 255f;
+        float max = Math.max(r, Math.max(g, b)), min = Math.min(r, Math.min(g, b)), d = max - min;
+        float h = 0;
+        if (d > 0) {
+            if (max == r) h = ((g - b) / d) % 6;
+            else if (max == g) h = (b - r) / d + 2;
+            else h = (r - g) / d + 4;
+            h /= 6;
+            if (h < 0) h += 1;
+        }
+        return new float[]{h, max == 0 ? 0 : d / max, max};
+    }
+
+    /** Cuadrado de color que se puede elegir. */
+    private class Swatch extends net.minecraft.client.gui.components.AbstractWidget {
+        private final int rgb;
+
+        Swatch(int x, int y, int size, int rgb) {
+            super(x, y, size, size, Component.empty());
+            this.rgb = rgb;
+        }
+
+        @Override
+        protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+            boolean selected = color == rgb;
+            g.fill(getX(), getY(), getX() + width, getY() + height, 0xFF000000 | rgb);
+            g.renderOutline(getX() - (selected ? 1 : 0), getY() - (selected ? 1 : 0), width + (selected ? 2 : 0), height + (selected ? 2 : 0),
+                    selected ? GOLD : isHovered() ? 0xFFFFFFFF : 0xFF2A2A30);
+        }
+
+        @Override
+        public void onClick(double mouseX, double mouseY) { pickColor(rgb); }
+
+        @Override
+        protected void updateWidgetNarration(net.minecraft.client.gui.narration.NarrationElementOutput out) {}
+    }
+
+    /** Deslizador de tono / saturacion / brillo: al moverlo, el color pasa a ser el de los tres deslizadores. */
+    private class HsvSlider extends net.minecraft.client.gui.components.AbstractSliderButton {
+        private final String key;
+        private final java.util.function.DoubleConsumer setter;
+
+        HsvSlider(int x, int y, int w, String key, double value, java.util.function.DoubleConsumer setter) {
+            super(x, y, w, 14, Component.empty(), value);
+            this.key = key;
+            this.setter = setter;
+            updateMessage();
+        }
+
+        @Override
+        protected void updateMessage() { setMessage(Component.translatable(key, Math.round(value * 100) + "%")); }
+
+        @Override
+        protected void applyValue() {
+            setter.accept(value);
+            color = net.minecraft.util.Mth.hsvToRgb((float) hue, (float) sat, (float) bri) & 0xFFFFFF;
+        }
     }
 
     private List<Component> rightText() {
         List<Component> out = new ArrayList<>();
+        if (stage == Stage.TRAIT && hasColor()) {
+            // Debajo de los deslizadores: muestra del color actual
+            return out;
+        }
         if (stage != Stage.CLASS) {
             raceStats(out, race());
             return out;

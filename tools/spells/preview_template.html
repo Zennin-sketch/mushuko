@@ -78,6 +78,10 @@ canvas { display: block; width: 100%; height: 100%; }
       <label for="height" id="heightbox" hidden>Altura
         <select id="height"></select>
       </label>
+      <label for="earcolor" id="colorbox" hidden>Color
+        <input type="color" id="earcolor" value="#d9a27e">
+        <button id="coloroff" type="button">de la skin</button>
+      </label>
       <label for="speed">Velocidad
         <select id="speed"><option value="1">normal</option><option value="0.25">lenta ×¼</option><option value="0">pausa</option></select>
       </label>
@@ -297,9 +301,10 @@ let current = null, groups = [], model = null, outroAlpha = 1;
 // ---- Rasgos de raza sobre una cabeza de ejemplo ----
 const SKIN = '#d9a27e', HAIR = '#4a3222';
 const cosHolder = new THREE.Group(); scene.add(cosHolder);
+let earColor = null;   // color elegido (null = el de la skin)
 function cosColor(c) {
   const [src, mul] = c.split(':');
-  const base = src === 'skin' ? SKIN : src === 'hair' ? HAIR : '#' + src;
+  const base = (src === 'skin' || src === 'hair') && earColor ? earColor : src === 'skin' ? SKIN : src === 'hair' ? HAIR : '#' + src;
   const col = new THREE.Color(base); if (mul) col.multiplyScalar(+mul); return col;
 }
 function headMesh() {
@@ -394,6 +399,10 @@ function selectCosmetic(name) {
   sel.innerHTML = c.heights.map((h, i) => `<option value="${i}">${c.height_names[i]}</option>`).join('');
   sel.value = c.heights.length > 1 ? '1' : '0';
   document.getElementById('heightbox').hidden = c.heights.length < 2;
+  earColor = null;
+  document.getElementById('colorbox').hidden = !['elf_ears', 'beast_cat', 'beast_dog', 'beast_bear'].includes(name);
+  document.getElementById('earcolor').oninput = e => { earColor = e.target.value; showCosmetic(name); };
+  document.getElementById('coloroff').onclick = () => { earColor = null; showCosmetic(name); };
   ['fly', 'sizebox', 'replay'].forEach(id => document.getElementById(id).hidden = true);
   document.querySelectorAll('.spell').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.id === 'cos:' + name)));
   document.getElementById('note').innerHTML = `<h2>${c.name}</h2><p>${COSINFO[name]}</p>`;
@@ -412,7 +421,7 @@ const COSINFO = {
   superd_gem: 'La joya roja de los Superd, centrada en la frente. Brilla un poco en la oscuridad.',
 };
 function show(name) {
-  cosChains = null;
+  cosChains = null; document.getElementById('colorbox').hidden = true;
   cosHolder.visible = false; cosHolder.clear(); document.getElementById('heightbox').hidden = true;
   current = name; model = DATA.models[name];
   inner.clear();

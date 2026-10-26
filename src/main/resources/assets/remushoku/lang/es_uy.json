@@ -2452,9 +2452,9 @@
   "gui.remushoku.cc.trait_title.elf": "Orejas de elfo",
   "gui.remushoku.cc.trait_title.demon": "Cuernos de demonio",
   "gui.remushoku.cc.trait_title.beast": "Orejas de bestia",
-  "gui.remushoku.cc.trait.elf": "Elige a qué altura van tus orejas de elfo.\nToman el color de la piel de tu skin.\nUsa las flechas para probar las tres alturas.",
+  "gui.remushoku.cc.trait.elf": "Elige a qué altura van tus orejas de elfo y su color.\nPor defecto toman el color de la piel de tu skin; a la derecha puedes elegir otro tono.\nUsa las flechas para probar las tres alturas.",
   "gui.remushoku.cc.trait.demon": "Elige a qué altura nacen tus cuernos en espiral, como los de la Emperatriz Demonio Kishirika.\nUsa las flechas para probar las tres alturas.",
-  "gui.remushoku.cc.trait.beast": "Los hombres bestia del Gran Bosque llevan las marcas de su clan.\nElige tus orejas: gato, perro u oso.\nToman el color del pelo de tu skin.",
+  "gui.remushoku.cc.trait.beast": "Los hombres bestia del Gran Bosque llevan las marcas de su clan.\nElige tus orejas: gato, perro u oso, y el color del pelaje a la derecha.\nPor defecto toman el color del pelo de tu skin.",
   "gui.remushoku.cc.stat.health": "Vida",
   "gui.remushoku.cc.stat.speed": "Velocidad",
   "gui.remushoku.cc.stat.armor": "Armadura",
@@ -2481,5 +2481,12 @@
   "class.remushoku.archer.lore": "Esta clase todavía no está disponible.\nLlegará en una próxima actualización.",
   "class.remushoku.mage.features": "• Maná y hechizos de agua, fuego, tierra y viento\n• Magia sin elemento, curación y barreras\n• Piel de maná: menos daño cuanto más maná tengas\n• Sube de rango aprendiendo hechizos",
   "class.remushoku.swordsman.features": "• Aura de batalla (Touki)\n• Habilidades de espada con puntos\n• Un estilo a elegir:",
-  "class.remushoku.archer.features": "• Próximamente"
+  "class.remushoku.archer.features": "• Próximamente",
+  "gui.remushoku.cc.color_ear": "Color de las orejas",
+  "gui.remushoku.cc.color_fur": "Color del pelaje",
+  "gui.remushoku.cc.color_auto": "Usar el color de mi skin",
+  "gui.remushoku.cc.color_auto_hint": "(se toma de tu skin)",
+  "gui.remushoku.cc.hue": "Tono: %s",
+  "gui.remushoku.cc.sat": "Saturación: %s",
+  "gui.remushoku.cc.bright": "Brillo: %s"
 }

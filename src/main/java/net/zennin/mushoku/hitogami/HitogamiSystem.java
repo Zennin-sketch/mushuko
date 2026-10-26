@@ -234,7 +234,7 @@ public final class HitogamiSystem {
         if (r == null) return;
         int cls = a.cls() == SpellCasting.CLASS_SWORDSMAN ? SpellCasting.CLASS_SWORDSMAN : SpellCasting.CLASS_MAGE;
         if (RaceSystem.data(p).race().isEmpty()) RaceSystem.choose(p, r.key, false);
-        setAppearance(p, Appearance.forRace(r, a.variant(), a.height()));
+        setAppearance(p, Appearance.forRace(r, a.variant(), a.height(), a.color()));
         PlayerClasses.choose(p, cls);
         if (cls == SpellCasting.CLASS_SWORDSMAN && !a.affinity().isEmpty()) SwordSystem.chooseAffinity(p, a.affinity());
         ModAttachments.setHitogami(p, d.withCreated());
@@ -251,6 +251,6 @@ public final class HitogamiSystem {
 
     private static void sendAppearance(ServerPlayer of, ServerPlayer to) {
         Appearance a = ModAttachments.appearance(of);
-        ServerPlayNetworking.send(to, new AppearancePayload(of.getId(), a.kind(), a.variant(), a.height()));
+        ServerPlayNetworking.send(to, new AppearancePayload(of.getId(), a.kind(), a.variant(), a.height(), a.color()));
     }
 }
