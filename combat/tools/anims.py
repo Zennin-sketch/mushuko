@@ -374,8 +374,9 @@ roll('roll_backward_right', 'Roll diagonal atras-derecha (espadachin)', lean=-36
 # (GRAB_HIP, GRAB_BACK) se comparten entre sacar y guardar, y sheaths.json se calcula de ahi.
 GRAB_HIP = P(root(lean=4), torso(turn=-24, lean=4), head(yaw=-20, down=18),
              dict(rarm=R((-4.5, -11, 4), (-0.15, -0.45, -0.88)), larm=L((-6, -12, 1), (0, -0.3, -1))))
-GRAB_BACK = P(root(lean=-3), torso(turn=12, lean=-3), head(yaw=-12, down=-6),
-              dict(rarm=R((4, 3, -4), (-0.6, -0.8, -0.05)), larm=L((-6, -11, 2))))
+# Espalda: el arma cruza la espalda en diagonal, con el mango sobre el hombro derecho y la hoja hacia la cadera izquierda.
+GRAB_BACK = P(root(lean=-2), torso(turn=10, lean=-4), head(yaw=-18, down=-4),
+              dict(rarm=R((4.5, 4, -3.5), (-0.5, -0.85, -0.15)), larm=L((-6, -11, 2))))
 SHEATH_SLOTS = {}  # slot -> (animacion, tick de agarre)
 
 def draw_hip():
@@ -400,22 +401,33 @@ def sheathe_hip():
     x.key(13, 'stop', **NEUTRAL_P)
 
 def draw_back():
-    x = anim('back_draw', 'Desenvainar desde la espalda', end=14, stop=18, lag=('head', 'larm'))
+    """Sacar de la espalda: sube la mano al hombro, agarra el mango, tira hacia arriba sacando la hoja por encima
+    del hombro, la hace pasar por arriba de la cabeza y la baja adelante con el peso (rodillas) hasta la guardia."""
+    x = anim('back_draw', 'Desenvainar desde la espalda', end=16, stop=20, lag=('head', 'larm'))
     x.key(0, 'stop', **NEUTRAL_P)
-    x.key(3, 'smooth', **P(torso(turn=8), head(yaw=-8, down=-3), dict(rarm=R((6, 0, -1), (-0.3, -0.6, -0.6)))))
+    x.key(3, 'smooth', **P(torso(turn=6), head(yaw=-10, down=-2), dict(rarm=R((6, 1, 3), (0, 1, 0.2)))))
     x.key(5, 'stop', **GRAB_BACK)
-    x.key(8, 'smooth', **P(root(lean=4), torso(turn=-6, lean=4), head(), dict(rarm=R((6, 5, 5), (0.2, 0.9, 0.35)), larm=L((-3, -4, 8)))))
-    x.key(11, 'stop', **GUARD_H)
-    x.key(14, 'stop', **P(NEUTRAL_P, grip((3, -9, 6), (0.15, 0.9, 0.3))))
+    x.key(8, 'smooth', **P(root(lean=-4, up=0.02), torso(turn=4, lean=-8), head(yaw=-8, down=-10),
+                           dict(rarm=R((5, 7, -1), (-0.2, 0.75, -0.65)), larm=L((-6, -10, 3)))))
+    x.key(10, 'smooth', **P(root(lean=2), torso(turn=-4, lean=-2), head(yaw=0, down=-4),
+                            dict(rarm=R((4, 6, 5), (0, 0.85, 0.5)), larm=L((-3, 2, 7), (0, 0.85, 0.5)), grip=(1, 3.5))))
+    x.key(13, 'stop', **P(root(lean=6, up=-0.06, fwd=0.04), torso(turn=-8, lean=5), head(yaw=8, down=4),
+                          grip((2, -7, 9), (0.15, 0.45, 0.88)), legs('wide', 14)))
+    x.key(16, 'stop', **GUARD_H)
     SHEATH_SLOTS['back'] = (x, 5)
 
 def sheathe_back():
-    x = anim('back_sheathe', 'Guardar en la espalda', end=13, stop=17, lag=('head', 'larm'))
-    x.key(0, 'stop', **P(NEUTRAL_P, grip((3, -9, 6), (0.15, 0.9, 0.3))))
-    x.key(4, 'smooth', **P(torso(turn=6), head(yaw=-6), dict(rarm=R((6, 5, 3), (0.1, 0.9, -0.4)), larm=L((-6, -11, 2)))))
-    x.key(8, 'stop', **GRAB_BACK)
-    x.key(10, 'smooth', **P(torso(turn=4), dict(rarm=R((6, -6, 1)))))
-    x.key(13, 'stop', **NEUTRAL_P)
+    """Guardar en la espalda: levanta el arma por encima del hombro derecho, la baja por detras hasta que el mango
+    queda sobre el hombro, suelta y baja la mano."""
+    x = anim('back_sheathe', 'Guardar en la espalda', end=15, stop=19, lag=('head', 'larm'))
+    x.key(0, 'stop', **GUARD_H)
+    x.key(4, 'smooth', **P(root(lean=-2), torso(turn=2, lean=-4), head(yaw=-4, down=-8),
+                           dict(rarm=R((4, 6, 4), (0, 0.9, 0.2)), larm=L((-3, 2, 6), (0, 0.9, 0.2)), grip=(1, 3.5))))
+    x.key(7, 'smooth', **P(root(lean=-3), torso(turn=8, lean=-6), head(yaw=-12, down=-8),
+                           dict(rarm=R((5, 7, -1), (-0.3, 0.3, -0.9)), larm=L((-6, -9, 3)))))
+    x.key(9, 'stop', **GRAB_BACK)
+    x.key(12, 'smooth', **P(torso(turn=3), head(yaw=-4), dict(rarm=R((6, -4, 2), (0, 0, 1)))))
+    x.key(15, 'stop', **NEUTRAL_P)
 
 draw_hip(); sheathe_hip(); draw_back(); sheathe_back()
 for _a in ANIMS_REF():

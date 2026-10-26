@@ -31,6 +31,8 @@ public class CosmeticLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
     public void render(PoseStack pose, MultiBufferSource buffers, int light, AbstractClientPlayer player, float limbSwing,
                        float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
         if (player.isInvisible()) return;
+        // La capa con capucha tapa orejas, cuernos y gema
+        if (player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST).getItem() instanceof net.zennin.mushoku.item.ArmorV2Item v && v.fullBody) return;
         Appearance a = ClientAppearance.get(player);
         if (a == null || a.model() == null) return;
         CosmeticModel m = CosmeticModel.get(a.model());

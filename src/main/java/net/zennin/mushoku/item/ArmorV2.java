@@ -61,7 +61,33 @@ public final class ArmorV2 {
     public static final Item ENCHANTED_SHOES = reg("enchanted_shoes_v2", AddonItems.ENCHANTED_SHOES,
             new ArmorV2Item(material("enchanted_shoes_v2", 2, 0), ArmorItem.Type.BOOTS, props(ArmorItem.Type.BOOTS, 20), "enchanted_shoes_v2", true, "tooltip.remushoku.enchanted_shoes"));
     public static final Item FLAME_CLOAK = reg("flame_trapping_cloak_v2", AddonItems.FLAME_TRAPPING_CLOAK,
-            new ArmorV2Item(material("flame_cloak_v2", 3, 0), ArmorItem.Type.CHESTPLATE, props(ArmorItem.Type.CHESTPLATE, 20), "flame_cloak_v2", true, "tooltip.remushoku.flame_cloak"));
+            new ArmorV2Item(material("flame_cloak_v2", 3, 0), ArmorItem.Type.CHESTPLATE, props(ArmorItem.Type.CHESTPLATE, 20), "flame_cloak_v2", true, "tooltip.remushoku.flame_cloak", true));
+
+    // ---------- Ropa de personajes (equipable, sin efectos) ----------
+    private static Item outfit(String id, String model, Holder<ArmorMaterial> mat, ArmorItem.Type type) {
+        ArmorV2Item item = new ArmorV2Item(mat, type, props(type, 12), model, false, "tooltip.remushoku." + model);
+        Registry.register(BuiltInRegistries.ITEM, MushokuMod.id(id), item);
+        ALL.add(item);
+        return item;
+    }
+
+    private static final Holder<ArmorMaterial> CLOTH = material("outfit_cloth", 1, 0);
+    private static final Holder<ArmorMaterial> LEATHER = material("outfit_leather", 2, 0);
+    public static final Item ROXY_HAT = outfit("roxy_hat", "outfit_roxy", CLOTH, ArmorItem.Type.HELMET);
+    public static final Item ROXY_ROBE = outfit("roxy_robe", "outfit_roxy", CLOTH, ArmorItem.Type.CHESTPLATE);
+    public static final Item ROXY_STOCKINGS = outfit("roxy_stockings", "outfit_roxy", CLOTH, ArmorItem.Type.LEGGINGS);
+    public static final Item ROXY_BOOTS = outfit("roxy_boots", "outfit_roxy", CLOTH, ArmorItem.Type.BOOTS);
+    public static final Item GHISLAINE_EYEPATCH = outfit("ghislaine_eyepatch", "outfit_ghislaine", LEATHER, ArmorItem.Type.HELMET);
+    public static final Item GHISLAINE_TOP = outfit("ghislaine_top", "outfit_ghislaine", LEATHER, ArmorItem.Type.CHESTPLATE);
+    public static final Item GHISLAINE_STRAPS = outfit("ghislaine_straps", "outfit_ghislaine", LEATHER, ArmorItem.Type.LEGGINGS);
+    public static final Item GHISLAINE_BOOTS = outfit("ghislaine_boots", "outfit_ghislaine", LEATHER, ArmorItem.Type.BOOTS);
+    public static final Item PAUL_ARMOR = outfit("paul_armor", "outfit_paul", LEATHER, ArmorItem.Type.CHESTPLATE);
+    public static final Item PAUL_PANTS = outfit("paul_pants", "outfit_paul", LEATHER, ArmorItem.Type.LEGGINGS);
+    public static final Item PAUL_BOOTS = outfit("paul_boots", "outfit_paul", LEATHER, ArmorItem.Type.BOOTS);
+    public static final Item ERIS_HAIRBAND = outfit("eris_hairband", "outfit_eris", CLOTH, ArmorItem.Type.HELMET);
+    public static final Item ERIS_BLOUSE = outfit("eris_blouse", "outfit_eris", LEATHER, ArmorItem.Type.CHESTPLATE);
+    public static final Item ERIS_SHORTS = outfit("eris_shorts", "outfit_eris", CLOTH, ArmorItem.Type.LEGGINGS);
+    public static final Item ERIS_BOOTS = outfit("eris_boots", "outfit_eris", LEATHER, ArmorItem.Type.BOOTS);
 
     public static final CreativeModeTab TAB = FabricItemGroup.builder()
             .title(Component.translatable("item_group.remushoku.v2_tab"))

@@ -30,27 +30,27 @@
    "pos": [
     -5.0,
     2.0,
-    -0.0
+    0.0
    ],
    "rot": [
-    0.57903,
-    -0.56505,
-    -0.31787,
-    0.49438
+    0.63686,
+    -0.55245,
+    -0.38045,
+    0.38007
    ],
-   "bend": -1.78067,
-   "axis": -1.38281,
+   "bend": -1.64378,
+   "axis": -1.30957,
    "wrist": [
-    0.51862,
+    0.6657,
     0.0,
     -0.0
    ],
    "draw": "back_draw",
    "sheathe": "back_sheathe",
    "grab": 5,
-   "drawLength": 18,
-   "release": 8,
-   "sheatheLength": 17
+   "drawLength": 20,
+   "release": 9,
+   "sheatheLength": 19
   }
  },
  "items": {

@@ -27,12 +27,19 @@ public class ArmorV2Item extends ArmorItem implements GeoItem {
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     public final String model;
     public final boolean glows;
+    /** Va en el torso pero se ve de la cabeza a los pies (la capa con capucha): tambien tapa los rasgos de raza. */
+    public final boolean fullBody;
     private final String tip;
 
     public ArmorV2Item(Holder<ArmorMaterial> material, Type type, Properties props, String model, boolean glows, String tip) {
+        this(material, type, props, model, glows, tip, false);
+    }
+
+    public ArmorV2Item(Holder<ArmorMaterial> material, Type type, Properties props, String model, boolean glows, String tip, boolean fullBody) {
         super(material, type, props);
         this.model = model;
         this.glows = glows;
+        this.fullBody = fullBody;
         this.tip = tip;
     }
 
@@ -43,7 +50,7 @@ public class ArmorV2Item extends ArmorItem implements GeoItem {
 
             @Override
             public <T extends LivingEntity> HumanoidModel<?> getGeoArmorRenderer(T entity, ItemStack stack, EquipmentSlot slot, HumanoidModel<T> original) {
-                if (renderer == null) renderer = net.zennin.mushoku.client.ArmorV2Renderer.create(model, glows);
+                if (renderer == null) renderer = net.zennin.mushoku.client.ArmorV2Renderer.create(model, glows, fullBody);
                 return (HumanoidModel<?>) renderer;
             }
         });

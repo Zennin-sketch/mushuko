@@ -44,6 +44,24 @@ MATS = {
     'fur':     dict(base=(222, 206, 176), dark=(160, 140, 108), light=(244, 234, 214)),
     'ember':   dict(base=(255, 140, 40), dark=(200, 70, 20), light=(255, 230, 140), glow=True),
     'cloth_d': dict(base=(60, 30, 34), dark=(36, 16, 20), light=(90, 50, 54)),
+    'robe_grey': dict(base=(150, 150, 157), dark=(96, 96, 104), light=(196, 196, 204)),
+    'robe_dark': dict(base=(92, 94, 104), dark=(56, 58, 66), light=(128, 130, 140)),
+    'shirt':   dict(base=(234, 230, 220), dark=(176, 170, 156), light=(250, 248, 242)),
+    'brown':   dict(base=(110, 72, 40), dark=(64, 40, 20), light=(150, 104, 64)),
+    'brown_pants': dict(base=(120, 86, 58), dark=(74, 50, 32), light=(156, 118, 84)),
+    'boot_brown': dict(base=(84, 56, 36), dark=(46, 30, 18), light=(120, 84, 56)),
+    'cloak_brown': dict(base=(128, 90, 62), dark=(76, 50, 32), light=(166, 124, 88)),
+    'hat_brown': dict(base=(86, 58, 42), dark=(48, 30, 20), light=(122, 88, 64)),
+    'hat_band': dict(base=(150, 42, 40), dark=(96, 22, 22), light=(196, 80, 70)),
+    'robe_roxy': dict(base=(92, 62, 46), dark=(54, 34, 24), light=(130, 94, 70)),
+    'stocking': dict(base=(52, 54, 72), dark=(30, 30, 44), light=(80, 84, 104)),
+    'black_leather': dict(base=(42, 38, 38), dark=(20, 18, 18), light=(78, 70, 68)),
+    'dark_metal': dict(base=(84, 88, 96), dark=(46, 48, 54), light=(136, 140, 150)),
+    'leather_brown': dict(base=(124, 82, 46), dark=(72, 46, 24), light=(170, 120, 74)),
+    'tunic':   dict(base=(58, 96, 92), dark=(32, 58, 56), light=(92, 136, 130)),
+    'pants_grey': dict(base=(98, 94, 88), dark=(58, 56, 52), light=(132, 128, 120)),
+    'ribbon_blue': dict(base=(70, 110, 200), dark=(40, 64, 130), light=(130, 170, 240)),
+    'ribbon_brown': dict(base=(96, 54, 30), dark=(56, 30, 16), light=(136, 84, 52)),
 }
 
 def box(bone, origin, size, mat, detail=None, rot=None, pivot=None):
@@ -67,31 +85,112 @@ def sym(boxes):
     return out
 
 # ================================================================ Disenos
+B, H, RA, LA, RL, RF = 'armorBody', 'armorHead', 'armorRightArm', 'armorLeftArm', 'armorRightLeg', 'armorRightBoot'
+
 def mk2():
-    B, R, L, F = 'armorBody', 'armorRightArm', 'armorRightLeg', 'armorRightBoot'
+    """Armadura Magica Mk-II v2 con la ropa de Rudeus (temporada 2): tunica gris con capucha caida, camisa blanca,
+    cinturon con bolsa, faldones largos, pantalon marron y botas. El nucleo de mana queda como broche azul."""
     return sym([
-        box(B, [-4.75, 15, -3], [9.5, 9.25, 6], 'steel'),
-        box(B, [-4.5, 12, -2.6], [9, 3, 5.2], 'dark', 'bands'),
-        box(B, [-3.5, 17, -3.6], [7, 6, 0.75], 'steel_l', 'rivets'),
-        box(B, [-1.25, 19.25, -4.1], [2.5, 2.5, 0.75], 'crystal'),
-        box(B, [-4.5, 23.5, -3.5], [9, 1.5, 7], 'gold'),
-        box(B, [-3.5, 14, 3], [7, 8, 2.5], 'dark', 'vents'),
-        box(B, [-3, 21.5, 4], [1.5, 3, 1.5], 'steel_l'),
-        box(B, [1.5, 21.5, 4], [1.5, 3, 1.5], 'steel_l'),
-        box(R, [-9.5, 21, -3.25], [6, 3.5, 6.5], 'steel', 'rivets'),
-        box(R, [-9.6, 21, -3.35], [6.2, 0.75, 6.7], 'gold'),
-        box(R, [-8.6, 16, -2.6], [4.8, 5, 5.2], 'dark', 'bands'),
-        box(R, [-8.9, 12, -2.9], [5.4, 4.5, 5.8], 'steel', 'rivets'),
-        box(R, [-9.1, 13.5, -0.75], [0.5, 1.5, 1.5], 'crystal'),
-        box(L, [-4.4, 6, -2.6], [4.8, 6, 5.2], 'steel', 'plates'),
-        box(L, [-4.2, 4.5, -3.3], [4.4, 2.5, 1.2], 'gold'),
-        box(F, [-4.5, 0, -3.4], [5, 5, 6.2], 'steel', 'rivets'),
-        box(F, [-4.6, 0, -3.6], [5.2, 1, 6.6], 'dark'),
-        box(F, [-2.75, 2.5, -3.75], [1.5, 1.5, 0.4], 'crystal'),
+        box(B, [-4.6, 12, -2.6], [9.2, 12.3, 5.2], 'robe_grey', 'robe'),
+        box(B, [-1.6, 19.5, -2.75], [3.2, 4.6, 0.3], 'shirt'),
+        box(B, [-4.4, 22.8, -2.9], [8.8, 1.6, 5.8], 'robe_dark'),
+        box(B, [-3.6, 18.5, 2.5], [7.2, 5, 1.6], 'robe_dark', 'folds'),
+        box(B, [-0.75, 21.4, -3.0], [1.5, 1.5, 0.4], 'crystal'),
+        box(B, [-4.75, 12.6, -2.75], [9.5, 1.3, 5.5], 'brown'),
+        box(B, [-0.8, 12.5, -2.95], [1.6, 1.5, 0.3], 'gold'),
+        box(B, [2.2, 10.2, -3.0], [2.2, 2.6, 1.3], 'brown', 'stitch'),
+        box(B, [-4.8, 3.5, -2.8], [9.6, 8.6, 5.6], 'robe_grey', 'tails'),
+        box(RA, [-8.5, 12.5, -2.5], [4.6, 11.7, 5], 'robe_grey', 'folds'),
+        box(RA, [-8.7, 11.8, -2.7], [5, 1.6, 5.4], 'robe_dark'),
+        box(RL, [-4.15, 4, -2.25], [4.3, 8, 4.5], 'brown_pants'),
+        box(RF, [-4.3, 0, -2.6], [4.5, 4.6, 5.2], 'boot_brown', 'boots'),
+        box(RF, [-4.3, 0, -3.1], [4.5, 1.6, 0.6], 'boot_brown'),
+    ])
+
+def flame_cloak():
+    """Capa Atrapallamas v2: capa marron con capucha que cubre todo el cuerpo y tapa la cara (como su icono).
+    Es del torso, pero se ve de la cabeza a los pies; el dobladillo guarda brasas que brillan."""
+    return sym([
+        box(H, [-4.8, 23.4, -4.8], [9.6, 9.6, 9.6], 'cloak_brown', 'hood'),
+        box(H, [-1.5, 29.5, 4.6], [3, 3, 1.6], 'cloak_brown'),
+        box(B, [-5, 12, -3], [10, 12.6, 6], 'cloak_brown', 'folds'),
+        box(B, [-5.3, 0.5, -3.3], [10.6, 11.6, 6.6], 'cloak_brown', 'hem'),
+        box(B, [-1, 22, -3.4], [2, 2, 0.5], 'ember'),
+        box(RA, [-9, 10.5, -3], [5.2, 13.6, 6], 'cloak_brown', 'folds'),
+    ])
+
+def roxy():
+    """Roxy: sombrero de bruja con banda, manto corto sobre los hombros, blusa blanca con lazo azul, tunica,
+    medias oscuras y botas."""
+    return sym([
+        box(H, [-7, 31.2, -7], [14, 0.8, 14], 'hat_brown'),
+        box(H, [-4.4, 32, -4.4], [8.8, 1, 8.8], 'hat_band'),
+        box(H, [-4.2, 33, -4.2], [8.4, 2.6, 8.4], 'hat_brown'),
+        box(H, [-3, 35.6, -2.6], [6, 2.6, 6], 'hat_brown'),
+        box(H, [-1.9, 38.2, -1.2], [3.8, 2.2, 3.8], 'hat_brown'),
+        box(H, [-1, 40.4, 0.4], [2, 1.8, 2], 'hat_brown'),
+        box(B, [-4.5, 12, -2.5], [9, 12.2, 5], 'robe_roxy', 'robe'),
+        box(B, [-2, 17, -2.6], [4, 7, 0.3], 'shirt'),
+        box(B, [-0.8, 21, -2.8], [1.6, 1.4, 0.3], 'ribbon_blue'),
+        box(B, [-5.2, 19.5, -3], [10.4, 4.6, 6], 'robe_roxy', 'trim_white'),
+        box(B, [-4.8, 6, -2.8], [9.6, 6.2, 5.6], 'robe_roxy', 'tails'),
+        box(RA, [-8.4, 12.5, -2.4], [4.4, 11.5, 4.8], 'robe_roxy', 'folds'),
+        box(RA, [-8.5, 12, -2.5], [4.6, 1.2, 5], 'shirt'),
+        box(RL, [-4.1, 4, -2.1], [4.1, 8, 4.2], 'stocking'),
+        box(RF, [-4.2, 0, -2.5], [4.3, 4, 5], 'boot_brown', 'boots'),
+    ])
+
+def ghislaine():
+    """Ghislaine: parche en el ojo izquierdo, top y taparrabos de cuero negro, cinturon, hombrera de metal,
+    brazaletes y botas altas."""
+    return sym([
+        box(H, [-4.3, 27.3, -4.3], [8.6, 0.6, 8.6], 'black_leather'),
+        box(H, [0.8, 26.6, -4.45], [2.4, 2.2, 0.4], 'black_leather'),
+        box(B, [-4.3, 18.5, -2.3], [8.6, 3.4, 4.6], 'black_leather', 'stitch'),
+        box(B, [-3.5, 21.9, -2.3], [1.2, 2.2, 4.6], 'black_leather'),
+        box(B, [2.3, 21.9, -2.3], [1.2, 2.2, 4.6], 'black_leather'),
+        box(B, [-4.5, 11.8, -2.5], [9, 1.5, 5], 'brown'),
+        box(B, [-0.8, 11.7, -2.7], [1.6, 1.7, 0.3], 'dark_metal'),
+        box(B, [-2.5, 6.5, -2.7], [5, 5.3, 0.5], 'black_leather', 'folds'),
+        box(B, [-2.5, 6.5, 2.2], [5, 5.3, 0.5], 'black_leather', 'folds'),
+        box(RA, [-8.8, 20.5, -2.8], [5, 3.5, 5.6], 'dark_metal', 'rivets'),
+        box(RA, [-8.3, 12, -2.3], [4.6, 4.5, 4.6], 'black_leather', 'stitch'),
+        box(RL, [-4.1, 9, -2.2], [4.2, 1, 4.4], 'black_leather'),
+        box(RF, [-4.2, 0, -2.4], [4.4, 7.5, 4.8], 'black_leather', 'straps'),
+    ])
+
+def paul():
+    """Paul: tunica verdosa, peto de cuero con remaches, hombrera izquierda, cinturon de espadachin, brazaletes,
+    pantalon gris y botas."""
+    return sym([
+        box(B, [-4.3, 12, -2.3], [8.6, 12.1, 4.6], 'tunic'),
+        box(B, [-4.6, 15.5, -2.6], [9.2, 7.5, 5.2], 'leather_brown', 'rivets'),
+        box(B, [-4.6, 12, -2.6], [9.2, 1.4, 5.2], 'brown'),
+        box(B, [-4.9, 10, -1.5], [1, 3, 3], 'brown'),
+        box(B, [-4.3, 7, -2.3], [8.6, 5, 4.6], 'tunic', 'tails'),
+        box(LA, [3.8, 20.5, -2.8], [5, 3.5, 5.6], 'leather_brown', 'rivets'),
+        box(RA, [-8.2, 13, -2.2], [4.4, 11, 4.4], 'tunic'),
+        box(RA, [-8.4, 12, -2.4], [4.8, 4, 4.8], 'leather_brown', 'stitch'),
+        box(RL, [-4.1, 3.5, -2.1], [4.2, 8.5, 4.2], 'pants_grey'),
+        box(RF, [-4.2, 0, -2.5], [4.4, 5, 5], 'boot_brown', 'boots'),
+    ])
+
+def eris():
+    """Eris (aventurera): diadema, blusa blanca con lazo marron, peto de cuero, cinturon, brazaletes, shorts marrones
+    y botas."""
+    return sym([
+        box(H, [-4.3, 30, -4.3], [8.6, 0.8, 8.6], 'black_leather'),
+        box(B, [-4.3, 12, -2.3], [8.6, 12.1, 4.6], 'shirt', 'folds'),
+        box(B, [-1, 21.5, -2.6], [2, 1.6, 0.4], 'ribbon_brown'),
+        box(B, [-4.5, 16, -2.6], [9, 6, 5.2], 'leather_brown', 'stitch'),
+        box(B, [-4.6, 12, -2.6], [9.2, 1.3, 5.2], 'brown'),
+        box(RA, [-8.2, 12.5, -2.2], [4.4, 11.5, 4.4], 'shirt', 'folds'),
+        box(RA, [-8.4, 12, -2.4], [4.8, 4.5, 4.8], 'leather_brown', 'stitch'),
+        box(RL, [-4.15, 8, -2.2], [4.3, 4.2, 4.4], 'brown_pants'),
+        box(RF, [-4.2, 0, -2.5], [4.4, 6, 5], 'boot_brown', 'boots'),
     ])
 
 def curse_helmet():
-    H = 'armorHead'
     return [
         box(H, [-4.6, 23.6, -4.6], [9.2, 9, 9.2], 'bronze', 'visor'),
         box(H, [-4.7, 27.5, -4.7], [9.4, 1, 9.4], 'rune'),
@@ -102,7 +201,6 @@ def curse_helmet():
     ]
 
 def sunglasses():
-    H = 'armorHead'
     return [
         box(H, [-0.75, 28, -4.55], [1.5, 0.6, 0.4], 'black'),
         box(H, [-3.9, 26.6, -4.6], [3.2, 2.2, 0.4], 'lens', 'shine'),
@@ -114,36 +212,30 @@ def sunglasses():
     ]
 
 def enchanted_shoes():
-    F = 'armorRightBoot'
     return sym([
-        box(F, [-4.3, 0, -3.2], [4.6, 3.5, 5.8], 'leather', 'stitch'),
-        box(F, [-4.4, 3.5, -2.6], [4.8, 1.5, 5.2], 'cloth'),
-        box(F, [-4.45, 3.4, -2.65], [4.9, 0.4, 5.3], 'gold'),
-        box(F, [-5.0, 1.8, 0.5], [0.6, 3.2, 3.2], 'feather', 'feather'),
-        box(F, [-4.35, 0.8, -3.3], [4.7, 0.6, 0.2], 'feather'),
+        box(RF, [-4.3, 0, -3.2], [4.6, 3.5, 5.8], 'leather', 'stitch'),
+        box(RF, [-4.4, 3.5, -2.6], [4.8, 1.5, 5.2], 'cloth'),
+        box(RF, [-4.45, 3.4, -2.65], [4.9, 0.4, 5.3], 'gold'),
+        box(RF, [-5.0, 1.8, 0.5], [0.6, 3.2, 3.2], 'feather', 'feather'),
+        box(RF, [-4.35, 0.8, -3.3], [4.7, 0.6, 0.2], 'feather'),
     ])
 
-def flame_cloak():
-    B, R = 'armorBody', 'armorRightArm'
-    return sym([
-        box(B, [-4.3, 12.3, -2.3], [8.6, 8, 4.6], 'cloth_d'),
-        box(B, [-5, 20.5, -3.2], [10, 3.5, 6.4], 'crimson', 'trim'),
-        box(B, [-4.5, 23.6, -2.8], [9, 1.6, 5.6], 'fur'),
-        box(B, [-4.8, 5, 2.4], [9.6, 18, 0.8], 'crimson', 'flames'),
-        box(B, [-1, 21.5, -3.6], [2, 2, 0.6], 'ember'),
-        box(R, [-8.6, 19.5, -2.7], [4.8, 4.5, 5.4], 'crimson', 'trim'),
-    ])
-
+# nombre: (diseno, [(item, ranura)], cubre todo el cuerpo desde el torso)
 ARMORS = {
-    # nombre: (diseno, items [(id, tipo, huesos visibles)], defensa por pieza y material base)
-    'mk2_v2': (mk2, [('magic_armor_mk_2_v2_chestplate', 'chest'), ('magic_armor_mk_2_v2_leggings', 'legs'), ('magic_armor_mk_2_v2_boots', 'feet')]),
-    'curse_helmet_v2': (curse_helmet, [('curse_suppressing_helmet_v2', 'head')]),
-    'sunglasses_v2': (sunglasses, [('magical_sunglasses_v2', 'head')]),
-    'enchanted_shoes_v2': (enchanted_shoes, [('enchanted_shoes_v2', 'feet')]),
-    'flame_cloak_v2': (flame_cloak, [('flame_trapping_cloak_v2', 'chest')]),
+    'mk2_v2': (mk2, [('magic_armor_mk_2_v2_chestplate', 'chest'), ('magic_armor_mk_2_v2_leggings', 'legs'), ('magic_armor_mk_2_v2_boots', 'feet')], False),
+    'curse_helmet_v2': (curse_helmet, [('curse_suppressing_helmet_v2', 'head')], False),
+    'sunglasses_v2': (sunglasses, [('magical_sunglasses_v2', 'head')], False),
+    'enchanted_shoes_v2': (enchanted_shoes, [('enchanted_shoes_v2', 'feet')], False),
+    'flame_cloak_v2': (flame_cloak, [('flame_trapping_cloak_v2', 'chest')], True),
+    'outfit_roxy': (roxy, [('roxy_hat', 'head'), ('roxy_robe', 'chest'), ('roxy_stockings', 'legs'), ('roxy_boots', 'feet')], False),
+    'outfit_ghislaine': (ghislaine, [('ghislaine_eyepatch', 'head'), ('ghislaine_top', 'chest'), ('ghislaine_straps', 'legs'), ('ghislaine_boots', 'feet')], False),
+    'outfit_paul': (paul, [('paul_armor', 'chest'), ('paul_pants', 'legs'), ('paul_boots', 'feet')], False),
+    'outfit_eris': (eris, [('eris_hairband', 'head'), ('eris_blouse', 'chest'), ('eris_shorts', 'legs'), ('eris_boots', 'feet')], False),
 }
 SLOT_BONES = {'head': ['armorHead'], 'chest': ['armorBody', 'armorRightArm', 'armorLeftArm'],
               'legs': ['armorRightLeg', 'armorLeftLeg'], 'feet': ['armorRightBoot', 'armorLeftBoot']}
+# Iconos hechos a mano (en vez del generado de frente)
+ICON_FROM = {'flame_trapping_cloak_v2': 'addon_flametrappingcloak'}
 
 # ================================================================ UV y pintura
 def uv_size(s):
@@ -216,7 +308,23 @@ def paint(boxes, tex, seed=1):
                     if det == 'shine' and name == 'north' and i == 1 and j == 0:
                         c = (230, 240, 255)
                     if det == 'stitch' and j == 1 and i % 2 == 0:
-                        c = MATS['cloth']['light']
+                        c = m['light']
+                    if det in ('folds', 'hem') and name in ('north', 'south', 'east', 'west') and i % 3 == 1:
+                        c = [x * 0.82 for x in c]
+                    if det == 'hem' and j >= fh - 2 and name not in ('up', 'down'):
+                        c, g = MATS['ember']['base'], j == fh - 1
+                    if det == 'hood' and name == 'north' and 1 <= i < fw - 1 and 1 <= j < fh - 1:
+                        c = (16, 11, 8)  # la cara queda en sombra
+                    if det == 'robe' and name == 'north' and i == fw // 2:
+                        c = m['dark']
+                    if det == 'tails' and name == 'north' and fw // 2 - 1 <= i <= fw // 2:
+                        c = (30, 30, 34)
+                    if det == 'trim_white' and j == fh - 1:
+                        c = MATS['shirt']['base']
+                    if det == 'boots' and j <= 1:
+                        c = m['light']
+                    if det == 'straps' and j % 3 == 0:
+                        c = MATS['dark_metal']['light']
                     if det == 'trim' and j == fh - 1:
                         c = MATS['gold']['base']
                     if det == 'feather' and name in ('east', 'west') and (i + j) % 3 == 0:
@@ -299,7 +407,8 @@ def main():
     mdir = os.path.join(ASSETS, 'models', 'item')
     for d in (gdir, tdir, idir, mdir):
         os.makedirs(d, exist_ok=True)
-    for name, (fn, items) in ARMORS.items():
+    import shutil
+    for name, (fn, items, full) in ARMORS.items():
         boxes = fn()
         tex = pack(boxes)
         img, glow = paint(boxes, tex, seed=len(name))
@@ -312,7 +421,10 @@ def main():
         with open(os.path.join(gdir, name + '.geo.json'), 'w') as f:
             json.dump(geo(name, boxes, tex), f, indent=1)
         for item, slot in items:
-            icon(boxes, SLOT_BONES[slot], img).save(os.path.join(idir, item + '.png'))
+            if item in ICON_FROM:
+                shutil.copy(os.path.join(idir, ICON_FROM[item] + '.png'), os.path.join(idir, item + '.png'))
+            else:
+                icon(boxes, SLOT_BONES[slot], img).save(os.path.join(idir, item + '.png'))
             with open(os.path.join(mdir, item + '.json'), 'w') as f:
                 json.dump({'parent': 'minecraft:item/generated', 'textures': {'layer0': 'remushoku:item/' + item}}, f, indent=1)
     print(len(ARMORS), 'armaduras v2 ->', gdir)
