@@ -35,7 +35,7 @@ final class SkinLayersBend {
         String[] v = System.getProperty("mushoku.bend." + k, def).split(",");
         return new int[]{Integer.parseInt(v[0].trim()), Integer.parseInt(v[1].trim())};
     }
-    private static int calls, vcalls;
+    private static int calls, vcalls, bcalls, dcalls;
 
     static void install() {
         // 1) Cada malla 3D se dobla igual que la parte del cuerpo que cubre (mismo calculo que bendy-lib).
@@ -107,6 +107,10 @@ final class SkinLayersBend {
             int[] md = MODE[Math.max(0, Math.min(3, kind))];
             value = b.getBend() * md[0];
             otherHalf = md[1] == 1;
+            if (DEBUG && (++bcalls % 53) == 0) org.slf4j.LoggerFactory.getLogger("mushoku_combat").info(
+                    "[capas] bender parte={} centro=({},{},{}) base(y0)={} base(y12)={} otro(y0)={} otro(y12)={} alto={} doblez={} ejeAng={}",
+                    kind, bx, by, bz, base.distanceTo(new Vector3f(0, 0, 0)), base.distanceTo(new Vector3f(0, 0.75f, 0)),
+                    other.distanceTo(new Vector3f(0, 0, 0)), other.distanceTo(new Vector3f(0, 0.75f, 0)), height, value, axis);
             // mismo eje que IBendable.applyBend
             axisVec = new Vector3f((float) Math.cos(axis), 0, (float) Math.sin(axis)).mul(new Matrix3f().set(dir.getRotation()));
         }
@@ -187,6 +191,9 @@ final class SkinLayersBend {
         Bender bender;
 
         VoxelCuboid(io.github.kosmx.bendylib.ICuboidBuilder.Data d) {
+            if (DEBUG && (++dcalls % 211) == 0) org.slf4j.LoggerFactory.getLogger("mushoku_combat").info(
+                    "[capas] voxel pos=({},{},{}) tam=({},{},{}) extra=({},{},{}) uv=({},{}) tex={}x{}", d.x, d.y, d.z, d.sizeX, d.sizeY, d.sizeZ,
+                    d.extraX, d.extraY, d.extraZ, d.u, d.v, d.textureWidth, d.textureHeight);
             float x0 = d.x - d.extraX, y0 = d.y - d.extraY, z0 = d.z - d.extraZ;
             float x1 = d.x + d.sizeX + d.extraX, y1 = d.y + d.sizeY + d.extraY, z1 = d.z + d.sizeZ + d.extraZ;
             if (d.mirror) { float t = x0; x0 = x1; x1 = t; }
