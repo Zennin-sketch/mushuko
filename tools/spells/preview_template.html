@@ -329,6 +329,63 @@ function showCosmetic(name) {
     g.add(m);
   });
   cosHolder.add(g);
+  cosChains = { group: g, chains: c.chains || [], mesh: null };
+}
+// ---- Orejas articuladas: mismo calculo que CosmeticChain.java ----
+let cosChains = null;
+function earAmp(on, x) {
+  if (!on) return 0;
+  if (x >= 0 && x < 8) return Math.sin(Math.PI * x / 8);
+  if (x >= 8 && x < 14) return 0.4 * Math.sin(Math.PI * (x - 8) / 6);
+  return 0;
+}
+function qAxis(ax, deg) { return new THREE.Quaternion().setFromAxisAngle(ax, deg * D2R); }
+const AX = new THREE.Vector3(1, 0, 0), AZ = new THREE.Vector3(0, 0, 1);
+function chainQuads(c, side, t, hurt) {
+  const T = t + side * 31, w = Math.floor(T / 70), local = T - w * 70;
+  const o = 10 + hash(w, 11 + side) * 40, on = hash(w, 23 + side) < 0.65, d = local - o;
+  let Q = new THREE.Quaternion().setFromEuler(new THREE.Euler(c.base_rot[0]*D2R, c.base_rot[1]*D2R, c.base_rot[2]*D2R, 'ZYX'));
+  Q.multiply(qAxis(AX, c.sway * Math.sin(t * 0.06 + side * 1.3) - 35 * hurt));
+  const frames = [], P = [new THREE.Vector3(...c.base)];
+  c.segs.forEach((sg, k) => {
+    const a = earAmp(on, d - k * c.lag);
+    Q = Q.clone().multiply(qAxis(AX, sg[1] + c.sway * 0.5 * Math.sin(t * 0.06 + side * 1.3 - k * 0.5)))
+                 .multiply(qAxis(AZ, sg[2] - c.twitch * a * (k === 0 ? 1 : 0.25)));
+    frames.push(Q);
+    P.push(P[k].clone().add(new THREE.Vector3(0, sg[0], 0).applyQuaternion(Q)));
+  });
+  const n = c.segs.length;
+  const R = [];
+  for (let i = 0; i <= n; i++) R.push(i === 0 ? frames[0] : i === n ? frames[n - 1] : frames[i - 1].clone().slerp(frames[i], 0.5));
+  const quads = [];
+  const ring = (i, w2, t2, off) => [[-1,-1],[1,-1],[1,1],[-1,1]].map(([sx, sz]) =>
+      { const v = P[i].clone().add(new THREE.Vector3(sx * w2 / 2, 0, sz * t2 / 2 + off).applyQuaternion(R[i])); if (side === 1) v.x = -v.x; return v; });
+  const loft = (count, wf, tf, off, color, shade) => {
+    const rings = []; for (let i = 0; i < count; i++) rings.push(ring(i, wf(i), tf(i), off(i)));
+    for (let i = 0; i < count - 1; i++) for (let e = 0; e < 4; e++)
+      quads.push({ p: [rings[i][e], rings[i][(e+1)%4], rings[i+1][(e+1)%4], rings[i+1][e]], color, mul: (shade(i) + shade(i+1)) / 2 });
+    quads.push({ p: [...rings[0]].reverse(), color, mul: shade(0) });
+    quads.push({ p: rings[count - 1], color, mul: shade(count - 1) });
+  };
+  loft(n + 1, i => c.widths[i], i => c.thick[i], () => 0, c.color, i => c.shade[i]);
+  if (c.inner) loft(Math.min(n + 1, c.inner.rings), i => c.widths[i] * c.inner.width, () => 0.12, i => c.thick[i] / 2 + 0.06, c.inner.color, () => 1);
+  return quads;
+}
+function updateCosChains(t) {
+  if (!cosChains || !cosChains.chains.length) return;
+  const pos = [], col = [], idx = [];
+  for (const c of cosChains.chains) for (const side of (c.mirror ? [0, 1] : [0])) for (const q of chainQuads(c, side, t, 0)) {
+    const base = pos.length / 3, cc = cosColor(q.color).multiplyScalar(q.mul);
+    q.p.forEach(v => { pos.push(v.x, v.y, v.z); col.push(cc.r, cc.g, cc.b); });
+    idx.push(base, base + 1, base + 2, base, base + 2, base + 3);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+  geo.setIndex(idx); geo.computeVertexNormals();
+  if (cosChains.mesh) { cosChains.group.remove(cosChains.mesh); cosChains.mesh.geometry.dispose(); }
+  cosChains.mesh = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide, flatShading: true }));
+  cosChains.group.add(cosChains.mesh);
 }
 function selectCosmetic(name) {
   current = 'cos:' + name; model = null; groups = []; inner.clear(); bolt.clear();
@@ -347,14 +404,15 @@ function selectCosmetic(name) {
   sel.onchange = () => showCosmetic(name);
 }
 const COSINFO = {
-  elf_ears: 'Orejas largas y en punta, del color de tu piel (se toma de tu skin), con el pliegue interno más oscuro. Al crear el personaje elegís entre 3 alturas.',
+  elf_ears: 'Orejas largas y en punta hechas de tramos unidos (sin huecos, como los codos con Bendy-lib), que se curvan hacia arriba. Color de tu piel con el pliegue interno más oscuro. 3 alturas.',
   demon_horns: 'Cuernos en espiral tipo carnero, oscuros con estrías y la punta color hueso, como los de Kishirika. 3 alturas a elegir.',
-  beast_cat: 'Orejas de gato puntiagudas, del color de tu pelo (se toma de la parte de arriba de tu skin) con el interior rosado.',
-  beast_dog: 'Orejas de perro: paradas en la base y con la punta doblada hacia adelante.',
-  beast_bear: 'Orejas de oso: chicas y redondeadas, con el interior más oscuro.',
+  beast_cat: 'Orejas de gato en punta, de tramos unidos, color de tu pelo con el interior rosado. Se balancean y cada pocos segundos dan un tic (la punta sigue con retraso). Al recibir un golpe se echan para atrás.',
+  beast_dog: 'Orejas caídas: suben un poco, se doblan hacia afuera y cuelgan al costado. Se mecen y sacuden con retraso en la punta.',
+  beast_bear: 'Orejas de oso chicas y redondeadas, con el interior más oscuro. Se mueven poco, con tics cortos.',
   superd_gem: 'La joya roja de los Superd, centrada en la frente. Brilla un poco en la oscuridad.',
 };
 function show(name) {
+  cosChains = null;
   cosHolder.visible = false; cosHolder.clear(); document.getElementById('heightbox').hidden = true;
   current = name; model = DATA.models[name];
   inner.clear();
@@ -419,7 +477,7 @@ const hud = document.getElementById('hud');
 function frame(now) {
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
   ticks += dt * 20 * speed;
-  if (!model) { controls.update(); renderer.render(scene, camera); requestAnimationFrame(frame); return; }
+  if (!model) { updateCosChains(ticks); controls.update(); renderer.render(scene, camera); requestAnimationFrame(frame); return; }
   const pv = model.preview || { kind: 'projectile' };
   let t = ticks, s;
   outroAlpha = 1;
@@ -455,5 +513,5 @@ function frame(now) {
 let start = 'stone_bullet';
 try { const v = localStorage.getItem('grimorio-sel'); if (v && DATA.models[v]) start = v; } catch (e) {}
 show(start); resize(); requestAnimationFrame(frame);
-window.__show = show; window.__cos = selectCosmetic; window.__setTicks = v => { ticks = v; };
+window.__show = show; window.__cos = selectCosmetic; window.__ticks = v => { ticks = v; }; window.__cam = k => { const c = controls.target; const d = { front: [0, 0.25, 3.8], side: [3.8, 0.25, 0], back: [1.5, 1.2, -3.4] }[k]; camera.position.set(c.x + d[0], c.y + d[1], c.z + d[2]); }; window.__setTicks = v => { ticks = v; };
 </script>

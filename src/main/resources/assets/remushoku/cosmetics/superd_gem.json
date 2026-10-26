@@ -47,5 +47,6 @@
    "alpha": 1.0,
    "glow": true
   }
- ]
+ ],
+ "chains": []
 }

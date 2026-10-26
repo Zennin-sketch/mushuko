@@ -23,6 +23,17 @@ public final class CosmeticModel {
     public record Part(SpellModel.Face face, int source, float mul, boolean glow) {}
 
     public final List<Part> parts = new ArrayList<>();
+    public final List<CosmeticChain> chains = new ArrayList<>();
+
+    /** "skin:0.8" / "hair" / "e8a6b0" -> {fuente, rgb, multiplicador}. */
+    static Object[] parseColor(String col) {
+        String[] sp = col.split(":");
+        int source = HEX, rgb = 0xffffff;
+        if (sp[0].equals("skin")) source = SKIN;
+        else if (sp[0].equals("hair")) source = HAIR;
+        else rgb = Integer.parseInt(sp[0], 16);
+        return new Object[]{source, rgb, sp.length > 1 ? Float.parseFloat(sp[1]) : 1f};
+    }
     public float[] heights = {0};
 
     private static final Map<String, CosmeticModel> CACHE = new HashMap<>();
@@ -46,6 +57,8 @@ public final class CosmeticModel {
             try (Reader reader = res.get().openAsReader()) {
                 JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
                 m.heights = floats(root.getAsJsonArray("heights"));
+                if (root.has("chains"))
+                    for (JsonElement ce : root.getAsJsonArray("chains")) m.chains.add(new CosmeticChain(ce.getAsJsonObject()));
                 int seed = 0;
                 for (JsonElement be : root.getAsJsonArray("boxes")) {
                     JsonObject b = be.getAsJsonObject();

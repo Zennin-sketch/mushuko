@@ -34,7 +34,7 @@ public class CosmeticLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         Appearance a = ClientAppearance.get(player);
         if (a == null || a.model() == null) return;
         CosmeticModel m = CosmeticModel.get(a.model());
-        if (m.parts.isEmpty()) return;
+        if (m.parts.isEmpty() && m.chains.isEmpty()) return;
         pose.pushPose();
         getParentModel().head.translateAndRotate(pose);
         // Marco del rasgo: +X derecha, +Y arriba, +Z adelante (el modelo del jugador tiene los tres ejes al reves)
@@ -42,17 +42,37 @@ public class CosmeticLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         pose.translate(0, m.heights[Mth.clamp(a.height(), 0, m.heights.length - 1)], 0);
         PoseStack.Pose last = pose.last();
         ResourceLocation skin = player.getSkin().texture();
+        // Orejas articuladas (se recalculan cada cuadro: balanceo, tic y se echan atras al recibir un golpe)
+        java.util.List<CosmeticChain.Quad> quads = new java.util.ArrayList<>();
+        float hurt = player.hurtTime > 0 ? Math.max(0f, (player.hurtTime - partialTick) / 10f) : 0f;
+        for (CosmeticChain chain : m.chains) quads.addAll(chain.quads(ageInTicks, hurt));
+        // Primero todo lo que usa la skin y despues lo de color fijo (no se pueden mezclar dos buffers a la vez)
         VertexConsumer skinVc = buffers.getBuffer(RenderType.entityCutoutNoCull(skin));
         for (CosmeticModel.Part p : m.parts) {
             if (p.source() == CosmeticModel.HEX) continue;
             emit(skinVc, last, p, light, p.source() == CosmeticModel.SKIN ? SKIN_U : HAIR_U, p.source() == CosmeticModel.SKIN ? SKIN_V : HAIR_V);
         }
+        for (CosmeticChain.Quad q : quads) if (q.source() != CosmeticModel.HEX) emitQuad(skinVc, last, q, light);
         VertexConsumer plainVc = buffers.getBuffer(RenderType.entityCutoutNoCull(PLAIN));
         for (CosmeticModel.Part p : m.parts) {
             if (p.source() != CosmeticModel.HEX) continue;
             emit(plainVc, last, p, p.glow() ? LightTexture.FULL_BRIGHT : light, -1, -1);
         }
+        for (CosmeticChain.Quad q : quads) if (q.source() == CosmeticModel.HEX) emitQuad(plainVc, last, q, light);
         pose.popPose();
+    }
+
+    private static void emitQuad(VertexConsumer vc, PoseStack.Pose last, CosmeticChain.Quad q, int light) {
+        boolean fromSkin = q.source() != CosmeticModel.HEX;
+        float u = q.source() == CosmeticModel.SKIN ? SKIN_U : q.source() == CosmeticModel.HAIR ? HAIR_U : 0.5f;
+        float v = q.source() == CosmeticModel.SKIN ? SKIN_V : q.source() == CosmeticModel.HAIR ? HAIR_V : 0.5f;
+        int base = fromSkin ? 0xffffff : q.rgb();
+        int r = Mth.clamp(Math.round(((base >> 16) & 255) * q.mul()), 0, 255);
+        int g = Mth.clamp(Math.round(((base >> 8) & 255) * q.mul()), 0, 255);
+        int b = Mth.clamp(Math.round((base & 255) * q.mul()), 0, 255);
+        for (org.joml.Vector3f p : q.p())
+            vc.addVertex(last, p.x, p.y, p.z).setColor(r, g, b, 255).setUv(u, v)
+                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(last, q.n().x, q.n().y, q.n().z);
     }
 
     /** u/v >= 0: toda la cara usa ese pixel de la skin; si no, la UV propia de la caja. */

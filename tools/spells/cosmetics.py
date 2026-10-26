@@ -27,16 +27,25 @@ def tube(points, w0, w1, t0, t1, color_fn, alpha=1.0):
         out.append(seg(points[k], points[k + 1], w0 + (w1 - w0) * u, t0 + (t1 - t0) * u, color_fn(u), alpha))
     return out
 
-# ------------------------------------------------------------ Orejas de elfo: largas, en punta, hacia arriba y atras
+# ------------------------------------------------------------ Orejas como cadena articulada
+def chain(base, base_rot, segs, widths, thick, color, shade=None, inner=None, twitch=0.0, sway=0.0, lag=1.2, mirror=True):
+    """Oreja hecha de tramos unidos (como los codos y rodillas con Bendy-lib): sin huecos entre tramos.
+    base: donde nace (lado derecho). base_rot: orientacion inicial (grados, X luego Y luego Z); el tramo crece en +Y local,
+    el ancho va en X local y el grosor en Z local. segs: [largo, doblez_x, doblez_z] de cada tramo.
+    widths/thick: ancho y grosor en cada union (tramos + 1). shade: multiplicador de color en cada union.
+    inner: {color, width (fraccion), rings (cuantas uniones cubre)} = cara interna de otro color.
+    twitch/sway: grados del tic de la oreja (cada pocos segundos) y del balanceo suave; lag: atraso de la punta (ticks)."""
+    return dict(base=list(base), base_rot=list(base_rot), segs=[list(x) for x in segs], widths=list(widths), thick=list(thick),
+                color=color, shade=list(shade or [1.0] * len(widths)), inner=inner, twitch=twitch, sway=sway, lag=lag, mirror=mirror)
+
+# ------------------------------------------------------------ Orejas de elfo: largas y en punta, hacia afuera, arriba y atras
 def elf_ears():
-    pts = []
-    for k in range(9):
-        u = k / 8
-        pts.append((4.15 + 4.2 * u ** 1.1, 0.2 + 3.9 * u, 0.2 - 3.4 * u ** 1.3))
-    outer = tube(pts, 2.6, 0.35, 0.9, 0.6, lambda u: 'skin:%.2f' % (1.0 - 0.08 * u))
-    # pliegue interno (mas oscuro), del lado de adelante
-    inner = tube([(p[0] + 0.15, p[1], p[2] + 0.45) for p in pts[1:6]], 1.1, 0.5, 0.35, 0.3, lambda u: 'skin:0.72')
-    return dict(name='Orejas de elfo', heights=[1.5, 2.5, 3.5], height_names=['Baja', 'Media', 'Alta'], boxes=both(outer + inner))
+    ear = chain(base=(4.0, 0.0, 0.6), base_rot=(-20, -15, -62),
+                segs=[(1.6, 0, 0), (1.6, 0, 9), (1.5, 0, 11), (1.5, 0, 12), (1.2, 0, 10)],
+                widths=[2.9, 2.7, 2.2, 1.5, 0.8, 0.15], thick=[0.8, 0.75, 0.65, 0.55, 0.45, 0.3],
+                color='skin', shade=[0.97, 1.0, 1.0, 0.98, 0.96, 0.95],
+                inner=dict(color='skin:0.74', width=0.5, rings=4), twitch=6, sway=0.8, lag=1.0)
+    return dict(name='Orejas de elfo', heights=[1.6, 2.6, 3.6], height_names=['Baja', 'Media', 'Alta'], boxes=[], chains=[ear])
 
 # ------------------------------------------------------------ Cuernos de demonio: en espiral (tipo carnero), como Kishirika
 def demon_horns():
@@ -58,40 +67,30 @@ def demon_horns():
         if ring:
             col = lerp_hex(col, '000000', 0.25)
         horn.append(seg(pts[k], pts[k + 1], 2.3 - 1.7 * u, 2.3 - 1.7 * u, col, 1.0))
-    return dict(name='Cuernos de demonio', heights=[-1.0, 0.0, 1.0], height_names=['Baja', 'Media', 'Alta'], boxes=both(horn))
+    return dict(name='Cuernos de demonio', heights=[-1.0, 0.0, 1.0], height_names=['Baja', 'Media', 'Alta'], boxes=both(horn), chains=[])
 
 # ------------------------------------------------------------ Orejas de hombre bestia (arriba de la cabeza)
-def ear_stack(x, z, h, w0, w1, depth, tilt_z, tilt_x, color, inner, n=5):
-    """Oreja de capas que se afinan hacia la punta, inclinada hacia afuera (tilt_z) y adelante/atras (tilt_x)."""
-    out = []
-    tz, tx = math.radians(tilt_z), math.radians(tilt_x)
-    for i in range(n):
-        u = (i + 0.5) / n
-        w = w0 + (w1 - w0) * u
-        y = 8 + h * u
-        cx = x + math.sin(tz) * h * u
-        cz = z + math.sin(tx) * h * u
-        out.append(box((cx, y, cz), (w, h / n * 1.05, depth), color, rot=(tilt_x, 0, -tilt_z)))
-        if inner and i < n - 1:
-            out.append(box((cx, y, cz + depth / 2 + 0.05), (w * 0.55, h / n * 1.05, 0.15), inner, rot=(tilt_x, 0, -tilt_z)))
-    return out
-
 def beast_cat():
-    ears = ear_stack(2.4, -0.6, 4.2, 3.2, 0.5, 1.1, 14, -6, 'hair', 'e8a6b0')
-    return dict(name='Orejas de gato', heights=[0.0], height_names=['—'], boxes=both(ears))
+    ear = chain(base=(2.3, 7.6, -0.3), base_rot=(-8, 0, -14),
+                segs=[(1.6, 0, 0), (1.5, -5, 4), (1.4, -7, 6)],
+                widths=[3.6, 3.1, 2.1, 0.35], thick=[1.0, 0.9, 0.7, 0.35], color='hair', shade=[0.92, 1.0, 1.0, 1.05],
+                inner=dict(color='e8a6b0', width=0.55, rings=3), twitch=16, sway=3, lag=1.0)
+    return dict(name='Orejas de gato', heights=[0.0], height_names=['—'], boxes=[], chains=[ear])
 
 def beast_dog():
-    # Base parada y la punta doblada hacia adelante
-    base = ear_stack(2.6, -0.8, 3.0, 3.0, 2.2, 1.0, 10, -4, 'hair', 'c98f86', n=3)
-    tip = [box((2.95, 10.9, 0.3), (2.3, 0.9, 2.4), 'hair', rot=(58, 0, -10)),
-           box((3.0, 10.1, 1.3), (1.9, 0.8, 1.1), 'hair:0.88', rot=(75, 0, -10))]
-    return dict(name='Orejas de perro', heights=[0.0], height_names=['—'], boxes=both(base + tip))
+    # Oreja caida: sube un poco, se dobla hacia afuera y cuelga al costado de la cabeza
+    ear = chain(base=(3.2, 7.7, -0.2), base_rot=(0, 0, -25),
+                segs=[(0.8, 0, 0), (1.2, 0, -75), (1.9, 0, -55), (1.9, 0, -18), (1.4, 0, -5)],
+                widths=[2.8, 3.1, 3.3, 3.2, 2.8, 2.0], thick=[0.9, 0.8, 0.75, 0.7, 0.65, 0.6], color='hair',
+                shade=[0.95, 1.0, 0.97, 0.93, 0.88, 0.84], twitch=16, sway=4, lag=1.6)
+    return dict(name='Orejas de perro', heights=[0.0], height_names=['—'], boxes=[], chains=[ear])
 
 def beast_bear():
-    ear = [box((2.9, 8.9, -0.8), (2.8, 1.8, 1.2), 'hair'),
-           box((2.9, 10.0, -0.8), (2.0, 0.8, 1.2), 'hair'),
-           box((2.9, 9.2, -0.15), (1.4, 1.3, 0.2), 'b07a6a')]
-    return dict(name='Orejas de oso', heights=[0.0], height_names=['—'], boxes=both(ear))
+    ear = chain(base=(2.9, 7.6, -0.6), base_rot=(-4, 0, -10),
+                segs=[(1.0, 0, 0), (1.0, 0, 8), (0.6, 0, 14)],
+                widths=[2.6, 3.1, 2.8, 1.3], thick=[1.1, 1.1, 1.0, 0.8], color='hair', shade=[0.95, 1.0, 1.0, 1.02],
+                inner=dict(color='9a6a5c', width=0.55, rings=3), twitch=10, sway=2, lag=0.8)
+    return dict(name='Orejas de oso', heights=[0.0], height_names=['—'], boxes=[], chains=[ear])
 
 # ------------------------------------------------------------ Gema de Superd: punto rojo centrado en la frente
 def superd_gem():
@@ -99,7 +98,7 @@ def superd_gem():
     g['glow'] = True
     hl = box((-0.25, 6.35, 4.3), (0.4, 0.4, 0.1), 'ff9a9a')
     hl['glow'] = True
-    return dict(name='Gema de Superd', heights=[0.0], height_names=['—'], boxes=[g, hl])
+    return dict(name='Gema de Superd', heights=[0.0], height_names=['—'], boxes=[g, hl], chains=[])
 
 COSMETICS = dict(elf_ears=elf_ears, demon_horns=demon_horns, beast_cat=beast_cat, beast_dog=beast_dog,
                  beast_bear=beast_bear, superd_gem=superd_gem)
