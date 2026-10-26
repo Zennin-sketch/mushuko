@@ -2586,5 +2586,6 @@
   "entity.remushoku.spirit_body": "Body",
   "msg.remushoku.no_arrows": "You have no arrows (put them in the quiver or your inventory)",
   "msg.remushoku.bow_reload_hint": "Load an arrow with %s",
-  "key.remushoku.bow_reload": "Load arrow (mod bows)"
+  "key.remushoku.bow_reload": "Load arrow (mod bows)",
+  "tooltip.remushoku.quiver_count": "%s / %s arrows"
 }

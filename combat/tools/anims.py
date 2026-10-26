@@ -466,8 +466,8 @@ bow_r()
 # Solo se mueven brazos, cuerpo y cabeza: las piernas siguen caminando (se puede caminar tensando).
 UPPER = {'rightArm', 'leftArm', 'body', 'head', 'rightItem', 'leftItem'}
 ARMS = {'rightArm', 'leftArm', 'rightItem', 'leftItem'}
-BOW_UP = (0.32, 0.95, 0.0)          # arco de pie, la punta de arriba inclinada hacia la derecha
-BOW_UP_LOW = (0.55, 0.8, 0.2)       # en espera: mas inclinado
+BOW_UP = (0.77, 0.64, 0.0)          # arco en diagonal: la punta de arriba inclinada 50 grados hacia la derecha
+BOW_UP_LOW = (0.88, 0.42, 0.2)      # en espera: casi acostado, en diagonal
 # Espera: el arco adelante y abajo en la izquierda, la derecha cerca de la cuerda. Alto suficiente para verse en
 # primera persona (los ojos estan ~4 px sobre el cuello).
 BOW_IDLE = dict(larm=L((-3.0, -2.8, 8.8), BOW_UP_LOW), rarm=R((0.2, -3.8, 6.2), (0.2, 0.3, 1)))
@@ -487,16 +487,22 @@ def bows():
     i.key(23, 'smooth', **P(BOW_IDLE, dict(larm=L((-3.6, -6.0, 7.3), BOW_UP_LOW), rarm=R((1.4, -6.4, 5.1), (0.2, 0.3, 1)))))
     i.key(40, 'smooth', **BOW_IDLE)
 
-    l = anim('bow_load', 'Arco del mod: R = sacar una flecha del carcaj (hombro derecho) y colocarla en la cuerda', end=16,
-             stop=20, start=BOW_IDLE, lag=('head',))
+    l = anim('bow_load', 'Arco del mod: R = la mano sube por arriba del hombro, saca una flecha del carcaj, la trae y la coloca',
+             end=16, stop=20, start=BOW_IDLE, lag=('head',))
     l.only = UPPER
     l.key(0, 'smooth', **P(BOW_IDLE))
-    l.key(4, 'smooth', **P(torso(turn=-6), head(yaw=14, down=-4),
-                           dict(larm=L((-3.4, -4.6, 8.2), BOW_UP), rarm=R((3.2, 2.2, -3.6), (0, 1, -0.2)))))
-    l.key(6, 'stop', **P(torso(turn=-8), head(yaw=16, down=-6),
-                         dict(larm=L((-3.4, -4.4, 8.4), BOW_UP), rarm=R((3.0, 3.2, -4.4), (0, 1, -0.3)))))
-    l.key(10, 'smooth', **P(torso(turn=6), head(yaw=-6, down=4),
-                            dict(larm=L((-3.0, -3.2, 9.2), BOW_UP), rarm=R((0.8, -1.0, 7.6), (-0.2, 0.2, 1)))))
+    # sube el brazo por el costado, casi estirado (sin doblar el codo de golpe)
+    l.key(3, 'smooth', **P(torso(turn=-4), head(yaw=8, down=-2),
+                           dict(larm=L((-3.2, -3.6, 8.6), BOW_UP), rarm=R((6.0, 4.0, 1.5), (0.3, 0.9, 0.3)))))
+    # la mano llega a la boca del carcaj, arriba y atras del hombro derecho
+    l.key(6, 'stop', **P(torso(turn=-8), head(yaw=14, down=-6),
+                         dict(larm=L((-3.2, -3.4, 8.8), BOW_UP), rarm=R((4.2, 6.4, -2.6), (0.1, 1.0, -0.2)))))
+    # saca la flecha hacia arriba
+    l.key(8, 'smooth', **P(torso(turn=-6), head(yaw=10, down=-4),
+                           dict(larm=L((-3.0, -3.0, 9.0), BOW_UP), rarm=R((5.0, 7.2, -0.6), (0.1, 1.0, 0.3)))))
+    # la trae por delante del hombro hasta el arco
+    l.key(11, 'smooth', **P(torso(turn=2), head(yaw=0, down=2),
+                            dict(larm=L((-2.4, -1.6, 9.4), BOW_UP), rarm=R((2.6, 1.0, 6.0), (-0.1, 0.4, 1)))))
     l.key(13, 'stop', **BOW_NOCKED)
     l.key(16, 'stop', **BOW_NOCKED)
 
@@ -526,7 +532,7 @@ def skill(name, desc, end, legs_free=False):
         x.only = UPPER
     return x
 
-QUIVER_R = dict(rarm=R((3.0, 3.2, -4.4), (0, 1, -0.3)))
+QUIVER_R = dict(rarm=R((4.2, 6.4, -2.6), (0.1, 1.0, -0.2)))
 CHEEK = dict(rarm=R((0.4, 2.0, 2.4), (-0.1, 0.25, 1)))
 NOCK = dict(rarm=R((-0.4, -0.6, 5.6), (-0.1, 0.3, 1)))
 BOW_UP_SKY = (0.25, 0.45, -0.86)    # apuntando al cielo: el arco se acuesta hacia atras

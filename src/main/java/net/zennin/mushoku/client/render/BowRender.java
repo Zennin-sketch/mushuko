@@ -33,6 +33,8 @@ public final class BowRender {
     public static ArmBend armBend = (p, arm, pose) -> {};
     /** Se esta dibujando la primera persona animada (lo pone el addon). */
     public static java.util.function.BooleanSupplier firstPerson = () -> false;
+    /** Cuando empezo a cargar cada jugador (id -> tick del mundo), para la flecha en la mano. */
+    public static final java.util.Map<Integer, Long> LOAD_START = new java.util.HashMap<>();
 
     /** Forma y colores de cada arco. */
     public record Style(float riser, float limb, float w0, float w1, float t0, float t1, float base, float curve, float recurve,
@@ -89,17 +91,25 @@ public final class BowRender {
                 back = Math.max(BRACE, Math.min(BRACE + DRAW, h.length()));
             }
         }
-        if (firstPerson.getAsBoolean() && p == net.minecraft.client.Minecraft.getInstance().player) {
-            // primera persona: mas inclinado y mas chico, para que no tape la vista (como en Unturned)
-            pose.mulPose(com.mojang.math.Axis.XP.rotationDegrees(left ? -32 : 32));
-            pose.scale(0.62f, 0.62f, 0.62f);
-            back = BRACE + (back - BRACE) / 0.62f;
-            back = Math.min(BRACE + DRAW, back);
-        }
-        boolean arrow = drawing || BowSystem.isLoaded(bow);
+        Long ls = LOAD_START.get(p.getId());
+        float lt = ls == null ? 99 : (p.level().getGameTime() - ls) + net.minecraft.client.Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
+        boolean inHand = lt >= 6 && lt < 13;
+        boolean arrow = drawing || (BowSystem.isLoaded(bow) && !inHand && !(lt < 13)) || (lt >= 13 && lt < 24);
         ItemStack ammo = arrow ? p.getProjectile(bow) : ItemStack.EMPTY;
         draw(pose, buffers, style(bow), back, arrow, ammo.isEmpty() ? new ItemStack(Items.ARROW) : ammo, light, overlay);
         pose.popPose();
+        if (inHand) {
+            // la flecha que saco del carcaj, en la mano que tensa
+            pose.pushPose();
+            model.translateToHand(drawArm, pose);
+            armBend.apply(p, drawArm, pose);
+            pose.translate((drawArm == HumanoidArm.LEFT ? 1 : -1) / 16f, 10.5f / 16f, 0);
+            ItemStack a = p.getProjectile(bow);
+            int[] col = ArrowRender.colors(a.isEmpty() ? new ItemStack(Items.ARROW) : a);
+            ArrowRender.draw(pose, Mesh3D.solid(buffers), new Vector3f(0, 0, 3f), new Vector3f(0, 0, -1), new Vector3f(1, 0, 0), ARROW,
+                    col[0], col[1], light, overlay);
+            pose.popPose();
+        }
     }
 
     /** back: cuanto esta atras la cuerda (px desde el agarre). */

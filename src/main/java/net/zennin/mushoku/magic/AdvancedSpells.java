@@ -129,7 +129,7 @@ public final class AdvancedSpells {
             }
 
             // ================= FUEGO =================
-            case EX_FLAME -> shoot(p, proj(p, MagicProjectile.FIRE, 8f).size(2f), 1.6f, 0f, SoundEvents.BLAZE_SHOOT);
+            case EX_FLAME -> shoot(p, proj(p, MagicProjectile.FIRE, 8f).size(2f).incendiary(2.2f), 1.6f, 0f, SoundEvents.BLAZE_SHOOT);
             case FLAME_SLICE -> {
                 // Se ve un solo tajo de fuego ancho; los costados son golpes invisibles para cubrir el mismo abanico
                 for (float yaw = -10f; yaw <= 10f; yaw += 10f)

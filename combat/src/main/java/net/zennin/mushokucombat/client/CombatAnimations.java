@@ -47,7 +47,8 @@ public final class CombatAnimations {
 
     /** Animaciones que se ven en primera persona. */
     static boolean firstPerson(String name) {
-        return name.startsWith("bow_") && !name.endsWith("_r") || name.startsWith("archer_");
+        // los arcos del mod tienen su propia primera persona (BowFirstPerson, fija a la camara)
+        return false;
     }
 
     /** Hay una animacion del addon sonando en este jugador. */

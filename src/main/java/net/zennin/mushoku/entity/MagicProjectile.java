@@ -37,6 +37,8 @@ public class MagicProjectile extends ThrowableProjectile {
     private float knockback = 0f;
     private float explosion = 0f;
     private boolean lift = false;
+    /** Estallido de fuego al impactar (como la carga de un ghast): no rompe bloques, prende fuego al azar alrededor. */
+    private float incendiary = 0f;
 
     public MagicProjectile(EntityType<? extends MagicProjectile> type, Level level) {
         super(type, level);
@@ -53,6 +55,7 @@ public class MagicProjectile extends ThrowableProjectile {
     public MagicProjectile size(float s) { this.entityData.set(SIZE, s); return this; }
     public MagicProjectile knockback(float k) { this.knockback = k; return this; }
     public MagicProjectile explosion(float power) { this.explosion = power; return this; }
+    public MagicProjectile incendiary(float power) { this.incendiary = power; return this; }
     public MagicProjectile lift() { this.lift = true; this.entityData.set(VARIANT, VARIANT_DRILL); return this; }
     public MagicProjectile variant(int v) { this.entityData.set(VARIANT, v); return this; }
     public int variant() { return this.entityData.get(VARIANT); }
@@ -146,6 +149,18 @@ public class MagicProjectile extends ThrowableProjectile {
             if (level() instanceof ServerLevel sl) {
                 sl.sendParticles(particle(), getX(), getY(), getZ(), Math.round(10 * sizeScale()), 0.3 * sizeScale(), 0.3 * sizeScale(), 0.3 * sizeScale(), 0.05);
             }
+            if (incendiary > 0 && explosion <= 0) {
+                Entity owner = getOwner();
+                // dana a todos menos al que la lanzo; los bloques quedan, pero el fuego aparece al azar como con un ghast
+                net.minecraft.world.level.ExplosionDamageCalculator calc = new net.minecraft.world.level.ExplosionDamageCalculator() {
+                    @Override
+                    public boolean shouldDamageEntity(net.minecraft.world.level.Explosion e, Entity entity) {
+                        return entity != owner && super.shouldDamageEntity(e, entity);
+                    }
+                };
+                level().explode(this, damageSources().explosion(this, owner), calc, getX(), getY(), getZ(), incendiary, true,
+                        Level.ExplosionInteraction.NONE);
+            }
             if (explosion > 0) {
                 if (level() instanceof ServerLevel sl && kind() == FIRE)
                     SpellFxEntity.spawn(sl, "fire_burst", position(), 0, explosion * 1.3f, 20, null);
@@ -164,6 +179,7 @@ public class MagicProjectile extends ThrowableProjectile {
         tag.putFloat("Knockback", knockback);
         tag.putFloat("Explosion", explosion);
         tag.putBoolean("Lift", lift);
+        tag.putFloat("Incendiary", incendiary);
     }
 
     @Override
@@ -173,6 +189,7 @@ public class MagicProjectile extends ThrowableProjectile {
         if (tag.contains("Size")) this.entityData.set(SIZE, tag.getFloat("Size"));
         this.damage = tag.getFloat("Damage");
         this.knockback = tag.getFloat("Knockback");
+        this.incendiary = tag.getFloat("Incendiary");
         this.explosion = tag.getFloat("Explosion");
         this.lift = tag.getBoolean("Lift");
     }

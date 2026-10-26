@@ -47,8 +47,14 @@ public final class BowClient {
         // R: cargar
         boolean reload = ModKeys.isDown(ModKeys.BOW_RELOAD);
         while (ModKeys.BOW_RELOAD.consumeClick()) {}
-        if (reload && !reloadPrev && mc.screen == null && bow && !BowSystem.isLoaded(p.getMainHandItem()) && !p.isUsingItem())
+        Long started = net.zennin.mushoku.client.render.BowRender.LOAD_START.get(p.getId());
+        boolean busy = started != null && mc.level != null && mc.level.getGameTime() - started < BowSystem.LOAD_TICKS;
+        if (reload && !reloadPrev && mc.screen == null && bow && !busy && !BowSystem.isLoaded(p.getMainHandItem()) && !p.isUsingItem()) {
             ClientPlayNetworking.send(new ActionPayload(ActionPayload.BOW_RELOAD));
+            boolean hasArrows = p.getAbilities().instabuild || !p.getProjectile(p.getMainHandItem()).isEmpty();
+            if (mc.level != null && hasArrows)
+                net.zennin.mushoku.client.render.BowRender.LOAD_START.put(p.getId(), mc.level.getGameTime());
+        }
         reloadPrev = reload;
         // clic izquierdo mantenido: tensar (con la flecha cargada); no golpea ni rompe bloques
         boolean attack = bow && mc.screen == null && mc.mouseHandler.isMouseGrabbed() && physicallyDown(mc.options.keyAttack);

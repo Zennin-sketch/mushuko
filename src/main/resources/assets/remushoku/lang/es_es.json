@@ -2586,5 +2586,6 @@
   "entity.remushoku.spirit_body": "Cuerpo",
   "msg.remushoku.no_arrows": "No tienes flechas (ponlas en el carcaj o en el inventario)",
   "msg.remushoku.bow_reload_hint": "Carga la flecha con %s",
-  "key.remushoku.bow_reload": "Cargar flecha (arcos del mod)"
+  "key.remushoku.bow_reload": "Cargar flecha (arcos del mod)",
+  "tooltip.remushoku.quiver_count": "%s / %s flechas"
 }

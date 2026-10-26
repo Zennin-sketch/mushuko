@@ -9,7 +9,8 @@
     "AbstractClientPlayerMixin",
     "InventoryScreenMixin",
     "CreativeScreenMixin",
-    "ItemInHandLayerMixin"
+    "ItemInHandLayerMixin",
+    "FirstPersonBowMixin"
   ],
   "injectors": {
     "defaultRequire": 1

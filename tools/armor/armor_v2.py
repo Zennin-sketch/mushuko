@@ -115,7 +115,11 @@ def rbox(bone, origin, size, mat, detail=None, pivot=(0, 0, 0), e=(0, 0, 0)):
 def mirrored(b):
     """Copia espejada en X. Para brazos/piernas/botas cambia al hueso del otro lado."""
     o, s = b['origin'], b['size']
-    m = dict(b, bone=MIRROR.get(b['bone'], b['bone']), origin=[-(o[0] + s[0]), o[1], o[2]])
+    bone = MIRROR.get(b['bone'], b['bone'])
+    if bone.startswith('ring_'):
+        head, ang = bone.rsplit('_', 1)
+        bone = '%sm_%03d' % (head, (360 - int(ang)) % 360)
+    m = dict(b, bone=bone, origin=[-(o[0] + s[0]), o[1], o[2]])
     if b['rot']:
         m['rot'] = [b['rot'][0], -b['rot'][1], -b['rot'][2]]
         m['pivot'] = [-b['pivot'][0], b['pivot'][1], b['pivot'][2]]
@@ -186,6 +190,43 @@ def chain(bone, base, segs, mat, det=None, side=0.0):
     return out
 
 
+_RING = [0]
+
+
+def ring_bone(tag, x, z):
+    """Hueso de tela segun donde esta alrededor de la cintura (0 adelante, 90 derecha = -X, 180 atras): el renderer lo
+    mueve con la pierna de ese lado (adelante empuja la pierna que va adelante, atras la que va atras)."""
+    ang = int(round(math.degrees(math.atan2(-x, -z)))) % 360
+    _RING[0] += 1
+    return 'ring_%s%02d_%03d' % (tag, _RING[0], ang)
+
+
+def ring_panel(tag, piv, w, length, mat, det=None, yaw=None, flare=0, thick=0.5):
+    """Pano en su propio hueso de tela (con pivote en su borde de arriba)."""
+    x, y, z = piv
+    yw = yaw if yaw is not None else math.degrees(math.atan2(-x, -z))
+    return panel(ring_bone(tag, x, z), piv, w, length, mat, det, yw, flare, thick)
+
+
+def ring_skirt(tag, y, length, hw, hd, flare, mat, det=None, n=16, thick=0.5, gap=0.0, cz=0.0):
+    """Falda de n panos alrededor de un ovalo (medio ancho hw, media profundidad hd), cada uno en su hueso: se mueve
+    por partes con cada pierna y, como los vecinos se mueven parecido, los panos se estiran y se unen (como codos).
+    gap: abertura adelante en grados (abrigo abierto)."""
+    out = []
+    per = 2 * math.pi * math.sqrt((hw * hw + hd * hd) / 2)
+    bottom = per + 2 * math.pi * length * math.sin(math.radians(flare)) * 0.8
+    w = bottom / n * 1.12
+    for i in range(n):
+        a = 360.0 * (i + 0.5) / n
+        d = min(a, 360 - a)
+        if gap and d < gap / 2:
+            continue
+        r = math.radians(a)
+        x, z = -math.sin(r) * hw, cz - math.cos(r) * hd
+        out.append(panel(ring_bone(tag, x, z - cz), (x, y, z), w, length, mat, det, a, flare, thick))
+    return out
+
+
 # ================================================================ Disenos
 B, H, RA, LA, RL, RF = 'armorBody', 'armorHead', 'armorRightArm', 'armorLeftArm', 'armorRightLeg', 'armorRightBoot'
 LL, LF = 'armorLeftLeg', 'armorLeftBoot'
@@ -219,11 +260,14 @@ def mk2():
     # cinturon, hebilla y bolsas
     out.append(box(B, [-5.0, 12.2, -3.0], [10, 1.4, 6.0], 'harness', 'stitch'))
     out.append(box(B, [-0.9, 12.05, -3.25], [1.8, 1.7, 0.3], 'gold'))
-    out.append(box(B, [-5.6, 10.2, -1.6], [1.4, 2.8, 2.8], 'harness', 'flap'))
-    out.append(box(B, [2.0, 10.4, -3.6], [2.2, 2.4, 1.2], 'harness', 'flap'))
-    out.append(box(B, [-3.6, 10.8, 3.1], [2.4, 2.0, 1.0], 'harness', 'flap'))
-    # faldones hasta la rodilla, abiertos adelante y con abertura atras
-    out += skirt(B, 12.4, 8.6, 4.75, 2.85, 9, 'coat_grey', 'coat_edge', split=1.4, corner=2.6, cflare=12, cloth=True)
+    # bolsas del cinturon: cada una cuelga de su zona y se mueve con la pierna de ese lado
+    for o, sz in (([-5.6, 10.2, -1.6], [1.4, 2.8, 2.8]), ([2.0, 10.4, -3.6], [2.2, 2.4, 1.2]), ([-3.6, 10.8, 3.1], [2.4, 2.0, 1.0])):
+        cx, cz = o[0] + sz[0] / 2, o[2] + sz[2] / 2
+        bb = box(ring_bone('p', cx, cz), o, sz, 'harness', 'flap')
+        bb['rot'], bb['pivot'] = [0, 0, 0], [cx, 12.6, cz]
+        out.append(bb)
+    # faldones hasta la rodilla en 18 panos (abiertos adelante): cada parte sigue a su pierna
+    out += ring_skirt('k', 12.4, 8.6, 4.75, 2.85, 9, 'coat_grey', 'coat_edge', n=18, gap=24)
     # mangas: hombro, manga ancha con pliegues, correa en el codo y puno vuelto
     out += sym([
         box(RA, [-8.75, 21.7, -2.75], [5.2, 2.6, 5.5], 'coat_grey', 'trim_light'),
@@ -265,14 +309,17 @@ def flame_cloak():
     # cuerpo de la capa: frente en dos hojas, costados, esquinas y espalda en cuatro pliegues
     L_ = 21.4
     top = 22.2
-    out += xm(panel('clothFR', (-4.6, top, -3.4), 7.4, L_, 'cloak', 'cloakflame', yaw=-6, flare=6))
-    out += xm(panel('clothR', (-8.6, top, 0), 6.6, L_, 'cloak', 'cloakflame', yaw=90, flare=7))
-    out += xm(panel('clothFR', (-7.6, top, -2.9), 2.8, L_, 'cloak', 'cloakflame', yaw=45, flare=8))
-    out += xm(panel('clothB', (-7.6, top, 2.9), 2.8, L_, 'cloak', 'cloakflame', yaw=135, flare=8))
+    out += xm(ring_panel('c', (-4.6, top, -3.4), 7.4, L_, 'cloak', 'cloakflame', yaw=-6, flare=6))
+    out += xm(ring_panel('c', (-8.6, top, 0), 6.6, L_, 'cloak', 'cloakflame', yaw=90, flare=7))
+    out += xm(ring_panel('c', (-7.6, top, -2.9), 2.8, L_, 'cloak', 'cloakflame', yaw=45, flare=8))
+    out += xm(ring_panel('c', (-7.6, top, 2.9), 2.8, L_, 'cloak', 'cloakflame', yaw=135, flare=8))
     for x, dz, yw in ((-6.0, 0, 192), (-2.1, 0.8, 168), (2.1, 0.8, 192), (6.0, 0, 168)):
-        out.append(panel('clothB', (x, top, 3.4 + dz), 4.6, L_ - dz * 0.5, 'cloak', 'cloakflame', yaw=yw, flare=7))
-    # forro oscuro que se ve por la abertura del frente
-    out.append(box(B, [-3.2, 1.4, -2.6], [6.4, 20.8, 0.3], 'cloak_in', 'folds'))
+        out.append(ring_panel('c', (x, top, 3.4 + dz), 4.6, L_ - dz * 0.5, 'cloak', 'cloakflame', yaw=yw, flare=7))
+    # forro oscuro que se ve por la abertura del frente: dos mitades, cada una con su pierna
+    for x0 in (-3.2, 0.0):
+        lb = box(ring_bone('i', x0 + 1.6, -2.6), [x0, 1.4, -2.6], [3.2, 20.8, 0.3], 'cloak_in', 'folds')
+        lb['rot'], lb['pivot'] = [0, 0, 0], [x0 + 1.6, 22.2, -2.45]
+        out.append(lb)
     # mangas (los brazos salen de la capa con la misma tela) y punos con brasas
     out += sym([
         box(RA, [-8.7, 13.2, -2.7], [5.0, 10.9, 5.4], 'cloak', 'folds'),
@@ -311,8 +358,8 @@ def roxy():
     out += xm(rbox(B, [-2.4, 22.2, -3.15], [1.8, 1.3, 0.4], 'frill_black', pivot=(-0.6, 22.8, -3.0), e=(0, 0, 12)))
     out += xm(rbox(B, [-0.9, 19.6, -3.1], [0.6, 2.7, 0.3], 'frill_black', pivot=(-0.6, 22.3, -3.0), e=(0, 0, -14)))
     # falda: piso negro con tablas y volado blanco abajo
-    out += skirt(B, 12.9, 5.4, 4.9, 2.95, 24, 'frill_black', 'pleats', corner=3.0, cflare=26, cloth=True)
-    out += skirt(B, 8.2, 2.6, 6.9, 5.0, 34, 'blouse', 'frill', corner=4.2, cflare=34, cloth=True)
+    out += ring_skirt('s', 12.9, 5.4, 4.9, 2.95, 24, 'frill_black', 'pleats', n=16)
+    out += ring_skirt('f', 8.2, 2.6, 6.9, 5.0, 34, 'blouse', 'frill', n=20)
     # moño grande atras
     out.append(box(B, [-0.9, 12.9, 2.7], [1.8, 1.6, 0.9], 'frill_black'))
     out += xm(rbox(B, [-3.9, 12.6, 2.8], [3.0, 2.4, 0.6], 'frill_black', 'folds', pivot=(-0.9, 13.7, 3.1), e=(0, 0, -10)))
@@ -705,6 +752,12 @@ def geo(name, boxes, tex):
         if tops:
             bones[cb] = dict(name=cb, parent='armorBody', pivot=[0, round(max(tops), 3), 0], cubes=[])
             order.append(cb)
+    # Huesos de tela por zona (ring_*): pivote en el borde de arriba de su pano, colgados del torso
+    for b in boxes:
+        if b['bone'].startswith('ring_') and b['bone'] not in bones:
+            piv = b['pivot'] if b['pivot'] else [b['origin'][0] + b['size'][0] / 2, b['origin'][1] + b['size'][1], b['origin'][2]]
+            bones[b['bone']] = dict(name=b['bone'], parent='armorBody', pivot=[round(v, 3) for v in piv], cubes=[])
+            order.append(b['bone'])
     for b in boxes:
         uv = {}
         for name, (fx, fy, fw, fh) in faces(b).items():
@@ -817,6 +870,7 @@ def main():
         os.makedirs(d, exist_ok=True)
     import shutil
     for name, (fn, items, full) in ARMORS.items():
+        _RING[0] = 0
         boxes = fn()
         tex = pack(boxes)
         img, glow = paint(boxes, tex, seed=len(name))
@@ -832,7 +886,8 @@ def main():
             if item in ICON_FROM:
                 shutil.copy(os.path.join(idir, ICON_FROM[item] + '.png'), os.path.join(idir, item + '.png'))
             else:
-                icon(boxes, SLOT_BONES[slot], img).save(os.path.join(idir, item + '.png'))
+                sb = SLOT_BONES[slot] + ([bx['bone'] for bx in boxes if bx['bone'].startswith('ring_')] if slot == 'chest' else [])
+                icon(boxes, sb, img).save(os.path.join(idir, item + '.png'))
             with open(os.path.join(mdir, item + '.json'), 'w') as f:
                 json.dump({'parent': 'minecraft:item/generated', 'textures': {'layer0': 'remushoku:item/' + item}}, f, indent=1)
     print(len(ARMORS), 'armaduras v2 ->', gdir)

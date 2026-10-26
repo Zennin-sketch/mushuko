@@ -27,51 +27,97 @@ import java.util.List;
  * Hay que ponerlo en su ranura del inventario (al lado del escudo): ahi se ve en la espalda y funciona.
  */
 public class QuiverItem extends BundleItem {
+    /** Flechas que entran en un carcaj (en pilas de 64). */
+    public static final int CAPACITY = 999;
+
     public QuiverItem(Properties props) {
         super(props);
+    }
+
+    // ---------------------------------------------------------------- contenido (pilas de 64, hasta 999 en total)
+    public static List<ItemStack> contents(ItemStack quiver) {
+        BundleContents c = quiver.get(DataComponents.BUNDLE_CONTENTS);
+        List<ItemStack> out = new java.util.ArrayList<>();
+        if (c != null) for (ItemStack s : c.items()) out.add(s.copy());
+        return out;
+    }
+
+    public static int count(ItemStack quiver) {
+        int n = 0;
+        for (ItemStack s : contents(quiver)) n += s.getCount();
+        return n;
+    }
+
+    private static void store(ItemStack quiver, List<ItemStack> list) {
+        list.removeIf(ItemStack::isEmpty);
+        quiver.set(DataComponents.BUNDLE_CONTENTS, new BundleContents(list));
+    }
+
+    /** Mete lo que entre de 'arrows' (lo saca de esa pila). Devuelve cuantas metio. */
+    public static int insert(ItemStack quiver, ItemStack arrows) {
+        if (!arrows.is(ItemTags.ARROWS) || arrows.isEmpty()) return 0;
+        List<ItemStack> list = contents(quiver);
+        int room = CAPACITY - count(quiver), moved = 0;
+        for (ItemStack s : list) {
+            if (room <= 0 || arrows.isEmpty()) break;
+            if (ItemStack.isSameItemSameComponents(s, arrows) && s.getCount() < 64) {
+                int k = Math.min(Math.min(64 - s.getCount(), arrows.getCount()), room);
+                s.grow(k); arrows.shrink(k); room -= k; moved += k;
+            }
+        }
+        while (room > 0 && !arrows.isEmpty()) {
+            int k = Math.min(Math.min(64, arrows.getCount()), room);
+            list.add(arrows.split(k)); room -= k; moved += k;
+        }
+        if (moved > 0) store(quiver, list);
+        return moved;
+    }
+
+    /** Saca la ultima pila que entro (como la bolsa). */
+    public static ItemStack removeOne(ItemStack quiver) {
+        List<ItemStack> list = contents(quiver);
+        if (list.isEmpty()) return ItemStack.EMPTY;
+        ItemStack out = list.remove(list.size() - 1);
+        store(quiver, list);
+        return out;
     }
 
     @Override
     public boolean overrideStackedOnOther(ItemStack quiver, Slot slot, ClickAction action, Player player) {
         if (action != ClickAction.SECONDARY) return false;
-        BundleContents c = quiver.get(DataComponents.BUNDLE_CONTENTS);
-        if (c == null) return false;
         ItemStack other = slot.getItem();
-        BundleContents.Mutable m = new BundleContents.Mutable(c);
         if (other.isEmpty()) {
-            ItemStack removed = m.removeOne();
-            if (removed != null) {
+            ItemStack removed = removeOne(quiver);
+            if (!removed.isEmpty()) {
                 player.playSound(SoundEvents.BUNDLE_REMOVE_ONE, 0.8f, 0.8f + player.level().getRandom().nextFloat() * 0.4f);
                 ItemStack rest = slot.safeInsert(removed);
-                m.tryInsert(rest);
+                if (!rest.isEmpty()) insert(quiver, rest);
             }
         } else if (other.is(ItemTags.ARROWS)) {
-            if (m.tryTransfer(slot, player) > 0) player.playSound(SoundEvents.BUNDLE_INSERT, 0.8f, 0.8f + player.level().getRandom().nextFloat() * 0.4f);
+            ItemStack taken = slot.safeTake(other.getCount(), other.getCount(), player);
+            int n = insert(quiver, taken);
+            if (!taken.isEmpty()) slot.safeInsert(taken);
+            if (n > 0) player.playSound(SoundEvents.BUNDLE_INSERT, 0.8f, 0.8f + player.level().getRandom().nextFloat() * 0.4f);
         } else {
             return false;
         }
-        quiver.set(DataComponents.BUNDLE_CONTENTS, m.toImmutable());
         return true;
     }
 
     @Override
     public boolean overrideOtherStackedOnMe(ItemStack quiver, ItemStack other, Slot slot, ClickAction action, Player player, SlotAccess access) {
         if (action != ClickAction.SECONDARY || !slot.allowModification(player)) return false;
-        BundleContents c = quiver.get(DataComponents.BUNDLE_CONTENTS);
-        if (c == null) return false;
-        BundleContents.Mutable m = new BundleContents.Mutable(c);
         if (other.isEmpty()) {
-            ItemStack removed = m.removeOne();
-            if (removed != null) {
+            ItemStack removed = removeOne(quiver);
+            if (!removed.isEmpty()) {
                 player.playSound(SoundEvents.BUNDLE_REMOVE_ONE, 0.8f, 1f);
                 access.set(removed);
             }
         } else if (other.is(ItemTags.ARROWS)) {
-            if (m.tryInsert(other) > 0) player.playSound(SoundEvents.BUNDLE_INSERT, 0.8f, 1f);
+            if (insert(quiver, other) > 0) player.playSound(SoundEvents.BUNDLE_INSERT, 0.8f, 1f);
         } else {
             return false;
         }
-        quiver.set(DataComponents.BUNDLE_CONTENTS, m.toImmutable());
         return true;
     }
 
@@ -82,7 +128,14 @@ public class QuiverItem extends BundleItem {
     }
 
     @Override
+    public boolean isBarVisible(ItemStack stack) { return count(stack) > 0; }
+
+    @Override
+    public int getBarWidth(ItemStack stack) { return Math.min(13, 1 + Math.round(12f * count(stack) / CAPACITY)); }
+
+    @Override
     public void appendHoverText(ItemStack stack, TooltipContext ctx, List<Component> lines, TooltipFlag flag) {
+        lines.add(Component.translatable("tooltip.remushoku.quiver_count", count(stack), CAPACITY).withStyle(ChatFormatting.GOLD));
         lines.add(Component.translatable("tooltip.remushoku.quiver").withStyle(ChatFormatting.GRAY));
     }
 
@@ -100,14 +153,11 @@ public class QuiverItem extends BundleItem {
         for (ItemStack s : inv.items) if (s.is(ItemTags.ARROWS)) return;
         ItemStack quiver = find(p);
         if (quiver.isEmpty()) return;
-        BundleContents c = quiver.get(DataComponents.BUNDLE_CONTENTS);
-        if (c == null || c.isEmpty()) return;
-        BundleContents.Mutable m = new BundleContents.Mutable(c);
-        ItemStack out = m.removeOne();
-        if (out == null) return;
-        ItemStack give = out.split(Math.min(16, out.getCount()));
-        if (!out.isEmpty()) m.tryInsert(out);
-        quiver.set(DataComponents.BUNDLE_CONTENTS, m.toImmutable());
+        List<ItemStack> list = contents(quiver);
+        if (list.isEmpty()) return;
+        ItemStack first = list.get(0);
+        ItemStack give = first.split(Math.min(16, first.getCount()));
+        store(quiver, list);
         if (!inv.add(give)) p.drop(give, false);
     }
 }

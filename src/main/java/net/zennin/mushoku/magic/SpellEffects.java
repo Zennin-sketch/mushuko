@@ -77,6 +77,8 @@ public final class SpellEffects {
 
     private static void shoot(ServerPlayer p, int kind, float damage, float speed, SoundEvent snd) {
         MagicProjectile proj = new MagicProjectile(p.level(), p, kind, damage);
+        // la bola de fuego estalla como la carga de un ghast: no rompe bloques pero prende fuego alrededor
+        if (kind == MagicProjectile.FIRE) proj.incendiary(1.2f);
         proj.setPos(p.getX(), p.getEyeY() - 0.1, p.getZ());
         proj.shootFromRotation(p, p.getXRot(), p.getYRot(), 0f, speed, 0f);
         p.level().addFreshEntity(proj);

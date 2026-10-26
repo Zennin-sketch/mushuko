@@ -36,6 +36,10 @@ public final class BowAnimClient {
     public static void oneShot(AbstractClientPlayer p, String anim) {
         if (p.level() == null) return;
         LOCK.put(p, p.level().getGameTime() + oneShotTicks(anim));
+        if (anim.equals("bow_load") && (p != net.minecraft.client.Minecraft.getInstance().player
+                || !net.zennin.mushoku.client.render.BowRender.LOAD_START.containsKey(p.getId())
+                || p.level().getGameTime() - net.zennin.mushoku.client.render.BowRender.LOAD_START.get(p.getId()) > 10))
+            net.zennin.mushoku.client.render.BowRender.LOAD_START.put(p.getId(), p.level().getGameTime());
         STATE.put(p, anim);
         CombatAnimations.play(p, anim, 2);
     }
