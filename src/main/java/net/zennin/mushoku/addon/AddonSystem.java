@@ -26,7 +26,7 @@ public final class AddonSystem {
     private AddonSystem() {}
 
     public static boolean cursed(Player p) {
-        return p.hasEffect(AddonItems.SUPERD_CURSE) && !p.getItemBySlot(EquipmentSlot.HEAD).is(AddonItems.CURSE_SUPPRESSING_HELMET);
+        return p.hasEffect(AddonItems.SUPERD_CURSE) && !net.zennin.mushoku.item.ArmorV2.is(p.getItemBySlot(EquipmentSlot.HEAD), AddonItems.CURSE_SUPPRESSING_HELMET);
     }
 
     public static void init() {
@@ -48,11 +48,11 @@ public final class AddonSystem {
             int t = server.getTickCount();
             if (t % 20 != 0) return;
             for (ServerPlayer p : server.getPlayerList().getPlayers()) {
-                if (p.getItemBySlot(EquipmentSlot.FEET).is(AddonItems.ENCHANTED_SHOES))
+                if (net.zennin.mushoku.item.ArmorV2.is(p.getItemBySlot(EquipmentSlot.FEET), AddonItems.ENCHANTED_SHOES))
                     p.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 60, 0, false, false, true));
-                if (p.getItemBySlot(EquipmentSlot.CHEST).is(AddonItems.FLAME_TRAPPING_CLOAK))
+                if (net.zennin.mushoku.item.ArmorV2.is(p.getItemBySlot(EquipmentSlot.CHEST), AddonItems.FLAME_TRAPPING_CLOAK))
                     p.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 60, 0, false, false, true));
-                if (p.getItemBySlot(EquipmentSlot.HEAD).is(AddonItems.MAGICAL_SUNGLASSES)) {
+                if (net.zennin.mushoku.item.ArmorV2.is(p.getItemBySlot(EquipmentSlot.HEAD), AddonItems.MAGICAL_SUNGLASSES)) {
                     p.removeEffect(MobEffects.BLINDNESS);
                     p.removeEffect(MobEffects.DARKNESS);
                 }

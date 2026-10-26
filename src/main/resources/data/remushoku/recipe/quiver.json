@@ -1,0 +1,24 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "equipment",
+ "pattern": [
+  "SL ",
+  "LAL",
+  " LL"
+ ],
+ "key": {
+  "S": {
+   "item": "minecraft:string"
+  },
+  "L": {
+   "item": "minecraft:leather"
+  },
+  "A": {
+   "item": "minecraft:arrow"
+  }
+ },
+ "result": {
+  "id": "remushoku:quiver",
+  "count": 1
+ }
+}

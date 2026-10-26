@@ -20,6 +20,8 @@ public class ClassPickScreen extends Screen {
                 .bounds(cx - 105, cy, 100, 20).build());
         addRenderableWidget(Button.builder(Component.translatable("gui.remushoku.class_pick_gui.button_swordsman"), b -> minecraft.setScreen(new AffinityScreen()))
                 .bounds(cx + 5, cy, 100, 20).build());
+        addRenderableWidget(Button.builder(Component.translatable("class.remushoku.archer_short"), b -> minecraft.setScreen(new ArcherSchoolScreen()))
+                .bounds(cx - 50, cy + 24, 100, 20).build());
     }
 
     private void pick(int action) {

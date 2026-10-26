@@ -91,6 +91,7 @@ public final class ModNetworking {
                     case ActionPayload.CAST -> SpellCasting.onActivate(p);
                     case ActionPayload.CHOOSE_MAGE -> PlayerClasses.choose(p, SpellCasting.CLASS_MAGE);
                     case ActionPayload.CHOOSE_SWORDSMAN -> PlayerClasses.choose(p, SpellCasting.CLASS_SWORDSMAN);
+                    case ActionPayload.CHOOSE_ARCHER -> PlayerClasses.choose(p, SpellCasting.CLASS_ARCHER);
                     case ActionPayload.EYE_ONE -> net.zennin.mushoku.extra.DemonEyes.toggle(p, 0);
                     case ActionPayload.EYE_TWO -> net.zennin.mushoku.extra.DemonEyes.toggle(p, 1);
                     default -> {}

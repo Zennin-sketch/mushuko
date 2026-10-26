@@ -109,6 +109,10 @@ public final class ModItems {
 
     private ModItems() {}
 
+    /** Carcaj del arquero: guarda hasta 64 flechas y te las pasa cuando te quedas sin flechas sueltas. */
+    public static final Item QUIVER = register("quiver", new net.zennin.mushoku.item.QuiverItem(new Item.Properties().stacksTo(1)
+            .component(net.minecraft.core.component.DataComponents.BUNDLE_CONTENTS, net.minecraft.world.item.component.BundleContents.EMPTY)));
+
     private static <T extends Item> T register(String name, T item) {
         Registry.register(BuiltInRegistries.ITEM, MushokuMod.id(name), item);
         ALL.add(item);

@@ -232,11 +232,12 @@ public final class HitogamiSystem {
         if (d.created()) return;
         Race r = Race.byKey(a.race());
         if (r == null) return;
-        int cls = a.cls() == SpellCasting.CLASS_SWORDSMAN ? SpellCasting.CLASS_SWORDSMAN : SpellCasting.CLASS_MAGE;
+        int cls = a.cls() == SpellCasting.CLASS_SWORDSMAN || a.cls() == SpellCasting.CLASS_ARCHER ? a.cls() : SpellCasting.CLASS_MAGE;
         if (RaceSystem.data(p).race().isEmpty()) RaceSystem.choose(p, r.key, false);
         setAppearance(p, Appearance.forRace(r, a.variant(), a.height(), a.color()));
         PlayerClasses.choose(p, cls);
         if (cls == SpellCasting.CLASS_SWORDSMAN && !a.affinity().isEmpty()) SwordSystem.chooseAffinity(p, a.affinity());
+        if (cls == SpellCasting.CLASS_ARCHER && !a.affinity().isEmpty()) net.zennin.mushoku.archer.ArcherSystem.chooseSchool(p, a.affinity());
         ModAttachments.setHitogami(p, d.withCreated());
         toWorldSpawn(p);
         p.displayClientMessage(Component.translatable("msg.remushoku.hitogami.reborn").withStyle(ChatFormatting.GOLD), false);

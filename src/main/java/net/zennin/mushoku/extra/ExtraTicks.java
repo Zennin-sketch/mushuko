@@ -30,8 +30,8 @@ public final class ExtraTicks {
             for (ServerPlayer p : server.getPlayerList().getPlayers()) {
                 if (holdingClaws(p) && p.horizontalCollision) p.fallDistance = 0;
                 if (!second) continue;
-                boolean fullSet = p.getItemBySlot(EquipmentSlot.CHEST).is(ModItems.MK2_CHESTPLATE)
-                        && p.getItemBySlot(EquipmentSlot.LEGS).is(ModItems.MK2_LEGGINGS) && p.getItemBySlot(EquipmentSlot.FEET).is(ModItems.MK2_BOOTS);
+                boolean fullSet = net.zennin.mushoku.item.ArmorV2.is(p.getItemBySlot(EquipmentSlot.CHEST), ModItems.MK2_CHESTPLATE)
+                        && net.zennin.mushoku.item.ArmorV2.is(p.getItemBySlot(EquipmentSlot.LEGS), ModItems.MK2_LEGGINGS) && net.zennin.mushoku.item.ArmorV2.is(p.getItemBySlot(EquipmentSlot.FEET), ModItems.MK2_BOOTS);
                 MobEffectInstance boost = p.getEffect(MobEffects.HEALTH_BOOST);
                 if (fullSet) {
                     p.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 60, 0, false, false, true));

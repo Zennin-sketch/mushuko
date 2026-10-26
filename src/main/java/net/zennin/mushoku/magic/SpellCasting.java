@@ -11,7 +11,7 @@ import net.zennin.mushoku.sword.SwordSkill;
 
 /** Logica del servidor: armar el hechizo con flechas, lanzarlo y cobrar el mana. */
 public final class SpellCasting {
-    public static final int CLASS_MAGE = 1, CLASS_SWORDSMAN = 2;
+    public static final int CLASS_MAGE = 1, CLASS_SWORDSMAN = 2, CLASS_ARCHER = 3;
 
     private SpellCasting() {}
 

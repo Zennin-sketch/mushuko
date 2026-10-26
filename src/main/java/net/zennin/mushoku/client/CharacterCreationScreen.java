@@ -65,7 +65,7 @@ public class CharacterCreationScreen extends Screen {
         int sy = height - 72;
         addRenderableWidget(Button.builder(Component.literal("<"), b -> cycle(-1)).bounds(cx - 95, sy, 20, 20).build());
         addRenderableWidget(Button.builder(Component.literal(">"), b -> cycle(1)).bounds(cx + 75, sy, 20, 20).build());
-        if (stage == Stage.CLASS && cls == 1) {
+        if (stage == Stage.CLASS && cls >= 1) {
             addRenderableWidget(Button.builder(Component.literal("<"), b -> { aff = (aff + 2) % 3; }).bounds(cx - 95, sy + 24, 20, 20).build());
             addRenderableWidget(Button.builder(Component.literal(">"), b -> { aff = (aff + 1) % 3; }).bounds(cx + 75, sy + 24, 20, 20).build());
         }
@@ -75,7 +75,7 @@ public class CharacterCreationScreen extends Screen {
         boolean last = stage == Stage.CLASS;
         Button next = Button.builder(Component.translatable(last ? "gui.remushoku.cc.confirm" : "gui.remushoku.cc.next"), b -> next())
                 .bounds(cx + 100, height - 26, 90, 20).build();
-        next.active = !(last && cls == 2);
+        next.active = true;
         addRenderableWidget(next);
     }
 
@@ -101,9 +101,9 @@ public class CharacterCreationScreen extends Screen {
             case RACE -> stage = hasTrait() ? Stage.TRAIT : Stage.CLASS;
             case TRAIT -> stage = Stage.CLASS;
             case CLASS -> {
-                if (cls == 2) return;
                 ClientPlayNetworking.send(new HitogamiActionPayload(HitogamiActionPayload.CREATE, race().key, variant, height, hasColor() ? color : -1,
-                        cls == 0 ? SpellCasting.CLASS_MAGE : SpellCasting.CLASS_SWORDSMAN, cls == 1 ? SwordStyle.values()[aff].key : ""));
+                        cls == 0 ? SpellCasting.CLASS_MAGE : cls == 1 ? SpellCasting.CLASS_SWORDSMAN : SpellCasting.CLASS_ARCHER,
+                        cls == 1 ? SwordStyle.values()[aff].key : cls == 2 ? net.zennin.mushoku.archer.ArcherSchool.values()[aff].key : ""));
                 onClose();
                 return;
             }
@@ -134,9 +134,11 @@ public class CharacterCreationScreen extends Screen {
 
         // Selector(es)
         int sy = height - 72;
-        selectorBox(g, cx, sy, selectorLabel(), stage == Stage.CLASS && cls == 2 ? DIM : TEXT);
+        selectorBox(g, cx, sy, selectorLabel(), TEXT);
         if (stage == Stage.CLASS && cls == 1)
             selectorBox(g, cx, sy + 24, Component.translatable("style.remushoku." + SwordStyle.values()[aff].key), TEXT);
+        if (stage == Stage.CLASS && cls == 2)
+            selectorBox(g, cx, sy + 24, Component.translatable("school.remushoku." + net.zennin.mushoku.archer.ArcherSchool.values()[aff].key), TEXT);
 
         // Paneles
         int side = sideWidth();
@@ -199,6 +201,8 @@ public class CharacterCreationScreen extends Screen {
         int sel = inv.selected;
         ItemStack main = inv.items.get(sel), off = inv.offhand.get(0);
         ItemStack[] armor = {inv.armor.get(0), inv.armor.get(1), inv.armor.get(2), inv.armor.get(3)};
+        int qs = sel == 8 ? 7 : 8;  // ranura donde se pone el carcaj de muestra (se ve en la espalda)
+        ItemStack quiverSlot = inv.items.get(qs);
         try {
             if (stage == Stage.CLASS) {
                 switch (cls) {
@@ -217,6 +221,7 @@ public class CharacterCreationScreen extends Screen {
                     }
                     default -> {
                         inv.items.set(sel, new ItemStack(Items.BOW));
+                        inv.items.set(qs, new ItemStack(ModItems.QUIVER));
                         inv.offhand.set(0, ItemStack.EMPTY);
                         for (int i = 0; i < 4; i++) inv.armor.set(i, ItemStack.EMPTY);
                     }
@@ -227,6 +232,7 @@ public class CharacterCreationScreen extends Screen {
             InventoryScreen.renderEntityInInventoryFollowsMouse(g, cx - 60, top, cx + 60, bottom, size, 0.0625f, mouseX, mouseY, p);
         } finally {
             inv.items.set(sel, main);
+            inv.items.set(qs, quiverSlot);
             inv.offhand.set(0, off);
             for (int i = 0; i < 4; i++) inv.armor.set(i, armor[i]);
         }
@@ -370,6 +376,12 @@ public class CharacterCreationScreen extends Screen {
             SwordStyle st = SwordStyle.values()[aff];
             out.add(Component.translatable("style.remushoku." + st.key).withStyle(ChatFormatting.GOLD));
             out.add(Component.translatable("style.remushoku." + st.key + ".desc").withStyle(ChatFormatting.GRAY));
+        }
+        if (cls == 2) {
+            out.add(Component.empty());
+            var sc = net.zennin.mushoku.archer.ArcherSchool.values()[aff];
+            out.add(Component.translatable("school.remushoku." + sc.key).withStyle(ChatFormatting.GOLD));
+            out.add(Component.translatable("school.remushoku." + sc.key + ".desc").withStyle(ChatFormatting.GRAY));
         }
         return out;
     }

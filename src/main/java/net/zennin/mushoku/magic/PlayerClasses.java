@@ -24,11 +24,14 @@ public final class PlayerClasses {
         ManaData d = ModAttachments.get(p);
         if (d.playerClass() != 0) return; // ya eligio
         ModAttachments.set(p, d.withClass(cls));
-        p.displayClientMessage(Component.translatable(cls == SpellCasting.CLASS_MAGE ? "msg.remushoku.class_mage" : "msg.remushoku.class_swordsman")
+        p.displayClientMessage(Component.translatable(cls == SpellCasting.CLASS_MAGE ? "msg.remushoku.class_mage"
+                        : cls == SpellCasting.CLASS_ARCHER ? "msg.remushoku.class_archer" : "msg.remushoku.class_swordsman")
                 .withStyle(ChatFormatting.GOLD), false);
         ModNetworking.syncMana(p);
         SwordSystem.refresh(p);
         SwordSystem.sync(p);
+        net.zennin.mushoku.archer.ArcherSystem.refresh(p);
+        net.zennin.mushoku.archer.ArcherSystem.sync(p);
         net.zennin.mushoku.extra.DemonEyes.maybeBornWithEye(p);
     }
 
@@ -36,6 +39,7 @@ public final class PlayerClasses {
     public static void reset(ServerPlayer p) {
         ModAttachments.set(p, ModAttachments.get(p).withClass(0));
         SwordSystem.reset(p);
+        net.zennin.mushoku.archer.ArcherSystem.reset(p);
         ModNetworking.syncMana(p);
         ModNetworking.openClassScreen(p);
     }

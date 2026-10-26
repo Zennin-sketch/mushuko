@@ -82,6 +82,20 @@ public final class ModAttachments {
     @SuppressWarnings("UnstableApiUsage")
     public static void setHitogami(Player player, net.zennin.mushoku.hitogami.HitogamiData d) { player.setAttached(HITOGAMI, d); }
 
+    /** Escuela, puntos y habilidades del arquero. */
+    @SuppressWarnings("UnstableApiUsage")
+    public static final AttachmentType<ArcherData> ARCHER = AttachmentRegistry.<ArcherData>builder()
+            .persistent(ArcherData.CODEC)
+            .copyOnDeath()
+            .initializer(() -> ArcherData.DEFAULT)
+            .buildAndRegister(MushokuMod.id("archer"));
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static ArcherData archer(Player player) { return player.getAttachedOrCreate(ARCHER); }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static void setArcher(Player player, ArcherData d) { player.setAttached(ARCHER, d); }
+
     private ModAttachments() {}
 
     @SuppressWarnings("UnstableApiUsage")

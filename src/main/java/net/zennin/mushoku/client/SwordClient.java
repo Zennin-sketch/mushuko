@@ -17,15 +17,20 @@ public final class SwordClient {
     private static void tick(Minecraft mc) {
         if (mc.player == null) return;
         boolean swordsman = ClientManaState.playerClass == 2;
+        boolean archer = ClientManaState.playerClass == 3;
         while (ModKeys.MENU.consumeClick()) {
             if (swordsman && mc.screen == null)
                 mc.setScreen(ClientSwordState.data.style().isEmpty() ? new AffinityScreen() : new SwordsmanScreen());
+            else if (archer && mc.screen == null)
+                mc.setScreen(ClientArcherState.data.school().isEmpty() ? new ArcherSchoolScreen() : new ArcherScreen());
         }
         boolean silentMage = ClientManaState.playerClass == 1 && ClientExtraState.data.silent();
         KeyMapping[] keys = {ModKeys.SKILL_1, ModKeys.SKILL_2, ModKeys.SKILL_3};
         for (int i = 0; i < 3; i++) {
             while (keys[i].consumeClick()) {
                 if ((swordsman || silentMage) && mc.screen == null) ClientPlayNetworking.send(new SwordActionPayload(SwordActionPayload.USE_SLOT, i, ""));
+                else if (archer && mc.screen == null)
+                    ClientPlayNetworking.send(new net.zennin.mushoku.network.ArcherActionPayload(net.zennin.mushoku.network.ArcherActionPayload.USE_SLOT, i, ""));
             }
         }
         while (ModKeys.ADVENTURER.consumeClick()) if (mc.screen == null) mc.setScreen(new AdventurerScreen());
