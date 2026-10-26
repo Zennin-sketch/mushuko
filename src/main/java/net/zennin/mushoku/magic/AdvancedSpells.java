@@ -63,28 +63,32 @@ public final class AdvancedSpells {
             }
             case ICE_FORTRESS -> dome(p, level, Blocks.PACKED_ICE.defaultBlockState(), 300, SoundEvents.GLASS_PLACE);
             case CUMULONIMBUS -> {
-                // La nube se arma en espiral en el cielo; con el primer rayo empieza a llover un rato corto
+                // Nube enorme (36 bloques de radio): se arma en espiral, destella y suelta 4 rayos mientras llueve
                 Vec3 c = targetPoint(p, 40);
-                net.zennin.mushoku.entity.SpellFxEntity.spawn(level, "cumulonimbus", c.add(0, 16, 0), p.getRandom().nextFloat() * 360, 6f, net.zennin.mushoku.entity.SpellFxEntity.CUMULO_LIFE, null);
-                sound(level, c, SoundEvents.ELYTRA_FLYING, 0.6f);
-                int[] strikes = {net.zennin.mushoku.entity.SpellFxEntity.CUMULO_FORM, net.zennin.mushoku.entity.SpellFxEntity.CUMULO_FORM + 25, net.zennin.mushoku.entity.SpellFxEntity.CUMULO_FORM + 50};
+                double R = net.zennin.mushoku.entity.SpellFxEntity.CUMULO_RADIUS;
+                net.zennin.mushoku.entity.SpellFxEntity.spawn(level, "cumulonimbus", c.add(0, net.zennin.mushoku.entity.SpellFxEntity.CUMULO_HEIGHT, 0),
+                        p.getRandom().nextFloat() * 360, net.zennin.mushoku.entity.SpellFxEntity.CUMULO_SCALE, net.zennin.mushoku.entity.SpellFxEntity.CUMULO_LIFE, null);
+                sound(level, c, SoundEvents.ELYTRA_FLYING, 1.0f);
+                Tasks.later(net.zennin.mushoku.entity.SpellFxEntity.CUMULO_FORM - 20, () -> sound(level, c, SoundEvents.LIGHTNING_BOLT_THUNDER, 0.6f));
+                int[] strikes = net.zennin.mushoku.entity.SpellFxEntity.CUMULO_STRIKES;
                 for (int i = 0; i < strikes.length; i++) {
                     final int n = i;
                     Tasks.later(strikes[i], () -> {
-                        List<LivingEntity> near = around(level, c, 9, p);
+                        List<LivingEntity> near = around(level, c, R * 0.85, p);
                         Vec3 at = n < near.size() ? near.get(n).position()
-                                : c.add((p.getRandom().nextDouble() - 0.5) * 10, 0, (p.getRandom().nextDouble() - 0.5) * 10);
+                                : c.add((p.getRandom().nextDouble() - 0.5) * R * 1.4, 0, (p.getRandom().nextDouble() - 0.5) * R * 1.4);
                         lightning(level, p, at);
                     });
                 }
                 Tasks.later(net.zennin.mushoku.entity.SpellFxEntity.CUMULO_FORM, () -> sound(level, c, SoundEvents.WEATHER_RAIN, 2f));
                 Tasks.repeat(net.zennin.mushoku.entity.SpellFxEntity.CUMULO_FORM, 10, net.zennin.mushoku.entity.SpellFxEntity.CUMULO_RAIN_END - net.zennin.mushoku.entity.SpellFxEntity.CUMULO_FORM, tick -> {
                     // La lluvia apaga a quien este debajo y el fuego del suelo (tambien el que prenden los rayos)
-                    for (LivingEntity e : around(level, c, 10, null)) e.clearFire();
+                    for (LivingEntity e : around(level, c, R, null)) e.clearFire();
                     BlockPos b = BlockPos.containing(c);
-                    for (BlockPos pos : BlockPos.betweenClosed(b.offset(-9, -4, -9), b.offset(9, 6, 9)))
+                    int r = (int) Math.ceil(R);
+                    for (BlockPos pos : BlockPos.betweenClosed(b.offset(-r, -4, -r), b.offset(r, 6, r)))
                         if (level.getBlockState(pos).is(Blocks.FIRE)) level.removeBlock(pos, false);
-                    if (tick % 20 == 0) sound(level, c, SoundEvents.WEATHER_RAIN, 1.5f);
+                    if (tick % 20 == 0) sound(level, c, SoundEvents.WEATHER_RAIN, 2f);
                     return true;
                 });
             }

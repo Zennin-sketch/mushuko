@@ -69,14 +69,90 @@ def storm_cloud(scale, life, form, strikes, arms, steps, radius, rain=None, name
     d['preview']['strikes'] = list(strikes)
     return d
 
-# Momentos clave (ticks) que tambien usa el codigo del hechizo
-CUMULO_FORM, CUMULO_STRIKES, CUMULO_RAIN_END, CUMULO_LIFE = 50, (50, 75, 100), 120, 150
+# Momentos clave (ticks) que tambien usa el codigo del hechizo (SpellFxEntity / AdvancedSpells)
+CUMULO_FORM, CUMULO_STRIKES, CUMULO_RAIN_END, CUMULO_LIFE = 60, (60, 80, 100, 120), 140, 175
+CUMULO_SCALE, CUMULO_RADIUS, CUMULO_HEIGHT = 12, 48, 28   # radio 48 px * 12 / 16 = 36 bloques; a 28 bloques del suelo
 STORM_FORM, STORM_LIFE = 14, 45
 
 def cumulonimbus():
-    # escala 6: radio ~ 24 px * 6 = 9 bloques; la lluvia cae ~18 bloques (48 px * 6 / 16)
-    return storm_cloud(6, CUMULO_LIFE, CUMULO_FORM, CUMULO_STRIKES, 3, 15, 24, rain=(CUMULO_FORM, CUMULO_RAIN_END, 48),
-                       name='Cumulonimbus', spells=['cumulonimbus'], height=16)
+    """Cumulonimbus grande: el viento entra en espiral, se arma la base oscura de afuera hacia adentro, sube la torre
+    del centro y se abre el yunque arriba. Antes de cada rayo destella por dentro; llueve primero suave y despues
+    fuerte; al final se deshace abriendose."""
+    rnd = random.Random(1907)
+    F, R, life = CUMULO_FORM, CUMULO_RADIUS, CUMULO_LIFE
+    fall = CUMULO_HEIGHT * 16 / CUMULO_SCALE
+    # ---- base: bocanadas en 5 brazos de espiral, de afuera hacia adentro
+    puffs = cloud_puffs(5, 22, 6, R, 280, rnd, 17, 9)
+    base_dark = [box(at, sz, lerp_hex('3e4350', '5d6473', rnd.random()), 0.95, rot=(0, ry, 0)) for _, at, sz, ry in puffs]
+    base_mid = [box((at[0], at[1] + sz[1] * 0.5, at[2]), (sz[0] * 0.85, sz[1] * 0.8, sz[2] * 0.85), lerp_hex('7c8392', '9ba1ad', rnd.random()),
+                    0.93, rot=(0, ry + 25, 0)) for _, at, sz, ry in puffs]
+    # bordes deshilachados de la base (mas claros y transparentes)
+    fringe = []
+    for k in range(40):
+        ang = rnd.uniform(0, 2 * math.pi)
+        r = R * rnd.uniform(0.92, 1.12)
+        w = rnd.uniform(6, 11)
+        fringe.append(box((r * math.cos(ang), rnd.uniform(-1, 2), r * math.sin(ang)), (w, w * 0.5, w), 'a7adb8', 0.5, rot=(0, rnd.uniform(0, 90), 0)))
+    swirl = [0, F, 260, 1.5]
+    groups = [
+        group('cloud', 'translucent', base_dark, spin=(0, 0.5, 0), swirl=swirl, stagger=[0, F * 0.7]),
+        group('cloud', 'translucent', base_mid, spin=(0, 0.5, 0), swirl=swirl, stagger=[6, F * 0.8]),
+        group('cloud', 'translucent', fringe, spin=(0, 0.35, 0), swirl=[0, F, 200, 1.4], stagger=[F * 0.3, F * 0.9], pulse=(0.02, 37)),
+    ]
+    # ---- torre central que sube y se hincha
+    tower = []
+    for lvl in range(7):
+        y = 3 + lvl * 4.5
+        w = 22 - lvl * 1.6
+        for _ in range(4):
+            ox, oz = rnd.uniform(-5, 5), rnd.uniform(-5, 5)
+            tower.append(box((ox, y, oz), (w * rnd.uniform(0.7, 1.0), rnd.uniform(6, 8), w * rnd.uniform(0.7, 1.0)),
+                             lerp_hex('a4aab6', 'd3d7de', lvl / 6), 0.94, rot=(0, rnd.uniform(0, 90), 0)))
+    groups.append(group('cloud', 'translucent', tower, spin=(0, 0.8, 0), rise=[F * 0.25, F, 22], stagger=[F * 0.25, F * 0.95]))
+    # ---- yunque: capa ancha y chata arriba, se abre al final de la formacion
+    anvil = [box(at, (sz[0] * 1.3, sz[1] * 0.45, sz[2] * 1.3), lerp_hex('c6cad3', 'e3e6eb', rnd.random()), 0.9, rot=(0, ry, 0))
+             for _, at, sz, ry in cloud_puffs(4, 12, 4, R * 0.75, 200, rnd, 16, 10)]
+    for bx in anvil:
+        bx['at'][1] = round(bx['at'][1] + 36, 3)
+    groups.append(group('cloud', 'translucent', anvil, spin=(0, -0.3, 0), offset=[0, 0, 0], grow=[F * 0.7, F + 12],
+                        show=[[F * 0.7, 400]]))
+    # ---- destellos por dentro: anuncian cada rayo (antes) y quedan vibrando un instante (despues)
+    for i, st in enumerate(CUMULO_STRIKES):
+        fl = [box((rnd.uniform(-R * 0.6, R * 0.6), rnd.uniform(0, 4), rnd.uniform(-R * 0.6, R * 0.6)),
+                  (rnd.uniform(8, 16), 4, rnd.uniform(8, 16)), 'd8e6ff', 0.5) for _ in range(5)]
+        groups.append(group('cloud', 'emissive', fl, glow=True, flicker=0.8, show=[[st - 7, st - 4], [st - 2, st + 5]]))
+    ambient = [box((rnd.uniform(-R * 0.7, R * 0.7), rnd.uniform(0, 6), rnd.uniform(-R * 0.7, R * 0.7)),
+                   (rnd.uniform(6, 12), 3, rnd.uniform(6, 12)), 'b9cdf2', 0.35) for _ in range(8)]
+    groups.append(group('cloud', 'emissive', ambient, glow=True, flicker=0.9,
+                        show=[[F - 20, F - 17], [F + 10, F + 12], [F + 31, F + 33], [F + 49, F + 52], [F + 70, F + 72]]))
+    # ---- viento que la arma: espirales que se cierran desde afuera
+    wisps = []
+    for a in range(5):
+        for k in range(22):
+            u0, u1 = k / 22, (k + 1) / 22
+            def pt(u, a=a):
+                ang = math.radians(a * 72 + 40 + u * 340)
+                r = R * 1.35 - u * R * 1.05
+                return (r * math.cos(ang), -2 + u * 3, r * math.sin(ang))
+            wisps.append(seg(pt(u0), pt(u1), 1.2, 0.8, 'c9ced8', 0.15 + 0.3 * math.sin(math.pi * u0)))
+    groups.append(group('cloud', 'translucent', wisps, glow=True, spin=(0, 6, 0), show=[[0, F + 4]], stagger=[0, F * 0.4]))
+    # niebla que entra hacia el centro mientras se forma
+    groups.append(group('cloud', 'translucent', [], show=[[0, F - 4]],
+                        emit=emitter(90, 26, (R * 1.2, 3, R * 1.2), (5.0, 2.0), ('8d94a2', 'c3c8d1'), alpha=0.45, outward=-1.4)))
+    # ---- lluvia: primero unas gotas, despues el aguacero; cortina gris debajo mientras llueve fuerte
+    drop = dict(rise=-fall / 9, center=(0, -3, 0), shape=(0.18, 3.0, 0.18))
+    groups.append(group('water', 'translucent', [], glow=True, show=[[F - 6, F + 14]],
+                        emit=emitter(140, 9, (R * 0.8, 0.5, R * 0.8), (1.0, 1.0), ('b4cce4', 'dce9f6'), alpha=0.6, **drop)))
+    groups.append(group('water', 'translucent', [], glow=True, show=[[F + 8, CUMULO_RAIN_END]],
+                        emit=emitter(520, 9, (R * 0.85, 0.5, R * 0.85), (1.0, 1.0), ('a9c2dc', 'e2edf8'), alpha=0.75, **drop)))
+    curtain = [box((rnd.uniform(-R * 0.6, R * 0.6), -fall / 2, rnd.uniform(-R * 0.6, R * 0.6)),
+                   (rnd.uniform(14, 24), fall, rnd.uniform(14, 24)), '9aa7b8', 0.07, rot=(0, rnd.uniform(0, 90), 0)) for _ in range(9)]
+    groups.append(group('water', 'translucent', curtain, show=[[F + 12, CUMULO_RAIN_END - 4]], pulse=(0.04, 23)))
+    # al final se deshace: se apaga mientras se abre un 20%
+    d = fx('Cumulonimbus', ['cumulonimbus'], groups, life, scale=CUMULO_SCALE, height=CUMULO_HEIGHT, cam=CUMULO_HEIGHT * 2.6,
+           outro=[30, 0, -0.2])
+    d['preview']['strikes'] = list(CUMULO_STRIKES)
+    return d
 
 def storm_cloud_small():
     return storm_cloud(3, STORM_LIFE, STORM_FORM, (STORM_FORM,), 2, 10, 14, name='Nube del rayo', spells=['lightning'], height=11)
@@ -346,22 +422,74 @@ def wind_blade_form():
                                                            swirl, haze, body, edge, streaks, motes],
               life=FORM, scale=1.0, height=0.6, cam=2.2)
 
+def _ring_z(radius, segments, width, thick, color, alpha, z=0.0):
+    """Anillo alrededor del eje Z (el eje de vuelo de los proyectiles)."""
+    out = []
+    for k in range(segments):
+        a0, a1 = 2 * math.pi * k / segments, 2 * math.pi * (k + 1) / segments
+        out.append(seg((radius * math.cos(a0), radius * math.sin(a0), z), (radius * math.cos(a1), radius * math.sin(a1), z), width, thick, color, alpha))
+    return out
+
 def wind_drill_form():
+    """El aire entra en corrientes que giran alrededor de la mano, se junta en un anillo y de ahi el taladro se
+    estira hacia adelante hasta la punta; al final un golpe de aire sale del anillo."""
     from spell_models import wind_drill
     strands, cone, motes = wind_drill()['groups']
-    strands['swirl'] = [0, 18, 540, 2.2]
-    cone['grow'] = [6, 18]
+    # las hebras crecen de atras hacia la punta (todas a la vez, no una hebra despues de otra)
+    body, tip = strands['boxes'][:-1], strands['boxes'][-1:]
+    n = len(body) // 3
+    strands['boxes'] = [body[st * n + k] for k in range(n) for st in range(3)] + tip
+    strands['stagger'] = [5, 17]
+    cone['stagger'] = [7, 18]
     motes['show'] = [[15, 40]]
-    return fx('Taladro de viento: se forma en la mano', [], [_gather('wind', 'translucent', 20, 10, ('ffffff', 'c6eedd'), size=(0.9, 0.2)),
-                                                              strands, cone, motes],
-              life=FORM, scale=1.0, height=0.6, cam=2.2)
+    # corrientes de aire que llegan girando desde atras y afuera, y se cierran sobre el anillo
+    streams = []
+    for a in range(4):
+        pts = []
+        for k in range(19):
+            u = k / 18
+            ang = math.radians(a * 90 + u * 300)
+            r = 10.5 - u * 5.0
+            pts.append((r * math.cos(ang), r * math.sin(ang), -14 + u * 6))
+        for k in range(18):
+            u = k / 18
+            streams.append(seg(pts[k], pts[k + 1], 0.3 + 0.9 * u, 0.35, lerp_hex('bfe9d8', 'ffffff', u), 0.15 + 0.55 * u))
+    intake = group('wind', 'translucent', streams, glow=True, spin=(0, 0, 55), show=[[0, 12]], stagger=[0, 6])
+    ring = group('wind', 'translucent', _ring_z(5.6, 20, 0.7, 0.5, 'e6fff4', 0.75) + _ring_z(4.2, 16, 0.4, 0.4, 'ffffff', 0.6),
+                 glow=True, spin=(0, 0, 70), offset=[0, 0, -8], grow=[3, 9], show=[[3, 19]])
+    blast = group('wind', 'translucent', _ring_z(6.5, 24, 1.0, 0.4, 'ffffff', 0.55), glow=True,
+                  offset=[0, 0, -8], grow=[16, 22], show=[[16, 22]])
+    flash = group('wind', 'translucent', [box((0, 0, 10.6), (1.6, 1.6, 1.6), 'ffffff', 0.85, rot=(0, 0, 45))], glow=True,
+                  show=[[16, 21]], pulse=(0.3, 3))
+    return fx('Taladro de viento: se forma en la mano', [], [_gather('wind', 'translucent', 18, 10, ('ffffff', 'c6eedd'), size=(0.9, 0.2), radius=(13, 13, 6)),
+                                                              intake, ring, strands, cone, blast, flash, motes],
+              life=FORM, scale=1.0, height=0.6, cam=2.4)
 
 def water_arrow_form():
+    """Las gotas se juntan en una bola de agua; la bola se estira hacia los dos lados en el astil, se afila la punta,
+    la espiral se enrosca alrededor y una onda de agua cierra la formacion."""
     shaft_head, helix, drops = water_arrow()['groups']
-    shaft_head['stagger'] = [4, 17]
-    helix['swirl'] = [0, 18, 360, 2.0]
-    drops['show'] = [[15, 40]]
-    return fx('Flecha de agua: se forma en la mano', [], [_gather('water', 'translucent', 22, 12, ('7cc8ff', 'ffffff')), helix, shaft_head, drops],
+    shaft = []
+    for i in range(14):
+        zc = -8 + i + 0.5
+        shaft.append(box((0, 0, zc), (0.9, 0.9, 1.05), '6cc0ff', 0.7, rot=(0, 0, 45)))
+    shaft.sort(key=lambda b: abs(b['at'][2] + 1))
+    head = shaft_head['boxes'][1:]
+    shaft_head['boxes'] = shaft + head
+    shaft_head['stagger'] = [5, 16]
+    hb = helix['boxes']
+    hn = len(hb) // 2
+    helix['boxes'] = [hb[st * hn + k] for k in range(hn) for st in range(2)]
+    helix['stagger'] = [10, 19]
+    helix['show'] = [[10, 40]]
+    drops['show'] = [[16, 40]]
+    blob = group('water', 'translucent', [box((0, 0, -1), (3.4, 3.4, 3.4), '7cc8ff', 0.75, rot=(0, 45, 45)),
+                                          box((0, 0, -1), (2.6, 2.6, 2.6), 'cdeeff', 0.6, rot=(45, 0, 30))],
+                 glow=True, spin=(20, 35, 0), grow=[1, 7], show=[[1, 12]], pulse=(0.12, 4))
+    wave = group('water', 'translucent', _ring_z(4.5, 22, 0.7, 0.4, 'e6f6ff', 0.6), glow=True,
+                 offset=[0, 0, -1], grow=[15, 21], show=[[15, 21]])
+    return fx('Flecha de agua: se forma en la mano', [], [_gather('water', 'translucent', 24, 11, ('7cc8ff', 'ffffff'), radius=(11, 11, 11)),
+                                                           blob, shaft_head, helix, wave, drops],
               life=FORM, scale=1.0, height=0.6, cam=2.2)
 
 def fire_crescent_form():

@@ -25,7 +25,13 @@ public class SpellFxEntity extends Entity {
     private static final EntityDataAccessor<Integer> FOLLOW = SynchedEntityData.defineId(SpellFxEntity.class, EntityDataSerializers.INT);
 
     // Tiempos del Cumulonimbus (iguales a tools/spells/spell_fx.py)
-    public static final int CUMULO_FORM = 50, CUMULO_RAIN_END = 120, CUMULO_LIFE = 150;
+    public static final int CUMULO_FORM = 60, CUMULO_RAIN_END = 140, CUMULO_LIFE = 175;
+    public static final int[] CUMULO_STRIKES = {60, 80, 100, 120};
+    /** Escala del modelo, radio de la nube en pixeles del modelo y altura sobre el suelo (bloques). */
+    public static final float CUMULO_SCALE = 12f, CUMULO_RADIUS_PX = 48f;
+    public static final int CUMULO_HEIGHT = 28;
+    /** Radio de la nube en bloques (36). */
+    public static final double CUMULO_RADIUS = CUMULO_RADIUS_PX * CUMULO_SCALE / 16.0;
     public static final int STORM_FORM = 14, STORM_LIFE = 45;
 
     public SpellFxEntity(EntityType<? extends SpellFxEntity> type, Level level) {
@@ -75,8 +81,8 @@ public class SpellFxEntity extends Entity {
 
     /** Salpicaduras en el suelo bajo la nube mientras llueve. */
     private void rainSplashes() {
-        double radius = 24 * 0.85 * scale() / 16.0;
-        for (int i = 0; i < 6; i++) {
+        double radius = CUMULO_RADIUS_PX * 0.85 * scale() / 16.0;
+        for (int i = 0; i < 28; i++) {
             double x = getX() + (random.nextDouble() * 2 - 1) * radius;
             double z = getZ() + (random.nextDouble() * 2 - 1) * radius;
             int y = level().getHeight(Heightmap.Types.MOTION_BLOCKING, (int) Math.floor(x), (int) Math.floor(z));
