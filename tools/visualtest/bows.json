@@ -826,7 +826,8 @@
   },
   {
    "op": "fp",
-   "v": true
+   "v": true,
+   "fov": 70
   },
   {
    "op": "wait",
@@ -886,6 +887,14 @@
    "v": "fp_release"
   },
   {
+   "op": "wait",
+   "t": 5
+  },
+  {
+   "op": "shot",
+   "v": "fp_after"
+  },
+  {
    "op": "fp",
    "v": false
   },
@@ -912,6 +921,14 @@
   {
    "op": "wait",
    "t": 5
+  },
+  {
+   "op": "cmd",
+   "v": "gamemode survival"
+  },
+  {
+   "op": "wait",
+   "t": 10
   },
   {
    "op": "inv",

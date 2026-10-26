@@ -70,12 +70,16 @@ public final class BowRender {
         pose.translate((left ? 1 : -1) / 16f, 10f / 16f, 0);
         // flecha a lo largo del brazo, palas "hacia arriba" del brazo estirado
         pose.mulPose(new Matrix4f(0, 1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, 0, 0, 1));
-        // inclinado como en Unturned
-        pose.mulPose(com.mojang.math.Axis.XP.rotationDegrees(left ? -16 : 16));
         float back = BRACE;
         if (hand != null) {
+            // la flecha va de la mano que tensa al agarre: el arco se orienta sobre esa linea
             Vector4f loc = new Matrix4f(pose.last().pose()).invert().transform(new Vector4f(hand));
-            back = Math.max(BRACE, Math.min(BRACE + DRAW, -loc.x * 16f));
+            Vector3f h = new Vector3f(loc.x, loc.y, loc.z).mul(16f);
+            if (h.x < -1.5f) {
+                Vector3f dir = new Vector3f(h).negate().normalize();
+                pose.mulPose(new org.joml.Quaternionf().rotationTo(1, 0, 0, dir.x, dir.y, dir.z));
+                back = Math.max(BRACE, Math.min(BRACE + DRAW, h.length()));
+            }
         }
         boolean arrow = drawing || BowSystem.isLoaded(bow);
         ItemStack ammo = arrow ? p.getProjectile(bow) : ItemStack.EMPTY;

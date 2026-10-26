@@ -179,6 +179,7 @@ public final class VisualTest {
                 boolean on = s.get("v").getAsBoolean();
                 mc.gameRenderer.setRenderHand(on);
                 mc.options.setCameraType(CameraType.FIRST_PERSON);
+                if (s.has("fov")) mc.options.fov().set(s.get("fov").getAsInt());
             }
             case "reload" -> net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(
                     new net.zennin.mushoku.network.ActionPayload(net.zennin.mushoku.network.ActionPayload.BOW_RELOAD));
@@ -190,6 +191,7 @@ public final class VisualTest {
             case "inv" -> {
                 keepScreen = s.get("v").getAsBoolean();
                 mc.options.hideGui = !keepScreen;
+                if (keepScreen) { mc.options.guiScale().set(4); mc.resizeDisplay(); }
                 if (keepScreen) mc.setScreen(new net.minecraft.client.gui.screens.inventory.InventoryScreen(mc.player));
                 else mc.setScreen(null);
             }

@@ -30,8 +30,9 @@ public class QuiverLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<A
         pose.pushPose();
         getParentModel().body.translateAndRotate(pose);
         // espalda (+Z en el modelo; +Y hacia abajo): centro a media espalda, boca hacia el hombro derecho
-        pose.translate(0.4f / 16f, 6.2f / 16f, 4.9f / 16f);
+        pose.translate(0.4f / 16f, 6.0f / 16f, 4.3f / 16f);
         pose.mulPose(Axis.ZP.rotationDegrees(148));
+        pose.scale(0.82f, 0.82f, 0.82f);
         pose.translate(0, -QuiverRender.H / 2 / 16f, 0);
         QuiverRender.draw(pose, buffers, quiver, light, OverlayTexture.NO_OVERLAY);
         pose.popPose();

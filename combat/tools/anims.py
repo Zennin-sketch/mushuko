@@ -467,14 +467,16 @@ bow_r()
 UPPER = {'rightArm', 'leftArm', 'body', 'head', 'rightItem', 'leftItem'}
 ARMS = {'rightArm', 'leftArm', 'rightItem', 'leftItem'}
 BOW_UP = (0.32, 0.95, 0.0)          # arco de pie, la punta de arriba inclinada hacia la derecha
-BOW_UP_LOW = (0.55, 0.8, 0.22)      # en espera: mas inclinado y hacia adelante
-# Espera: el arco abajo y adelante en la izquierda, la derecha cerca de la cuerda (asi se ve en primera persona)
-BOW_IDLE = dict(larm=L((-3.6, -6.2, 7.2), BOW_UP_LOW), rarm=R((1.4, -6.6, 5.0), (0.2, 0.3, 1)))
-# Tensado: brazo izquierdo estirado al frente, mano derecha en la mejilla, torso de perfil (hombro izquierdo adelante)
-BOW_AIM = P(torso(turn=20, lean=1), head(yaw=-18, down=0),
-            dict(larm=L((-2.6, -1.6, 10.2), BOW_UP), rarm=R((1.8, 1.0, 2.6), (-0.1, 0.25, 1))))
-BOW_NOCKED = P(torso(turn=14), head(yaw=-10, down=2),
-               dict(larm=L((-2.8, -2.6, 9.6), BOW_UP), rarm=R((0.4, -2.2, 6.6), (-0.1, 0.3, 1))))
+BOW_UP_LOW = (0.55, 0.8, 0.2)       # en espera: mas inclinado
+# Espera: el arco adelante y abajo en la izquierda, la derecha cerca de la cuerda. Alto suficiente para verse en
+# primera persona (los ojos estan ~4 px sobre el cuello).
+BOW_IDLE = dict(larm=L((-3.0, -2.8, 8.8), BOW_UP_LOW), rarm=R((0.2, -3.8, 6.2), (0.2, 0.3, 1)))
+# Tensado: el torso de frente (asi la flecha sale derecho hacia donde mira la camara en primera persona); brazo
+# izquierdo estirado al frente casi en el centro y la mano derecha en el menton.
+BOW_AIM = P(torso(turn=0, lean=1), head(yaw=0, down=0),
+            dict(larm=L((-1.6, 0.4, 9.6), BOW_UP), rarm=R((0.4, 2.0, 2.4), (-0.1, 0.25, 1))))
+BOW_NOCKED = P(torso(turn=0), head(yaw=0, down=2),
+               dict(larm=L((-2.0, -1.0, 9.6), BOW_UP), rarm=R((-0.4, -0.6, 5.6), (-0.1, 0.3, 1))))
 
 def bows():
     i = anim('bow_idle', 'Arco del mod: espera con el arco en la izquierda (loop, se ve en primera persona)', end=40,
@@ -502,16 +504,16 @@ def bows():
              start=BOW_NOCKED)
     x.only = UPPER
     x.key(0, 'smooth', **BOW_NOCKED)
-    x.key(4, 'smooth', **P(BOW_AIM, dict(rarm=R((1.4, -0.4, 5.0), (-0.1, 0.25, 1)))))
+    x.key(4, 'smooth', **P(BOW_AIM, dict(rarm=R((0.2, 0.8, 4.4), (-0.1, 0.25, 1)))))
     x.key(10, 'stop', **BOW_AIM)
-    x.key(17, 'smooth', **P(BOW_AIM, dict(rarm=R((1.9, 1.1, 2.4), (-0.1, 0.25, 1)), larm=L((-2.6, -1.5, 10.3), BOW_UP))))
+    x.key(17, 'smooth', **P(BOW_AIM, dict(rarm=R((0.5, 2.1, 2.2), (-0.1, 0.25, 1)), larm=L((-1.6, 0.5, 9.7), BOW_UP))))
     x.key(24, 'smooth', **BOW_AIM)
 
     y = anim('bow_release', 'Arco del mod: soltar la flecha (la mano de la cuerda sale hacia atras)', end=12, stop=16, start=BOW_AIM,
              lag=('head',))
     y.only = UPPER
     y.key(0, 'smooth', **BOW_AIM)
-    y.key(2, 'stop', **P(BOW_AIM, dict(larm=L((-2.6, -1.3, 10.6), BOW_UP), rarm=R((4.5, 1.6, -2.5), (0.3, 0.5, -1)))))
+    y.key(2, 'stop', **P(BOW_AIM, dict(larm=L((-1.6, 0.6, 10.0), BOW_UP), rarm=R((4.0, 2.6, -2.0), (0.3, 0.5, -1)))))
     y.key(6, 'smooth', **P(BOW_AIM, dict(rarm=R((5.0, -3.0, -0.5)))))
     y.key(12, 'stop', **P(NEUTRAL_P, BOW_IDLE))
 
@@ -525,8 +527,8 @@ def skill(name, desc, end, legs_free=False):
     return x
 
 QUIVER_R = dict(rarm=R((3.0, 3.2, -4.4), (0, 1, -0.3)))
-CHEEK = dict(rarm=R((1.8, 1.0, 2.6), (-0.1, 0.25, 1)))
-NOCK = dict(rarm=R((0.4, -2.2, 6.6), (-0.1, 0.3, 1)))
+CHEEK = dict(rarm=R((0.4, 2.0, 2.4), (-0.1, 0.25, 1)))
+NOCK = dict(rarm=R((-0.4, -0.6, 5.6), (-0.1, 0.3, 1)))
 BOW_UP_SKY = (0.25, 0.45, -0.86)    # apuntando al cielo: el arco se acuesta hacia atras
 
 def archer_skills():
