@@ -602,6 +602,7 @@ class Anim:
         self.weapon_from = 0    # tick desde el que el arma esta en la mano (desenvainar)
         self.continuity = True  # giro de muneca continuo; sacar/guardar lo apagan para que el agarre sea identico
         self.keys = []
+        self.poses = []         # (tick, pose completa, modo): para derivar animaciones por arma
         base = json.loads(json.dumps(NEUTRAL)); base.update(json.loads(json.dumps(start or {})))
         self.cur = base
 
@@ -620,6 +621,7 @@ class Anim:
                 p[k] = list(v)
         self.cur = p
         self.keys.append((tick, flatten(p), 'stop' if mode in ('stop', 'hold') else 'smooth'))
+        self.poses.append((tick, json.loads(json.dumps(p)), 'stop' if mode in ('stop', 'hold') else 'smooth'))
         return self
 
     def series(self):

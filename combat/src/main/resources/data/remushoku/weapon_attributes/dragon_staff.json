@@ -5,23 +5,23 @@
     "range_bonus": 0.25,
     "attacks": [
       {
-        "hitbox": "FORWARD_BOX",
-        "damage_multiplier": 0.9,
-        "angle": 0,
-        "upswing": 0.5,
-        "animation": "mushoku_combat:staff_jab",
-        "swing_sound": {
-          "id": "bettercombat:staff_stab"
-        }
-      },
-      {
         "hitbox": "VERTICAL_PLANE",
         "damage_multiplier": 1.1,
         "angle": 120,
         "upswing": 0.5,
-        "animation": "mushoku_combat:staff_crack",
+        "animation": "mushoku_combat:dragon_staff_1",
         "swing_sound": {
           "id": "bettercombat:staff_slam"
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 0.9,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "mushoku_combat:dragon_staff_2",
+        "swing_sound": {
+          "id": "bettercombat:staff_stab"
         }
       }
     ],

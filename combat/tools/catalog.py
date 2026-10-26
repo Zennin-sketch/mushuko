@@ -70,10 +70,63 @@ WEAPONS = {
     'metal_rod': dict(label='Varilla de Metal', family='rod'),
 }
 
+# Combo propio de cada arma (ver weapon_combos.py). b = cuanto cuerpo pone en cada golpe segun tamano y peso.
+# moves = golpes de la biblioteca en orden (el ultimo es el remate); dmg = multiplicador de dano de cada golpe.
+COMBOS = {
+    'migurd_sword':  dict(b=1.0,  hand='one', moves=['sword_slash_1', 'sword_slash_2', 'sword_thrust_3'], dmg=[0.9, 1.0, 1.35]),
+    'pauls_sword':   dict(b=1.15, hand='one', moves=['katana_overhead', 'sword_slash_2', 'katana_whirlwind'], dmg=[1.0, 1.0, 1.4]),
+    'almanfi_sword': dict(b=0.85, hand='one', moves=['sword_slash_2', 'sword_slash_1', 'sword_thrust_3'], dmg=[0.85, 0.95, 1.3]),
+    'hiramune':      dict(b=1.05, hand='one', moves=['katana_iai', 'sword_slash_1', 'sword_thrust_3'], dmg=[1.0, 0.95, 1.35]),
+    'ice_blade':     dict(b=0.75, hand='one', moves=['sword_thrust_3', 'sword_slash_1', 'sword_slash_2'], dmg=[0.9, 0.9, 1.2]),
+    'phoenix_dragon_sword': dict(b=1.0, hand='one', moves=['sword_slash_1', 'heavy_rise', 'katana_whirlwind'], dmg=[0.95, 1.05, 1.45]),
+    'stone_blade':   dict(b=0.8,  hand='one', moves=['sword_slash_1', 'sword_slash_2', 'heavy_slam'], dmg=[0.9, 0.95, 1.3]),
+    'katana':        dict(b=1.0,  hand='two', spread=3.5, moves=['katana_iai', 'katana_overhead', 'katana_whirlwind'], dmg=[0.95, 1.1, 1.3]),
+    'kajakut':       dict(b=1.3,  hand='two', spread=3.5, moves=['heavy_sweep', 'heavy_rise', 'heavy_slam'], dmg=[1.0, 1.05, 1.5]),
+    'war_axe':       dict(b=1.25, hand='two', spread=3.5, moves=['heavy_rise', 'heavy_sweep', 'heavy_slam'], dmg=[1.0, 1.0, 1.5]),
+    'scythe':        dict(b=1.2,  hand='two', spread=6, moves=['scythe_reap', 'scythe_backswing', 'scythe_cyclone'], dmg=[1.0, 1.0, 1.3]),
+    'superd_spear':  dict(b=1.1,  hand='two', spread=-7, moves=['spear_thrust', 'spear_sweep', 'spear_dragon_pierce'], dmg=[0.9, 0.85, 1.5]),
+    'aqua_heartia':  dict(b=1.0,  hand='two', spread=-6, moves=['staff_jab', 'spear_sweep', 'staff_crack'], dmg=[0.9, 0.9, 1.1]),
+    'dragon_staff':  dict(b=0.95, hand='two', spread=6, moves=['staff_crack', 'staff_jab'], dmg=[1.1, 0.9]),
+    'staff_of_areos': dict(b=1.05, hand='two', spread=-6, moves=['spear_thrust', 'staff_crack'], dmg=[0.9, 1.1]),
+    'migurd_staff':  dict(b=1.1,  hand='two', spread=6, moves=['staff_jab', 'scythe_backswing', 'staff_crack'], dmg=[0.9, 1.0, 1.15]),
+    'wand':          dict(b=0.7,  hand='one', moves=['sword_thrust_3', 'sword_slash_2'], dmg=[0.9, 1.0]),
+    'metal_rod':     dict(b=1.1,  hand='one', moves=['sword_slash_1', 'sword_slash_2', 'staff_crack'], dmg=[1.0, 1.0, 1.3]),
+}
+
+# Hitbox, angulo y sonido de cada golpe de la biblioteca (sale de las familias)
+def move_info():
+    info = {}
+    for f in FAMILIES.values():
+        for a in f['attacks']:
+            info.setdefault(a['anim'], (a['hitbox'], a['angle'], a['sound']))
+    return info
+
+def weapon_attributes(wid):
+    w = WEAPONS[wid]
+    f = FAMILIES[w['family']]
+    c = COMBOS[wid]
+    info = move_info()
+    out = {'attributes': {
+        'category': w['family'],
+        'two_handed': f['two_handed'],
+        'range_bonus': f['range_bonus'],
+        'attacks': [{
+            'hitbox': info[m][0], 'damage_multiplier': c['dmg'][i], 'angle': info[m][1], 'upswing': 0.5,
+            'animation': NS + ':%s_%d' % (wid, i + 1), 'swing_sound': {'id': info[m][2]},
+        } for i, m in enumerate(c['moves'])],
+    }}
+    if f['pose']:
+        out['attributes']['pose'] = f['pose']
+    return out
+
 # Animaciones que no son ataques (las reproduce el addon) y con que arma se muestran en la preview.
 EXTRA = [
     dict(group='Esquivas (espadachin)', items=['roll_forward', 'roll_backward', 'roll_left', 'roll_right'], weapon='migurd_sword'),
+    dict(group='Esquivas diagonales (espadachin)', items=['roll_forward_left', 'roll_forward_right', 'roll_backward_left', 'roll_backward_right'], weapon='migurd_sword'),
     dict(group='Esquivas (mago)', items=['dash_forward', 'dash_backward', 'dash_left', 'dash_right'], weapon='aqua_heartia'),
+    dict(group='Esquivas diagonales (mago)', items=['dash_forward_left', 'dash_forward_right', 'dash_backward_left', 'dash_backward_right'], weapon='aqua_heartia'),
+    dict(group='Ideas para la magia', items=['magic_push', 'magic_gather_throw', 'magic_ground', 'magic_sweep', 'magic_snipe',
+                                            'magic_sky', 'magic_spiral', 'magic_barrier'], weapon='aqua_heartia'),
     dict(group='Conjuro', items=['cast_pose', 'cast_release'], weapon='aqua_heartia'),
     dict(group='Desenvainar y guardar (cintura)', items=['hip_draw', 'hip_sheathe'], weapon='migurd_sword'),
     dict(group='Desenvainar y guardar (espalda)', items=['back_draw', 'back_sheathe'], weapon='kajakut'),

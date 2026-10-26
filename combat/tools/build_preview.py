@@ -67,8 +67,16 @@ def main(anim_dir, out):
         model['label'] = w['label']
         model['family'] = w['family']
         weapons[wid] = model
+    # Cada arma tiene su propio combo: en la pagina cada arma es su propio grupo
+    families = {}
+    for wid, w in catalog.WEAPONS.items():
+        f = catalog.FAMILIES[w['family']]
+        c = catalog.COMBOS[wid]
+        families[wid] = dict(f, label=w['label'], attacks=[dict(anim='%s_%d' % (wid, i + 1), hitbox=catalog.move_info()[m][0], damage=c['dmg'][i], angle=catalog.move_info()[m][1])
+                                                             for i, m in enumerate(c['moves'])])
+        weapons[wid]['family'] = wid
     sheaths = json.load(open(os.path.join(REPO, 'combat', 'src', 'main', 'resources', 'assets', 'mushoku_combat', 'sheaths.json')))
-    data = dict(anims=anims, weapons=weapons, families=catalog.FAMILIES, extra=catalog.EXTRA, sheaths=sheaths)
+    data = dict(anims=anims, weapons=weapons, families=families, extra=catalog.EXTRA, sheaths=sheaths)
     tpl = open(os.path.join(HERE, 'preview_template.html'), encoding='utf-8').read()
     html = tpl.replace('/*__DATA__*/null', json.dumps(data, separators=(',', ':')))
     os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)

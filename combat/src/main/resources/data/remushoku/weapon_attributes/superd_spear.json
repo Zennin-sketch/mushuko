@@ -9,7 +9,7 @@
         "damage_multiplier": 0.9,
         "angle": 0,
         "upswing": 0.5,
-        "animation": "mushoku_combat:spear_thrust",
+        "animation": "mushoku_combat:superd_spear_1",
         "swing_sound": {
           "id": "bettercombat:spear_stab"
         }
@@ -19,7 +19,7 @@
         "damage_multiplier": 0.85,
         "angle": 160,
         "upswing": 0.5,
-        "animation": "mushoku_combat:spear_sweep",
+        "animation": "mushoku_combat:superd_spear_2",
         "swing_sound": {
           "id": "bettercombat:glaive_slash_quick"
         }
@@ -29,7 +29,7 @@
         "damage_multiplier": 1.5,
         "angle": 0,
         "upswing": 0.5,
-        "animation": "mushoku_combat:spear_dragon_pierce",
+        "animation": "mushoku_combat:superd_spear_3",
         "swing_sound": {
           "id": "bettercombat:spear_stab"
         }

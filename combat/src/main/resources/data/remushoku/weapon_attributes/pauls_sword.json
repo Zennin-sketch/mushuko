@@ -5,13 +5,13 @@
     "range_bonus": 0.0,
     "attacks": [
       {
-        "hitbox": "HORIZONTAL_PLANE",
-        "damage_multiplier": 0.9,
-        "angle": 140,
+        "hitbox": "VERTICAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 90,
         "upswing": 0.5,
-        "animation": "mushoku_combat:sword_slash_1",
+        "animation": "mushoku_combat:pauls_sword_1",
         "swing_sound": {
-          "id": "bettercombat:sword_slash"
+          "id": "bettercombat:katana_slash"
         }
       },
       {
@@ -19,19 +19,19 @@
         "damage_multiplier": 1.0,
         "angle": 140,
         "upswing": 0.5,
-        "animation": "mushoku_combat:sword_slash_2",
+        "animation": "mushoku_combat:pauls_sword_2",
         "swing_sound": {
           "id": "bettercombat:sword_slash"
         }
       },
       {
-        "hitbox": "FORWARD_BOX",
-        "damage_multiplier": 1.35,
-        "angle": 0,
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.4,
+        "angle": 360,
         "upswing": 0.5,
-        "animation": "mushoku_combat:sword_thrust_3",
+        "animation": "mushoku_combat:pauls_sword_3",
         "swing_sound": {
-          "id": "bettercombat:rapier_stab"
+          "id": "bettercombat:katana_slash"
         }
       }
     ]

@@ -9,9 +9,9 @@
         "damage_multiplier": 0.9,
         "angle": 0,
         "upswing": 0.5,
-        "animation": "mushoku_combat:staff_jab",
+        "animation": "mushoku_combat:staff_of_areos_1",
         "swing_sound": {
-          "id": "bettercombat:staff_stab"
+          "id": "bettercombat:spear_stab"
         }
       },
       {
@@ -19,7 +19,7 @@
         "damage_multiplier": 1.1,
         "angle": 120,
         "upswing": 0.5,
-        "animation": "mushoku_combat:staff_crack",
+        "animation": "mushoku_combat:staff_of_areos_2",
         "swing_sound": {
           "id": "bettercombat:staff_slam"
         }

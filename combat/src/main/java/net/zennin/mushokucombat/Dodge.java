@@ -29,7 +29,12 @@ public final class Dodge {
     private static final Set<String> RELAYED = Set.of("cast_pose", "cast_release",
             "hip_draw", "hip_sheathe", "back_draw", "back_sheathe",
             "roll_forward", "roll_backward", "roll_left", "roll_right",
-            "dash_forward", "dash_backward", "dash_left", "dash_right");
+            "roll_forward_left", "roll_forward_right", "roll_backward_left", "roll_backward_right",
+            "dash_forward", "dash_backward", "dash_left", "dash_right",
+            "dash_forward_left", "dash_forward_right", "dash_backward_left", "dash_backward_right");
+    /** Direcciones de la esquiva (el indice viaja en DodgePayload). */
+    public static final String[] DIRS = {"forward", "backward", "left", "right",
+            "forward_left", "forward_right", "backward_left", "backward_right"};
 
     private Dodge() {}
 
@@ -57,12 +62,7 @@ public final class Dodge {
         if (!p.isAlive() || p.isSpectator()) return;
         if (!Stamina.consume(p, Stamina.DODGE_COST)) return;
         STARTED.put(p.getUUID(), p.serverLevel().getGameTime());
-        String dir = switch (payload.dir()) {
-            case 1 -> "backward";
-            case 2 -> "left";
-            case 3 -> "right";
-            default -> "forward";
-        };
+        String dir = DIRS[Math.max(0, Math.min(DIRS.length - 1, payload.dir()))];
         relay(p, (payload.roll() ? "roll_" : "dash_") + dir);
         p.level().playSound(null, p.getX(), p.getY(), p.getZ(),
                 payload.roll() ? SoundEvents.PLAYER_ATTACK_SWEEP : SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS,

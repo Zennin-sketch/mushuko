@@ -5,33 +5,33 @@
     "range_bonus": 0.0,
     "attacks": [
       {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 0.9,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "mushoku_combat:ice_blade_1",
+        "swing_sound": {
+          "id": "bettercombat:rapier_stab"
+        }
+      },
+      {
         "hitbox": "HORIZONTAL_PLANE",
         "damage_multiplier": 0.9,
         "angle": 140,
         "upswing": 0.5,
-        "animation": "mushoku_combat:sword_slash_1",
+        "animation": "mushoku_combat:ice_blade_2",
         "swing_sound": {
           "id": "bettercombat:sword_slash"
         }
       },
       {
         "hitbox": "HORIZONTAL_PLANE",
-        "damage_multiplier": 1.0,
+        "damage_multiplier": 1.2,
         "angle": 140,
         "upswing": 0.5,
-        "animation": "mushoku_combat:sword_slash_2",
+        "animation": "mushoku_combat:ice_blade_3",
         "swing_sound": {
           "id": "bettercombat:sword_slash"
-        }
-      },
-      {
-        "hitbox": "FORWARD_BOX",
-        "damage_multiplier": 1.35,
-        "angle": 0,
-        "upswing": 0.5,
-        "animation": "mushoku_combat:sword_thrust_3",
-        "swing_sound": {
-          "id": "bettercombat:rapier_stab"
         }
       }
     ]

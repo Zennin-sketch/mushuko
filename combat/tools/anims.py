@@ -293,6 +293,8 @@ def dash(name, desc, d):
     """d = direccion: (der, adelante). Inclinacion hacia donde va, brazos al reves."""
     dx, df = d
     lean, tilt = 1 if df > 0 else -1 if df < 0 else 0, 1 if dx > 0 else -1 if dx < 0 else 0
+    if dx and df:  # diagonal: la inclinacion se reparte entre los dos ejes
+        lean, tilt = lean * 0.72, tilt * 0.72
     x = anim(name, desc, end=13, stop=17, lag=LIMBS_LAG, ground='contact')
     def arms(k):  # k > 0: brazos atras respecto del movimiento; k < 0: adelante
         return dict(rarm=R((6 + 2 * dx * -k, -9 + abs(k), -k * 6 * df + 1), (0, 0, 1)),
@@ -310,8 +312,12 @@ dash('dash_forward', 'Dash hacia adelante (mago)', (0, 1))
 dash('dash_backward', 'Dash hacia atras (mago)', (0, -1))
 dash('dash_left', 'Dash a la izquierda (mago)', (-1, 0))
 dash('dash_right', 'Dash a la derecha (mago)', (1, 0))
+dash('dash_forward_left', 'Dash diagonal adelante-izquierda (mago)', (-1, 1))
+dash('dash_forward_right', 'Dash diagonal adelante-derecha (mago)', (1, 1))
+dash('dash_backward_left', 'Dash diagonal atras-izquierda (mago)', (-1, -1))
+dash('dash_backward_right', 'Dash diagonal atras-derecha (mago)', (1, -1))
 
-def roll(name, desc, lean=0, tilt=0, lean_in=None):
+def roll(name, desc, lean=0, tilt=0, lean_in=None, turn=0):
     """Roll en 5 tiempos: 1) se inclina y da un paso hacia donde va a rodar, 2) se zambulle encogiendose,
     3) gira, 4) cae amortiguando con los brazos abiertos, 5) se levanta."""
     sl, st = (1 if lean > 0 else -1 if lean < 0 else 0), (1 if tilt > 0 else -1 if tilt < 0 else 0)
@@ -338,6 +344,10 @@ def roll(name, desc, lean=0, tilt=0, lean_in=None):
     x.key(13, 'smooth', **P(root(up=-0.3, lean=lean * 0.97, tilt=tilt * 0.97, plant=0), legs('crouch', 15), curl(c * 0.45)))
     x.key(14, 'stop', **P(root(up=-0.24, lean=lean + 6 * sl, tilt=tilt + 6 * st, plant=0), balance, legs('crouch', 15), head(down=5), curl(c * 0.15)))
     x.key(17, 'stop', **P(NEUTRAL_P, root(lean=lean, tilt=tilt, plant=0)))
+    if turn:
+        # Diagonal: el cuerpo gira hacia donde va a rodar, rueda en esa direccion y al levantarse vuelve al frente
+        ramp = {0: 0.0, 2: 0.6, 17: 0.0}
+        x.keys = [(t, f[:4] + [f[4] + turn * ramp.get(t, 1.0)] + f[5:], m) for t, f, m in x.keys]
 
 TUCK = P(dict(rarm=R((3, -6, 6), (0, 1, 0)), larm=L((-3, -6, 6), (0, 1, 0))), legs('tuck'), head(down=30))
 roll('roll_forward', 'Roll hacia adelante (espadachin)', lean=360, lean_in=P(
@@ -350,6 +360,14 @@ roll('roll_left', 'Roll lateral a la izquierda (espadachin)', tilt=-360, lean_in
 roll('roll_right', 'Roll lateral a la derecha (espadachin)', tilt=360, lean_in=P(
     root(up=-0.16, tilt=34), dict(rleg=((0.45, -0.9, 0.05), 30), lleg=((-0.1, -1, 0), 5)),
     dict(rarm=R((9, -12, 2)), larm=L((0, -12, 4)))))
+
+# Diagonales: el roll de adelante / atras con el cuerpo girado 45 grados hacia donde va (giro positivo = a la derecha)
+ROLL_FWD_IN = P(root(up=-0.18, lean=38), legs('lunge', 15), dict(rarm=R((4, -12, 8)), larm=L((-4, -12, 8))))
+ROLL_BACK_IN = P(root(up=-0.28, lean=-22), legs('crouch', -5), dict(rarm=R((5, -6, 8)), larm=L((-5, -6, 8))))
+roll('roll_forward_left', 'Roll diagonal adelante-izquierda (espadachin)', lean=360, lean_in=ROLL_FWD_IN, turn=-45)
+roll('roll_forward_right', 'Roll diagonal adelante-derecha (espadachin)', lean=360, lean_in=ROLL_FWD_IN, turn=45)
+roll('roll_backward_left', 'Roll diagonal atras-izquierda (espadachin)', lean=-360, lean_in=ROLL_BACK_IN, turn=45)
+roll('roll_backward_right', 'Roll diagonal atras-derecha (espadachin)', lean=-360, lean_in=ROLL_BACK_IN, turn=-45)
 
 # =============================================================== DESENVAINAR / ENVAINAR
 # El arma guardada se dibuja exactamente donde queda la mano en el tick de "agarre": por eso las dos poses de agarre
@@ -425,3 +443,91 @@ a.key(5, 'smooth', **P(CAST, root(up=-0.05, turn=-22, fwd=0.1, lean=5), dict(rar
                      dict(larm=L((-11, -5, -5), (0, -0.3, -1)))))
 a.key(9, 'stop', **P(CAST, root(up=-0.05, turn=-22, fwd=0.1, lean=5)))
 a.key(16, 'stop', **NEUTRAL_P)
+
+# =============================================================== IDEAS DE ANIMACIONES DE MAGIA (8)
+# Para tomar de base en los conjuros de cada hechizo. Todas con el baston en la mano derecha.
+def spell_anim(name, desc, end):
+    return anim(name, desc, end=end, stop=end + 4, lag=('head', 'larm'))
+
+# 1) Empuje doble: se agacha, junta las manos al pecho y empuja todo hacia adelante (Water Cannon, Sonic Boom)
+a = spell_anim('magic_push', 'Magia: empuje doble con las dos manos', 26)
+a.key(0, 'stop', **NEUTRAL_P)
+a.key(6, 'stop', **P(root(up=-0.08, fwd=-0.08, lean=-4), torso(lean=-6), head(down=6),
+                     dict(rarm=R((3, -6, 5), (0, 1, 0.3)), larm=L((-2, -6, 5), (0, 0.3, 1))), legs('guard', 12)))
+a.key(9, 'smooth', **P(root(up=-0.1, fwd=0.2, lean=10), torso(lean=6), head(down=0),
+                       dict(rarm=R((3, -3, 11), (0, 0.4, 1)), larm=L((-3, -3, 11), (0, 0.3, 1))), legs('lunge', 10)))
+a.key(14, 'stop', **P(root(up=-0.1, fwd=0.22, lean=11), dict(rarm=R((3, -3.5, 11.5), (0, 0.4, 1)))))
+a.key(26, 'stop', **NEUTRAL_P)
+
+# 2) Reunir sobre la cabeza y lanzar: junta el mana arriba (la bola crece) y la arroja (Ex-Flame, Exodus Flame)
+a = spell_anim('magic_gather_throw', 'Magia: reunir sobre la cabeza y lanzar', 34)
+a.key(0, 'stop', **NEUTRAL_P)
+a.key(8, 'stop', **P(root(up=0.02, lean=-8), torso(lean=-10), head(down=-25),
+                     dict(rarm=R((3, 7.2, 2.5), (0, 1, 0)), larm=L((-3, 7.2, 2.5), (0, 0.4, 1))), legs('wide')))
+a.key(18, 'smooth', **P(root(up=0.03, lean=-10), torso(lean=-12), head(down=-28),
+                        dict(rarm=R((2.5, 7.5, 2), (0, 1, 0)), larm=L((-2.5, 7.5, 2), (0, 0.4, 1)))))
+a.key(21, 'smooth', **P(root(up=-0.08, fwd=0.2, lean=16), torso(lean=12), head(down=5),
+                        dict(rarm=R((3, -2, 11), (0, 0.6, 0.8)), larm=L((-3, -3, 10), (0, 0.2, 1))), legs('lunge', 12)))
+a.key(25, 'stop', **P(root(up=-0.09, fwd=0.22, lean=17)))
+a.key(34, 'stop', **NEUTRAL_P)
+
+# 3) Mano al suelo: rodilla abajo y la palma izquierda contra el piso (Earth Lance, Earth Pillar, Quagmire)
+a = spell_anim('magic_ground', 'Magia: palma contra el suelo', 30)
+a.key(0, 'stop', **NEUTRAL_P)
+a.key(6, 'smooth', **P(root(up=-0.25, lean=14), torso(lean=12), head(down=20),
+                       dict(rarm=R((6, -4, 4), (0, 1, 0.2)), larm=L((-5, -14, 7), (0, -1, 0.3))), legs('crouch', 30)))
+a.key(9, 'stop', **P(root(up=-0.42, lean=22), torso(lean=16), head(down=12),
+                     dict(rarm=R((7, -2, 2), (0, 1, 0.1)), larm=L((-4, -18, 9), (0, -1, 0.2))),
+                     dict(rleg=((0.1, -0.35, -0.9), 95), lleg=((-0.1, -0.75, 0.6), 85))))
+a.key(18, 'stop', **P(root(up=-0.42, lean=20), head(down=-2)))
+a.key(30, 'stop', **NEUTRAL_P)
+
+# 4) Barrido lateral: el brazo cruza el cuerpo y barre de derecha a izquierda (Wind Slice, Flame Slice)
+a = spell_anim('magic_sweep', 'Magia: barrido lateral con el baston', 24)
+a.key(0, 'stop', **NEUTRAL_P)
+a.key(5, 'stop', **P(root(turn=25, up=-0.04), torso(turn=40), head(yaw=-30),
+                     dict(rarm=R((9, -2, -3), (0.7, 0.3, -0.6)), larm=L((-3, -6, 7), (0, 0.3, 1))), legs('wide', 8)))
+a.key(9, 'smooth', **P(root(turn=-20, up=-0.06, fwd=0.1), torso(turn=-35, lean=4), head(yaw=20),
+                       dict(rarm=R((-2, -3, 12), (-0.9, 0.1, 0.4)), larm=L((-9, -7, -2))), legs('wide', 12)))
+a.key(13, 'stop', **P(root(turn=-26, up=-0.06, fwd=0.1), torso(turn=-48), dict(rarm=R((-7, -4, 8), (-0.8, 0.1, -0.6)))))
+a.key(24, 'stop', **NEUTRAL_P)
+
+# 5) Apuntar y disparar: el baston a la altura de los ojos como un rifle, la izquierda lo sostiene y hay retroceso
+a = spell_anim('magic_snipe', 'Magia: apuntar y disparar (Stone Cannon)', 30)
+a.key(0, 'stop', **NEUTRAL_P)
+a.key(7, 'stop', **P(root(turn=-30, up=-0.04), torso(turn=-25), head(yaw=30, down=2),
+                     grip((3, 0, 9), (0, 0.06, 1), spread=-6), legs('guard', 10)))
+a.key(16, 'smooth', **P(root(turn=-30, up=-0.04), grip((3, 0.2, 9.2), (0, 0.06, 1), spread=-6)))
+a.key(18, 'stop', **P(root(turn=-30, up=-0.03, fwd=-0.1, lean=-6), torso(turn=-25, lean=-5), head(yaw=30, down=-4),
+                      grip((3, 2, 6), (0, 0.35, 0.95), spread=-6)))
+a.key(22, 'smooth', **P(root(turn=-30, up=-0.04, lean=0), grip((3, 0, 8.5), (0, 0.08, 1), spread=-6)))
+a.key(30, 'stop', **NEUTRAL_P)
+
+# 6) Baston al cielo: lo levanta mirando arriba (se forma la tormenta) y lo baja apuntando (Lightning, Cumulonimbus)
+a = spell_anim('magic_sky', 'Magia: baston al cielo y apuntar', 36)
+a.key(0, 'stop', **NEUTRAL_P)
+a.key(8, 'stop', **P(root(up=0.02, lean=-6), torso(lean=-8), head(down=-35),
+                     dict(rarm=R((4, 7.4, 1.5), (0, 1, 0.05)), larm=L((-8, -7, 3), (0, -0.3, 1))), legs('wide')))
+a.key(22, 'smooth', **P(root(up=0.03, lean=-7), head(down=-38), dict(rarm=R((4, 7.7, 1), (0, 1, 0.05)))))
+a.key(26, 'smooth', **P(root(up=-0.05, fwd=0.1, lean=8), torso(lean=6), head(down=0),
+                        dict(rarm=R((4, -1, 11), (0, 0.2, 1))), legs('guard', 10)))
+a.key(29, 'stop', **P(root(up=-0.05, fwd=0.12, lean=9)))
+a.key(36, 'stop', **NEUTRAL_P)
+
+# 7) Giro: vuelta completa con el baston extendido y remate adelante (Tornado, Tornado Impact)
+a = spell_anim('magic_spiral', 'Magia: giro completo con el baston extendido', 30)
+a.key(0, 'stop', **NEUTRAL_P)
+a.key(5, 'stop', **P(root(turn=20, up=-0.08), torso(turn=35), dict(rarm=R((9, -3, 2), (1, 0.2, 0.1))), legs('crouch', -20)))
+a.key(10, 'smooth', **P(root(turn=-150, up=-0.06), torso(turn=0), dict(rarm=R((10, -2, 2), (1, 0.2, 0))), legs('wide')))
+a.key(15, 'smooth', **P(root(turn=-345, up=-0.08, fwd=0.1), torso(turn=-10), dict(rarm=R((4, -2, 11), (0, 0.3, 1)))))
+a.key(19, 'stop', **P(root(turn=-360, up=-0.08, fwd=0.14, lean=8), torso(turn=0, lean=4), dict(rarm=R((3, -2, 12), (0, 0.2, 1)))))
+a.key(30, 'stop', **P(NEUTRAL_P, root(turn=-360)))
+
+# 8) Baston plantado: lo clava adelante en vertical y adelanta la palma izquierda (Magic Shield, Water Shield)
+a = spell_anim('magic_barrier', 'Magia: baston plantado y palma adelante', 30)
+a.key(0, 'stop', **NEUTRAL_P)
+a.key(6, 'smooth', **P(root(up=0.02), dict(rarm=R((5, 3, 7), (0, 1, 0.1)))))
+a.key(9, 'stop', **P(root(up=-0.06, lean=6), torso(lean=4), head(down=4),
+                     dict(rarm=R((5, -5, 8), (0, 1, 0.05)), larm=L((-3, -2, 11), (0, 1, 0.2))), legs('guard', 14)))
+a.key(20, 'stop', **P(root(up=-0.07, lean=7), dict(larm=L((-3, -1.5, 11.5), (0, 1, 0.2)))))
+a.key(30, 'stop', **NEUTRAL_P)

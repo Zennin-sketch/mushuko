@@ -1,0 +1,122 @@
+<title>Armería v2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Nunito+Sans:wght@400;600&display=swap">
+<style>
+/* Layout: lista de piezas a la izquierda, maniqui grande a la derecha. Un solo look de taller nocturno. */
+:root { --bg:#14161d; --panel:#1c1f29; --line:#2e3344; --fg:#ebe6da; --dim:#9da0b0; --gold:#d9b45a;
+  --display:'Cinzel', Georgia, serif; --body:'Nunito Sans', system-ui, sans-serif; color-scheme: dark; }
+* { box-sizing: border-box; } [hidden] { display:none !important; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 14px; }
+.wrap { display:grid; grid-template-columns: 290px 1fr; gap:16px; height:100%; padding-block:16px;
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); }
+aside { display:flex; flex-direction:column; gap:10px; overflow-y:auto; min-width:0; }
+h1 { font-family:var(--display); color:var(--gold); font-size:22px; margin:0; letter-spacing:.04em; }
+.sub { color:var(--dim); margin:0; line-height:1.45; }
+.opt { text-align:left; background:transparent; border:1px solid var(--line); border-radius:6px; color:var(--fg); padding:10px 12px; cursor:pointer; font:inherit; }
+.opt b { font-family:var(--display); font-weight:500; font-size:15px; display:block; }
+.opt span { color:var(--dim); font-size:12px; }
+.opt[aria-pressed="true"] { border-color:var(--gold); background:#241f15; }
+.opt:focus-visible, button:focus-visible { outline:2px solid #7fb6ff; outline-offset:2px; }
+main { position:relative; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:#0d0f15; min-width:0; }
+canvas { display:block; width:100%; height:100%; }
+.bar { position:absolute; left:12px; bottom:12px; display:flex; gap:8px; flex-wrap:wrap; }
+.bar button { background:rgba(28,31,41,.92); color:var(--fg); border:1px solid var(--line); border-radius:6px; padding:7px 11px; font:inherit; cursor:pointer; }
+.bar button[aria-pressed="true"] { border-color:var(--gold); color:var(--gold); }
+@media (max-width:760px) { .wrap { grid-template-columns:1fr; grid-template-rows:auto 60vh; height:auto; } }
+</style>
+<div class="wrap">
+  <aside>
+    <h1>Armería v2</h1>
+    <p class="sub">Rediseños de las armaduras como modelos 3D (GeckoLib). En el juego están en la pestaña "Mushoku: armaduras v2 (pruebas)" del creativo.</p>
+    <div id="list" style="display:flex;flex-direction:column;gap:6px"></div>
+  </aside>
+  <main>
+    <canvas id="c"></canvas>
+    <div class="bar">
+      <button id="spin" aria-pressed="true">Girar</button>
+      <button id="man" aria-pressed="true">Maniquí</button>
+    </div>
+  </main>
+</div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+const DATA = /*__DATA__*/null;
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('c'), antialias: true });
+renderer.setPixelRatio(Math.min(2, devicePixelRatio));
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x0d0f15);
+const camera = new THREE.PerspectiveCamera(35, 1, 0.05, 100);
+camera.position.set(-1.6, 1.4, -3.4);
+const controls = new OrbitControls(camera, renderer.domElement); controls.target.set(0, 1.0, 0); controls.enableDamping = true;
+scene.add(new THREE.HemisphereLight(0xdde4ff, 0x30281c, 1.2));
+const sun = new THREE.DirectionalLight(0xffffff, 1.5); sun.position.set(-3, 5, -4); scene.add(sun);
+scene.add(new THREE.GridHelper(10, 10, 0x343a4c, 0x22262f));
+const root = new THREE.Group(); scene.add(root);
+root.scale.setScalar(1 / 16);
+
+// Maniqui: cabeza, torso, brazos y piernas del jugador (coordenadas Bedrock)
+const man = new THREE.Group(); root.add(man);
+[[[-4, 24, -4], [8, 8, 8], 0xc9a183], [[-4, 12, -2], [8, 12, 4], 0x6e7fa8], [[-8, 12, -2], [4, 12, 4], 0xc9a183], [[4, 12, -2], [4, 12, 4], 0xc9a183],
+ [[-3.9, 0, -2], [4, 12, 4], 0x48506a], [[-0.1, 0, -2], [4, 12, 4], 0x48506a]].forEach(([o, s, c]) => {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(...s), new THREE.MeshLambertMaterial({ color: c }));
+  m.position.set(o[0] + s[0] / 2, o[1] + s[1] / 2, o[2] + s[2] / 2); man.add(m);
+});
+
+const loader = new THREE.TextureLoader();
+function cubeMesh(c, tex, tw, th, glow) {
+  const [w, h, d] = c.size, [u, v] = c.uv;
+  const g = new THREE.BoxGeometry(w, h, d);
+  // Caras de BoxGeometry: +x, -x, +y, -y, +z, -z  ->  regiones del box UV de Bedrock
+  const R = [[u, v + d, d, h], [u + d + w, v + d, d, h], [u + d, v, w, d], [u + d + w, v, w, d], [u + 2 * d + w, v + d, w, h], [u + d, v + d, w, h]];
+  const uv = g.attributes.uv;
+  for (let f = 0; f < 6; f++) {
+    const [x, y, ww, hh] = R[f];
+    const pts = [[x, y], [x + ww, y], [x, y + hh], [x + ww, y + hh]];
+    for (let k = 0; k < 4; k++) uv.setXY(f * 4 + k, pts[k][0] / tw, 1 - pts[k][1] / th);
+  }
+  const mats = [new THREE.MeshLambertMaterial({ map: tex, transparent: true, alphaTest: 0.1 })];
+  const mesh = new THREE.Mesh(g, mats[0]);
+  const holder = new THREE.Group();
+  mesh.position.set(c.origin[0] + w / 2, c.origin[1] + h / 2, c.origin[2] + d / 2);
+  if (c.rotation) {
+    const piv = c.pivot; holder.position.set(...piv); mesh.position.sub(new THREE.Vector3(...piv));
+    holder.rotation.set(c.rotation[0] * Math.PI / 180, c.rotation[1] * Math.PI / 180, c.rotation[2] * Math.PI / 180, 'ZYX');
+  }
+  holder.add(mesh);
+  if (glow) {
+    const gm = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ map: glow, transparent: true, alphaTest: 0.1, depthWrite: false, blending: THREE.AdditiveBlending }));
+    gm.position.copy(mesh.position); gm.scale.setScalar(1.002); holder.add(gm);
+  }
+  return holder;
+}
+const armorGroup = new THREE.Group(); root.add(armorGroup);
+function nearest(t) { t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestFilter; t.colorSpace = THREE.SRGBColorSpace; return t; }
+function show(id) {
+  armorGroup.clear();
+  const a = DATA.armors[id];
+  const tex = nearest(loader.load(a.texture)), glow = a.glow ? nearest(loader.load(a.glow)) : null;
+  const geo = a.geo['minecraft:geometry'][0];
+  const tw = geo.description.texture_width, th = geo.description.texture_height;
+  for (const b of geo.bones) for (const c of (b.cubes || [])) armorGroup.add(cubeMesh(c, tex, tw, th, glow));
+  document.querySelectorAll('.opt').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.id === id)));
+  try { localStorage.setItem('armeria-sel', id); } catch (e) {}
+}
+const list = document.getElementById('list');
+for (const [id, a] of Object.entries(DATA.armors)) {
+  const b = document.createElement('button'); b.className = 'opt'; b.dataset.id = id;
+  b.innerHTML = `<b>${a.name}</b><span>${a.note}</span>`; b.onclick = () => show(id); list.appendChild(b);
+}
+let spin = true;
+document.getElementById('spin').onclick = e => { spin = !spin; e.target.setAttribute('aria-pressed', String(spin)); };
+document.getElementById('man').onclick = e => { man.visible = !man.visible; e.target.setAttribute('aria-pressed', String(man.visible)); };
+function resize() { const el = renderer.domElement.parentElement; renderer.setSize(el.clientWidth, el.clientHeight, false); camera.aspect = el.clientWidth / el.clientHeight; camera.updateProjectionMatrix(); }
+new ResizeObserver(resize).observe(renderer.domElement.parentElement);
+if (matchMedia('(prefers-reduced-motion: reduce)').matches) { spin = false; document.getElementById('spin').setAttribute('aria-pressed', 'false'); }
+let start = Object.keys(DATA.armors)[0];
+try { const s = localStorage.getItem('armeria-sel'); if (s && DATA.armors[s]) start = s; } catch (e) {}
+show(start); resize();
+window.__show = show; window.__rot = r => { root.rotation.y = r; spin = false; };
+(function loop() { if (spin) root.rotation.y += 0.008; controls.update(); renderer.render(scene, camera); requestAnimationFrame(loop); })();
+</script>

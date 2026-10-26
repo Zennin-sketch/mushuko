@@ -36,6 +36,17 @@ def longest(family):
 
 assign_weapons(G, anims, catalog, longest)
 
+# Combos propios de cada arma (colision con el modelo de esa misma arma)
+import weapon_combos
+_by_name = {a.name: a for a in G.ANIMS}
+for _wid, _spec in catalog.COMBOS.items():
+    _spec = dict(_spec, label=catalog.WEAPONS[_wid]['label'])
+    for _a in weapon_combos.build(_by_name, _wid, _spec):
+        _a.weapon = weapons.segment(_wid, catalog.WEAPONS[_wid])
+for _a in G.ANIMS:
+    if _a.name.startswith('magic_'):
+        _a.weapon = longest('staff')
+
 if __name__ == '__main__':
     G.write(os.path.join(RES, 'assets', 'mushoku_combat', 'player_animations'))
 
@@ -43,7 +54,7 @@ if __name__ == '__main__':
     os.makedirs(wa, exist_ok=True)
     for wid, w in catalog.WEAPONS.items():
         with open(os.path.join(wa, wid + '.json'), 'w') as fh:
-            json.dump(catalog.attributes(w['family']), fh, indent=2)
+            json.dump(catalog.weapon_attributes(wid), fh, indent=2)
 
     slots = {}
     for slot, (a, grab) in anims.SHEATH_SLOTS.items():

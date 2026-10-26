@@ -14,7 +14,7 @@ import net.zennin.mushokucombat.net.DodgePayload;
  * si no te moves, hacia atras. El roll necesita estar en el piso; el dash se puede hacer una vez en el aire.
  */
 public final class DodgeClient {
-    private static final String[] DIRS = {"forward", "backward", "left", "right"};
+    private static final String[] DIRS = net.zennin.mushokucombat.Dodge.DIRS;
     // Velocidad tick a tick (bloques/tick): arranque corto (anticipacion), impulso fuerte y frenada progresiva.
     private static final double[] DASH = {0.15, 0.55, 1.0, 0.95, 0.8, 0.55, 0.3, 0.12};
     private static final double[] ROLL = {0.05, 0.1, 0.18, 0.3, 0.48, 0.55, 0.55, 0.5, 0.42, 0.32, 0.2, 0.1};
@@ -48,7 +48,14 @@ public final class DodgeClient {
         }
         float f = p.input.forwardImpulse, l = p.input.leftImpulse;
         if (Math.abs(f) < 0.1f && Math.abs(l) < 0.1f) f = -1f;
-        byte dir = Math.abs(f) >= Math.abs(l) ? (byte) (f > 0 ? 0 : 1) : (byte) (l > 0 ? 2 : 3);
+        // 8 direcciones: con dos teclas a la vez (por ejemplo A + S) sale la diagonal
+        boolean fw = f > 0.1f, bw = f < -0.1f, lf = l > 0.1f, rt = l < -0.1f;
+        byte dir;
+        if (fw && lf) dir = 4;
+        else if (fw && rt) dir = 5;
+        else if (bw && lf) dir = 6;
+        else if (bw && rt) dir = 7;
+        else dir = Math.abs(f) >= Math.abs(l) ? (byte) (f > 0 ? 0 : 1) : (byte) (l > 0 ? 2 : 3);
         double yaw = Math.toRadians(p.getYRot());
         Vec3 forward = new Vec3(-Math.sin(yaw), 0, Math.cos(yaw));
         Vec3 left = new Vec3(Math.cos(yaw), 0, Math.sin(yaw));
