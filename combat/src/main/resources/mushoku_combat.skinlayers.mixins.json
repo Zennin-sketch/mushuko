@@ -1,0 +1,8 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "net.zennin.mushokucombat.mixin.compat",
+  "compatibilityLevel": "JAVA_21",
+  "client": ["SkinLayersCompileMixin"],
+  "injectors": { "defaultRequire": 0 }
+}

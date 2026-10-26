@@ -49,6 +49,8 @@ final class SkinLayersBend {
 
     static void install() {
         // 1) Cada malla 3D se dobla igual que la parte del cuerpo que cubre (mismo calculo que bendy-lib).
+        // El doblez de la malla ahora se hace con un mixin en compile (LayerBendConsumer); el proveedor queda vacio.
+        if (true) { registerLayerTransformer(); return; }
         SkinLayersAPI.setupMeshTransformerProvider(part -> {
             BendableCuboid b = activeBend(part);
             if (DEBUG && (++calls % 97) == 0) {
@@ -63,6 +65,10 @@ final class SkinLayersBend {
             return new Bender(b);
         });
         // 2) Brazos (y mangas) acompanian la inclinacion del torso, como hace Player Animator con el modelo normal.
+        registerLayerTransformer();
+    }
+
+    private static void registerLayerTransformer() {
         LayerFeatureTransformerAPI.setLayerTransformer((player, pose, part) -> {
             // que parte se va a dibujar (brazo, pierna o torso): cada una dobla con su propio signo/mitad
             kind = 0;
