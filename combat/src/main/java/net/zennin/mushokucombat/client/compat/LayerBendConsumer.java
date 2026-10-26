@@ -66,11 +66,23 @@ public final class LayerBendConsumer implements VertexConsumer {
             if (c.isEmpty()) return null;
             Tuple<String, ?> m = c.get().getActiveMutator();
             if (m == null || !(m.getB() instanceof BendableCuboid b) || Math.abs(b.getBend()) < 1.0e-4f) return null;
-            if (LOGS < 3) { LOGS++; org.slf4j.LoggerFactory.getLogger("mushoku_combat").info("[capas] doblando la capa 3D de una parte (doblez {})", b.getBend()); }
+            if (Boolean.getBoolean("mushoku.layerdebug") && (LOGS++ % 97) == 0 && LOGS < 3000) {
+                org.joml.Matrix4f pm = pose.pose();
+                org.slf4j.LoggerFactory.getLogger("mushoku_combat").info("[capas] part={} paired={} bend={} axis={} dir={} c=({},{},{}) bendH={} base={} other={} pose={} own={}",
+                        System.identityHashCode(part), src != part, b.getBend(), b.getBendAxis(), b.getBendDirection(), b.getBendX(), b.getBendY(), b.getBendZ(),
+                        b.bendHeight(), b.getBasePlane(), b.getOtherSidePlane(), pm, ownBend(part));
+            }
             return new LayerBendConsumer(vc, pose, b);
         } catch (Throwable t) {
             return null;
         }
+    }
+
+    private static String ownBend(ModelPart part) {
+        try {
+            Tuple<String, ?> m = ModelPartAccessor.optionalGetCuboid(part, 0).get().getActiveMutator();
+            return m == null ? "none" : m.getA() + ":" + (m.getB() instanceof BendableCuboid bb ? bb.getBend() : -99f);
+        } catch (Throwable t) { return "err"; }
     }
 
     @Override
