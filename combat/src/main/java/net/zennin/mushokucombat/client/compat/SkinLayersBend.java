@@ -109,7 +109,7 @@ final class SkinLayersBend {
                 float t = Math.max(0f, Math.min(1f, (mid + BAND) / (2 * BAND)));
                 float w = t * t * (3 - 2 * t);
                 if (w <= 0f) continue;
-                Vector4f q = new Vector4f(p, 1f).mul(new Matrix4f().translate(bx, by, bz).rotate(value * w, axisVec)
+                Vector4f q = new Vector4f(p, 1f).mul(new Matrix4f().translate(bx, by, bz).rotate(-value * w, axisVec)
                         .translate(-bx, -by, -bz));
                 v[i].set(q.x, q.y, q.z, 1f);
             }
@@ -139,13 +139,14 @@ final class SkinLayersBend {
             if (mc.getAndActivateMutator(VoxelCuboid.NAME) instanceof VoxelCuboid v) v.bender = this;
         }
 
-        /** Posicion (en bloques, marco de la parte) ya doblada. */
+        /** Posicion (en bloques, marco de la parte) ya doblada. El signo va al reves que en bendy-lib: comprobado en la
+         *  prueba visual (con +doblez la pierna de la capa se iba para atras). */
         Vector3f bend(Vector3f p) {
             float mid = (Math.abs(other.distanceTo(p)) - Math.abs(base.distanceTo(p))) / 2f;
             float t = Math.max(0f, Math.min(1f, (mid + BAND) / (2 * BAND)));
             float w = t * t * (3 - 2 * t);
             if (w <= 0f) return p;
-            Vector4f q = new Vector4f(p, 1f).mul(new Matrix4f().translate(bx, by, bz).rotate(value * w, axisVec).translate(-bx, -by, -bz));
+            Vector4f q = new Vector4f(p, 1f).mul(new Matrix4f().translate(bx, by, bz).rotate(-value * w, axisVec).translate(-bx, -by, -bz));
             return new Vector3f(q.x, q.y, q.z);
         }
 
