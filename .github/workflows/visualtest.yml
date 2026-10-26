@@ -36,7 +36,7 @@ jobs:
         run: |
           export LIBGL_ALWAYS_SOFTWARE=1
           xvfb-run -a -s "-screen 0 1280x720x24" timeout 1500 portablemc --main-dir mc --work-dir mc start fabric:1.21.1:0.16.5 -u Zennin --resolution 1280x720 \
-            --jvm-args="-Xmx3G -Dmushoku.visualtest=$PWD/tools/visualtest/${{ inputs.scenario }}.json" || true
+            --jvm-args="-Xmx3G ${{ inputs.jvm }} -Dmushoku.visualtest=$PWD/tools/visualtest/${{ inputs.scenario }}.json" || true
           ls mc/screenshots || true
           grep -E "visualtest|Exception|ERROR" mc/logs/latest.log | head -80 || true
       - name: Subir capturas a la rama vt-results
@@ -45,11 +45,11 @@ jobs:
           mkdir -p /tmp/res && cp mc/screenshots/*.png /tmp/res/ 2>/dev/null || true
           grep -E "visualtest|Exception|ERROR|Caused by|at net.zennin|skinlayers|Compatibilidad" mc/logs/latest.log | head -300 > /tmp/res/log.txt || true
           cd /tmp/res
-          git init -q && git checkout -q -b vt-results
+          git init -q && git checkout -q -b vt-${{ inputs.tag }}
           git config user.name "visualtest" && git config user.email "visualtest@users.noreply.github.com"
           echo "${{ inputs.scenario }} ${{ github.sha }}" > info.txt
           git add -A && git commit -q -m "Resultados ${{ inputs.scenario }}"
-          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" vt-results
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" vt-${{ inputs.tag }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:

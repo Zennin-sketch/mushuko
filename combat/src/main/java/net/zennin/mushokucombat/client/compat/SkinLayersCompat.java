@@ -15,6 +15,7 @@ public final class SkinLayersCompat {
     private SkinLayersCompat() {}
 
     public static void init() {
+        if (Boolean.getBoolean("mushoku.nolayercompat")) return; // para comparar en la prueba visual
         if (!FabricLoader.getInstance().isModLoaded("skinlayers3d") || !FabricLoader.getInstance().isModLoaded("playeranimator")) return;
         try {
             SkinLayersBend.install();

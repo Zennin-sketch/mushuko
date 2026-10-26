@@ -33,5 +33,38 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
         if (fullBody && slot == net.minecraft.world.entity.EquipmentSlot.CHEST) setBoneVisible(this.head, true);
     }
 
+    /**
+     * Ropa que acompania a las piernas: los panos de faldas, tunicas y capas van en huesos de tela (hijos del torso)
+     * que se abren hacia donde va cada pierna (adelante, atras o al costado), asi no las atraviesan al caminar.
+     */
+    @Override
+    protected void applyBaseTransformations(net.minecraft.client.model.HumanoidModel<?> base) {
+        super.applyBaseTransformations(base);
+        var model = getGeoModel();
+        // Giro de cada pierna respecto del torso (al agacharse el torso se inclina y las piernas quedan "atras")
+        float r = base.rightLeg.xRot - base.body.xRot, l = base.leftLeg.xRot - base.body.xRot;
+        float fwdR = Math.max(0, -r), fwdL = Math.max(0, -l), backR = Math.max(0, r), backL = Math.max(0, l);
+        cloth(model, "clothF", Math.max(fwdR, fwdL), 1, 0);
+        cloth(model, "clothFR", fwdR, 1, 0);
+        cloth(model, "clothFL", fwdL, 1, 0);
+        cloth(model, "clothB", Math.max(backR, backL), -1, 0);
+        cloth(model, "clothR", 0, 0, base.rightLeg.zRot);
+        cloth(model, "clothL", 0, 0, base.leftLeg.zRot);
+    }
+
+    /**
+     * Angulo del pano para seguir a la pierna: la rodilla (6 px bajo la cadera) se corre 6*sen(a); el pano, que gira
+     * desde su borde de arriba (cintura u hombros), tiene que correrse lo mismo a esa altura.
+     */
+    private static void cloth(GeoModel<ArmorV2Item> model, String name, float legAngle, int dir, float z) {
+        model.getBone(name).ifPresent(b -> {
+            float span = Math.max(6.5f, b.getPivotY() - 6);
+            float a = (float) Math.asin(Math.min(1, 6 * Math.sin(Math.min(legAngle, 1.4f)) / span)) * 1.1f;
+            b.setRotX(dir * a);
+            b.setRotY(0);
+            b.setRotZ(z);
+        });
+    }
+
     public static Object create(String model, boolean glows, boolean fullBody) { return new ArmorV2Renderer(model, glows, fullBody); }
 }

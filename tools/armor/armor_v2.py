@@ -24,7 +24,11 @@ BONES = {  # hueso de armadura -> (hueso del cuerpo, pivote)
     'armorRightBoot': ('bipedRightLeg', [-1.9, 12, 0]),
     'armorLeftBoot': ('bipedLeftLeg', [1.9, 12, 0]),
 }
-MIRROR = {'armorRightArm': 'armorLeftArm', 'armorRightLeg': 'armorLeftLeg', 'armorRightBoot': 'armorLeftBoot'}
+MIRROR = {'armorRightArm': 'armorLeftArm', 'armorRightLeg': 'armorLeftLeg', 'armorRightBoot': 'armorLeftBoot',
+          'clothFR': 'clothFL', 'clothR': 'clothL'}
+# Huesos de tela (hijos del torso) que el renderer mueve con las piernas: F adelante, B atras, R/L costados (R = derecha
+# del jugador = -X), FR/FL las dos hojas de adelante de un abrigo abierto.
+CLOTH = ('clothF', 'clothB', 'clothR', 'clothL', 'clothFR', 'clothFL')
 
 # Materiales: base, oscuro (bordes), claro (luz de arriba), y si brilla
 MATS = {
@@ -142,27 +146,32 @@ def panel(bone, piv, w, length, mat, det=None, yaw=0, flare=0, thick=0.5, sway=0
     return rbox(bone, [px - w / 2, py - length, pz - thick], [w, length, thick], mat, det, pivot=piv, e=(flare, yaw, sway))
 
 
-def skirt(bone, y, length, hw, hd, flare, mat, det=None, cz=0.0, corner=None, thick=0.5, front=True, split=0.0, cflare=None):
+def skirt(bone, y, length, hw, hd, flare, mat, det=None, cz=0.0, corner=None, thick=0.5, front=True, split=0.0, cflare=None,
+          cloth=False):
     """Falda/faldon de 8 panos alrededor de un rectangulo (medio ancho hw, media profundidad hd).
-    split > 0 abre el frente en dos (como un abrigo)."""
+    split > 0 abre el frente en dos (como un abrigo). cloth=True: cada pano va en su hueso de tela, que se mueve con
+    las piernas (adelante, atras, costados)."""
+    def b(which):
+        return which if cloth else bone
     out = []
     corner = corner if corner is not None else min(hw, hd) * 0.9
     cf = cflare if cflare is not None else flare
     if front:
         if split:
             w = hw - split / 2
-            out += [panel(bone, (-(split / 2 + w / 2), y, cz - hd), w, length, mat, det, 0, flare, thick),
-                    panel(bone, ((split / 2 + w / 2), y, cz - hd), w, length, mat, det, 0, flare, thick)]
+            out += [panel(b('clothFR'), (-(split / 2 + w / 2), y, cz - hd), w, length, mat, det, 0, flare, thick),
+                    panel(b('clothFL'), ((split / 2 + w / 2), y, cz - hd), w, length, mat, det, 0, flare, thick)]
         else:
-            out.append(panel(bone, (0, y, cz - hd), 2 * hw, length, mat, det, 0, flare, thick))
-    out.append(panel(bone, (0, y, cz + hd), 2 * hw, length, mat, det, 180, flare, thick))
-    out.append(panel(bone, (-hw, y, cz), 2 * hd, length, mat, det, 90, flare, thick))
-    out.append(panel(bone, (hw, y, cz), 2 * hd, length, mat, det, -90, flare, thick))
+            out.append(panel(b('clothF'), (0, y, cz - hd), 2 * hw, length, mat, det, 0, flare, thick))
+    out.append(panel(b('clothB'), (0, y, cz + hd), 2 * hw, length, mat, det, 180, flare, thick))
+    out.append(panel(b('clothR'), (-hw, y, cz), 2 * hd, length, mat, det, 90, flare, thick))
+    out.append(panel(b('clothL'), (hw, y, cz), 2 * hd, length, mat, det, -90, flare, thick))
     k = 0.72  # las esquinas van un poco hacia adentro para no asomar arriba
     for sx, sz, yw in ((-1, -1, 45), (1, -1, -45), (-1, 1, 135), (1, 1, -135)):
         if sz < 0 and not front:
             continue
-        out.append(panel(bone, (sx * hw * k + sx * 0.6, y, cz + sz * (hd * k + 0.6)), corner, length, mat, det, yw, cf, thick))
+        cb = 'clothB' if sz > 0 else ('clothF' if not split else ('clothFR' if sx < 0 else 'clothFL'))
+        out.append(panel(b(cb), (sx * hw * k + sx * 0.6, y, cz + sz * (hd * k + 0.6)), corner, length, mat, det, yw, cf, thick))
     return out
 
 
@@ -214,7 +223,7 @@ def mk2():
     out.append(box(B, [2.0, 10.4, -3.6], [2.2, 2.4, 1.2], 'harness', 'flap'))
     out.append(box(B, [-3.6, 10.8, 3.1], [2.4, 2.0, 1.0], 'harness', 'flap'))
     # faldones hasta la rodilla, abiertos adelante y con abertura atras
-    out += skirt(B, 12.4, 8.6, 4.75, 2.85, 9, 'coat_grey', 'coat_edge', split=1.4, corner=2.6, cflare=12)
+    out += skirt(B, 12.4, 8.6, 4.75, 2.85, 9, 'coat_grey', 'coat_edge', split=1.4, corner=2.6, cflare=12, cloth=True)
     # mangas: hombro, manga ancha con pliegues, correa en el codo y puno vuelto
     out += sym([
         box(RA, [-8.75, 21.7, -2.75], [5.2, 2.6, 5.5], 'coat_grey', 'trim_light'),
@@ -256,12 +265,12 @@ def flame_cloak():
     # cuerpo de la capa: frente en dos hojas, costados, esquinas y espalda en cuatro pliegues
     L_ = 21.4
     top = 22.2
-    out += xm(panel(B, (-4.6, top, -3.4), 7.4, L_, 'cloak', 'cloakflame', yaw=-6, flare=6))
-    out += xm(panel(B, (-8.6, top, 0), 6.6, L_, 'cloak', 'cloakflame', yaw=90, flare=7))
-    out += xm(panel(B, (-7.6, top, -2.9), 2.8, L_, 'cloak', 'cloakflame', yaw=45, flare=8))
-    out += xm(panel(B, (-7.6, top, 2.9), 2.8, L_, 'cloak', 'cloakflame', yaw=135, flare=8))
+    out += xm(panel('clothFR', (-4.6, top, -3.4), 7.4, L_, 'cloak', 'cloakflame', yaw=-6, flare=6))
+    out += xm(panel('clothR', (-8.6, top, 0), 6.6, L_, 'cloak', 'cloakflame', yaw=90, flare=7))
+    out += xm(panel('clothFR', (-7.6, top, -2.9), 2.8, L_, 'cloak', 'cloakflame', yaw=45, flare=8))
+    out += xm(panel('clothB', (-7.6, top, 2.9), 2.8, L_, 'cloak', 'cloakflame', yaw=135, flare=8))
     for x, dz, yw in ((-6.0, 0, 192), (-2.1, 0.8, 168), (2.1, 0.8, 192), (6.0, 0, 168)):
-        out.append(panel(B, (x, top, 3.4 + dz), 4.6, L_ - dz * 0.5, 'cloak', 'cloakflame', yaw=yw, flare=7))
+        out.append(panel('clothB', (x, top, 3.4 + dz), 4.6, L_ - dz * 0.5, 'cloak', 'cloakflame', yaw=yw, flare=7))
     # forro oscuro que se ve por la abertura del frente
     out.append(box(B, [-3.2, 1.4, -2.6], [6.4, 20.8, 0.3], 'cloak_in', 'folds'))
     # mangas (los brazos salen de la capa con la misma tela) y punos con brasas
@@ -302,8 +311,8 @@ def roxy():
     out += xm(rbox(B, [-2.4, 22.2, -3.15], [1.8, 1.3, 0.4], 'frill_black', pivot=(-0.6, 22.8, -3.0), e=(0, 0, 12)))
     out += xm(rbox(B, [-0.9, 19.6, -3.1], [0.6, 2.7, 0.3], 'frill_black', pivot=(-0.6, 22.3, -3.0), e=(0, 0, -14)))
     # falda: piso negro con tablas y volado blanco abajo
-    out += skirt(B, 12.9, 5.4, 4.9, 2.95, 24, 'frill_black', 'pleats', corner=3.0, cflare=26)
-    out += skirt(B, 8.2, 2.6, 6.9, 5.0, 34, 'blouse', 'frill', corner=4.2, cflare=34)
+    out += skirt(B, 12.9, 5.4, 4.9, 2.95, 24, 'frill_black', 'pleats', corner=3.0, cflare=26, cloth=True)
+    out += skirt(B, 8.2, 2.6, 6.9, 5.0, 34, 'blouse', 'frill', corner=4.2, cflare=34, cloth=True)
     # moño grande atras
     out.append(box(B, [-0.9, 12.9, 2.7], [1.8, 1.6, 0.9], 'frill_black'))
     out += xm(rbox(B, [-3.9, 12.6, 2.8], [3.0, 2.4, 0.6], 'frill_black', 'folds', pivot=(-0.9, 13.7, 3.1), e=(0, 0, -10)))
@@ -352,11 +361,11 @@ def ghislaine():
     out.append(rbox(B, [-4.9, 11.6, -2.85], [9.8, 1.0, 5.7], 'wrap', None, pivot=(0, 12.1, 0), e=(0, 0, 7)))
     out.append(box(B, [1.6, 11.4, -3.05], [1.6, 1.4, 0.3], 'gold'))
     # taparrabos: panos largos adelante y atras, cortos a los costados
-    out.append(panel(B, (0, 12.0, -2.9), 4.4, 7.4, 'khaki', 'fray', flare=10))
-    out.append(panel(B, (0, 12.0, 2.9), 5.0, 7.8, 'khaki', 'fray', yaw=180, flare=10))
-    out += xm(panel(B, (-4.7, 12.0, 0), 4.6, 4.6, 'khaki', 'fray', yaw=90, flare=24))
-    out += xm(panel(B, (-3.6, 12.0, -2.4), 2.6, 5.4, 'khaki', 'fray', yaw=40, flare=20))
-    out += xm(panel(B, (-3.6, 12.0, 2.4), 2.6, 5.4, 'khaki', 'fray', yaw=140, flare=20))
+    out.append(panel('clothF', (0, 12.0, -2.9), 4.4, 7.4, 'khaki', 'fray', flare=10))
+    out.append(panel('clothB', (0, 12.0, 2.9), 5.0, 7.8, 'khaki', 'fray', yaw=180, flare=10))
+    out += xm(panel('clothR', (-4.7, 12.0, 0), 4.6, 4.6, 'khaki', 'fray', yaw=90, flare=24))
+    out += xm(panel('clothFR', (-3.6, 12.0, -2.4), 2.6, 5.4, 'khaki', 'fray', yaw=40, flare=20))
+    out += xm(panel('clothB', (-3.6, 12.0, 2.4), 2.6, 5.4, 'khaki', 'fray', yaw=140, flare=20))
     out += sym([
         box(RA, [-9.1, 20.0, -3.1], [5.6, 4.4, 6.2], 'fur_tan', 'fur'),
         box(RA, [-8.6, 24.2, -2.6], [4.4, 0.8, 5.2], 'fur_tan', 'fur'),
@@ -390,9 +399,9 @@ def paul():
     out.append(rbox(B, [-0.6, 11.0, 2.75], [1.2, 14, 0.4], 'brown', 'stitch', pivot=(0, 18, 2.9), e=(0, 0, -34)))
     out.append(rbox(B, [-6.0, 4.0, -1.0], [1.4, 8.4, 2.2], 'black_leather', 'trim', pivot=(-5.3, 12, 0), e=(-20, 0, 8)))
     # escarcelas (adelante dos, costados y atras)
-    out += xm(panel(B, (-2.3, 12.4, -3.0), 4.0, 5.0, 'leather_brown', 'rivets', flare=12))
-    out += xm(panel(B, (-4.9, 12.4, 0), 4.2, 4.4, 'leather_brown', 'rivets', yaw=90, flare=16))
-    out.append(panel(B, (0, 12.4, 3.0), 8.4, 4.6, 'gambeson', 'quilt', yaw=180, flare=12))
+    out += xm(panel('clothFR', (-2.3, 12.4, -3.0), 4.0, 5.0, 'leather_brown', 'rivets', flare=12))
+    out += xm(panel('clothR', (-4.9, 12.4, 0), 4.2, 4.4, 'leather_brown', 'rivets', yaw=90, flare=16))
+    out.append(panel('clothB', (0, 12.4, 3.0), 8.4, 4.6, 'gambeson', 'quilt', yaw=180, flare=12))
     out += [
         box(LA, [3.4, 22.0, -3.1], [5.8, 2.6, 6.2], 'steel_d', 'rivets'),
         box(LA, [3.8, 20.2, -2.95], [5.4, 2.0, 5.9], 'steel_d', 'plates'),
@@ -436,7 +445,7 @@ def eris():
     out.append(box(B, [-4.9, 12.0, -2.9], [9.8, 0.9, 5.8], 'black_leather'))
     out.append(box(B, [3.9, 8.4, -1.4], [1.4, 3.8, 1.6], 'black_leather', 'stitch'))
     # falda corta tableada
-    out += skirt(B, 12.5, 4.4, 4.9, 2.9, 26, 'maroon', 'pleats_light', corner=3.0, cflare=28)
+    out += skirt(B, 12.5, 4.4, 4.9, 2.9, 26, 'maroon', 'pleats_light', corner=3.0, cflare=28, cloth=True)
     out += sym([
         box(RA, [-8.7, 22.4, -2.7], [5.4, 1.8, 5.4], 'fur_cream', 'fur'),
         box(RA, [-8.45, 15.0, -2.45], [4.9, 7.6, 4.9], 'maroon', 'folds'),
@@ -497,7 +506,7 @@ ARMORS = {
     'outfit_paul': (paul, [('paul_armor', 'chest'), ('paul_pants', 'legs'), ('paul_boots', 'feet')], False),
     'outfit_eris': (eris, [('eris_hairband', 'head'), ('eris_blouse', 'chest'), ('eris_shorts', 'legs'), ('eris_boots', 'feet')], False),
 }
-SLOT_BONES = {'head': ['armorHead'], 'chest': ['armorBody', 'armorRightArm', 'armorLeftArm'],
+SLOT_BONES = {'head': ['armorHead'], 'chest': ['armorBody', 'armorRightArm', 'armorLeftArm', *CLOTH],
               'legs': ['armorRightLeg', 'armorLeftLeg'], 'feet': ['armorRightBoot', 'armorLeftBoot']}
 # Iconos hechos a mano (en vez del generado de frente)
 ICON_FROM = {'flame_trapping_cloak_v2': 'addon_flametrappingcloak'}
@@ -690,6 +699,12 @@ def geo(name, boxes, tex):
             order.append(body_bone)
         bones[armor_bone] = dict(name=armor_bone, parent=body_bone, pivot=pivot, cubes=[])
         order.append(armor_bone)
+    # Huesos de tela: cuelgan del torso y giran desde lo mas alto de sus panos (la cintura o los hombros)
+    for cb in CLOTH:
+        tops = [bx['pivot'][1] if bx['pivot'] else bx['origin'][1] + bx['size'][1] for bx in boxes if bx['bone'] == cb]
+        if tops:
+            bones[cb] = dict(name=cb, parent='armorBody', pivot=[0, round(max(tops), 3), 0], cubes=[])
+            order.append(cb)
     for b in boxes:
         uv = {}
         for name, (fx, fy, fw, fh) in faces(b).items():
