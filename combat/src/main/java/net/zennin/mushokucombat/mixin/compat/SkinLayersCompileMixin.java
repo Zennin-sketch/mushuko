@@ -28,7 +28,7 @@ public abstract class SkinLayersCompileMixin {
     private void mushokuCombat$bend(ModelPart vanillaModel, PoseStack.Pose pose, VertexConsumer vc, int light, int overlay, int color,
                                     CallbackInfo ci) {
         if (mushokuCombat$inside) return;
-        VertexConsumer bent = LayerBendConsumer.wrap(vanillaModel, pose, vc);
+        VertexConsumer bent = LayerBendConsumer.wrap(this, vanillaModel, pose, vc);
         if (bent == null) return;
         mushokuCombat$inside = true;
         try {
