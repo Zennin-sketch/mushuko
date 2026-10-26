@@ -5,6 +5,12 @@ on:
       scenario:
         description: Escenario (tools/visualtest/<nombre>.json)
         default: skinlayers
+      jvm:
+        description: Argumentos extra de Java
+        default: ""
+      tag:
+        description: Rama de resultados (vt-<tag>)
+        default: results
 permissions:
   contents: write
 jobs:
