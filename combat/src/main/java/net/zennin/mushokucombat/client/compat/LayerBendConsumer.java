@@ -76,7 +76,7 @@ public final class LayerBendConsumer implements VertexConsumer {
         float t = Math.max(0f, Math.min(1f, (mid + BAND) / (2 * BAND)));
         float w = t * t * (3 - 2 * t);
         if (w > 0f) {
-            float ang = value * w;
+            float ang = -value * w; // signo comprobado en la prueba visual (con +doblez la mitad iba al reves)
             Matrix4f r = new Matrix4f().translate(cx, cy, cz).rotate(ang, axis).translate(-cx, -cy, -cz);
             v = r.transform(new Vector4f(p, 1f));
             lastRot.identity().rotate(ang, axis);
