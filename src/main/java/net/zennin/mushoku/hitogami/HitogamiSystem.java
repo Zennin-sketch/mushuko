@@ -79,7 +79,7 @@ public final class HitogamiSystem {
         ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new Oracle());
 
         ServerPlayConnectionEvents.JOIN.register((h, s, server) -> {
-            PENDING.put(h.getPlayer().getUUID(), 30);
+            if (System.getProperty("mushoku.visualtest") == null) PENDING.put(h.getPlayer().getUUID(), 30);
             sendAppearance(h.getPlayer(), h.getPlayer());
         });
         ServerPlayConnectionEvents.DISCONNECT.register((h, server) -> {
