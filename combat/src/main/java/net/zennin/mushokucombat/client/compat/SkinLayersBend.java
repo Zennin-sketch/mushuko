@@ -25,6 +25,16 @@ import java.util.Optional;
 final class SkinLayersBend {
     private SkinLayersBend() {}
 
+    private static final java.util.Map<String, Integer> SEEN = new java.util.HashMap<>();
+
+    /** Primeras 3 veces que pasa cada cosa (solo con -Dmushoku.debuglayers=true). */
+    static void dbg(String what) {
+        if (!DEBUG) return;
+        String key = what.length() > 40 ? what.substring(0, 40) : what;
+        int n = SEEN.merge(key.split(" ")[0], 1, Integer::sum);
+        if (n <= 3 || n % 5000 == 0) org.slf4j.LoggerFactory.getLogger("mushoku_combat").info("[capas] {} (#{})", what, n);
+    }
+
     private static final boolean DEBUG = Boolean.getBoolean("mushoku.debuglayers");
     /** Parte que se esta dibujando: 1 brazo, 2 pierna, 3 torso. */
     static int kind;
@@ -56,6 +66,7 @@ final class SkinLayersBend {
         LayerFeatureTransformerAPI.setLayerTransformer((player, pose, part) -> {
             // que parte se va a dibujar (brazo, pierna o torso): cada una dobla con su propio signo/mitad
             kind = 0;
+            dbg("layerTransformer " + part);
             if (net.minecraft.client.Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player)
                     instanceof net.minecraft.client.renderer.entity.player.PlayerRenderer pr) {
                 var m = pr.getModel();
@@ -124,6 +135,7 @@ final class SkinLayersBend {
         @Override
         public void transform(Vector3f normal, Vector4f[] v) {
             int n = Math.min(4, v.length);
+            dbg("transform(poligono)");
             boolean dbg = DEBUG && (++vcalls % 4001) == 0;
             float ox = v[0].x, oy = v[0].y, oz = v[0].z;
             for (int i = 0; i < n; i++) {
@@ -157,6 +169,7 @@ final class SkinLayersBend {
          */
         @Override
         public void transform(ModelPart.Cube cube) {
+            dbg("transform(cube) " + cube.getClass().getName());
             MutableCuboid mc = (MutableCuboid) (Object) cube;
             if (!mc.hasMutator(VoxelCuboid.NAME)) mc.registerMutator(VoxelCuboid.NAME, VoxelCuboid::new);
             if (mc.getAndActivateMutator(VoxelCuboid.NAME) instanceof VoxelCuboid v) v.bender = this;
@@ -228,6 +241,7 @@ final class SkinLayersBend {
 
         @Override
         public void render(com.mojang.blaze3d.vertex.PoseStack.Pose pose, com.mojang.blaze3d.vertex.VertexConsumer vc, int light, int overlay, int color) {
+            dbg("voxel render bender=" + (bender != null));
             Matrix4f m4 = pose.pose();
             Matrix3f m3 = pose.normal();
             for (int f = 0; f < 6; f++) {
