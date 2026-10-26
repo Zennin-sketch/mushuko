@@ -3,7 +3,16 @@
   "minVersion": "0.8",
   "package": "net.zennin.mushokucombat.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": ["PlayerAttackHelperMixin"],
-  "client": ["GuiMixin", "ItemInHandLayerMixin", "ItemInHandRendererMixin"],
-  "injectors": { "defaultRequire": 0 }
+  "mixins": [
+    "PlayerAttackHelperMixin"
+  ],
+  "client": [
+    "GuiMixin",
+    "ItemInHandLayerMixin",
+    "ItemInHandRendererMixin",
+    "PlayerModelPairsMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
 }

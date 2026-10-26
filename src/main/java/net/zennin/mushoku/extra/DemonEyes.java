@@ -85,6 +85,7 @@ public final class DemonEyes {
                 if (on) {
                     d = d.withClair(Optional.of(new ExtraData.Clair(p.getX(), p.getY(), p.getZ(),
                             p.level().dimension().location().toString(), p.gameMode.getGameModeForPlayer().getId())));
+                    spawnBody(p);
                     p.setGameMode(GameType.SPECTATOR);
                 } else {
                     d = returnFromClair(p, d);
@@ -113,7 +114,52 @@ public final class DemonEyes {
         sync(p);
     }
 
+    /** Cuerpo de cada jugador en Clarividencia (dueno -> entidad). */
+    private static final java.util.Map<java.util.UUID, net.zennin.mushoku.entity.SpiritBodyEntity> BODIES = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /** Deja el cuerpo quieto donde estabas, con tu equipo puesto. */
+    private static void spawnBody(ServerPlayer p) {
+        removeBody(p);
+        var body = new net.zennin.mushoku.entity.SpiritBodyEntity(net.zennin.mushoku.registry.ModEntities.SPIRIT_BODY, p.level());
+        body.moveTo(p.getX(), p.getY(), p.getZ(), p.getYRot(), p.getXRot());
+        body.setYHeadRot(p.getYHeadRot());
+        body.yBodyRot = p.yBodyRot;
+        body.setOwner(p.getUUID());
+        body.setCustomName(p.getName());
+        body.setCustomNameVisible(false);
+        for (net.minecraft.world.entity.EquipmentSlot s : net.minecraft.world.entity.EquipmentSlot.values())
+            body.setItemSlot(s, p.getItemBySlot(s).copy());
+        for (net.minecraft.world.entity.EquipmentSlot s : net.minecraft.world.entity.EquipmentSlot.values()) body.setDropChance(s, 0f);
+        p.level().addFreshEntity(body);
+        BODIES.put(p.getUUID(), body);
+    }
+
+    private static void removeBody(ServerPlayer p) {
+        var b = BODIES.remove(p.getUUID());
+        if (b != null && !b.isRemoved()) b.discard();
+    }
+
+    /** El cuerpo sigue teniendo dueno en Clarividencia. */
+    public static boolean hasBody(net.zennin.mushoku.entity.SpiritBodyEntity b) {
+        return b.owner().map(id -> BODIES.get(id) == b).orElse(false);
+    }
+
+    /** Golpearon tu cuerpo: volves a el (sale la Clarividencia) y recibis el golpe. */
+    public static void bodyHit(ServerPlayer p, net.minecraft.world.damagesource.DamageSource src, float amount) {
+        ExtraData d = ModAttachments.extra(p);
+        for (int slot = 0; slot < 2; slot++) {
+            if ("clairvoyance".equals(d.eye(slot)) && d.on(slot)) {
+                toggle(p, slot);
+                break;
+            }
+        }
+        removeBody(p);
+        p.invulnerableTime = 0;
+        p.hurt(src, amount);
+    }
+
     private static ExtraData returnFromClair(ServerPlayer p, ExtraData d) {
+        removeBody(p);
         if (d.clair().isEmpty()) return d;
         ExtraData.Clair c = d.clair().get();
         ServerLevel target = p.server.getLevel(ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(c.dim())));

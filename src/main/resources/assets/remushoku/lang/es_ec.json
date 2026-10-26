@@ -2582,5 +2582,6 @@
   "item.remushoku.mana_bow": "Arco de cristal de maná",
   "item.remushoku.demon_bow": "Arco del Rey Demonio",
   "tooltip.remushoku.bow_speed": "Velocidad de tensado: %s",
-  "tooltip.remushoku.bow_damage": "Daño de la flecha: %s"
+  "tooltip.remushoku.bow_damage": "Daño de la flecha: %s",
+  "entity.remushoku.spirit_body": "Cuerpo"
 }

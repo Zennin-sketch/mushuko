@@ -52,11 +52,17 @@ public final class LayerBendConsumer implements VertexConsumer {
                 .mul(new Matrix3f().set(b.getBendDirection().getRotation()));
     }
 
+    /** Capa externa -> parte del cuerpo (la capa 3D se dibuja en la capa externa, pero el doblez vigente esta en la parte). */
+    private static final java.util.Map<ModelPart, ModelPart> PAIRS = java.util.Collections.synchronizedMap(new java.util.WeakHashMap<>());
+
+    public static void pair(ModelPart layer, ModelPart body) { PAIRS.put(layer, body); }
+
     /** Devuelve el consumidor que dobla, o null si esa parte no esta doblada. */
     public static VertexConsumer wrap(ModelPart part, PoseStack.Pose pose, VertexConsumer vc) {
         if (!ACTIVE || part == null) return null;
         try {
-            Optional<MutableCuboid> c = ModelPartAccessor.optionalGetCuboid(part, 0);
+            ModelPart src = PAIRS.getOrDefault(part, part);
+            Optional<MutableCuboid> c = ModelPartAccessor.optionalGetCuboid(src, 0);
             if (c.isEmpty()) return null;
             Tuple<String, ?> m = c.get().getActiveMutator();
             if (m == null || !(m.getB() instanceof BendableCuboid b) || Math.abs(b.getBend()) < 1.0e-4f) return null;
@@ -76,7 +82,7 @@ public final class LayerBendConsumer implements VertexConsumer {
         float t = Math.max(0f, Math.min(1f, (mid + BAND) / (2 * BAND)));
         float w = t * t * (3 - 2 * t);
         if (w > 0f) {
-            float ang = -value * w; // signo comprobado en la prueba visual (con +doblez la mitad iba al reves)
+            float ang = value * w;
             Matrix4f r = new Matrix4f().translate(cx, cy, cz).rotate(ang, axis).translate(-cx, -cy, -cz);
             v = r.transform(new Vector4f(p, 1f));
             lastRot.identity().rotate(ang, axis);

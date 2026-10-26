@@ -2582,5 +2582,6 @@
   "item.remushoku.mana_bow": "Mana Crystal Bow",
   "item.remushoku.demon_bow": "Demon King Bow",
   "tooltip.remushoku.bow_speed": "Draw speed: %s",
-  "tooltip.remushoku.bow_damage": "Arrow damage: %s"
+  "tooltip.remushoku.bow_damage": "Arrow damage: %s",
+  "entity.remushoku.spirit_body": "Body"
 }

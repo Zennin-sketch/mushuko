@@ -37,6 +37,7 @@ public class MushokuClient implements ClientModInitializer {
         EntityRendererRegistry.register(ModEntities.SPELL_FX, SpellFxRenderer::new);
         // --- Hitogami, dimension del vacio y rasgos de raza ---
         HumanoidNpcRenderer.register(ModEntities.HITOGAMI, "hitogami");
+        EntityRendererRegistry.register(ModEntities.SPIRIT_BODY, SpiritBodyRenderer::new);
         VoidSkyEffects.register();
         ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.ArcherSyncPayload.TYPE, (payload, context) -> ClientArcherState.set(payload.data()));
         ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.HitogamiScreenPayload.TYPE, (payload, context) ->

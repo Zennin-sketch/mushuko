@@ -89,6 +89,10 @@ public final class ModEntities {
             net.zennin.mushoku.hitogami.HitogamiEntity::new);
     public static final EntityType<VillagerGuardEntity> VILLAGER_GUARD = humanoid("villager_guard_entity", MobCategory.CREATURE, VillagerGuardEntity::new);
 
+    /** Cuerpo que queda quieto mientras usas el ojo de Clarividencia. */
+    public static final EntityType<net.zennin.mushoku.entity.SpiritBodyEntity> SPIRIT_BODY = humanoid("spirit_body", MobCategory.MISC,
+            net.zennin.mushoku.entity.SpiritBodyEntity::new);
+
     private ModEntities() {}
 
     private static <T extends Mob> EntityType<T> creature(String name, float w, float h, EntityType.EntityFactory<T> factory) {
@@ -108,6 +112,7 @@ public final class ModEntities {
     }
 
     public static void init() {
+        FabricDefaultAttributeRegistry.register(SPIRIT_BODY, net.zennin.mushoku.entity.SpiritBodyEntity.attributes());
         FabricDefaultAttributeRegistry.register(HITOGAMI, net.zennin.mushoku.hitogami.HitogamiEntity.attributes());
         FabricDefaultAttributeRegistry.register(SG_BANDIT, BanditEntity.attributes(40));
         FabricDefaultAttributeRegistry.register(NG_BANDIT, BanditEntity.attributes(40));
