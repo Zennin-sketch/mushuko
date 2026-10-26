@@ -31,6 +31,8 @@ public final class BowRender {
     /** Doblez del codo de la animacion (Player Animator): lo pone el addon. Se aplica despues de translateToHand. */
     public interface ArmBend { void apply(Player p, HumanoidArm arm, PoseStack pose); }
     public static ArmBend armBend = (p, arm, pose) -> {};
+    /** Se esta dibujando la primera persona animada (lo pone el addon). */
+    public static java.util.function.BooleanSupplier firstPerson = () -> false;
 
     /** Forma y colores de cada arco. */
     public record Style(float riser, float limb, float w0, float w1, float t0, float t1, float base, float curve, float recurve,
@@ -86,6 +88,13 @@ public final class BowRender {
                 pose.mulPose(new org.joml.Quaternionf().rotationTo(1, 0, 0, dir.x, dir.y, dir.z));
                 back = Math.max(BRACE, Math.min(BRACE + DRAW, h.length()));
             }
+        }
+        if (firstPerson.getAsBoolean() && p == net.minecraft.client.Minecraft.getInstance().player) {
+            // primera persona: mas inclinado y mas chico, para que no tape la vista (como en Unturned)
+            pose.mulPose(com.mojang.math.Axis.XP.rotationDegrees(left ? -32 : 32));
+            pose.scale(0.62f, 0.62f, 0.62f);
+            back = BRACE + (back - BRACE) / 0.62f;
+            back = Math.min(BRACE + DRAW, back);
         }
         boolean arrow = drawing || BowSystem.isLoaded(bow);
         ItemStack ammo = arrow ? p.getProjectile(bow) : ItemStack.EMPTY;

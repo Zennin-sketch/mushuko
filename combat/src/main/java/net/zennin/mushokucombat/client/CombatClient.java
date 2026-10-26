@@ -39,6 +39,7 @@ public final class CombatClient implements ClientModInitializer {
             pose.mulPose(new org.joml.Quaternionf().rotateAxis(bend, new org.joml.Vector3f((float) Math.cos(axisf), 0, (float) Math.sin(axisf))));
             pose.translate(0, -0.25f, 0);
         };
+        net.zennin.mushoku.client.render.BowRender.firstPerson = dev.kosmx.playerAnim.api.firstPerson.FirstPersonMode::isFirstPersonPass;
         net.zennin.mushoku.client.render.BowRender.hidden = p -> p instanceof AbstractClientPlayer cp && !ClientSheath.handVisible(cp);
         ClientSheath.init();
         net.zennin.mushokucombat.client.compat.SkinLayersCompat.init();
