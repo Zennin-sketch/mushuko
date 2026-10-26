@@ -30,7 +30,7 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
     @Override
     protected void applyBoneVisibilityBySlot(net.minecraft.world.entity.EquipmentSlot slot) {
         super.applyBoneVisibilityBySlot(slot);
-        if (fullBody && slot == net.minecraft.world.entity.EquipmentSlot.CHEST) setBoneVisible(getHeadBone(), true);
+        if (fullBody && slot == net.minecraft.world.entity.EquipmentSlot.CHEST) setBoneVisible(this.head, true);
     }
 
     public static Object create(String model, boolean glows, boolean fullBody) { return new ArmorV2Renderer(model, glows, fullBody); }
