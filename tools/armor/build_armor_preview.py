@@ -7,12 +7,12 @@ def uri(p):
     return 'data:image/png;base64,' + base64.b64encode(open(p, 'rb').read()).decode() if os.path.exists(p) else None
 
 NOTES = {
-    'mk2_v2': ('Armadura Mágica Mk-II v2 (ropa de Rudeus)', 'Túnica gris con capucha caída, camisa blanca, cinturón con bolsa, faldones largos, pantalón marrón y botas. El núcleo de maná queda como broche azul.'),
-    'flame_cloak_v2': ('Capa Atrapallamas v2', 'Capa marrón con capucha que cubre todo el cuerpo y deja la cara en sombra (tapa orejas y rasgos de raza). El dobladillo brilla como brasas.'),
-    'outfit_roxy': ('Ropa de Roxy', 'Sombrero de bruja con banda roja, manto corto, blusa blanca con lazo azul, túnica, medias oscuras y botas.'),
-    'outfit_ghislaine': ('Ropa de Ghislaine', 'Parche en el ojo izquierdo, top y taparrabos de cuero negro, hombrera de metal, brazaletes y botas altas.'),
-    'outfit_paul': ('Ropa de Paul', 'Túnica verdosa, peto de cuero con remaches, hombrera izquierda, cinturón de espadachín, pantalón gris y botas.'),
-    'outfit_eris': ('Ropa de Eris', 'Diadema, blusa blanca con lazo marrón, peto de cuero, brazaletes, shorts marrones y botas.'),
+    'mk2_v2': ('Armadura Mágica Mk-II v2 (ropa de Rudeus)', 'Abrigo gris largo abierto con forro oscuro, cuello alto, capucha caída, arnés de cuero cruzado, cinturón con bolsas, faldones con abertura, mangas anchas con puño vuelto y el núcleo de maná como broche.'),
+    'flame_cloak_v2': ('Capa Atrapallamas v2', 'Capucha con visera y punta caída que deja la cara en sombra (dos brasas por ojos), esclavina con borde dorado, capa en paños con pliegues hasta los tobillos y llamas que brillan en el dobladillo.'),
+    'outfit_roxy': ('Ropa de Roxy', 'Sombrero de bruja con ala caída y punta doblada, blusa blanca con volados y mangas abullonadas, corsé con cordones, falda negra acampanada con volado blanco, moño atrás, medias con franjas y botas.'),
+    'outfit_ghislaine': ('Ropa de Ghislaine', 'Estola de piel con mechones, vendas de cuero, tahalí cruzado, dos cinturones, taparrabos caqui deshilachado, hombreras de piel, aros de oro, botas altas con borde de piel y parche.'),
+    'outfit_paul': ('Ropa de Paul', 'Gambesón acolchado, coraza de cuero con remaches, hombrera de tres placas, tahalí con vaina, escarcelas de cuero, brazaletes, pantalón gris y botas de caña doblada.'),
+    'outfit_eris': ('Ropa de Eris', 'Chaqueta granate con cuello y hombros de piel, blusa con cinta, corsé, falda tableada, guanteletes, medias granate, botas altas y diadema con moño.'),
     'curse_helmet_v2': ('Casco Supresor de Maldición v2', 'Yelmo de bronce con visera en T, banda de runas violetas que brilla y cresta dorada.'),
     'sunglasses_v2': ('Gafas de Sol Mágicas v2', 'Lentes azul oscuro con reflejo, marco dorado y patillas negras, en 3D.'),
     'enchanted_shoes_v2': ('Zapatos Encantados v2', 'Botas de cuero azul con puño blanco, alitas de pluma celeste y una franja de runas que brilla.'),

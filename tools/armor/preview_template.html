@@ -66,10 +66,16 @@ const man = new THREE.Group(); root.add(man);
 
 const loader = new THREE.TextureLoader();
 function cubeMesh(c, tex, tw, th, glow) {
-  const [w, h, d] = c.size, [u, v] = c.uv;
+  const [w, h, d] = c.size;
   const g = new THREE.BoxGeometry(w, h, d);
-  // Caras de BoxGeometry: +x, -x, +y, -y, +z, -z  ->  regiones del box UV de Bedrock
-  const R = [[u, v + d, d, h], [u + d + w, v + d, d, h], [u + d, v, w, d], [u + d + w, v, w, d], [u + 2 * d + w, v + d, w, h], [u + d, v + d, w, h]];
+  // Caras de BoxGeometry: +x, -x, +y, -y, +z, -z (marco Bedrock). GeckoLib espeja X, asi que +x usa la cara "west".
+  let R;
+  if (Array.isArray(c.uv)) {
+    const [u, v] = c.uv, [fw, fh, fd] = c.size.map(x => Math.floor(x + 1e-6));
+    R = [[u + fd + fw, v + fd, fd, fh], [u, v + fd, fd, fh], [u + fd, v, fw, fd], [u + fd + fw, v + fd, fw, -fd], [u + 2 * fd + fw, v + fd, fw, fh], [u + fd, v + fd, fw, fh]];
+  } else {
+    R = ['west', 'east', 'up', 'down', 'south', 'north'].map(n => [...c.uv[n].uv, ...c.uv[n].uv_size]);
+  }
   const uv = g.attributes.uv;
   for (let f = 0; f < 6; f++) {
     const [x, y, ww, hh] = R[f];
@@ -82,7 +88,8 @@ function cubeMesh(c, tex, tw, th, glow) {
   mesh.position.set(c.origin[0] + w / 2, c.origin[1] + h / 2, c.origin[2] + d / 2);
   if (c.rotation) {
     const piv = c.pivot; holder.position.set(...piv); mesh.position.sub(new THREE.Vector3(...piv));
-    holder.rotation.set(c.rotation[0] * Math.PI / 180, c.rotation[1] * Math.PI / 180, c.rotation[2] * Math.PI / 180, 'ZYX');
+    // GeckoLib: espeja X y aplica (-x, -y, z); visto en el marco Bedrock queda (-x, y, -z)
+    holder.rotation.set(-c.rotation[0] * Math.PI / 180, c.rotation[1] * Math.PI / 180, -c.rotation[2] * Math.PI / 180, 'ZYX');
   }
   holder.add(mesh);
   if (glow) {
@@ -117,6 +124,6 @@ if (matchMedia('(prefers-reduced-motion: reduce)').matches) { spin = false; docu
 let start = Object.keys(DATA.armors)[0];
 try { const s = localStorage.getItem('armeria-sel'); if (s && DATA.armors[s]) start = s; } catch (e) {}
 show(start); resize();
-window.__show = show; window.__rot = r => { root.rotation.y = r; spin = false; };
+window.__show = show; window.__cam = (x, y, z, ty) => { camera.position.set(x, y, z); controls.target.set(0, ty, 0); }; window.__rot = r => { root.rotation.y = r; spin = false; };
 (function loop() { if (spin) root.rotation.y += 0.008; controls.update(); renderer.render(scene, camera); requestAnimationFrame(loop); })();
 </script>

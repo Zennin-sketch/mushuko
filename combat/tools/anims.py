@@ -419,15 +419,19 @@ def draw_back():
 def sheathe_back():
     """Guardar en la espalda: levanta el arma por encima del hombro derecho, la baja por detras hasta que el mango
     queda sobre el hombro, suelta y baja la mano."""
-    x = anim('back_sheathe', 'Guardar en la espalda', end=15, stop=19, lag=('head', 'larm'))
+    x = anim('back_sheathe', 'Guardar en la espalda', end=16, stop=20, lag=('head', 'larm'))
     x.key(0, 'stop', **GUARD_H)
     x.key(4, 'smooth', **P(root(lean=-2), torso(turn=2, lean=-4), head(yaw=-4, down=-8),
                            dict(rarm=R((4, 6, 4), (0, 0.9, 0.2)), larm=L((-3, 2, 6), (0, 0.9, 0.2)), grip=(1, 3.5))))
     x.key(7, 'smooth', **P(root(lean=-3), torso(turn=8, lean=-6), head(yaw=-12, down=-8),
                            dict(rarm=R((5, 7, -1), (-0.3, 0.3, -0.9)), larm=L((-6, -9, 3)))))
     x.key(9, 'stop', **GRAB_BACK)
-    x.key(12, 'smooth', **P(torso(turn=3), head(yaw=-4), dict(rarm=R((6, -4, 2), (0, 0, 1)))))
-    x.key(15, 'stop', **NEUTRAL_P)
+    # Soltar: la mano baja por el costado, siempre con el brazo casi estirado (si la mano pasa cerca del hombro el
+    # codo se pliega del todo y el brazo se retuerce) y girando la muneca de a poco hasta la pose normal.
+    x.key(11, 'smooth', **P(torso(turn=6, lean=-2), head(yaw=-8, down=-2),
+                            dict(rarm=R((9, -8, -3), (0.15, -0.75, 0.6)), larm=L((-5.5, -12, 1)))))
+    x.key(13, 'smooth', **P(torso(turn=2), head(yaw=-2), dict(rarm=R((6, -11, 0.5), (0.05, -0.35, 0.95)))))
+    x.key(16, 'stop', **NEUTRAL_P)
 
 draw_hip(); sheathe_hip(); draw_back(); sheathe_back()
 for _a in ANIMS_REF():
