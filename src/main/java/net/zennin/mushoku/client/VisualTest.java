@@ -62,6 +62,8 @@ public final class VisualTest {
         ClientTickEvents.END_CLIENT_TICK.register(VisualTest::tick);
     }
 
+    private static boolean keepScreen;
+
     private static void log(String s) { MushokuMod.LOG.info("[visualtest] " + s); }
 
     private static void tick(Minecraft mc) {
@@ -75,7 +77,7 @@ public final class VisualTest {
             return;
         }
         if (mc.player == null || mc.level == null) return;
-        if (mc.screen != null) mc.setScreen(null);
+        if (mc.screen != null && !keepScreen) mc.setScreen(null);
         ticksInWorld++;
         if (ticksInWorld < 60) return;
         keepDummy(mc);
@@ -155,6 +157,41 @@ public final class VisualTest {
             case "shot" -> {
                 String name = s.get("v").getAsString();
                 Screenshot.grab(mc.gameDirectory, name + ".png", mc.getMainRenderTarget(), m -> log("captura " + name));
+            }
+            case "oneshot" -> Class.forName("net.zennin.mushokucombat.client.BowAnimClient")
+                    .getMethod("oneShot", AbstractClientPlayer.class, String.class).invoke(null, dummy, s.get("v").getAsString());
+            case "loadbow" -> net.zennin.mushoku.archer.BowSystem.setLoaded(dummy.getMainHandItem(), !s.has("v") || s.get("v").getAsBoolean());
+            case "quiver" -> {
+                // carcaj en la ranura del maniqui (y del jugador si 'me'), con n flechas de un tipo
+                ItemStack q = new ItemStack(net.zennin.mushoku.registry.ModItems.QUIVER);
+                int n = s.has("n") ? s.get("n").getAsInt() : 0;
+                java.util.List<ItemStack> list = new java.util.ArrayList<>();
+                if (n > 0) list.add(new ItemStack(net.minecraft.world.item.Items.ARROW, Math.min(64, n)));
+                if (s.has("spectral")) list.add(new ItemStack(net.minecraft.world.item.Items.SPECTRAL_ARROW, s.get("spectral").getAsInt()));
+                if (!list.isEmpty()) q.set(net.minecraft.core.component.DataComponents.BUNDLE_CONTENTS, new net.minecraft.world.item.component.BundleContents(list));
+                if (s.has("me")) {
+                    var sp = mc.getSingleplayerServer().getPlayerList().getPlayer(mc.player.getUUID());
+                    ItemStack qq = q.copy();
+                    mc.getSingleplayerServer().execute(() -> { net.zennin.mushoku.data.ModAttachments.setQuiver(sp, qq); net.zennin.mushoku.archer.QuiverSystem.broadcast(sp); });
+                } else net.zennin.mushoku.data.ModAttachments.setQuiver(dummy, q);
+            }
+            case "fp" -> {
+                boolean on = s.get("v").getAsBoolean();
+                mc.gameRenderer.setRenderHand(on);
+                mc.options.setCameraType(CameraType.FIRST_PERSON);
+            }
+            case "reload" -> net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(
+                    new net.zennin.mushoku.network.ActionPayload(net.zennin.mushoku.network.ActionPayload.BOW_RELOAD));
+            case "fpuse" -> {
+                mc.gameMode.useItem(mc.player, net.minecraft.world.InteractionHand.MAIN_HAND);
+                mc.options.keyUse.setDown(true);
+            }
+            case "fprelease" -> mc.options.keyUse.setDown(false);
+            case "inv" -> {
+                keepScreen = s.get("v").getAsBoolean();
+                mc.options.hideGui = !keepScreen;
+                if (keepScreen) mc.setScreen(new net.minecraft.client.gui.screens.inventory.InventoryScreen(mc.player));
+                else mc.setScreen(null);
             }
             default -> log("paso desconocido " + op);
         }
