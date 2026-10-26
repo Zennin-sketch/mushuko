@@ -25,17 +25,20 @@ import org.joml.Vector3f;
 public final class BowFirstPerson {
     /** Escala del arco en primera persona. */
     private static final float S = 0.55f;
-    private static final Vector3f FWD = new Vector3f(0.13f, 0.05f, -1f).normalize();
-    private static final Vector3f UP;
-    static {
-        // arriba del arco inclinado 50 grados hacia la derecha (en diagonal)
-        Vector3f u = new Vector3f((float) Math.sin(Math.toRadians(50)), (float) Math.cos(Math.toRadians(50)), 0);
+    /** Hacia donde apunta la flecha: en espera girado a la derecha (se ve el perfil del arco), al tensar casi al frente. */
+    private static final Vector3f FWD_IDLE = new Vector3f(0.62f, 0.1f, -1f).normalize(), FWD_AIM = new Vector3f(0.2f, 0.06f, -1f).normalize();
+    private static Vector3f FWD = new Vector3f(FWD_IDLE), UP = new Vector3f(0, 1, 0);
+
+    /** Arriba del arco inclinado 50 grados hacia la derecha (en diagonal), perpendicular a la flecha. */
+    private static void orient(float aim) {
+        FWD = new Vector3f(FWD_IDLE).lerp(FWD_AIM, smooth(aim)).normalize();
+        Vector3f u = new Vector3f((float) Math.sin(Math.toRadians(50)), (float) Math.cos(Math.toRadians(50)), 0.15f);
         UP = u.sub(new Vector3f(FWD).mul(u.dot(FWD))).normalize();
     }
-    private static final Vector3f L_IDLE = new Vector3f(-0.13f, -0.27f, -0.72f), L_AIM = new Vector3f(-0.07f, -0.15f, -0.74f);
+    private static final Vector3f L_IDLE = new Vector3f(-0.02f, -0.27f, -0.72f), L_AIM = new Vector3f(0.02f, -0.15f, -0.74f);
     private static final Vector3f R_IDLE = new Vector3f(0.19f, -0.42f, -0.5f), R_QUIVER = new Vector3f(0.42f, 0.16f, 0.25f);
     private static final Vector3f R_FLING = new Vector3f(0.34f, -0.16f, 0.02f);
-    private static final Vector3f SH_L = new Vector3f(-0.38f, -0.9f, 0.05f), SH_R = new Vector3f(0.42f, -0.9f, 0.05f);
+    private static final Vector3f SH_L = new Vector3f(-0.22f, -1.15f, 0.0f), SH_R = new Vector3f(0.42f, -0.9f, 0.05f);
 
     private static boolean wasDrawing;
     private static float releaseAt = -1000;
@@ -67,7 +70,9 @@ public final class BowFirstPerson {
         float rel = (now - releaseAt) / 10f;
 
         // mano izquierda (arco) y orientacion del arco
-        Vector3f L = lerp(L_IDLE, L_AIM, drawing ? Math.min(1, pull * 3) : (rel < 1 ? 1 - rel : 0));
+        float aim = drawing ? Math.min(1, pull * 3) : (rel < 1 ? 1 - rel : 0);
+        orient(aim);
+        Vector3f L = lerp(L_IDLE, L_AIM, aim);
         float back = BowRender.BRACE + BowRender.DRAW * pull;
         Vector3f nock = new Vector3f(FWD).mul(-back * S / 16f).add(L).add(new Vector3f(UP).mul(-0.02f));
         // mano derecha
@@ -91,8 +96,10 @@ public final class BowFirstPerson {
         // pequeno respiro en espera
         float breath = (float) Math.sin(now * 0.08f) * 0.006f;
         if (!drawing) { L.y += breath; R.y += breath * 0.7f; }
+        // el puno queda un poco abajo del agarre para no taparlo
+        Vector3f fist = new Vector3f(L).add(new Vector3f(UP).mul(-0.035f));
 
-        arm(p, pose, buffers, light, false, L);
+        arm(p, pose, buffers, light, false, fist);
         arm(p, pose, buffers, light, true, R);
 
         // arco
