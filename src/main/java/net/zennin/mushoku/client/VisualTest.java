@@ -178,6 +178,7 @@ public final class VisualTest {
             case "fp" -> {
                 boolean on = s.get("v").getAsBoolean();
                 mc.gameRenderer.setRenderHand(on);
+                mc.options.hideGui = !on; // la mano en primera persona no se dibuja con la interfaz oculta
                 mc.options.setCameraType(CameraType.FIRST_PERSON);
                 if (s.has("fov")) mc.options.fov().set(s.get("fov").getAsInt());
             }

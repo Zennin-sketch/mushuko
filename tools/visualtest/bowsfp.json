@@ -1,0 +1,149 @@
+{
+ "skin": "remushoku:textures/entities/rudeus_greyrat.png",
+ "steps": [
+  {
+   "op": "setup",
+   "fov": 40
+  },
+  {
+   "op": "dummy",
+   "yaw": 0,
+   "dist": 40
+  },
+  {
+   "op": "cam",
+   "pitch": 0
+  },
+  {
+   "op": "quiver",
+   "n": 30,
+   "me": true
+  },
+  {
+   "op": "cmd",
+   "v": "item replace entity @s weapon.mainhand with remushoku:hunter_bow"
+  },
+  {
+   "op": "fp",
+   "v": true,
+   "fov": 70
+  },
+  {
+   "op": "wait",
+   "t": 25
+  },
+  {
+   "op": "shot",
+   "v": "fp_idle"
+  },
+  {
+   "op": "reload"
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "fp_load_t59"
+  },
+  {
+   "op": "wait",
+   "t": 3
+  },
+  {
+   "op": "shot",
+   "v": "fp_load_t32"
+  },
+  {
+   "op": "wait",
+   "t": 3
+  },
+  {
+   "op": "shot",
+   "v": "fp_load_t35"
+  },
+  {
+   "op": "wait",
+   "t": 3
+  },
+  {
+   "op": "shot",
+   "v": "fp_load_t38"
+  },
+  {
+   "op": "wait",
+   "t": 8
+  },
+  {
+   "op": "shot",
+   "v": "fp_loaded"
+  },
+  {
+   "op": "fpuse"
+  },
+  {
+   "op": "wait",
+   "t": 6
+  },
+  {
+   "op": "shot",
+   "v": "fp_draw_6"
+  },
+  {
+   "op": "wait",
+   "t": 14
+  },
+  {
+   "op": "shot",
+   "v": "fp_draw_full"
+  },
+  {
+   "op": "cam",
+   "pitch": -35
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "fp_draw_up"
+  },
+  {
+   "op": "cam",
+   "pitch": 40
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "fp_draw_down"
+  },
+  {
+   "op": "fprelease"
+  },
+  {
+   "op": "cam",
+   "pitch": 0
+  },
+  {
+   "op": "wait",
+   "t": 3
+  },
+  {
+   "op": "shot",
+   "v": "fp_release"
+  },
+  {
+   "op": "wait",
+   "t": 10
+  },
+  {
+   "op": "shot",
+   "v": "fp_after"
+  }
+ ]
+}
