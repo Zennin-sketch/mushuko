@@ -263,6 +263,58 @@
   {
    "op": "shot",
    "v": "ready_fire_side"
+  },
+  {
+   "op": "ready",
+   "v": ""
+  },
+  {
+   "op": "dummy",
+   "yaw": 90,
+   "dist": 3.6,
+   "pitch": -35
+  },
+  {
+   "op": "anim",
+   "v": "cast_pose"
+  },
+  {
+   "op": "wait",
+   "t": 10
+  },
+  {
+   "op": "shot",
+   "v": "aim_up_pose"
+  },
+  {
+   "op": "anim",
+   "v": "cast_release"
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "aim_up_release"
+  },
+  {
+   "op": "dummy",
+   "yaw": 90,
+   "dist": 3.6,
+   "pitch": 35
+  },
+  {
+   "op": "anim",
+   "v": "cast_pose"
+  },
+  {
+   "op": "wait",
+   "t": 10
+  },
+  {
+   "op": "shot",
+   "v": "aim_down_pose"
   }
  ]
 }

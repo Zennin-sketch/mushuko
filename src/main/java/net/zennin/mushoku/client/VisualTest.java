@@ -171,7 +171,7 @@ public final class VisualTest {
         dummy.yHeadRotO = dummyYaw;
         if (walkTicks > 0) {
             walkTicks--;
-            dummy.walkAnimation.update(1.0f, 1.0f);
+            dummy.walkAnimation.update(0.55f, 1.0f);
         }
     }
 }
