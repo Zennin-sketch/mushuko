@@ -6,13 +6,19 @@
   "client": [
     "KeyMappingMixin",
     "HumanoidModelMixin",
-    "AbstractClientPlayerMixin"
+    "AbstractClientPlayerMixin",
+    "InventoryScreenMixin",
+    "CreativeScreenMixin",
+    "ItemInHandLayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "mixins": [
     "PlayerAccessor",
-    "LivingEntityAccessor"
+    "LivingEntityAccessor",
+    "MobAccessor",
+    "InventoryMenuMixin",
+    "SlotAccessor"
   ]
 }

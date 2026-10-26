@@ -10,6 +10,7 @@ import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
 /** Renderer de las armaduras v2: geo/armor_v2/<modelo>.geo.json y textures/armor_v2/<modelo>.png (+ brillo). */
 public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
     private final boolean fullBody;
+    private final boolean cloak;
 
     public ArmorV2Renderer(String model, boolean glows, boolean fullBody) {
         super(new GeoModel<>() {
@@ -23,6 +24,7 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
             public ResourceLocation getAnimationResource(ArmorV2Item a) { return MushokuMod.id("animations/mk2model.animation.json"); }
         });
         this.fullBody = fullBody;
+        this.cloak = model.contains("cloak");
         if (glows) addRenderLayer(new AutoGlowingGeoLayer<>(this));
     }
 
@@ -48,8 +50,30 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
         cloth(model, "clothFR", fwdR, 1, 0);
         cloth(model, "clothFL", fwdL, 1, 0);
         cloth(model, "clothB", Math.max(backR, backL), -1, 0);
-        cloth(model, "clothR", 0, 0, base.rightLeg.zRot);
-        cloth(model, "clothL", 0, 0, base.leftLeg.zRot);
+        // Costados: van sobre la pierna de su lado, asi que se balancean adelante y atras con ella (misma tela)
+        side(model, "clothR", r, base.rightLeg.zRot);
+        side(model, "clothL", l, base.leftLeg.zRot);
+        // Hombros (Capa Atrapallamas): la capa sube y baja con cada hombro
+        float dyR = cloak ? base.rightArm.y - base.body.y - 2f : 0, dyL = cloak ? base.leftArm.y - base.body.y - 2f : 0;
+        shoulder(model, "clothR", dyR); shoulder(model, "clothFR", dyR);
+        shoulder(model, "clothL", dyL); shoulder(model, "clothFL", dyL);
+        shoulder(model, "clothF", (dyR + dyL) / 2); shoulder(model, "clothB", (dyR + dyL) / 2);
+    }
+
+    /** Pano del costado: gira sobre X siguiendo el angulo de la pierna (con signo: adelante o atras). */
+    private static void side(GeoModel<ArmorV2Item> model, String name, float legRel, float z) {
+        model.getBone(name).ifPresent(b -> {
+            float span = Math.max(6.5f, b.getPivotY() - 6);
+            float k = Math.min(Math.abs(legRel), 1.4f);
+            float a = (float) Math.asin(Math.min(1, 6 * Math.sin(k) / span)) * Math.signum(legRel);
+            b.setRotX(-a);
+            b.setRotY(0);
+            b.setRotZ(z);
+        });
+    }
+
+    private static void shoulder(GeoModel<ArmorV2Item> model, String name, float dy) {
+        model.getBone(name).ifPresent(b -> b.setPosY(Math.abs(dy) < 1e-3f ? 0 : -dy));
     }
 
     /**

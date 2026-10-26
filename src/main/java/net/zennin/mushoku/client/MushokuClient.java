@@ -20,14 +20,18 @@ public class MushokuClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         VisualTest.init();
-        // Arcos del mod: el modelo cambia al tensar (pull/pulling como el arco de vanilla, con la velocidad de cada arco)
+        // Arcos y carcaj del mod: modelos 3D lisos dibujados por codigo (client/render)
         for (net.minecraft.world.item.Item it : net.zennin.mushoku.registry.ModItems.ALL) {
-            if (!(it instanceof net.zennin.mushoku.item.MushokuBowItem bow)) continue;
-            net.minecraft.client.renderer.item.ItemProperties.register(bow, net.minecraft.resources.ResourceLocation.withDefaultNamespace("pull"),
-                    (stack, level, entity, seed) -> bow.pull(stack, entity));
-            net.minecraft.client.renderer.item.ItemProperties.register(bow, net.minecraft.resources.ResourceLocation.withDefaultNamespace("pulling"),
-                    (stack, level, entity, seed) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1f : 0f);
+            if (it instanceof net.zennin.mushoku.item.MushokuBowItem bow)
+                net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry.INSTANCE.register(bow, ItemModels::bow);
         }
+        net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry.INSTANCE.register(net.zennin.mushoku.registry.ModItems.QUIVER, ItemModels::quiver);
+        BowClient.init();
+        ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.QuiverSyncPayload.TYPE, (payload, context) -> context.client().execute(() -> {
+            if (context.client().level == null) return;
+            if (context.client().level.getEntity(payload.entityId()) instanceof net.minecraft.world.entity.player.Player pl)
+                net.zennin.mushoku.data.ModAttachments.setQuiver(pl, payload.quiver());
+        }));
         BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.cutout(), ModBlocks.MAGIC_CIRCLE, ModBlocks.GLOW, ModBlocks.SHELF);
         BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.translucent(), ModBlocks.CLIMB_BLOCK, ModBlocks.ABSOLUTE_BARRIER, ModBlocks.BLOCK_SAND_CLOUD);
         ModKeys.init();

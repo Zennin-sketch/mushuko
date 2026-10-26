@@ -434,21 +434,16 @@ def sheathe_back():
     x.key(16, 'stop', **NEUTRAL_P)
 
 # =============================================================== ARCO
-# El arco va en la mano habil (derecha, como en vanilla) y la izquierda tensa la cuerda hasta la mejilla.
-# bow_draw: saca una flecha del carcaj (sobre el hombro derecho), la coloca en la cuerda, tensa y se queda apuntando
-# (loop). bow_release: la mano de la cuerda sale disparada hacia atras y el arco retrocede un poco.
-# El arco en la mano: con el brazo hacia adelante, 'adelante' de la mano = la flecha apunta al frente y el arco queda
-# vertical (con (0, 1, 0) el modelo quedaba acostado con la flecha hacia arriba).
+# --- Arcos vanilla y de otros mods: el arco en la mano habil (derecha) y la izquierda tensa la cuerda.
 BOW_HOLD = (0, 0.05, 1)
-# El modelo del arco queda acostado con el brazo adelante: se gira 90 grados sobre el eje de la flecha (vertical).
 import os as _os
 BOW_ROLL = item(*[float(v) for v in _os.environ.get('BOWROT', '-90,0,90').split(',')])
 BOW_DRAWN = P(BOW_ROLL, root(up=-0.02, turn=-18), torso(turn=-22, lean=1), head(yaw=20, down=0),
               dict(rarm=R((3, -1.5, 10), BOW_HOLD), larm=L((-1.5, 1, 2.5), (0, 0.2, 1))),
               dict(rleg=((0.16, -0.97, 0.22), 8), lleg=((-0.16, -0.97, -0.24), 6)))
 
-def bow():
-    x = anim('bow_draw', 'Arco: sacar flecha del carcaj, colocarla, tensar y apuntar (loop)', end=22, loop=True, ret=13,
+def bow_r():
+    x = anim('bow_draw_r', 'Arco (vanilla): sacar flecha, colocarla, tensar y apuntar (loop)', end=22, loop=True, ret=13,
              stop=100000, lag=('head',))
     x.key(0, 'smooth', **P(NEUTRAL_P, BOW_ROLL, dict(rarm=R((4, -6, 7), (0, -0.4, 1)))))
     x.key(4, 'smooth', **P(BOW_ROLL, torso(turn=8), head(yaw=-16, down=-2),
@@ -458,14 +453,192 @@ def bow():
     x.key(13, 'stop', **BOW_DRAWN)
     x.key(18, 'smooth', **P(BOW_DRAWN, dict(larm=L((-1.7, 1.1, 2.3), (0, 0.2, 1)))))
     x.key(22, 'smooth', **BOW_DRAWN)
-
-    y = anim('bow_release', 'Arco: soltar la flecha', end=12, stop=16, start=BOW_DRAWN, lag=('head',))
+    y = anim('bow_release_r', 'Arco (vanilla): soltar la flecha', end=12, stop=16, start=BOW_DRAWN, lag=('head',))
     y.key(0, 'smooth', **BOW_DRAWN)
     y.key(2, 'stop', **P(BOW_DRAWN, dict(rarm=R((3, -1.8, 10.5), (0, 0.1, 1)), larm=L((-4, 1.5, -3.5), (0, 0.5, -1)))))
     y.key(6, 'smooth', **P(BOW_DRAWN, dict(larm=L((-5.5, -4, -1.5)))))
     y.key(12, 'stop', **NEUTRAL_P)
 
-bow()
+bow_r()
+
+# --- Arcos del mod (agarre tipo Unturned): el arco en la mano IZQUIERDA, inclinado, y la derecha tensa la cuerda.
+# El arco "apunta hacia arriba" segun la direccion 'blade' de la mano izquierda (arriba con inclinacion a la derecha).
+# Solo se mueven brazos, cuerpo y cabeza: las piernas siguen caminando (se puede caminar tensando).
+UPPER = {'rightArm', 'leftArm', 'body', 'head', 'rightItem', 'leftItem'}
+ARMS = {'rightArm', 'leftArm', 'rightItem', 'leftItem'}
+BOW_UP = (0.32, 0.95, 0.0)          # arco de pie, la punta de arriba inclinada hacia la derecha
+BOW_UP_LOW = (0.55, 0.8, 0.22)      # en espera: mas inclinado y hacia adelante
+# Espera: el arco abajo y adelante en la izquierda, la derecha cerca de la cuerda (asi se ve en primera persona)
+BOW_IDLE = dict(larm=L((-3.6, -6.2, 7.2), BOW_UP_LOW), rarm=R((1.4, -6.6, 5.0), (0.2, 0.3, 1)))
+# Tensado: brazo izquierdo estirado al frente, mano derecha en la mejilla, torso de perfil (hombro izquierdo adelante)
+BOW_AIM = P(torso(turn=20, lean=1), head(yaw=-18, down=0),
+            dict(larm=L((-2.6, -1.6, 10.2), BOW_UP), rarm=R((1.8, 1.0, 2.6), (-0.1, 0.25, 1))))
+BOW_NOCKED = P(torso(turn=14), head(yaw=-10, down=2),
+               dict(larm=L((-2.8, -2.6, 9.6), BOW_UP), rarm=R((0.4, -2.2, 6.6), (-0.1, 0.3, 1))))
+
+def bows():
+    i = anim('bow_idle', 'Arco del mod: espera con el arco en la izquierda (loop, se ve en primera persona)', end=40,
+             loop=True, ret=6, stop=100000, lag=())
+    i.only = ARMS
+    i.key(0, 'smooth', **NEUTRAL_P)
+    i.key(6, 'stop', **BOW_IDLE)
+    i.key(23, 'smooth', **P(BOW_IDLE, dict(larm=L((-3.6, -6.0, 7.3), BOW_UP_LOW), rarm=R((1.4, -6.4, 5.1), (0.2, 0.3, 1)))))
+    i.key(40, 'smooth', **BOW_IDLE)
+
+    l = anim('bow_load', 'Arco del mod: R = sacar una flecha del carcaj (hombro derecho) y colocarla en la cuerda', end=16,
+             stop=20, start=BOW_IDLE, lag=('head',))
+    l.only = UPPER
+    l.key(0, 'smooth', **P(BOW_IDLE))
+    l.key(4, 'smooth', **P(torso(turn=-6), head(yaw=14, down=-4),
+                           dict(larm=L((-3.4, -4.6, 8.2), BOW_UP), rarm=R((3.2, 2.2, -3.6), (0, 1, -0.2)))))
+    l.key(6, 'stop', **P(torso(turn=-8), head(yaw=16, down=-6),
+                         dict(larm=L((-3.4, -4.4, 8.4), BOW_UP), rarm=R((3.0, 3.2, -4.4), (0, 1, -0.3)))))
+    l.key(10, 'smooth', **P(torso(turn=6), head(yaw=-6, down=4),
+                            dict(larm=L((-3.0, -3.2, 9.2), BOW_UP), rarm=R((0.8, -1.0, 7.6), (-0.2, 0.2, 1)))))
+    l.key(13, 'stop', **BOW_NOCKED)
+    l.key(16, 'stop', **BOW_NOCKED)
+
+    x = anim('bow_draw', 'Arco del mod: tensar y apuntar (loop)', end=24, loop=True, ret=10, stop=100000, lag=('head',),
+             start=BOW_NOCKED)
+    x.only = UPPER
+    x.key(0, 'smooth', **BOW_NOCKED)
+    x.key(4, 'smooth', **P(BOW_AIM, dict(rarm=R((1.4, -0.4, 5.0), (-0.1, 0.25, 1)))))
+    x.key(10, 'stop', **BOW_AIM)
+    x.key(17, 'smooth', **P(BOW_AIM, dict(rarm=R((1.9, 1.1, 2.4), (-0.1, 0.25, 1)), larm=L((-2.6, -1.5, 10.3), BOW_UP))))
+    x.key(24, 'smooth', **BOW_AIM)
+
+    y = anim('bow_release', 'Arco del mod: soltar la flecha (la mano de la cuerda sale hacia atras)', end=12, stop=16, start=BOW_AIM,
+             lag=('head',))
+    y.only = UPPER
+    y.key(0, 'smooth', **BOW_AIM)
+    y.key(2, 'stop', **P(BOW_AIM, dict(larm=L((-2.6, -1.3, 10.6), BOW_UP), rarm=R((4.5, 1.6, -2.5), (0.3, 0.5, -1)))))
+    y.key(6, 'smooth', **P(BOW_AIM, dict(rarm=R((5.0, -3.0, -0.5)))))
+    y.key(12, 'stop', **P(NEUTRAL_P, BOW_IDLE))
+
+bows()
+
+# --- Habilidades del arquero (Z / X / C): todas con el arco en la izquierda; terminan cerca de la espera.
+def skill(name, desc, end, legs_free=False):
+    x = anim('archer_' + name, desc, end=end, stop=end + 4, lag=('head',))
+    if legs_free:
+        x.only = UPPER
+    return x
+
+QUIVER_R = dict(rarm=R((3.0, 3.2, -4.4), (0, 1, -0.3)))
+CHEEK = dict(rarm=R((1.8, 1.0, 2.6), (-0.1, 0.25, 1)))
+NOCK = dict(rarm=R((0.4, -2.2, 6.6), (-0.1, 0.3, 1)))
+BOW_UP_SKY = (0.25, 0.45, -0.86)    # apuntando al cielo: el arco se acuesta hacia atras
+
+def archer_skills():
+    # Ojo de Halcon
+    a = skill('power_shot', 'Arquero: Disparo potente (carga la proxima flecha: tensado profundo)', 18)
+    a.key(0, 'smooth', **P(NEUTRAL_P, BOW_IDLE))
+    a.key(5, 'smooth', **P(BOW_AIM, root(up=-0.05), legs('guard', 10)))
+    a.key(10, 'stop', **P(BOW_AIM, root(up=-0.07, lean=-3), torso(turn=26, lean=-3), dict(rarm=R((2.8, 1.3, 1.2), (-0.1, 0.25, 1))), legs('wide', 12)))
+    a.key(14, 'stop', **P(BOW_AIM, root(up=-0.07, lean=-3), torso(turn=26, lean=-3), dict(rarm=R((2.9, 1.35, 1.0), (-0.1, 0.25, 1))), legs('wide', 12)))
+    a.key(18, 'smooth', **P(NEUTRAL_P, BOW_NOCKED))
+
+    a = skill('deadeye', 'Arquero: Ojo Certero (dos dedos al ojo, se concentra)', 24, legs_free=True)
+    a.key(0, 'smooth', **P(BOW_IDLE))
+    a.key(5, 'stop', **P(head(down=4), dict(rarm=R((1.4, 3.7, 2.6), (0, 1, 0.2)), larm=L((-3.4, -5.0, 7.8), BOW_UP_LOW))))
+    a.key(14, 'stop', **P(head(down=-2), dict(rarm=R((1.3, 3.9, 2.8), (0, 1, 0.2)))))
+    a.key(18, 'smooth', **P(head(yaw=-4), dict(rarm=R((2.5, 2.0, 5.5), (0.2, 0.4, 1)))))
+    a.key(24, 'smooth', **P(BOW_IDLE, head()))
+
+    a = skill('piercing_ray', 'Arquero: Rayo Perforante (postura abierta, disparo con empuje)', 22)
+    a.key(0, 'smooth', **P(NEUTRAL_P, BOW_NOCKED))
+    a.key(6, 'stop', **P(BOW_AIM, root(up=-0.08, turn=6), legs('wide', 16), dict(rarm=R((2.6, 1.2, 1.4), (-0.1, 0.25, 1)))))
+    a.key(10, 'stop', **P(BOW_AIM, root(up=-0.08, turn=6), legs('wide', 16), dict(rarm=R((2.7, 1.25, 1.2), (-0.1, 0.25, 1)))))
+    a.key(12, 'smooth', **P(BOW_AIM, root(up=-0.08, fwd=0.12, lean=8, turn=6), legs('lunge', 10),
+                            dict(larm=L((-2.4, -1.4, 10.8), BOW_UP), rarm=R((6.0, 1.0, -3.2), (0.4, 0.5, -1)))))
+    a.key(16, 'stop', **P(BOW_AIM, root(up=-0.08, fwd=0.12, lean=9, turn=6), legs('lunge', 10), dict(rarm=R((6.2, -1.5, -2.0)))))
+    a.key(22, 'smooth', **P(NEUTRAL_P, BOW_IDLE))
+
+    a = skill('phantom_arrow', 'Arquero: Flecha Fantasma (dibuja un circulo y la manda adelante)', 24, legs_free=True)
+    a.key(0, 'smooth', **P(BOW_IDLE))
+    pts = [(0.5, -1.0, 9.0), (2.6, 1.2, 9.4), (0.4, 3.2, 9.6), (-2.0, 1.2, 9.4), (0.2, -1.2, 9.0)]
+    for k, pt in enumerate(pts):
+        a.key(3 + k * 3, 'smooth', **P(head(down=2), dict(rarm=R(pt, (0, 1, 0.3)), larm=L((-3.6, -5.2, 7.6), BOW_UP_LOW))))
+    a.key(18, 'stop', **P(torso(turn=10), head(yaw=-6), dict(rarm=R((2.0, 0.5, 10.4), (0, 0.3, 1)))))
+    a.key(24, 'smooth', **P(BOW_IDLE, torso(), head()))
+
+    # Lluvia de Acero
+    a = skill('triple_shot', 'Arquero: Triple Disparo (saca tres flechas y las abre en abanico)', 18, legs_free=True)
+    a.key(0, 'smooth', **P(BOW_IDLE))
+    a.key(4, 'stop', **P(torso(turn=-6), head(yaw=12, down=-4), QUIVER_R, dict(larm=L((-3.4, -4.4, 8.4), BOW_UP))))
+    a.key(8, 'smooth', **P(torso(turn=10), head(yaw=-6), dict(rarm=R((0.4, -3.4, 6.4), (-0.2, 0.3, 1)))))
+    a.key(10, 'smooth', **P(torso(turn=12), dict(rarm=R((0.4, -2.2, 6.6), (-0.1, 0.3, 1)))))
+    a.key(12, 'smooth', **P(torso(turn=12), dict(rarm=R((0.4, -1.0, 6.8), (0.0, 0.3, 1)))))
+    a.key(18, 'stop', **BOW_NOCKED)
+
+    a = skill('arrow_rain', 'Arquero: Lluvia de Flechas (apunta al cielo y suelta)', 24)
+    SKY = P(torso(turn=16, lean=-14), head(yaw=-12, down=-42), root(lean=-6),
+            dict(larm=L((-2.6, 7.4, 6.6), BOW_UP_SKY), rarm=R((1.8, 3.0, 1.0), (-0.1, 0.8, 0.5))), legs('guard', 8))
+    a.key(0, 'smooth', **P(NEUTRAL_P, BOW_NOCKED))
+    a.key(7, 'stop', **SKY)
+    a.key(13, 'stop', **P(SKY, dict(rarm=R((2.0, 2.6, 0.4), (-0.1, 0.8, 0.5)))))
+    a.key(15, 'smooth', **P(SKY, dict(rarm=R((5.4, 1.0, -3.6), (0.4, 0.4, -1)))))
+    a.key(18, 'stop', **P(SKY, dict(rarm=R((5.6, -2.0, -2.0)))))
+    a.key(24, 'smooth', **P(NEUTRAL_P, BOW_IDLE))
+
+    a = skill('steel_storm', 'Arquero: Tormenta de Acero (dos descargas al cielo seguidas)', 30)
+    a.key(0, 'smooth', **P(NEUTRAL_P, BOW_NOCKED))
+    a.key(6, 'stop', **SKY)
+    a.key(9, 'smooth', **P(SKY, dict(rarm=R((5.2, 1.4, -3.2), (0.4, 0.4, -1)))))
+    a.key(12, 'smooth', **P(SKY, QUIVER_R))
+    a.key(16, 'smooth', **P(SKY, dict(rarm=R((1.0, 4.0, 3.0), (-0.1, 0.8, 0.5)))))
+    a.key(19, 'stop', **SKY)
+    a.key(22, 'smooth', **P(SKY, dict(rarm=R((5.4, 1.0, -3.6), (0.4, 0.4, -1)))))
+    a.key(24, 'stop', **P(SKY, dict(rarm=R((5.6, -2.0, -2.0)))))
+    a.key(30, 'smooth', **P(NEUTRAL_P, BOW_IDLE))
+
+    a = skill('barrage', 'Arquero: Rafaga (cuatro disparos rapidos)', 28, legs_free=True)
+    a.key(0, 'smooth', **P(BOW_NOCKED))
+    for k in range(4):
+        t = 2 + k * 6
+        a.key(t, 'smooth', **P(BOW_AIM, NOCK))
+        a.key(t + 2, 'stop', **P(BOW_AIM, CHEEK))
+        a.key(t + 3, 'smooth', **P(BOW_AIM, dict(rarm=R((4.6, 1.4, -2.0), (0.3, 0.5, -1)))))
+        a.key(t + 5, 'smooth', **P(BOW_AIM, QUIVER_R if k < 3 else NOCK))
+    a.key(28, 'smooth', **P(BOW_IDLE, torso(), head()))
+
+    # Viento Errante
+    a = skill('disengage', 'Arquero: Retirada (salto hacia atras con el arco al frente)', 16)
+    a.key(0, 'smooth', **P(NEUTRAL_P, BOW_IDLE))
+    a.key(3, 'stop', **P(root(up=-0.12, lean=8), legs('crouch', 10), dict(larm=L((-3.0, -3.0, 9.0), BOW_UP), rarm=R((1.0, -2.0, 6.0)))))
+    a.key(7, 'smooth', **P(root(up=0.25, lean=-16), legs('tuck'), head(down=10),
+                           dict(larm=L((-3.0, -1.6, 9.8), BOW_UP), rarm=R((5.5, -1.0, -3.0)))))
+    a.key(12, 'smooth', **P(root(up=0.05, lean=-6), legs('guard', 6), dict(larm=L((-3.0, -2.6, 9.6), BOW_UP), rarm=R((0.6, -2.0, 6.4)))))
+    a.key(16, 'stop', **P(NEUTRAL_P, BOW_NOCKED))
+
+    a = skill('gale_arrow', 'Arquero: Flecha Huracanada (envuelve la punta en viento)', 18, legs_free=True)
+    a.key(0, 'smooth', **P(BOW_NOCKED))
+    a.key(4, 'smooth', **P(torso(turn=10), dict(rarm=R((0.2, -0.4, 11.4), (0, 1, 0.2)))))
+    a.key(7, 'smooth', **P(torso(turn=10), dict(rarm=R((1.6, 0.8, 11.0), (0, 1, 0.2)))))
+    a.key(10, 'smooth', **P(torso(turn=10), dict(rarm=R((0.0, 1.6, 11.2), (0, 1, 0.2)))))
+    a.key(13, 'smooth', **P(torso(turn=10), dict(rarm=R((-1.0, 0.2, 11.0), (0, 1, 0.2)))))
+    a.key(18, 'stop', **BOW_NOCKED)
+
+    a = skill('tempest_arrow', 'Arquero: Flecha Tempestad (junta el viento con los brazos abiertos y dispara)', 26)
+    a.key(0, 'smooth', **P(NEUTRAL_P, BOW_IDLE))
+    a.key(6, 'stop', **P(root(up=0.02, lean=-6), torso(lean=-6), head(down=-14),
+                         dict(larm=L((-9.0, 2.0, 3.0), BOW_UP), rarm=R((9.0, 2.0, 3.0), (0, 1, 0))), legs('wide')))
+    a.key(10, 'smooth', **P(root(up=0.02, lean=-6), head(down=-16), dict(larm=L((-9.2, 2.6, 2.6), BOW_UP), rarm=R((9.2, 2.6, 2.6), (0, 1, 0)))))
+    a.key(14, 'stop', **P(BOW_AIM, root(up=-0.06), legs('wide', 10), dict(rarm=R((2.7, 1.2, 1.3), (-0.1, 0.25, 1)))))
+    a.key(17, 'smooth', **P(BOW_AIM, root(up=-0.07, fwd=0.14, lean=8), legs('lunge', 10), dict(rarm=R((5.8, 1.0, -3.4), (0.4, 0.5, -1)))))
+    a.key(20, 'stop', **P(BOW_AIM, root(up=-0.07, fwd=0.14, lean=8), legs('lunge', 10), dict(rarm=R((6.0, -1.5, -2.0)))))
+    a.key(26, 'smooth', **P(NEUTRAL_P, BOW_IDLE))
+
+    a = skill('gale_dance', 'Arquero: Danza del Vendaval (giro y disparos a los cercanos)', 24)
+    a.key(0, 'smooth', **P(NEUTRAL_P, BOW_IDLE))
+    a.key(3, 'stop', **P(root(up=-0.1, lean=18, fwd=0.1), legs('lunge', 10), dict(larm=L((-8.0, -2.0, 4.0), BOW_UP), rarm=R((7.0, -3.0, -3.0)))))
+    a.key(9, 'smooth', **P(root(up=-0.06, lean=10, turn=-180), legs('wide', 6), dict(larm=L((-9.0, -1.0, 3.0), BOW_UP), rarm=R((8.0, -2.0, 2.0)))))
+    a.key(13, 'stop', **P(root(up=-0.08, turn=-360), BOW_AIM, legs('guard', 10)))
+    a.key(15, 'smooth', **P(root(up=-0.08, turn=-360), BOW_AIM, legs('guard', 10), dict(rarm=R((5.0, 1.2, -3.0), (0.4, 0.5, -1)))))
+    a.key(18, 'stop', **P(root(up=-0.08, turn=-360), BOW_AIM, legs('guard', 10), dict(rarm=R((5.6, -1.8, -2.0)))))
+    a.key(24, 'smooth', **P(NEUTRAL_P, root(turn=-360), BOW_IDLE))
+
+archer_skills()
 
 draw_hip(); sheathe_hip(); draw_back(); sheathe_back()
 for _a in ANIMS_REF():

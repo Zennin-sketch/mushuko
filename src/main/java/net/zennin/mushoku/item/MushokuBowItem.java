@@ -13,7 +13,8 @@ import net.minecraft.world.level.Level;
 import java.util.List;
 
 /**
- * Arco del mod: modelo 3D propio (ver tools/bows/bows.py) con velocidad de tensado y dano propios.
+ * Arco del mod: modelo 3D liso dibujado por codigo (client/render/BowRender), agarre tipo Unturned (mano izquierda),
+ * se carga con R y se tensa con el clic. Velocidad de tensado y dano propios.
  * speed > 1 tensa mas rapido (llega antes a la fuerza maxima); damage multiplica el dano base de la flecha.
  */
 public class MushokuBowItem extends BowItem {
@@ -29,7 +30,32 @@ public class MushokuBowItem extends BowItem {
     public void releaseUsing(ItemStack stack, Level level, LivingEntity entity, int timeLeft) {
         int full = getUseDuration(stack, entity);
         int used = Math.round((full - timeLeft) * speed);
+        boolean shoots = getPowerForTime(used) >= 0.1f && entity instanceof net.minecraft.world.entity.player.Player pl
+                && (pl.getAbilities().instabuild || !pl.getProjectile(stack).isEmpty());
         super.releaseUsing(stack, level, entity, full - used);
+        // sale la flecha: hay que volver a cargar con R
+        if (shoots && !level.isClientSide) net.zennin.mushoku.archer.BowSystem.setLoaded(stack, false);
+    }
+
+    /** Solo se tensa con la flecha cargada (R). */
+    @Override
+    public net.minecraft.world.InteractionResultHolder<ItemStack> use(Level level, net.minecraft.world.entity.player.Player player,
+                                                                      net.minecraft.world.InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+        if (!net.zennin.mushoku.archer.BowSystem.isLoaded(stack)
+                || (player instanceof net.minecraft.server.level.ServerPlayer sp && net.zennin.mushoku.archer.BowSystem.busy(sp))) {
+            if (!level.isClientSide) player.displayClientMessage(Component.translatable("msg.remushoku.bow_reload_hint",
+                    net.minecraft.network.chat.Component.keybind("key.remushoku.bow_reload")).withStyle(ChatFormatting.GRAY), true);
+            return net.minecraft.world.InteractionResultHolder.fail(stack);
+        }
+        return super.use(level, player, hand);
+    }
+
+    /** Cargar o descargar la flecha no hace la animacion de "cambiar de objeto" en primera persona. */
+    @Override
+    public boolean allowComponentsUpdateAnimation(net.minecraft.world.entity.player.Player player, net.minecraft.world.InteractionHand hand,
+                                                  ItemStack oldStack, ItemStack newStack) {
+        return false;
     }
 
     @Override

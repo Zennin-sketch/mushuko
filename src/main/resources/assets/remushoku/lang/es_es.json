@@ -2490,7 +2490,7 @@
   "gui.remushoku.cc.sat": "Saturación: %s",
   "gui.remushoku.cc.bright": "Brillo: %s",
   "item.remushoku.quiver": "Carcaj",
-  "tooltip.remushoku.quiver": "Guarda hasta 64 flechas (clic derecho en el inventario). Si te quedas sin flechas con el arco en la mano, te pasa más.",
+  "tooltip.remushoku.quiver": "Guarda flechas. Ponlo en su ranura del inventario (arriba del escudo) para llevarlo en la espalda y que el arco saque flechas de ahí.",
   "item_group.remushoku.v2_tab": "Mushoku: armaduras v2 y ropa (pruebas)",
   "tooltip.remushoku.v2_test": "Versión 2 (de prueba, solo creativo)",
   "item.remushoku.magic_armor_mk_2_v2_chestplate": "Armadura Mágica Mk-II v2 (túnica de Rudeus)",
@@ -2583,5 +2583,8 @@
   "item.remushoku.demon_bow": "Arco del Rey Demonio",
   "tooltip.remushoku.bow_speed": "Velocidad de tensado: %s",
   "tooltip.remushoku.bow_damage": "Daño de la flecha: %s",
-  "entity.remushoku.spirit_body": "Cuerpo"
+  "entity.remushoku.spirit_body": "Cuerpo",
+  "msg.remushoku.no_arrows": "No tienes flechas (ponlas en el carcaj o en el inventario)",
+  "msg.remushoku.bow_reload_hint": "Carga la flecha con %s",
+  "key.remushoku.bow_reload": "Cargar flecha (arcos del mod)"
 }

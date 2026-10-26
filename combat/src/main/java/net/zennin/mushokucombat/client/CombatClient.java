@@ -28,6 +28,8 @@ public final class CombatClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         CombatAnimations.init();
+        // con el arma guardada (modo combate apagado) el arco del mod tampoco se dibuja en la otra mano
+        net.zennin.mushoku.client.render.BowRender.hidden = p -> p instanceof AbstractClientPlayer cp && !ClientSheath.handVisible(cp);
         ClientSheath.init();
         net.zennin.mushokucombat.client.compat.SkinLayersCompat.init();
         ClientPlayNetworking.registerGlobalReceiver(SheathStatePayload.TYPE, (payload, ctx) ->
@@ -39,6 +41,12 @@ public final class CombatClient implements ClientModInitializer {
             if (ctx.client().level == null) return;
             Entity e = ctx.client().level.getEntity(payload.entity());
             if (e instanceof AbstractClientPlayer p) CombatAnimations.play(p, payload.anim(), payload.anim().startsWith("cast") ? 4 : 2);
+        }));
+        // Animaciones que manda el mod principal (cargar el arco, habilidades del arquero)
+        ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.PlayAnimPayload.TYPE, (payload, ctx) -> ctx.client().execute(() -> {
+            if (ctx.client().level == null) return;
+            Entity e = ctx.client().level.getEntity(payload.entityId());
+            if (e instanceof AbstractClientPlayer p) BowAnimClient.oneShot(p, payload.anim());
         }));
         ClientPlayNetworking.registerGlobalReceiver(PerfectDodgePayload.TYPE, (payload, ctx) ->
                 ctx.client().execute(() -> GoldenGlow.trigger(ctx.client(), payload.entity())));

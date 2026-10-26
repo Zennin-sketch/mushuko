@@ -42,8 +42,22 @@ public final class CombatAnimations {
     private static final Map<AbstractClientPlayer, String> CURRENT = new WeakHashMap<>();
 
     private static boolean aims(String name) {
-        return name != null && (name.startsWith("cast") || name.startsWith("magic_") || name.startsWith("bow_draw"));
+        return name != null && (name.startsWith("cast") || name.startsWith("magic_") || name.startsWith("bow_") || name.startsWith("archer_"));
     }
+
+    /** Animaciones que se ven en primera persona. */
+    static boolean firstPerson(String name) {
+        return name.startsWith("bow_") && !name.endsWith("_r") || name.startsWith("archer_");
+    }
+
+    /** Hay una animacion del addon sonando en este jugador. */
+    public static boolean playing(AbstractClientPlayer p) {
+        ModifierLayer<IAnimation> layer = layer(p);
+        return layer != null && layer.getAnimation() != null && layer.isActive();
+    }
+
+    /** Lo que esta sonando en este jugador. */
+    public static String current(AbstractClientPlayer p) { return CURRENT.get(p); }
 
     private static Optional<AdjustmentModifier.PartModifier> aim(AbstractClientPlayer player, String part) {
         if (!aims(CURRENT.get(player))) return Optional.empty();
@@ -78,6 +92,11 @@ public final class CombatAnimations {
         }
         IPlayable anim = PlayerAnimationRegistry.getAnimation(MushokuCombat.id(name));
         if (anim == null) return;
-        layer.replaceAnimationWithFade(fade, anim.playAnimation());
+        var playing = anim.playAnimation();
+        // Arco y habilidades del arquero: tambien en primera persona (se ven los brazos cargando y tensando)
+        if (firstPerson(name) && playing instanceof dev.kosmx.playerAnim.api.layered.KeyframeAnimationPlayer kp)
+            kp.setFirstPersonMode(dev.kosmx.playerAnim.api.firstPerson.FirstPersonMode.THIRD_PERSON_MODEL)
+                    .setFirstPersonConfiguration(new dev.kosmx.playerAnim.api.firstPerson.FirstPersonConfiguration(true, true, true, true));
+        layer.replaceAnimationWithFade(fade, playing);
     }
 }

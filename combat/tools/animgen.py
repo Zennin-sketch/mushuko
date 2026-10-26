@@ -601,6 +601,7 @@ class Anim:
         self.weapon = None      # segmento del arma (lo pone build_data segun la familia); None = sin colision de arma
         self.weapon_from = 0    # tick desde el que el arma esta en la mano (desenvainar)
         self.continuity = True  # giro de muneca continuo; sacar/guardar lo apagan para que el agarre sea identico
+        self.only = None        # si se pone: solo se exportan esas partes (el resto lo mueve vanilla: caminar)
         self.keys = []
         self.poses = []         # (tick, pose completa, modo): para derivar animaciones por arma
         base = json.loads(json.dumps(NEUTRAL)); base.update(json.loads(json.dumps(start or {})))
@@ -669,6 +670,8 @@ class Anim:
     def emit(self, out, last_tick):
         by_tick, turns = {}, []
         for (part, ax), pts in out.items():
+            if self.only is not None and part not in self.only:
+                continue
             angle = ax in ROT_AXES or ax == 'axis'
             pts = rebase(pts) if angle else [(t, v, 0) for t, v in pts]
             keep = [pts[0]]

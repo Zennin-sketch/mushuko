@@ -132,6 +132,10 @@ public final class DemonEyes {
         for (net.minecraft.world.entity.EquipmentSlot s : net.minecraft.world.entity.EquipmentSlot.values()) body.setDropChance(s, 0f);
         p.level().addFreshEntity(body);
         BODIES.put(p.getUUID(), body);
+        // los que ya te estaban persiguiendo siguen yendo a por tu cuerpo
+        for (net.minecraft.world.entity.Mob m : p.level().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, p.getBoundingBox().inflate(48),
+                m -> m.getTarget() == p))
+            m.setTarget(body);
     }
 
     private static void removeBody(ServerPlayer p) {
@@ -193,6 +197,12 @@ public final class DemonEyes {
     }
 
     public static void init() {
+        // Los mobs hostiles tambien van por el cuerpo que queda quieto en Clarividencia (como si fueras vos)
+        net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents.ENTITY_LOAD.register((e, world) -> {
+            if (e instanceof net.minecraft.world.entity.Mob mob && e instanceof net.minecraft.world.entity.monster.Enemy)
+                ((net.zennin.mushoku.mixin.MobAccessor) mob).mushoku$targetSelector().addGoal(2,
+                        new net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal<>(mob, net.zennin.mushoku.entity.SpiritBodyEntity.class, true));
+        });
         ServerPlayConnectionEvents.JOIN.register((h, s, server) -> sync(h.getPlayer()));
         ServerPlayConnectionEvents.DISCONNECT.register((h, server) -> onDeathOrLeave(h.getPlayer()));
         net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.AFTER_DEATH.register((e, src) -> {

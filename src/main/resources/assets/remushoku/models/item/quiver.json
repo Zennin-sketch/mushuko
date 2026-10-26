@@ -1,6 +1,142 @@
 {
- "parent": "minecraft:item/generated",
- "textures": {
-  "layer0": "remushoku:item/quiver"
+ "parent": "builtin/entity",
+ "gui_light": "side",
+ "display": {
+  "gui": {
+   "rotation": [
+    22,
+    35,
+    -28
+   ],
+   "translation": [
+    0,
+    0,
+    0
+   ],
+   "scale": [
+    0.68,
+    0.68,
+    0.68
+   ]
+  },
+  "ground": {
+   "rotation": [
+    0,
+    0,
+    0
+   ],
+   "translation": [
+    0,
+    2,
+    0
+   ],
+   "scale": [
+    0.5,
+    0.5,
+    0.5
+   ]
+  },
+  "fixed": {
+   "rotation": [
+    0,
+    0,
+    -25
+   ],
+   "translation": [
+    0,
+    0,
+    0
+   ],
+   "scale": [
+    0.75,
+    0.75,
+    0.75
+   ]
+  },
+  "head": {
+   "rotation": [
+    0,
+    0,
+    0
+   ],
+   "translation": [
+    0,
+    10,
+    0
+   ],
+   "scale": [
+    0.7,
+    0.7,
+    0.7
+   ]
+  },
+  "firstperson_righthand": {
+   "rotation": [
+    0,
+    0,
+    -20
+   ],
+   "translation": [
+    0,
+    1,
+    0
+   ],
+   "scale": [
+    0.55,
+    0.55,
+    0.55
+   ]
+  },
+  "firstperson_lefthand": {
+   "rotation": [
+    0,
+    0,
+    20
+   ],
+   "translation": [
+    0,
+    1,
+    0
+   ],
+   "scale": [
+    0.55,
+    0.55,
+    0.55
+   ]
+  },
+  "thirdperson_righthand": {
+   "rotation": [
+    0,
+    0,
+    0
+   ],
+   "translation": [
+    0,
+    2,
+    1
+   ],
+   "scale": [
+    0.55,
+    0.55,
+    0.55
+   ]
+  },
+  "thirdperson_lefthand": {
+   "rotation": [
+    0,
+    0,
+    0
+   ],
+   "translation": [
+    0,
+    2,
+    1
+   ],
+   "scale": [
+    0.55,
+    0.55,
+    0.55
+   ]
+  }
  }
 }

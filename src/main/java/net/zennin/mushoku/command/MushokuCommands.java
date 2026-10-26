@@ -14,7 +14,7 @@ import net.zennin.mushoku.network.ModNetworking;
 
 /**
  * Comandos de prueba (requieren permisos de operador):
- * /mushoku mana <n>, /mushoku maxmana <n>, /mushoku elemento <agua|fuego|tierra|viento> <1-6>, /mushoku clase
+ * /mushoku mana <n>, /mushoku puntos <n> (espadachin), /mushoku puntosarquero <n>, /mushoku maxmana <n>, /mushoku elemento <agua|fuego|tierra|viento> <1-6>, /mushoku clase
  */
 public final class MushokuCommands {
     private MushokuCommands() {}
@@ -60,6 +60,13 @@ public final class MushokuCommands {
                             ServerPlayer p = c.getSource().getPlayerOrException();
                             ModAttachments.setSword(p, ModAttachments.sword(p).withPoints(IntegerArgumentType.getInteger(c, "valor")));
                             net.zennin.mushoku.sword.SwordSystem.sync(p);
+                            return 1;
+                        })))
+                        .then(Commands.literal("puntosarquero").then(Commands.argument("valor", IntegerArgumentType.integer(0)).executes(c -> {
+                            ServerPlayer p = c.getSource().getPlayerOrException();
+                            ModAttachments.setArcher(p, ModAttachments.archer(p).withPoints(IntegerArgumentType.getInteger(c, "valor")));
+                            net.zennin.mushoku.archer.ArcherSystem.sync(p);
+                            c.getSource().sendSuccess(() -> Component.literal("Puntos de arquero: " + IntegerArgumentType.getInteger(c, "valor")), false);
                             return 1;
                         })))
                         .then(Commands.literal("raza").then(Commands.argument("raza", StringArgumentType.word())

@@ -24,6 +24,8 @@ public final class SpellCasting {
     /** El jugador solto las teclas de conjuro con esta combinacion de flechas. */
     /** Mago, o espadachin con la habilidad Magia del Dios Norte (hasta nivel Intermedio). */
     public static boolean canCast(ServerPlayer p) {
+        // En creativo se puede conjurar cualquier hechizo, con cualquier clase
+        if (p.getAbilities().instabuild) return true;
         int cls = ModAttachments.get(p).playerClass();
         return isMageClass(cls) || (cls == CLASS_SWORDSMAN && ModAttachments.sword(p).knows(SwordSkill.NG_MAGIC.id));
     }
@@ -40,11 +42,12 @@ public final class SpellCasting {
             msg(p, Component.translatable("msg.remushoku.no_spell").withStyle(ChatFormatting.GRAY));
             return;
         }
-        if (ModAttachments.get(p).playerClass() == CLASS_SWORDSMAN && spell.level.tier > 2) {
+        boolean creative = p.getAbilities().instabuild;
+        if (!creative && ModAttachments.get(p).playerClass() == CLASS_SWORDSMAN && spell.level.tier > 2) {
             msg(p, Component.translatable("msg.remushoku.swordsman_spell_limit").withStyle(ChatFormatting.RED));
             return;
         }
-        if (m.level(spell.element) < spell.level.tier) {
+        if (!creative && m.level(spell.element) < spell.level.tier) {
             msg(p, Component.translatable("msg.remushoku.not_learned").withStyle(ChatFormatting.RED));
             return;
         }
@@ -66,7 +69,8 @@ public final class SpellCasting {
             return;
         }
         ManaData mana = ModAttachments.get(p);
-        if (mana.mana() < spell.level.cost) {
+        boolean creative = p.getAbilities().instabuild;
+        if (!creative && mana.mana() < spell.level.cost) {
             msg(p, Component.translatable("msg.remushoku.no_mana").withStyle(ChatFormatting.RED));
             return;
         }
@@ -81,9 +85,11 @@ public final class SpellCasting {
             if (spell == Spell.HEALING) net.zennin.mushoku.party.Parties.healMembers(p, 4f);
             else if (spell == Spell.X_HEALING) net.zennin.mushoku.party.Parties.healMembers(p, 8f);
             else if (spell == Spell.SHRINE_HEALING) net.zennin.mushoku.party.Parties.healMembers(p, 16f);
-            ManaData after = mana.withMana(mana.mana() - spell.level.cost);
-            after = after.withMaxMana(after.maxMana() + spell.level.maxManaGain);
-            ModAttachments.set(p, after);
+            if (!creative) {
+                ManaData after = mana.withMana(mana.mana() - spell.level.cost);
+                after = after.withMaxMana(after.maxMana() + spell.level.maxManaGain);
+                ModAttachments.set(p, after);
+            }
         }
         ModAttachments.setMagic(p, m.withQueued(""));
         ModNetworking.syncMana(p);
@@ -120,7 +126,7 @@ public final class SpellCasting {
             msg(p, Component.translatable("msg.remushoku.combine_fail").withStyle(ChatFormatting.RED));
             return;
         }
-        if (ModAttachments.get(p).playerClass() == CLASS_SWORDSMAN && result.level.tier > 2) {
+        if (!p.getAbilities().instabuild && ModAttachments.get(p).playerClass() == CLASS_SWORDSMAN && result.level.tier > 2) {
             msg(p, Component.translatable("msg.remushoku.swordsman_spell_limit").withStyle(ChatFormatting.RED));
             return;
         }

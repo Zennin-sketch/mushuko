@@ -17,7 +17,7 @@ import java.util.function.Supplier;
  * romance = false para los personajes con apariencia infantil: solo amistad.
  */
 public enum CompanionKind {
-    ERIS("eris_greyrat", "eris_greyrat", true, 256, 20, 16, 32, Combat.MELEE, () -> Items.IRON_SWORD, true,
+    ERIS("eris_greyrat", "eris_greyrat", true, 256, 20, 16, 32, Combat.MELEE, () -> ModItems.MIGURD_SWORD, true,
             s -> s.getItem() instanceof SwordItem || s.is(Items.COOKED_BEEF) || s.is(Items.COOKED_PORKCHOP) || s.is(Items.COOKED_MUTTON),
             s -> s.is(Items.BOOK) || s.is(Items.WRITABLE_BOOK) || s.is(Items.ROTTEN_FLESH),
             Map.of("joke", 0.8f, "story", 0.7f, "compliment", 1.2f, "flirt", 0.8f, "chat", 1.0f)),

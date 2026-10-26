@@ -94,9 +94,10 @@ public final class SwordSystem {
         SwordSkill s = SwordSkill.byId(id);
         SwordData d = ModAttachments.sword(p);
         if (s == null || !isSwordsman(p) || d.style().isEmpty() || d.knows(id)) return;
-        String why = cantLearn(d, s);
+        boolean creative = p.getAbilities().instabuild;
+        String why = cantLearn(d, s, creative);
         if (why != null) { msg(p, why, ChatFormatting.RED); return; }
-        ModAttachments.setSword(p, d.withPoints(d.points() - s.cost).learn(id));
+        ModAttachments.setSword(p, d.withPoints(creative ? d.points() : d.points() - s.cost).learn(id));
         p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.8f, 1.2f);
         msg(p, Component.translatable("msg.remushoku.skill_learned", Component.translatable(s.translationKey())).withStyle(ChatFormatting.GOLD));
         refresh(p);
@@ -104,7 +105,10 @@ public final class SwordSystem {
     }
 
     /** null si se puede aprender; si no, la clave del mensaje con el motivo. */
-    public static String cantLearn(SwordData d, SwordSkill s) {
+    public static String cantLearn(SwordData d, SwordSkill s) { return cantLearn(d, s, false); }
+
+    /** creative: en creativo los puntos son infinitos (no se piden ni se gastan). */
+    public static String cantLearn(SwordData d, SwordSkill s, boolean creative) {
         boolean affinity = s.style.key.equals(d.style());
         if (s.kind != SwordSkill.Kind.STYLE && !d.knows(SwordSkill.styleSkill(s.style).id)) return "msg.remushoku.need_style";
         if (!affinity && s.tier > 3) return "msg.remushoku.not_affinity";
@@ -113,7 +117,7 @@ public final class SwordSystem {
             for (SwordSkill o : SwordSkill.of(s.style)) if (o.tier == s.tier - 1 && d.knows(o.id)) prev = true;
             if (!prev) return "msg.remushoku.need_previous";
         }
-        if (d.points() < s.cost) return "msg.remushoku.no_points";
+        if (!creative && d.points() < s.cost) return "msg.remushoku.no_points";
         return null;
     }
 
@@ -140,8 +144,9 @@ public final class SwordSystem {
         SwordData d = ModAttachments.sword(p);
         if (!isSwordsman(p) || d.style().isEmpty()) return;
         if (d.touki() >= TOUKI_MAX) { msg(p, "msg.remushoku.touki_max", ChatFormatting.GRAY); return; }
-        if (d.points() < TOUKI_COST) { msg(p, "msg.remushoku.no_points", ChatFormatting.RED); return; }
-        ModAttachments.setSword(p, d.withPoints(d.points() - TOUKI_COST).withTouki(d.touki() + 1));
+        boolean creative = p.getAbilities().instabuild;
+        if (!creative && d.points() < TOUKI_COST) { msg(p, "msg.remushoku.no_points", ChatFormatting.RED); return; }
+        ModAttachments.setSword(p, d.withPoints(creative ? d.points() : d.points() - TOUKI_COST).withTouki(d.touki() + 1));
         ManaData m = ModAttachments.get(p);
         ModAttachments.set(p, m.withMaxMana(m.maxMana() + 100)); // como el original: cada nivel suma 100 de mana maximo
         p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1f, 1.2f);

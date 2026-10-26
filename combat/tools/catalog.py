@@ -131,7 +131,11 @@ EXTRA = [
     dict(group='Desenvainar y guardar (cintura)', items=['hip_draw', 'hip_sheathe'], weapon='migurd_sword'),
     dict(group='Desenvainar y guardar (espalda)', items=['back_draw', 'back_sheathe'], weapon='kajakut'),
     dict(group='Poses', items=['pose_staff', 'pose_spear'], weapon='aqua_heartia'),
-    dict(group='Arco', items=['bow_draw', 'bow_release'], weapon='hunter_bow'),
+    dict(group='Arco del mod (arco en la izquierda)', items=['bow_idle', 'bow_load', 'bow_draw', 'bow_release'], weapon=None),
+    dict(group='Arco vanilla', items=['bow_draw_r', 'bow_release_r'], weapon=None),
+    dict(group='Habilidades del arquero', items=['archer_power_shot', 'archer_deadeye', 'archer_piercing_ray', 'archer_phantom_arrow',
+                                                'archer_triple_shot', 'archer_arrow_rain', 'archer_steel_storm', 'archer_barrage',
+                                                'archer_disengage', 'archer_gale_arrow', 'archer_tempest_arrow', 'archer_gale_dance'], weapon=None),
 ]
 
 def attributes(family):

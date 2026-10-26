@@ -26,7 +26,10 @@ public final class ManaSystem {
             boolean syncTick = server.getTickCount() % 5 == 0;
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 ManaData d = ModAttachments.get(player);
-                if (d.mana() < d.maxMana()) {
+                // En creativo el mana es infinito: siempre lleno
+                if (player.getAbilities().instabuild && d.mana() < d.maxMana()) {
+                    ModAttachments.set(player, d.withMana(d.maxMana()));
+                } else if (d.mana() < d.maxMana()) {
                     ModAttachments.set(player, d.withMana(d.mana() + regenPerTick(d.maxMana())
                             + (ModAttachments.race(player).laplace() ? net.zennin.mushoku.race.RaceData.laplaceRegen(d.maxMana()) : 0)));
                 }

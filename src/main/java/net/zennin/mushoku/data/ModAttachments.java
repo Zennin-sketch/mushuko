@@ -70,6 +70,25 @@ public final class ModAttachments {
             .initializer(() -> net.zennin.mushoku.hitogami.HitogamiData.DEFAULT)
             .buildAndRegister(MushokuMod.id("hitogami"));
 
+    /** Carcaj en su ranura propia del inventario (solo ahi se ve en la espalda y pasa flechas al arco). */
+    @SuppressWarnings("UnstableApiUsage")
+    public static final AttachmentType<net.minecraft.world.item.ItemStack> QUIVER = AttachmentRegistry.<net.minecraft.world.item.ItemStack>builder()
+            .persistent(net.minecraft.world.item.ItemStack.OPTIONAL_CODEC)
+            .initializer(() -> net.minecraft.world.item.ItemStack.EMPTY)
+            .buildAndRegister(MushokuMod.id("quiver"));
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static net.minecraft.world.item.ItemStack quiver(Player player) {
+        net.minecraft.world.item.ItemStack s = player.getAttached(QUIVER);
+        return s == null ? net.minecraft.world.item.ItemStack.EMPTY : s;
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static void setQuiver(Player player, net.minecraft.world.item.ItemStack s) {
+        if (s == null || s.isEmpty()) player.removeAttached(QUIVER);
+        else player.setAttached(QUIVER, s);
+    }
+
     @SuppressWarnings("UnstableApiUsage")
     public static net.zennin.mushoku.race.Appearance appearance(Player player) { return player.getAttachedOrCreate(APPEARANCE); }
 

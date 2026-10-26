@@ -60,7 +60,7 @@ public class ArcherScreen extends Screen {
         if (!d.knows(s.id)) {
             Button b = Button.builder(Component.translatable("gui.remushoku.sword.learn", s.cost), btn -> send(ArcherActionPayload.LEARN, 0, s.id))
                     .bounds(right - 110, y, 110, 17).build();
-            String why = ArcherSystem.cantLearn(d, s);
+            String why = ArcherSystem.cantLearn(d, s, net.minecraft.client.Minecraft.getInstance().player != null && net.minecraft.client.Minecraft.getInstance().player.getAbilities().instabuild);
             b.active = why == null;
             b.setTooltip(Tooltip.create(why == null ? description(s)
                     : description(s).copy().append("\n").append(Component.translatable(why).withStyle(ChatFormatting.RED))));
@@ -109,14 +109,14 @@ public class ArcherScreen extends Screen {
         ArcherData d = ClientArcherState.data;
         g.drawCenteredString(font, title, width / 2, top, 0xFFD27F);
         ArcherSchool own = ArcherSchool.byKey(d.school());
-        Component info = Component.translatable("gui.remushoku.sword.points", d.points()).append("   ")
+        Component info = Component.translatable("gui.remushoku.sword.points", (net.minecraft.client.Minecraft.getInstance().player != null && net.minecraft.client.Minecraft.getInstance().player.getAbilities().instabuild) ? (Object) "∞" : (Object) d.points()).append("   ")
                 .append(Component.translatable("gui.remushoku.archer.school",
                         own == null ? Component.literal("-") : Component.translatable("school.remushoku." + own.key)));
         g.drawCenteredString(font, info, width / 2, top + 11, 0xCCCCCC);
         int y = top + 46;
         for (ArcherSkill s : ArcherSkill.of(tab)) {
             boolean known = d.knows(s.id);
-            int color = known ? 0x7CFC7C : ArcherSystem.cantLearn(d, s) == null ? 0xFFFFFF : 0x888888;
+            int color = known ? 0x7CFC7C : ArcherSystem.cantLearn(d, s, net.minecraft.client.Minecraft.getInstance().player != null && net.minecraft.client.Minecraft.getInstance().player.getAbilities().instabuild) == null ? 0xFFFFFF : 0x888888;
             Component name = Component.translatable(s.translationKey());
             g.drawString(font, name, left + 4, y + 5, color, true);
             String tier = Component.translatable("swordtier.remushoku." + s.tier).getString();

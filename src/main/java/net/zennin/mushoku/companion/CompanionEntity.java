@@ -123,6 +123,9 @@ public class CompanionEntity extends PathfinderMob implements RangedAttackMob {
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
+        // Eris ya guardada con la espada de hierro de antes: ahora usa la Espada Migurd
+        if (kind == CompanionKind.ERIS && getMainHandItem().is(net.minecraft.world.item.Items.IRON_SWORD))
+            setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(ModItems.MIGURD_SWORD));
         relations.clear();
         CompoundTag rel = tag.getCompound("Relations");
         for (String k : rel.getAllKeys()) {

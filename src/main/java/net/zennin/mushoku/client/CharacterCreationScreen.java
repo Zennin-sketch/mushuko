@@ -203,6 +203,7 @@ public class CharacterCreationScreen extends Screen {
         ItemStack[] armor = {inv.armor.get(0), inv.armor.get(1), inv.armor.get(2), inv.armor.get(3)};
         int qs = sel == 8 ? 7 : 8;  // ranura donde se pone el carcaj de muestra (se ve en la espalda)
         ItemStack quiverSlot = inv.items.get(qs);
+        ItemStack worn = net.zennin.mushoku.data.ModAttachments.quiver(p);
         try {
             if (stage == Stage.CLASS) {
                 switch (cls) {
@@ -221,7 +222,7 @@ public class CharacterCreationScreen extends Screen {
                     }
                     default -> {
                         inv.items.set(sel, new ItemStack(Items.BOW));
-                        inv.items.set(qs, new ItemStack(ModItems.QUIVER));
+                        net.zennin.mushoku.data.ModAttachments.setQuiver(p, new ItemStack(ModItems.QUIVER));
                         inv.offhand.set(0, ItemStack.EMPTY);
                         for (int i = 0; i < 4; i++) inv.armor.set(i, ItemStack.EMPTY);
                     }
@@ -239,6 +240,7 @@ public class CharacterCreationScreen extends Screen {
         } finally {
             inv.items.set(sel, main);
             inv.items.set(qs, quiverSlot);
+            net.zennin.mushoku.data.ModAttachments.setQuiver(p, worn);
             inv.offhand.set(0, off);
             for (int i = 0; i < 4; i++) inv.armor.set(i, armor[i]);
         }

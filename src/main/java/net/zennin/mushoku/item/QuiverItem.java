@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * Carcaj: guarda flechas (hasta 64, como una bolsa) y solo flechas. Clic derecho en el inventario para meter o sacar.
  * Si tienes un arco en la mano y te quedas sin flechas sueltas, el carcaj te va pasando flechas solo.
- * Se ve colgado en la espalda mientras lo llevas en el inventario.
+ * Hay que ponerlo en su ranura del inventario (al lado del escudo): ahi se ve en la espalda y funciona.
  */
 public class QuiverItem extends BundleItem {
     public QuiverItem(Properties props) {
@@ -86,12 +86,10 @@ public class QuiverItem extends BundleItem {
         lines.add(Component.translatable("tooltip.remushoku.quiver").withStyle(ChatFormatting.GRAY));
     }
 
-    /** Primer carcaj del inventario (o vacio). */
+    /** El carcaj equipado en su ranura del inventario (o vacio): solo ese se ve y pasa flechas. */
     public static ItemStack find(Player p) {
-        Inventory inv = p.getInventory();
-        if (inv.offhand.get(0).getItem() instanceof QuiverItem) return inv.offhand.get(0);
-        for (ItemStack s : inv.items) if (s.getItem() instanceof QuiverItem) return s;
-        return ItemStack.EMPTY;
+        ItemStack s = net.zennin.mushoku.data.ModAttachments.quiver(p);
+        return s.getItem() instanceof QuiverItem ? s : ItemStack.EMPTY;
     }
 
     /** Si no hay flechas sueltas, pasa hasta 16 del carcaj al inventario. */

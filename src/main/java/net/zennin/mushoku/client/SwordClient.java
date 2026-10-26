@@ -1,5 +1,7 @@
 package net.zennin.mushoku.client;
 
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.KeyMapping;
@@ -8,6 +10,7 @@ import net.zennin.mushoku.network.SwordActionPayload;
 
 /** Teclas del espadachin: V abre el menu, Z / X / C usan las habilidades de las ranuras 1-3. */
 public final class SwordClient {
+    private static boolean racePrev;
     private SwordClient() {}
 
     public static void init() {
@@ -36,8 +39,14 @@ public final class SwordClient {
         while (ModKeys.ADVENTURER.consumeClick()) if (mc.screen == null) mc.setScreen(new AdventurerScreen());
         while (ModKeys.COMBINE.consumeClick())
             if (mc.screen == null) ClientPlayNetworking.send(new net.zennin.mushoku.network.GuildActionPayload(net.zennin.mushoku.network.GuildActionPayload.COMBINE, 0, ""));
-        while (ModKeys.RACE_SKILL.consumeClick())
-            if (mc.screen == null) ClientPlayNetworking.send(new net.zennin.mushoku.network.GuildActionPayload(net.zennin.mushoku.network.GuildActionPayload.RACE_SKILL, 0, ""));
+        // Raza y recarga del arco pueden compartir tecla: se lee el teclado directo (Minecraft solo avisa a una)
+        while (ModKeys.RACE_SKILL.consumeClick()) {}
+        boolean raceNow = ModKeys.isDown(ModKeys.RACE_SKILL);
+        if (raceNow && !racePrev && mc.screen == null && !(BowClient.holdingBow(mc.player)
+                && KeyBindingHelper.getBoundKeyOf(ModKeys.RACE_SKILL).equals(KeyBindingHelper.getBoundKeyOf(ModKeys.BOW_RELOAD))))
+            ClientPlayNetworking.send(new net.zennin.mushoku.network.GuildActionPayload(net.zennin.mushoku.network.GuildActionPayload.RACE_SKILL, 0, ""));
+        racePrev = raceNow;
+
         while (ModKeys.EYE_1.consumeClick()) if (mc.screen == null) ClientPlayNetworking.send(new net.zennin.mushoku.network.ActionPayload(net.zennin.mushoku.network.ActionPayload.EYE_ONE));
         while (ModKeys.EYE_2.consumeClick()) if (mc.screen == null) ClientPlayNetworking.send(new net.zennin.mushoku.network.ActionPayload(net.zennin.mushoku.network.ActionPayload.EYE_TWO));
 

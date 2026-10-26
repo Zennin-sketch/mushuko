@@ -62,7 +62,7 @@ public class SwordsmanScreen extends Screen {
         int bx = left + PANEL_W - 150;
         Button add = Button.builder(Component.translatable("gui.remushoku.sword.touki_add", SwordSystem.TOUKI_COST),
                 b -> send(SwordActionPayload.TOUKI_LEVEL, 0, "")).bounds(bx, y, 78, 17).build();
-        add.active = d.touki() < SwordSystem.TOUKI_MAX && d.points() >= SwordSystem.TOUKI_COST;
+        add.active = d.touki() < SwordSystem.TOUKI_MAX && (d.points() >= SwordSystem.TOUKI_COST || (net.minecraft.client.Minecraft.getInstance().player != null && net.minecraft.client.Minecraft.getInstance().player.getAbilities().instabuild));
         add.setTooltip(Tooltip.create(Component.translatable("gui.remushoku.sword.touki_desc")));
         addRenderableWidget(add);
         Button tog = Button.builder(Component.translatable(d.toukiOn() ? "gui.remushoku.sword.on" : "gui.remushoku.sword.off")
@@ -78,7 +78,7 @@ public class SwordsmanScreen extends Screen {
         if (!d.knows(s.id)) {
             Button b = Button.builder(Component.translatable("gui.remushoku.sword.learn", s.cost), btn -> send(SwordActionPayload.LEARN, 0, s.id))
                     .bounds(right - 110, y, 110, 17).build();
-            String why = SwordSystem.cantLearn(d, s);
+            String why = SwordSystem.cantLearn(d, s, net.minecraft.client.Minecraft.getInstance().player != null && net.minecraft.client.Minecraft.getInstance().player.getAbilities().instabuild);
             b.active = why == null;
             b.setTooltip(Tooltip.create(why == null ? description(s)
                     : description(s).copy().append("\n").append(Component.translatable(why).withStyle(ChatFormatting.RED))));
@@ -136,14 +136,14 @@ public class SwordsmanScreen extends Screen {
         SwordData d = ClientSwordState.data;
         g.drawCenteredString(font, title, width / 2, top, 0xFFD27F);
         SwordStyle aff = SwordStyle.byKey(d.style());
-        Component info = Component.translatable("gui.remushoku.sword.points", d.points()).append("   ")
+        Component info = Component.translatable("gui.remushoku.sword.points", (net.minecraft.client.Minecraft.getInstance().player != null && net.minecraft.client.Minecraft.getInstance().player.getAbilities().instabuild) ? (Object) "∞" : (Object) d.points()).append("   ")
                 .append(Component.translatable("gui.remushoku.sword.affinity",
                         aff == null ? Component.literal("-") : Component.translatable("style.remushoku." + aff.key)));
         g.drawCenteredString(font, info, width / 2, top + 11, 0xCCCCCC);
         int y = top + 46;
         for (SwordSkill s : SwordSkill.of(tab)) {
             boolean known = d.knows(s.id);
-            int color = known ? 0x7CFC7C : SwordSystem.cantLearn(d, s) == null ? 0xFFFFFF : 0x888888;
+            int color = known ? 0x7CFC7C : SwordSystem.cantLearn(d, s, net.minecraft.client.Minecraft.getInstance().player != null && net.minecraft.client.Minecraft.getInstance().player.getAbilities().instabuild) == null ? 0xFFFFFF : 0x888888;
             Component name = Component.translatable(s.translationKey());
             g.drawString(font, name, left + 4, y + 5, color, true);
             String tier = Component.translatable("swordtier.remushoku." + s.tier).getString();

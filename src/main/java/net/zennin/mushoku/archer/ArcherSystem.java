@@ -115,7 +115,10 @@ public final class ArcherSystem {
         sync(p);
     }
 
-    public static String cantLearn(ArcherData d, ArcherSkill s) {
+    public static String cantLearn(ArcherData d, ArcherSkill s) { return cantLearn(d, s, false); }
+
+    /** creative: en creativo los puntos son infinitos (no se piden ni se gastan). */
+    public static String cantLearn(ArcherData d, ArcherSkill s, boolean creative) {
         boolean own = s.school.key.equals(d.school());
         if (s.kind != ArcherSkill.Kind.STYLE && !d.knows(ArcherSkill.styleSkill(s.school).id)) return "msg.remushoku.need_school";
         if (!own && s.tier > 3) return "msg.remushoku.not_school";
@@ -124,7 +127,7 @@ public final class ArcherSystem {
             for (ArcherSkill o : ArcherSkill.of(s.school)) if (o.tier == s.tier - 1 && d.knows(o.id)) prev = true;
             if (!prev) return "msg.remushoku.need_previous";
         }
-        if (d.points() < s.cost) return "msg.remushoku.no_points";
+        if (!creative && d.points() < s.cost) return "msg.remushoku.no_points";
         return null;
     }
 
@@ -132,9 +135,10 @@ public final class ArcherSystem {
         ArcherSkill s = ArcherSkill.byId(id);
         ArcherData d = ModAttachments.archer(p);
         if (s == null || !isArcher(p) || d.school().isEmpty() || d.knows(id)) return;
-        String why = cantLearn(d, s);
+        boolean creative = p.getAbilities().instabuild;
+        String why = cantLearn(d, s, creative);
         if (why != null) { msg(p, why, ChatFormatting.RED); return; }
-        ModAttachments.setArcher(p, d.withPoints(d.points() - s.cost).learn(id));
+        ModAttachments.setArcher(p, d.withPoints(creative ? d.points() : d.points() - s.cost).learn(id));
         p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.8f, 1.2f);
         msg(p, Component.translatable("msg.remushoku.skill_learned", Component.translatable(s.translationKey())).withStyle(ChatFormatting.GOLD));
         refresh(p);
@@ -324,6 +328,7 @@ public final class ArcherSystem {
             return;
         }
         if (!run(p, s)) return;
+        net.zennin.mushoku.network.ModNetworking.playAnim(p, "archer_" + s.id);
         if (!p.getAbilities().instabuild) ModAttachments.set(p, m.withMana(m.mana() - s.mana));
         cds.put(s, now + s.cooldown);
     }

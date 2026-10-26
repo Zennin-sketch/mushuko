@@ -20,6 +20,8 @@ public final class ModNetworking {
         PayloadTypeRegistry.playS2C().register(ManaSyncPayload.TYPE, ManaSyncPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(MagicSyncPayload.TYPE, MagicSyncPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ReadySpellPayload.TYPE, ReadySpellPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(PlayAnimPayload.TYPE, PlayAnimPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(QuiverSyncPayload.TYPE, QuiverSyncPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ActionPayload.TYPE, ActionPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(SwordSyncPayload.TYPE, SwordSyncPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(SwordActionPayload.TYPE, SwordActionPayload.CODEC);
@@ -95,6 +97,7 @@ public final class ModNetworking {
                     case ActionPayload.CHOOSE_ARCHER -> PlayerClasses.choose(p, SpellCasting.CLASS_ARCHER);
                     case ActionPayload.EYE_ONE -> net.zennin.mushoku.extra.DemonEyes.toggle(p, 0);
                     case ActionPayload.EYE_TWO -> net.zennin.mushoku.extra.DemonEyes.toggle(p, 1);
+                    case ActionPayload.BOW_RELOAD -> net.zennin.mushoku.archer.BowSystem.reload(p);
                     default -> {}
                 }
             });
@@ -134,5 +137,13 @@ public final class ModNetworking {
 
     public static void openClassScreen(ServerPlayer player) {
         ServerPlayNetworking.send(player, new ActionPayload(ActionPayload.OPEN_CLASS_SCREEN));
+    }
+
+    /** Animacion del addon en este jugador, para el y para los que lo ven. */
+    public static void playAnim(ServerPlayer p, String anim) {
+        PlayAnimPayload msg = new PlayAnimPayload(p.getId(), anim);
+        if (ServerPlayNetworking.canSend(p, PlayAnimPayload.TYPE)) ServerPlayNetworking.send(p, msg);
+        for (ServerPlayer o : net.fabricmc.fabric.api.networking.v1.PlayerLookup.tracking(p))
+            if (o != p && ServerPlayNetworking.canSend(o, PlayAnimPayload.TYPE)) ServerPlayNetworking.send(o, msg);
     }
 }
