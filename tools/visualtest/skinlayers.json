@@ -1,5 +1,5 @@
 {
- "skin": "remushoku:textures/entities/rudeus_greyrat.png",
+ "skin": "remushoku:textures/visualtest/layers_skin.png",
  "steps": [
   {
    "op": "setup",

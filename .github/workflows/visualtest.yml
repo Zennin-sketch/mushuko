@@ -11,6 +11,10 @@ on:
       tag:
         description: Rama de resultados (vt-<tag>)
         default: results
+      exclude:
+        description: Mods a sacar (parte del nombre del archivo)
+        default: ""
+
 permissions:
   contents: write
 jobs:
@@ -36,6 +40,7 @@ jobs:
           python3 tools/visualtest/fetch_mods.py mc/mods
           cp $(ls build/libs/*.jar | grep -v sources) mc/mods/
           cp $(ls combat/build/libs/*.jar | grep -v sources) mc/mods/
+          if [ -n "${{ inputs.exclude }}" ]; then rm -f mc/mods/*${{ inputs.exclude }}*; fi
           ls mc/mods
           printf 'onboardAccessibility:false\ntutorialStep:none\nskipMultiplayerWarning:true\nrenderDistance:5\nsimulationDistance:5\njoinedFirstServer:true\nguiScale:2\npauseOnLostFocus:false\nnarrator:0\nsoundCategory_master:0.0\ngraphicsMode:1\n' > mc/options.txt
       - name: Correr la prueba
