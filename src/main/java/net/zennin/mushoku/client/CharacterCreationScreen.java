@@ -36,7 +36,7 @@ public class CharacterCreationScreen extends Screen {
     private static final int GOLD = 0xFFE8C86A, TEXT = 0xFFE6E2D8, DIM = 0xFF9C988E, PANEL = 0xC8101016, LINE = 0xFF6E5C34;
 
     private Stage stage = Stage.RACE;
-    private int race = 0, variant = 0, height = 1, cls = 0, aff = 0;
+    private int race = 0, variant = 0, earHeight = 1, cls = 0, aff = 0;
     /** Color de las orejas: -1 = el de tu skin. hue/sat/bri = el mismo color en los deslizadores. */
     private int color = -1;
     private double hue = 0.08, sat = 0.35, bri = 0.85;
@@ -55,7 +55,7 @@ public class CharacterCreationScreen extends Screen {
 
     private boolean hasTrait() { Race r = race(); return r == Race.ELF || r == Race.DEMON || r == Race.BEAST; }
 
-    private Appearance appearance() { return Appearance.forRace(race(), variant, height, color); }
+    private Appearance appearance() { return Appearance.forRace(race(), variant, earHeight, color); }
 
     private boolean hasColor() { return race() == Race.ELF || race() == Race.BEAST; }
 
@@ -81,10 +81,10 @@ public class CharacterCreationScreen extends Screen {
 
     private void cycle(int dir) {
         switch (stage) {
-            case RACE -> { race = (race + dir + RACES.length) % RACES.length; variant = 0; height = 1; color = -1; }
+            case RACE -> { race = (race + dir + RACES.length) % RACES.length; variant = 0; earHeight = 1; color = -1; }
             case TRAIT -> {
                 if (race() == Race.BEAST) variant = (variant + dir + 3) % 3;
-                else height = (height + dir + 3) % 3;
+                else earHeight = (earHeight + dir + 3) % 3;
             }
             case CLASS -> cls = (cls + dir + CLASSES.length) % CLASSES.length;
         }
@@ -101,7 +101,7 @@ public class CharacterCreationScreen extends Screen {
             case RACE -> stage = hasTrait() ? Stage.TRAIT : Stage.CLASS;
             case TRAIT -> stage = Stage.CLASS;
             case CLASS -> {
-                ClientPlayNetworking.send(new HitogamiActionPayload(HitogamiActionPayload.CREATE, race().key, variant, height, hasColor() ? color : -1,
+                ClientPlayNetworking.send(new HitogamiActionPayload(HitogamiActionPayload.CREATE, race().key, variant, earHeight, hasColor() ? color : -1,
                         cls == 0 ? SpellCasting.CLASS_MAGE : cls == 1 ? SpellCasting.CLASS_SWORDSMAN : SpellCasting.CLASS_ARCHER,
                         cls == 1 ? SwordStyle.values()[aff].key : cls == 2 ? net.zennin.mushoku.archer.ArcherSchool.values()[aff].key : ""));
                 onClose();
@@ -244,7 +244,7 @@ public class CharacterCreationScreen extends Screen {
             case RACE -> Component.translatable("race.remushoku." + race().key);
             case TRAIT -> race() == Race.BEAST
                     ? Component.translatable("gui.remushoku.cc.animal." + variant)
-                    : Component.translatable("gui.remushoku.cc.height", Component.translatable("gui.remushoku.cc.height." + height));
+                    : Component.translatable("gui.remushoku.cc.height", Component.translatable("gui.remushoku.cc.height." + earHeight));
             case CLASS -> Component.translatable("class.remushoku." + CLASSES[cls]);
         };
     }
