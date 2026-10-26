@@ -110,18 +110,18 @@ public final class CosmeticChain {
         float[] rimW = new float[n + 1], rimX = new float[n + 1], backT = new float[n + 1], backZ = new float[n + 1],
                 floorW = new float[n + 1], floorT = new float[n + 1], floorZ = new float[n + 1], ones = new float[n + 1];
         for (int i = 0; i <= n; i++) {
-            float w = widths[i], th = thick[i];
+            float wi = widths[i], ti = thick[i];
             // el hueco se cierra en la ultima union (punta del hueco) para que no quede un corte
             float k = i < cnt - 1 ? 1f : 0f;
-            float hw = w * innerWidth * k;
-            float depth = th * 0.55f * k;
-            rimW[i] = (w - hw) / 2;
-            rimX[i] = w / 2 - rimW[i] / 2;
-            backT[i] = th - depth;
+            float hw = wi * innerWidth * k;
+            float depth = ti * 0.55f * k;
+            rimW[i] = (wi - hw) / 2;
+            rimX[i] = wi / 2 - rimW[i] / 2;
+            backT[i] = ti - depth;
             backZ[i] = -depth / 2;
             floorW[i] = Math.max(0.001f, hw);
             floorT[i] = 0.04f;
-            floorZ[i] = th / 2 - depth + 0.03f;
+            floorZ[i] = ti / 2 - depth + 0.03f;
             ones[i] = 1;
         }
         float[] negX = new float[n + 1];

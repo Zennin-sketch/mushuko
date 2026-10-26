@@ -62,7 +62,7 @@ public class SpellHandLayer extends RenderLayer<AbstractClientPlayer, PlayerMode
         if (r == null || ctx.consumers() == null) return;
         var cam = ctx.camera();
         float partial = ctx.tickCounter().getGameTimeDeltaPartialTick(true);
-        Vec3 look = new Vec3(cam.getLookVector()), up = new Vec3(cam.getUpVector()), left = new Vec3(cam.getLeftVector());
+        Vec3 look = v(cam.getLookVector()), up = v(cam.getUpVector()), left = v(cam.getLeftVector());
         float side = mc.player.getMainArm() == HumanoidArm.RIGHT ? 1 : -1;
         Vec3 off = look.scale(0.85).add(up.scale(-0.26)).add(left.scale(-0.34 * side));
         PoseStack pose = ctx.matrixStack() != null ? ctx.matrixStack() : new PoseStack();
@@ -76,4 +76,6 @@ public class SpellHandLayer extends RenderLayer<AbstractClientPlayer, PlayerMode
         draw(r, pose, ctx.consumers(), net.minecraft.client.renderer.LightTexture.FULL_BRIGHT, partial);
         pose.popPose();
     }
+
+    private static Vec3 v(org.joml.Vector3f f) { return new Vec3(f.x(), f.y(), f.z()); }
 }
