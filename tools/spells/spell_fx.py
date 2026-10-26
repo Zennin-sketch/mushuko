@@ -259,6 +259,55 @@ def fire_crescent():
               emit=emitter(16, 10, (8, 1, 3), (1.2, 0.2), ('ffd84a', 'b8240a'), alpha=0.95, rise=0.5, drift=0.8)),
     ])
 
-FX_MODELS = dict(water_arrow=water_arrow, fire_crescent=fire_crescent, storm_cloud=storm_cloud_small, cumulonimbus=cumulonimbus,
+
+# ================================================================ Formacion en la mano (antes de quedar listo para lanzar)
+# Duran FORM ticks y terminan exactamente como el proyectil, que despues queda flotando frente a la mano.
+FORM = 22
+
+def _spiral(arms, steps, r0, r1, turn, size0, size1, c0, c1, alpha=0.95):
+    out = []
+    for a in range(arms):
+        for k in range(steps):
+            u = k / max(1, steps - 1)
+            ang = math.radians(a * 360 / arms + turn * u)
+            r = r0 + (r1 - r0) * u
+            s = size0 + (size1 - size0) * u
+            out.append(box((r * math.cos(ang), 1.5 * math.sin(ang * 2), r * math.sin(ang)), (s, s, s), lerp_hex(c0, c1, u), alpha))
+    return out
+
+def fireball_form():
+    from spell_models import fireball
+    core, mid, shell, tail, embers = fireball()['groups']
+    core['grow'] = [2, 14]
+    mid['grow'] = [7, 18]
+    shell['grow'] = [11, 21]
+    tail['grow'] = [15, 22]
+    embers['show'] = [[13, 40]]
+    gather = group('fire', 'emissive', [], glow=True, show=[[0, 18]],
+                   emit=emitter(34, 12, (13, 11, 13), (1.4, 0.5), ('ffe07a', 'ff4a0e'), alpha=1.0, outward=-1.0))
+    sparks = group('fire', 'emissive', _spiral(3, 7, 11, 3, 300, 1.6, 0.7, 'ffd04a', 'ff6a1e'), glow=True,
+                   spin=(0, 40, 0), show=[[0, 17]], swirl=[0, 16, 360, 1.6], flicker=0.35)
+    return fx('Bola de fuego: se forma en la mano', [], [gather, sparks, core, mid, shell, tail, embers],
+              life=FORM, scale=1.0, height=0.6, cam=2.0)
+
+def water_ball_form():
+    from spell_models import water_ball
+    gs = water_ball()['groups']
+    sphere, core, lights, shine, ribbons, drops = gs[0], gs[1], gs[2], gs[3], gs[4:8], gs[8]
+    core['grow'] = [2, 12]
+    sphere['grow'] = [6, 19]
+    lights['grow'] = [10, 20]
+    shine['show'] = [[15, 40]]
+    for i, r in enumerate(ribbons):
+        r['swirl'] = [0, 18 + i, 300, 2.4]
+        r['grow'] = [0, 5]
+    drops['show'] = [[14, 40]]
+    gather = group('water', 'translucent', [], glow=True, show=[[0, 18]],
+                   emit=emitter(30, 13, (13, 12, 13), (1.4, 0.6), ('7cc8ff', 'ffffff'), alpha=0.95, outward=-0.95))
+    return fx('Bola de agua: se forma en la mano', [], [gather, core, sphere, lights, shine, *ribbons, drops],
+              life=FORM, scale=1.0, height=0.6, cam=2.0)
+
+
+FX_MODELS = dict(fireball_form=fireball_form, water_ball_form=water_ball_form, water_arrow=water_arrow, fire_crescent=fire_crescent, storm_cloud=storm_cloud_small, cumulonimbus=cumulonimbus,
                  earth_spike=earth_spike, ice_crystals=ice_crystals, fire_burst=fire_burst, water_wall=water_wall,
                  magic_shield=magic_shield)

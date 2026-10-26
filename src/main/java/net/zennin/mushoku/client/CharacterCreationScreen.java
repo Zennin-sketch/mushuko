@@ -31,7 +31,7 @@ import java.util.List;
 public class CharacterCreationScreen extends Screen {
     private enum Stage { RACE, TRAIT, CLASS }
 
-    private static final Race[] RACES = {Race.HUMAN, Race.ELF, Race.DWARF, Race.MIGURD, Race.SUPERD, Race.OGRE, Race.BEAST, Race.DEMON};
+    private static final Race[] RACES = {Race.HUMAN, Race.ELF, Race.DWARF, Race.MIGURD, Race.SUPERD, Race.BEAST, Race.DEMON};
     private static final String[] CLASSES = {"mage", "swordsman", "archer"};
     private static final int GOLD = 0xFFE8C86A, TEXT = 0xFFE6E2D8, DIM = 0xFF9C988E, PANEL = 0xC8101016, LINE = 0xFF6E5C34;
 
@@ -227,9 +227,15 @@ public class CharacterCreationScreen extends Screen {
                     }
                 }
             }
-            int top = 38, bottom = height - 80;
-            int size = Math.max(30, Math.min(90, (bottom - top) / 2 - 8));
-            InventoryScreen.renderEntityInInventoryFollowsMouse(g, cx - 60, top, cx + 60, bottom, size, 0.0625f, mouseX, mouseY, p);
+            // Caja amplia (el recorte de la caja cortaba la cabeza al mirar arriba) y tamano segun la escala de la raza.
+            int side = sideWidth();
+            int top = 34, bottom = height - 78, half = Math.max(60, width / 2 - side - 14);
+            float scale = Math.max(0.5f, p.getScale());
+            int size = (int) Math.max(24, Math.min(90, (bottom - top - 24) / (2.1f * scale)));
+            // La cabeza sigue al mouse pero sin pasarse (mirando muy arriba se metia adentro del cuerpo)
+            int midY = (top + bottom) / 2;
+            float my = Math.max(midY - 40, Math.min(midY + 40, mouseY));
+            InventoryScreen.renderEntityInInventoryFollowsMouse(g, cx - half, top, cx + half, bottom, size, 0.0625f, mouseX, my, p);
         } finally {
             inv.items.set(sel, main);
             inv.items.set(qs, quiverSlot);

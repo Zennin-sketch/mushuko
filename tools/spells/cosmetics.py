@@ -42,9 +42,9 @@ def chain(base, base_rot, segs, widths, thick, color, shade=None, inner=None, tw
 def elf_ears():
     ear = chain(base=(4.0, 0.0, 0.6), base_rot=(-20, -15, -62),
                 segs=[(1.6, 0, 0), (1.6, 0, 9), (1.5, 0, 11), (1.5, 0, 12), (1.2, 0, 10)],
-                widths=[2.9, 2.7, 2.2, 1.5, 0.8, 0.15], thick=[0.8, 0.75, 0.65, 0.55, 0.45, 0.3],
+                widths=[2.9, 2.7, 2.2, 1.5, 0.8, 0.15], thick=[1.05, 1.0, 0.85, 0.65, 0.45, 0.3],
                 color='skin', shade=[0.97, 1.0, 1.0, 0.98, 0.96, 0.95],
-                inner=dict(color='skin:0.74', width=0.5, rings=4), twitch=6, sway=0.8, lag=1.0)
+                inner=dict(color='skin:0.7', width=0.56, rings=5), twitch=6, sway=0.8, lag=1.0)
     return dict(name='Orejas de elfo', heights=[1.6, 2.6, 3.6], height_names=['Baja', 'Media', 'Alta'], boxes=[], chains=[ear])
 
 # ------------------------------------------------------------ Cuernos de demonio: en espiral (tipo carnero), como Kishirika

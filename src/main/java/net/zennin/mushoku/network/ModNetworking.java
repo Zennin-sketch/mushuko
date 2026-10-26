@@ -19,6 +19,7 @@ public final class ModNetworking {
     public static void init() {
         PayloadTypeRegistry.playS2C().register(ManaSyncPayload.TYPE, ManaSyncPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(MagicSyncPayload.TYPE, MagicSyncPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(ReadySpellPayload.TYPE, ReadySpellPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ActionPayload.TYPE, ActionPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(SwordSyncPayload.TYPE, SwordSyncPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(SwordActionPayload.TYPE, SwordActionPayload.CODEC);
@@ -108,7 +109,28 @@ public final class ModNetworking {
     public static void syncMagic(ServerPlayer player) {
         MagicData m = ModAttachments.magic(player);
         ServerPlayNetworking.send(player, new MagicSyncPayload(m.queued(), m.noElement(), m.water(), m.fire(), m.earth(), m.wind()));
+        broadcastReady(player, m.queued());
     }
+
+    private static final java.util.Map<java.util.UUID, String> LAST_READY = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /** Avisa a el y a los que lo ven que tiene un hechizo listo (para la pose y el hechizo flotando en la mano). */
+    private static void broadcastReady(ServerPlayer player, String spell) {
+        String prev = LAST_READY.put(player.getUUID(), spell);
+        if (spell.equals(prev)) return;
+        ReadySpellPayload pl = new ReadySpellPayload(player.getId(), spell);
+        ServerPlayNetworking.send(player, pl);
+        for (ServerPlayer other : net.fabricmc.fabric.api.networking.v1.PlayerLookup.tracking(player))
+            if (other != player) ServerPlayNetworking.send(other, pl);
+    }
+
+    /** Cuando alguien empieza a ver a este jugador, le manda su hechizo listo (si tiene). */
+    public static void sendReadyTo(ServerPlayer tracked, ServerPlayer viewer) {
+        String spell = ModAttachments.magic(tracked).queued();
+        if (!spell.isEmpty()) ServerPlayNetworking.send(viewer, new ReadySpellPayload(tracked.getId(), spell));
+    }
+
+    public static void forgetReady(ServerPlayer player) { LAST_READY.remove(player.getUUID()); }
 
     public static void openClassScreen(ServerPlayer player) {
         ServerPlayNetworking.send(player, new ActionPayload(ActionPayload.OPEN_CLASS_SCREEN));

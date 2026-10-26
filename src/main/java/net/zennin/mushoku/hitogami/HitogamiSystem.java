@@ -82,10 +82,19 @@ public final class HitogamiSystem {
             PENDING.put(h.getPlayer().getUUID(), 30);
             sendAppearance(h.getPlayer(), h.getPlayer());
         });
-        ServerPlayConnectionEvents.DISCONNECT.register((h, server) -> PROPHECY.remove(h.getPlayer().getUUID()));
-        ServerPlayerEvents.AFTER_RESPAWN.register((oldP, newP, alive) -> sendAppearance(newP, newP));
+        ServerPlayConnectionEvents.DISCONNECT.register((h, server) -> {
+            PROPHECY.remove(h.getPlayer().getUUID());
+            net.zennin.mushoku.network.ModNetworking.forgetReady(h.getPlayer());
+        });
+        ServerPlayerEvents.AFTER_RESPAWN.register((oldP, newP, alive) -> {
+            sendAppearance(newP, newP);
+            net.zennin.mushoku.network.ModNetworking.forgetReady(newP);
+        });
         EntityTrackingEvents.START_TRACKING.register((tracked, player) -> {
-            if (tracked instanceof ServerPlayer other) sendAppearance(other, player);
+            if (tracked instanceof ServerPlayer other) {
+                sendAppearance(other, player);
+                net.zennin.mushoku.network.ModNetworking.sendReadyTo(other, player);
+            }
         });
         // En el vacio no se recibe dano ni se ponen bloques
         ServerLivingEntityEvents.ALLOW_DAMAGE.register((e, src, amt) -> !(e instanceof ServerPlayer && VoidDimension.is(e.level())));

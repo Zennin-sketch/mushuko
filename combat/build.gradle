@@ -35,6 +35,8 @@ dependencies {
     // Bendy-lib (MIT): dobla codos, rodillas y cintura sin dejar huecos. Player Animator la usa pero no la trae;
     // sin ella las articulaciones quedan rectas. Va dentro del .jar del addon (misma version que usa Player Animator 2.0.4).
     include("io.github.kosmx.bendy-lib:bendy-lib-fabric:5.1") { transitive = false }
+    modCompileOnly("io.github.kosmx.bendy-lib:bendy-lib-fabric:5.1") { transitive = false }
+    // 3D Skin Layers: solo su API para doblar la capa 3D (copia minima en src/stubs, no va en el .jar).
 }
 
 processResources {

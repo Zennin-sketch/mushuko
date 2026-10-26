@@ -111,6 +111,8 @@ const INFO = {
   fire_burst: { el: 'Fuego', note: 'Explosion y el impacto de Exodus Flame: cubos de fuego que se expanden, fragmentos que salen volando y humo que sube.' },
   water_wall: { el: 'Agua', note: 'Water Shield: en vez del muro de hielo, una cortina de agua de 3×2 bloques que sube del suelo, con olas, espuma arriba y agua cayendo. Sigue frenando golpes (bloques invisibles detrás).' },
   magic_shield: { el: 'Neutral', note: 'Círculo rúnico dorado a tus pies y tres anillos celestes que te rodean girando mientras dura el escudo (15 s). Te sigue al moverte.' },
+  fireball_form: { el: 'Fuego · en la mano', note: 'Al quedar lista para lanzar, la bola de fuego se forma delante de la mano: brasas que llegan desde alrededor, chispas que entran girando en espiral y el núcleo que crece capa por capa hasta quedar igual a la bola. Después queda flotando, apuntando a donde mirás.' },
+  water_ball_form: { el: 'Agua · en la mano', note: 'Gotas que se juntan desde todos lados, las cintas de agua que se cierran girando y la esfera que se llena desde adentro hasta quedar igual a la bola de agua. Después queda flotando delante de la mano.' },
 };
 
 const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('c'), antialias: true });
@@ -363,17 +365,29 @@ function chainQuads(c, side, t, hurt) {
   const R = [];
   for (let i = 0; i <= n; i++) R.push(i === 0 ? frames[0] : i === n ? frames[n - 1] : frames[i - 1].clone().slerp(frames[i], 0.5));
   const quads = [];
-  const ring = (i, w2, t2, off) => [[-1,-1],[1,-1],[1,1],[-1,1]].map(([sx, sz]) =>
-      { const v = P[i].clone().add(new THREE.Vector3(sx * w2 / 2, 0, sz * t2 / 2 + off).applyQuaternion(R[i])); if (side === 1) v.x = -v.x; return v; });
-  const loft = (count, wf, tf, off, color, shade) => {
-    const rings = []; for (let i = 0; i < count; i++) rings.push(ring(i, wf(i), tf(i), off(i)));
+  const ring = (i, w2, t2, off, xo) => [[-1,-1],[1,-1],[1,1],[-1,1]].map(([sx, sz]) =>
+      { const v = P[i].clone().add(new THREE.Vector3(sx * w2 / 2 + xo, 0, sz * t2 / 2 + off).applyQuaternion(R[i])); if (side === 1) v.x = -v.x; return v; });
+  const loft = (from, to, wf, tf, off, xo, color, shade) => {
+    const count = to - from; if (count < 2) return;
+    const rings = []; for (let j = 0; j < count; j++) rings.push(ring(from + j, wf(from + j), tf(from + j), off(from + j), xo(from + j)));
     for (let i = 0; i < count - 1; i++) for (let e = 0; e < 4; e++)
-      quads.push({ p: [rings[i][e], rings[i][(e+1)%4], rings[i+1][(e+1)%4], rings[i+1][e]], color, mul: (shade(i) + shade(i+1)) / 2 });
-    quads.push({ p: [...rings[0]].reverse(), color, mul: shade(0) });
-    quads.push({ p: rings[count - 1], color, mul: shade(count - 1) });
+      quads.push({ p: [rings[i][e], rings[i][(e+1)%4], rings[i+1][(e+1)%4], rings[i+1][e]], color, mul: (shade(from + i) + shade(from + i + 1)) / 2 });
+    quads.push({ p: [...rings[0]].reverse(), color, mul: shade(from) });
+    quads.push({ p: rings[count - 1], color, mul: shade(to - 1) });
   };
-  loft(n + 1, i => c.widths[i], i => c.thick[i], () => 0, c.color, i => c.shade[i]);
-  if (c.inner) loft(Math.min(n + 1, c.inner.rings), i => c.widths[i] * c.inner.width, () => 0.12, i => c.thick[i] / 2 + 0.06, c.inner.color, () => 1);
+  const zero = () => 0;
+  if (!c.inner) { loft(0, n + 1, i => c.widths[i], i => c.thick[i], zero, zero, c.color, i => c.shade[i]); return quads; }
+  // Oreja con hueco (igual que CosmeticChain.java): bordes a todo el grosor, pared de atras fina y fondo de otro color
+  const cnt = Math.max(2, Math.min(n + 1, c.inner.rings));
+  const k = i => i < cnt - 1 ? 1 : 0;
+  const hw = i => c.widths[i] * c.inner.width * k(i), depth = i => c.thick[i] * 0.55 * k(i);
+  const rimW = i => (c.widths[i] - hw(i)) / 2, rimX = i => c.widths[i] / 2 - rimW(i) / 2;
+  const sh = i => c.shade[i];
+  loft(0, cnt, rimW, i => c.thick[i], zero, rimX, c.color, sh);
+  loft(0, cnt, rimW, i => c.thick[i], zero, i => -rimX(i), c.color, sh);
+  loft(0, cnt, i => c.widths[i], i => c.thick[i] - depth(i), i => -depth(i) / 2, zero, c.color, sh);
+  loft(0, cnt, i => Math.max(0.001, hw(i)), () => 0.04, i => c.thick[i] / 2 - depth(i) + 0.03, zero, c.inner.color, () => 1);
+  loft(cnt - 1, n + 1, i => c.widths[i], i => c.thick[i], zero, zero, c.color, sh);
   return quads;
 }
 function updateCosChains(t) {

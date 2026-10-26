@@ -34,17 +34,25 @@ public class MushokuClient implements ClientModInitializer {
                 context.client().setScreen(new HitogamiDialogScreen(payload.mode(), payload.text())));
         ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.AppearancePayload.TYPE, (payload, context) ->
                 ClientAppearance.set(payload.entityId(), new net.zennin.mushoku.race.Appearance(payload.kind(), payload.variant(), payload.height(), payload.color())));
-        net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((h, c) -> ClientAppearance.clear());
+        net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((h, c) -> {
+            ClientAppearance.clear();
+            ClientReadySpell.clear();
+        });
+        // Hechizo listo: pose de apuntar con la mano y el hechizo flotando delante (ver SpellHandLayer)
+        ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.ReadySpellPayload.TYPE, (payload, context) ->
+                ClientReadySpell.set(payload.entityId(), payload.spell()));
+        net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents.AFTER_ENTITIES.register(SpellHandLayer::renderFirstPerson);
         net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback.EVENT.register((type, renderer, helper, ctx) -> {
             if (renderer instanceof net.minecraft.client.renderer.entity.player.PlayerRenderer pr) {
                 helper.register(new CosmeticLayer(pr));
                 helper.register(new QuiverLayer(pr));
+                helper.register(new SpellHandLayer(pr));
             }
         });
         net.fabricmc.fabric.api.resource.ResourceManagerHelper.get(net.minecraft.server.packs.PackType.CLIENT_RESOURCES).registerReloadListener(
                 new net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener() {
                     @Override public net.minecraft.resources.ResourceLocation getFabricId() { return net.zennin.mushoku.MushokuMod.id("spell_models"); }
-                    @Override public void onResourceManagerReload(net.minecraft.server.packs.resources.ResourceManager manager) { SpellModel.clearCache(); CosmeticModel.clearCache(); }
+                    @Override public void onResourceManagerReload(net.minecraft.server.packs.resources.ResourceManager manager) { SpellModel.clearCache(); CosmeticModel.clearCache(); ClientReadySpell.reload(); }
                 });
         EntityRendererRegistry.register(ModEntities.THROWN_ITEM, net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.PartySyncPayload.TYPE, (payload, context) -> ClientPartyState.set(payload));

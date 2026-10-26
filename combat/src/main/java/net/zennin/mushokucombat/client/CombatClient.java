@@ -29,6 +29,7 @@ public final class CombatClient implements ClientModInitializer {
     public void onInitializeClient() {
         CombatAnimations.init();
         ClientSheath.init();
+        net.zennin.mushokucombat.client.compat.SkinLayersCompat.init();
         ClientPlayNetworking.registerGlobalReceiver(SheathStatePayload.TYPE, (payload, ctx) ->
                 ctx.client().execute(() -> ClientSheath.receive(ctx.client(), payload.entity(), payload.state())));
 

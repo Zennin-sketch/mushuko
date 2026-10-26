@@ -100,25 +100,56 @@ public final class CosmeticChain {
         Quaternionf[] R = new Quaternionf[n + 1];
         for (int i = 0; i <= n; i++)
             R[i] = i == 0 ? frames[0] : i == n ? frames[n - 1] : new Quaternionf(frames[i - 1]).slerp(frames[i], 0.5f);
-        loft(out, side, P, R, n + 1, widths, thick, null, 0, source, rgb, colorMul, shade);
-        if (hasInner) {
-            int cnt = Math.min(n + 1, innerRings);
-            float[] iw = new float[cnt], it = new float[cnt], off = new float[cnt], sh = new float[cnt];
-            for (int i = 0; i < cnt; i++) { iw[i] = widths[i] * innerWidth; it[i] = 0.12f; off[i] = thick[i] / 2 + 0.06f; sh[i] = 1; }
-            loft(out, side, P, R, cnt, iw, it, off, 0, innerSource, innerRgb, innerMul, sh);
+        if (!hasInner) {
+            loft(out, side, P, R, 0, n + 1, widths, thick, null, null, source, rgb, colorMul, shade);
+            return;
         }
+        // Oreja con hueco: en las primeras uniones la cara de adelante es una concavidad (dos bordes a todo el
+        // grosor, una pared de atras mas fina y el fondo del otro color); despues sigue maciza.
+        int cnt = Math.max(2, Math.min(n + 1, innerRings));
+        float[] rimW = new float[n + 1], rimX = new float[n + 1], backT = new float[n + 1], backZ = new float[n + 1],
+                floorW = new float[n + 1], floorT = new float[n + 1], floorZ = new float[n + 1], ones = new float[n + 1];
+        for (int i = 0; i <= n; i++) {
+            float w = widths[i], th = thick[i];
+            // el hueco se cierra en la ultima union (punta del hueco) para que no quede un corte
+            float k = i < cnt - 1 ? 1f : 0f;
+            float hw = w * innerWidth * k;
+            float depth = th * 0.55f * k;
+            rimW[i] = (w - hw) / 2;
+            rimX[i] = w / 2 - rimW[i] / 2;
+            backT[i] = th - depth;
+            backZ[i] = -depth / 2;
+            floorW[i] = Math.max(0.001f, hw);
+            floorT[i] = 0.04f;
+            floorZ[i] = th / 2 - depth + 0.03f;
+            ones[i] = 1;
+        }
+        float[] negX = new float[n + 1];
+        for (int i = 0; i <= n; i++) negX[i] = -rimX[i];
+        loft(out, side, P, R, 0, cnt, rimW, thick, null, rimX, source, rgb, colorMul, shade);
+        loft(out, side, P, R, 0, cnt, rimW, thick, null, negX, source, rgb, colorMul, shade);
+        loft(out, side, P, R, 0, cnt, widths, backT, backZ, null, source, rgb, colorMul, shade);
+        loft(out, side, P, R, 0, cnt, floorW, floorT, floorZ, null, innerSource, innerRgb, innerMul, ones);
+        loft(out, side, P, R, cnt - 1, n + 1, widths, thick, null, null, source, rgb, colorMul, shade);
     }
 
     private static final int[][] CORNERS = {{-1, -1}, {1, -1}, {1, 1}, {-1, 1}};
 
-    private static void loft(List<Quad> out, int side, Vector3f[] P, Quaternionf[] R, int count, float[] w, float[] th, float[] off,
-                             int unused, int source, int rgb, float mul, float[] shade) {
+    /** Tubo de seccion rectangular por las uniones from..to-1 (ancho w, grosor th, corrimiento en z 'off' y en x 'xoff'). */
+    private static void loft(List<Quad> out, int side, Vector3f[] P, Quaternionf[] R, int from, int to, float[] w, float[] th, float[] off,
+                             float[] xoff, int source, int rgb, float mul, float[] shadeAll) {
+        int count = to - from;
+        if (count < 2) return;
+        float[] shade = new float[count];
         Vector3f[][] rings = new Vector3f[count][4];
-        for (int i = 0; i < count; i++) {
+        for (int j = 0; j < count; j++) {
+            int i = from + j;
+            shade[j] = shadeAll[i];
             for (int e = 0; e < 4; e++) {
-                Vector3f v = new Vector3f(CORNERS[e][0] * w[i] / 2, 0, CORNERS[e][1] * th[i] / 2 + (off != null ? off[i] : 0)).rotate(R[i]).add(P[i]);
+                Vector3f v = new Vector3f(CORNERS[e][0] * w[i] / 2 + (xoff != null ? xoff[i] : 0), 0,
+                        CORNERS[e][1] * th[i] / 2 + (off != null ? off[i] : 0)).rotate(R[i]).add(P[i]);
                 if (side == 1) v.x = -v.x;
-                rings[i][e] = v;
+                rings[j][e] = v;
             }
         }
         Vector3f[] centers = new Vector3f[count];
