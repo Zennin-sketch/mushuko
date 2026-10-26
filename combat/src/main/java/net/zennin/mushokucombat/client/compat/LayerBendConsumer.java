@@ -35,6 +35,8 @@ public final class LayerBendConsumer implements VertexConsumer {
     private final Vector3f axis;
     private final IBendable.Plane base, other;
     private final Matrix3f lastRot = new Matrix3f();
+    private int vlog = -1;
+    private static int VLOGS;
 
     private LayerBendConsumer(VertexConsumer out, PoseStack.Pose p, BendableCuboid b) {
         this.out = out;
@@ -72,7 +74,9 @@ public final class LayerBendConsumer implements VertexConsumer {
                         System.identityHashCode(part), src != part, b.getBend(), b.getBendAxis(), b.getBendDirection(), b.getBendX(), b.getBendY(), b.getBendZ(),
                         b.bendHeight(), b.getBasePlane(), b.getOtherSidePlane(), pm, ownBend(part));
             }
-            return new LayerBendConsumer(vc, pose, b);
+            LayerBendConsumer lc = new LayerBendConsumer(vc, pose, b);
+            if (Boolean.getBoolean("mushoku.layerdebug") && Math.abs(b.getBend()) > 1f && VLOGS < 4) { VLOGS++; lc.vlog = 0; }
+            return lc;
         } catch (Throwable t) {
             return null;
         }
@@ -102,7 +106,10 @@ public final class LayerBendConsumer implements VertexConsumer {
             v = new Vector4f(p, 1f);
             lastRot.identity();
         }
-        Vector4f o = pose.transform(v);
+        Vector4f o = pose.transform(new Vector4f(v));
+        if (vlog >= 0 && vlog < 400 && (vlog++ % 8) == 0)
+            org.slf4j.LoggerFactory.getLogger("mushoku_combat").info("[capas] v in=({},{},{}) local=({},{},{}) w={} out=({},{},{}) c=({},{},{}) val={} axis={}",
+                    x, y, z, p.x * 16, p.y * 16, p.z * 16, w, o.x, o.y, o.z, cx * 16, cy * 16, cz * 16, value, axis);
         out.addVertex(o.x, o.y, o.z);
         return this;
     }
