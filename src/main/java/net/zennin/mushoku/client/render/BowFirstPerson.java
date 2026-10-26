@@ -24,7 +24,7 @@ import org.joml.Vector3f;
  */
 public final class BowFirstPerson {
     /** Escala del arco en primera persona. */
-    private static final float S = 0.7f;
+    private static final float S = 0.55f;
     private static final Vector3f FWD = new Vector3f(0.13f, 0.05f, -1f).normalize();
     private static final Vector3f UP;
     static {
@@ -32,10 +32,10 @@ public final class BowFirstPerson {
         Vector3f u = new Vector3f((float) Math.sin(Math.toRadians(50)), (float) Math.cos(Math.toRadians(50)), 0);
         UP = u.sub(new Vector3f(FWD).mul(u.dot(FWD))).normalize();
     }
-    private static final Vector3f L_IDLE = new Vector3f(-0.21f, -0.31f, -0.56f), L_AIM = new Vector3f(-0.12f, -0.17f, -0.62f);
-    private static final Vector3f R_IDLE = new Vector3f(0.22f, -0.5f, -0.42f), R_QUIVER = new Vector3f(0.42f, 0.16f, 0.25f);
+    private static final Vector3f L_IDLE = new Vector3f(-0.13f, -0.27f, -0.72f), L_AIM = new Vector3f(-0.07f, -0.15f, -0.74f);
+    private static final Vector3f R_IDLE = new Vector3f(0.19f, -0.42f, -0.5f), R_QUIVER = new Vector3f(0.42f, 0.16f, 0.25f);
     private static final Vector3f R_FLING = new Vector3f(0.34f, -0.16f, 0.02f);
-    private static final Vector3f SH_L = new Vector3f(-0.42f, -0.95f, 0.18f), SH_R = new Vector3f(0.44f, -0.95f, 0.18f);
+    private static final Vector3f SH_L = new Vector3f(-0.38f, -0.9f, 0.05f), SH_R = new Vector3f(0.42f, -0.9f, 0.05f);
 
     private static boolean wasDrawing;
     private static float releaseAt = -1000;
