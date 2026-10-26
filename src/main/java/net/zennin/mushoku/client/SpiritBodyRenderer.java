@@ -32,7 +32,7 @@ public class SpiritBodyRenderer extends HumanoidMobRenderer<SpiritBodyEntity, Pl
             var conn = Minecraft.getInstance().getConnection();
             PlayerInfo info = conn == null ? null : conn.getPlayerInfo(id);
             return info != null ? info.getSkin() : DefaultPlayerSkin.get(id);
-        }).orElse(DefaultPlayerSkin.getDefaultSkin());
+        }).orElse(DefaultPlayerSkin.get(new java.util.UUID(0L, 0L)));
     }
 
     @Override
