@@ -536,8 +536,10 @@ function equip(id) {
   const slot = rig.parts.rightArm.item.slot;
   slot.clear();
   for (const c of Object.values(rig.sheaths)) c.slot.clear();
+  modBowStyle = null;
   if (!id) return;
   const w = DATA.weapons[id];
+  if (w.kind === 'modbow') { modBowStyle = w.style; const sel = document.getElementById('weapon'); if (sel.value !== id) sel.value = id; return; }
   const sheath = w.family && DATA.families[w.family] ? rig.sheaths[DATA.families[w.family].slot] : null;
   const disp = Object.keys(w.display || {}).length ? w.display : (w.kind === 'block' && !w.elements.length ? HANDHELD : {});
   const tr = disp.translation || [0, 0, 0], ro = disp.rotation || [0, 0, 0], s = disp.scale || [1, 1, 1];
@@ -548,6 +550,103 @@ function equip(id) {
   slot.add(dg);
   if (sheath) sheath.slot.add(dg.clone(true));
   const sel = document.getElementById('weapon'); if (sel.value !== id) sel.value = id;
+}
+
+
+/* ---------------------------------------------------------------- arcos del mod (mismo dibujo que BowRender.java) */
+const BOW_STYLES = {
+  hunter_bow: { riser: 3.2, limb: 9.6, w0: 1.55, w1: 0.7, t0: 1.15, t1: 0.6, base: 0.16, curve: 0.36, recurve: 0, bend: 0.55, riserC: 0x6B4A2B, limbC: 0x8C6239, tipC: 0x5E3F22, gripC: 0x3E2A1C, stringC: 0xE8E0C8, accent: 0x2C1E14, deco: 'hunter' },
+  elven_bow: { riser: 3.4, limb: 11.5, w0: 1.25, w1: 0.5, t0: 0.95, t1: 0.45, base: 0.06, curve: 0.22, recurve: 0.95, bend: 0.55, riserC: 0xD9CFA8, limbC: 0xEDE6CC, tipC: 0xC9B67A, gripC: 0x3F6B3A, stringC: 0xF4F1E2, accent: 0xD9B45A, deco: 'elven' },
+  beast_bow: { riser: 3.6, limb: 9.0, w0: 1.9, w1: 0.8, t0: 1.45, t1: 0.7, base: 0.24, curve: 0.5, recurve: 1.15, bend: 0.5, riserC: 0x6E5236, limbC: 0xE9DFC6, tipC: 0x8E7E62, gripC: 0x7A5A3C, stringC: 0xD8CBB0, accent: 0x4A3A2A, deco: 'beast' },
+  mana_bow: { riser: 3.4, limb: 10.5, w0: 1.4, w1: 0.55, t0: 1.0, t1: 0.5, base: 0.1, curve: 0.3, recurve: 0.7, bend: 0.55, riserC: 0x2B3550, limbC: 0x5CB2F6, tipC: 0xB8E4FF, gripC: 0x1C2338, stringC: 0x9FE6FF, accent: 0x7FD8FF, deco: 'mana' },
+  demon_bow: { riser: 3.6, limb: 10.5, w0: 1.6, w1: 0.6, t0: 1.15, t1: 0.55, base: 0.16, curve: 0.35, recurve: 1.05, bend: 0.55, riserC: 0x241A1E, limbC: 0x1E1418, tipC: 0x8E1B1B, gripC: 0x3A1414, stringC: 0xB02A2A, accent: 0xD23A2A, deco: 'demon' },
+};
+const BRACE = 3.2, DRAWLEN = 10.5;
+let modBowStyle = null;
+const bowMats = {};
+const bowMat = c => bowMats[c] || (bowMats[c] = new THREE.MeshLambertMaterial({ color: c }));
+const unitBox = new THREE.BoxGeometry(1, 1, 1);
+const shadeC = (c, k) => (Math.min(255, Math.round(((c >> 16) & 255) * k)) << 16) | (Math.min(255, Math.round(((c >> 8) & 255) * k)) << 8) | Math.min(255, Math.round((c & 255) * k));
+const mixC = (a, b, t) => (Math.round(((a >> 16) & 255) * (1 - t) + ((b >> 16) & 255) * t) << 16) | (Math.round(((a >> 8) & 255) * (1 - t) + ((b >> 8) & 255) * t) << 8) | Math.round((a & 255) * (1 - t) + (b & 255) * t);
+function bBox(g, x0, y0, z0, x1, y1, z1, c) {
+  const m = new THREE.Mesh(unitBox, bowMat(c)); m.scale.set(x1 - x0, y1 - y0, z1 - z0); m.position.set((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2); g.add(m);
+}
+function bBar(g, a, b, side, w, t, c) {
+  const d = b.clone().sub(a), len = d.length(); if (len < 1e-4) return; d.divideScalar(len);
+  const x = side.clone().sub(d.clone().multiplyScalar(side.dot(d))); if (x.lengthSq() < 1e-6) x.set(1, 0, 0); x.normalize();
+  const z = x.clone().cross(d).normalize();
+  const m = new THREE.Mesh(unitBox, bowMat(c)); m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(x, d, z));
+  m.scale.set(w, len, t); m.position.copy(a.clone().add(b).multiplyScalar(0.5)); g.add(m);
+}
+function bowLimb(st, sgn, pull) {
+  const n = 12, pts = [], p = new THREE.Vector3(0.1, sgn * (st.riser + 0.3), 0); pts.push(p.clone());
+  const seg = st.limb / n;
+  for (let i = 0; i < n; i++) {
+    const t = (i + 0.5) / n; let th = st.base + st.curve * t + pull * st.bend * (0.35 + 0.9 * t);
+    if (st.recurve > 0 && t > 0.7) th -= st.recurve * (1 + pull * 0.3) * ((t - 0.7) / 0.3);
+    p.add(new THREE.Vector3(-Math.sin(th) * seg, sgn * Math.cos(th) * seg, 0)); pts.push(p.clone());
+  }
+  return pts;
+}
+function bowArrow(g, nock, dir, len) {
+  const at = t => dir.clone().multiplyScalar(t).add(nock), side = new THREE.Vector3(0, 0, 1);
+  bBar(g, at(0.35), at(len - 2.4), side, 0.42, 0.42, 0x9A7448);
+  [1.25, 0.85, 0.42].forEach((w, i) => bBar(g, at(len - 2.6 + i * 0.85), at(len - 2.6 + (i + 1) * 0.85), side, w, 0.32, 0x8E8E8E));
+  for (let k = 0; k < 3; k++) {
+    const a = (90 + k * 120) * D, r = new THREE.Vector3(0, Math.cos(a), Math.sin(a)), off = r.clone().multiplyScalar(0.62);
+    bBar(g, at(0.7).add(off), at(3.9).add(off), r, 1.05, 0.12, 0xF2F2F2);
+  }
+}
+function drawModBow(g, st, back, arrow) {
+  const pull = Math.max(0, Math.min(1, (back - BRACE) / DRAWLEN)), side = new THREE.Vector3(0, 0, 1), rh = st.riser;
+  bBox(g, -0.8, -rh, -0.75, 1.0, rh, 0.75, st.riserC);
+  for (let i = 0; i < 3; i++) { const y0 = -1.9 + i * 1.3; bBox(g, -1.0, y0, -0.95, 1.2, y0 + 1.15, 0.95, shadeC(st.gripC, i === 1 ? 1.08 : 0.96)); }
+  const top = bowLimb(st, 1, pull), bot = bowLimb(st, -1, pull);
+  for (const pts of [top, bot]) {
+    const n = pts.length - 1;
+    for (let i = 0; i < n; i++) {
+      const t = (i + 0.5) / n;
+      bBar(g, pts[i], pts[i + 1], side, st.w0 + (st.w1 - st.w0) * t, st.t0 + (st.t1 - st.t0) * t, shadeC(mixC(st.limbC, st.tipC, Math.pow(t, 1.6)), i % 2 ? 0.94 : 1));
+    }
+  }
+  const nock = new THREE.Vector3(-back, 0, 0);
+  bBar(g, top[top.length - 1], nock, side, 0.24, 0.24, st.stringC);
+  bBar(g, nock, bot[bot.length - 1], side, 0.24, 0.24, st.stringC);
+  if (arrow) bowArrow(g, nock, new THREE.Vector3(1, 0.012, 0), 17);
+}
+let bowRig = null;
+function ensureBowRig() {
+  if (bowRig) return bowRig;
+  const L = new THREE.Group(); L.position.y = -4; rig.parts.leftArm.item.bend.add(L);
+  const frame = new THREE.Group(); frame.position.set(1, 10, 0); L.add(frame);
+  frame.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, -1), new THREE.Vector3(-1, 0, 0)));
+  const aim = new THREE.Group(); frame.add(aim);
+  const body = new THREE.Group(); aim.add(body);
+  const R = new THREE.Group(); R.position.y = -4; rig.parts.rightArm.item.bend.add(R);
+  const hand = new THREE.Object3D(); hand.position.set(-1, 10.5, 0); R.add(hand);
+  bowRig = { frame, aim, body, hand };
+  return bowRig;
+}
+function updateModBow() {
+  const b = ensureBowRig();
+  b.body.children.slice().forEach(c => b.body.remove(c));
+  b.frame.visible = !!modBowStyle;
+  if (!modBowStyle) return;
+  rig.root.updateMatrixWorld(true);
+  b.aim.quaternion.identity(); b.aim.updateMatrixWorld(true);
+  const hw = b.hand.getWorldPosition(new THREE.Vector3());
+  const loc = b.aim.worldToLocal(hw.clone());
+  let back = BRACE, arrow = false;
+  const name = selected || '';
+  const tracking = loc.x < -1.5 && loc.x > -16 && Math.hypot(loc.y, loc.z) < 5 &&
+    (name.startsWith('bow_draw') || name.startsWith('archer_') || name === 'bow_load' || name === 'bow_release');
+  if (tracking) {
+    const dir = loc.clone().negate().normalize();
+    b.aim.quaternion.setFromUnitVectors(new THREE.Vector3(1, 0, 0), dir);
+    back = Math.max(BRACE, Math.min(BRACE + DRAWLEN, loc.length()));
+    arrow = true;
+  }
+  drawModBow(b.body, BOW_STYLES[modBowStyle], back, arrow);
 }
 
 /* ---------------------------------------------------------------- aplicar la animacion */
@@ -745,6 +844,7 @@ function frame(now) {
   }
   if (fade && fade.prev) fade.prev.delta = player ? player.delta : 0;
   apply(player);
+  updateModBow();
   drawTimeline();
   controls.update(); renderer.render(scene, camera);
   requestAnimationFrame(frame);

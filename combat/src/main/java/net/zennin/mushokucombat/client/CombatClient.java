@@ -29,6 +29,16 @@ public final class CombatClient implements ClientModInitializer {
     public void onInitializeClient() {
         CombatAnimations.init();
         // con el arma guardada (modo combate apagado) el arco del mod tampoco se dibuja en la otra mano
+        net.zennin.mushoku.client.render.BowRender.armBend = (p, arm, pose) -> {
+            if (!(p instanceof dev.kosmx.playerAnim.impl.IAnimatedPlayer ap) || !ap.playerAnimator_getAnimation().isActive()) return;
+            dev.kosmx.playerAnim.core.util.Vec3f d = ap.playerAnimator_getAnimation().get3DTransform(
+                    arm == net.minecraft.world.entity.HumanoidArm.LEFT ? "leftArm" : "rightArm", dev.kosmx.playerAnim.api.TransformType.BEND,
+                    new dev.kosmx.playerAnim.core.util.Vec3f(0f, 0f, 0f));
+            float axisf = -d.getX(), bend = d.getY();
+            pose.translate(0, 0.25f, 0);
+            pose.mulPose(new org.joml.Quaternionf().rotateAxis(bend, new org.joml.Vector3f((float) Math.cos(axisf), 0, (float) Math.sin(axisf))));
+            pose.translate(0, -0.25f, 0);
+        };
         net.zennin.mushoku.client.render.BowRender.hidden = p -> p instanceof AbstractClientPlayer cp && !ClientSheath.handVisible(cp);
         ClientSheath.init();
         net.zennin.mushokucombat.client.compat.SkinLayersCompat.init();

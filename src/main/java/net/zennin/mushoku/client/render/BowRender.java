@@ -28,6 +28,10 @@ public final class BowRender {
     /** El addon de combate lo usa para no dibujar el arco mientras esta guardado. */
     public static java.util.function.Predicate<Player> hidden = p -> false;
 
+    /** Doblez del codo de la animacion (Player Animator): lo pone el addon. Se aplica despues de translateToHand. */
+    public interface ArmBend { void apply(Player p, HumanoidArm arm, PoseStack pose); }
+    public static ArmBend armBend = (p, arm, pose) -> {};
+
     /** Forma y colores de cada arco. */
     public record Style(float riser, float limb, float w0, float w1, float t0, float t1, float base, float curve, float recurve,
                         float bend, int riserC, int limbC, int tipC, int gripC, int stringC, boolean glowString, int accent, String deco) {}
@@ -60,12 +64,14 @@ public final class BowRender {
         if (drawing) {
             pose.pushPose();
             model.translateToHand(drawArm, pose);
+            armBend.apply(p, drawArm, pose);
             pose.translate((drawArm == HumanoidArm.LEFT ? 1 : -1) / 16f, 10.5f / 16f, 0);
             hand = pose.last().pose().transform(new Vector4f(0, 0, 0, 1));
             pose.popPose();
         }
         pose.pushPose();
         model.translateToHand(bowArm, pose);
+        armBend.apply(p, bowArm, pose);
         boolean left = bowArm == HumanoidArm.LEFT;
         pose.translate((left ? 1 : -1) / 16f, 10f / 16f, 0);
         // flecha a lo largo del brazo, palas "hacia arriba" del brazo estirado
