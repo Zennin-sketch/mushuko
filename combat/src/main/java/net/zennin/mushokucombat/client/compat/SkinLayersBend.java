@@ -25,10 +25,21 @@ import java.util.Optional;
 final class SkinLayersBend {
     private SkinLayersBend() {}
 
+    private static final boolean DEBUG = Boolean.getBoolean("mushoku.debuglayers");
+    private static int calls;
+
     static void install() {
         // 1) Cada malla 3D se dobla igual que la parte del cuerpo que cubre (mismo calculo que bendy-lib).
         SkinLayersAPI.setupMeshTransformerProvider(part -> {
             BendableCuboid b = activeBend(part);
+            if (DEBUG && (++calls % 97) == 0) {
+                Optional<MutableCuboid> c = part == null ? Optional.empty() : ModelPartAccessor.optionalGetCuboid(part, 0);
+                org.slf4j.LoggerFactory.getLogger("mushoku_combat").info("[capas] parte={} cubo={} mutador={} doblez={}",
+                        part == null ? "null" : Integer.toHexString(System.identityHashCode(part)),
+                        c.map(x -> x.getClass().getSimpleName()).orElse("-"),
+                        c.map(x -> String.valueOf(x.getActiveMutator() == null ? null : x.getActiveMutator().getA() + "/" + x.getActiveMutator().getB().getClass().getSimpleName())).orElse("-"),
+                        b == null ? "-" : b.getBend());
+            }
             if (b == null || Math.abs(b.getBend()) < 1.0e-4f) return Noop.INSTANCE;
             return new Bender(b);
         });

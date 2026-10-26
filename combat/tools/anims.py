@@ -440,17 +440,19 @@ def sheathe_back():
 # El arco en la mano: con el brazo hacia adelante, 'adelante' de la mano = la flecha apunta al frente y el arco queda
 # vertical (con (0, 1, 0) el modelo quedaba acostado con la flecha hacia arriba).
 BOW_HOLD = (0, 0.05, 1)
-BOW_DRAWN = P(root(up=-0.02, turn=-18), torso(turn=-22, lean=1), head(yaw=20, down=0),
+# El modelo del arco queda acostado con el brazo adelante: se gira 90 grados sobre el eje de la flecha (vertical).
+BOW_ROLL = item(roll=90)
+BOW_DRAWN = P(BOW_ROLL, root(up=-0.02, turn=-18), torso(turn=-22, lean=1), head(yaw=20, down=0),
               dict(rarm=R((3, -1.5, 10), BOW_HOLD), larm=L((-1.5, 1, 2.5), (0, 0.2, 1))),
               dict(rleg=((0.16, -0.97, 0.22), 8), lleg=((-0.16, -0.97, -0.24), 6)))
 
 def bow():
     x = anim('bow_draw', 'Arco: sacar flecha del carcaj, colocarla, tensar y apuntar (loop)', end=22, loop=True, ret=13,
              stop=100000, lag=('head',))
-    x.key(0, 'smooth', **P(NEUTRAL_P, dict(rarm=R((4, -6, 7), (0, -0.4, 1)))))
-    x.key(4, 'smooth', **P(torso(turn=8), head(yaw=-16, down=-2),
+    x.key(0, 'smooth', **P(NEUTRAL_P, BOW_ROLL, dict(rarm=R((4, -6, 7), (0, -0.4, 1)))))
+    x.key(4, 'smooth', **P(BOW_ROLL, torso(turn=8), head(yaw=-16, down=-2),
                            dict(rarm=R((4, -4, 8), (0, -0.2, 1)), larm=L((3, 1, -3.5), (0, 1, 0)))))
-    x.key(8, 'smooth', **P(root(turn=-8), torso(turn=-10), head(yaw=8),
+    x.key(8, 'smooth', **P(BOW_ROLL, root(turn=-8), torso(turn=-10), head(yaw=8),
                            dict(rarm=R((3, -2, 10), BOW_HOLD), larm=L((2.2, -2, 8.5), (0, 0.3, 1)))))
     x.key(13, 'stop', **BOW_DRAWN)
     x.key(18, 'smooth', **P(BOW_DRAWN, dict(larm=L((-1.7, 1.1, 2.3), (0, 0.2, 1)))))

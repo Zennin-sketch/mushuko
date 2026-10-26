@@ -54,7 +54,7 @@ jobs:
         if: always()
         run: |
           mkdir -p /tmp/res && cp mc/screenshots/*.png /tmp/res/ 2>/dev/null || true
-          grep -E "visualtest|Exception|ERROR|Caused by|at net.zennin|skinlayers|Compatibilidad" mc/logs/latest.log | head -300 > /tmp/res/log.txt || true
+          grep -E "visualtest|Exception|ERROR|Caused by|at net.zennin|skinlayers|Compatibilidad|capas" mc/logs/latest.log | head -300 > /tmp/res/log.txt || true
           cd /tmp/res
           git init -q && git checkout -q -b vt-${{ inputs.tag }}
           git config user.name "visualtest" && git config user.email "visualtest@users.noreply.github.com"
