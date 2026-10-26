@@ -441,7 +441,8 @@ def sheathe_back():
 # vertical (con (0, 1, 0) el modelo quedaba acostado con la flecha hacia arriba).
 BOW_HOLD = (0, 0.05, 1)
 # El modelo del arco queda acostado con el brazo adelante: se gira 90 grados sobre el eje de la flecha (vertical).
-BOW_ROLL = item(roll=90)
+import os as _os
+BOW_ROLL = item(*[float(v) for v in _os.environ.get('BOWROT', '-90,0,90').split(',')])
 BOW_DRAWN = P(BOW_ROLL, root(up=-0.02, turn=-18), torso(turn=-22, lean=1), head(yaw=20, down=0),
               dict(rarm=R((3, -1.5, 10), BOW_HOLD), larm=L((-1.5, 1, 2.5), (0, 0.2, 1))),
               dict(rleg=((0.16, -0.97, 0.22), 8), lleg=((-0.16, -0.97, -0.24), 6)))

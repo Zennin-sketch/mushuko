@@ -26,6 +26,15 @@ final class SkinLayersBend {
     private SkinLayersBend() {}
 
     private static final boolean DEBUG = Boolean.getBoolean("mushoku.debuglayers");
+    /** Parte que se esta dibujando: 1 brazo, 2 pierna, 3 torso. */
+    static int kind;
+    /** Signo y mitad (0 = la del lado de la base, 1 = la otra) por parte; se pueden probar con -Dmushoku.bend.arm=1,0 etc. */
+    private static final int[][] MODE = {{1, 0}, mode("arm", "1,0"), mode("leg", "1,0"), mode("body", "1,0")};
+
+    private static int[] mode(String k, String def) {
+        String[] v = System.getProperty("mushoku.bend." + k, def).split(",");
+        return new int[]{Integer.parseInt(v[0].trim()), Integer.parseInt(v[1].trim())};
+    }
     private static int calls, vcalls;
 
     static void install() {
@@ -45,6 +54,13 @@ final class SkinLayersBend {
         });
         // 2) Brazos (y mangas) acompanian la inclinacion del torso, como hace Player Animator con el modelo normal.
         LayerFeatureTransformerAPI.setLayerTransformer((player, pose, part) -> {
+            // que parte se va a dibujar (brazo, pierna o torso): cada una dobla con su propio signo/mitad
+            kind = 0;
+            if (net.minecraft.client.Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player)
+                    instanceof net.minecraft.client.renderer.entity.player.PlayerRenderer pr) {
+                var m = pr.getModel();
+                kind = part == m.rightLeg || part == m.leftLeg ? 2 : part == m.body ? 3 : 1;
+            }
             if (!(player instanceof IAnimatedPlayer ap)) return;
             AnimationApplier anim = ap.playerAnimator_getAnimation();
             if (anim == null || !anim.isActive()) return;
@@ -77,6 +93,7 @@ final class SkinLayersBend {
         /** Media franja (en bloques) donde el giro pasa de 0 al total. */
         private static final float BAND = 1.5f / 16f;
         private final Vector3f axisVec;
+        private final boolean otherHalf;
 
         Bender(BendableCuboid b) {
             dir = b.getBendDirection();
@@ -87,7 +104,9 @@ final class SkinLayersBend {
             other = b.getOtherSidePlane().scaled(1 / 16f);
             height = b.bendHeight() / 16f;
             axis = b.getBendAxis();
-            value = b.getBend();
+            int[] md = MODE[Math.max(0, Math.min(3, kind))];
+            value = b.getBend() * md[0];
+            otherHalf = md[1] == 1;
             // mismo eje que IBendable.applyBend
             axisVec = new Vector3f((float) Math.cos(axis), 0, (float) Math.sin(axis)).mul(new Matrix3f().set(dir.getRotation()));
         }
@@ -109,7 +128,7 @@ final class SkinLayersBend {
                 float t = Math.max(0f, Math.min(1f, (mid + BAND) / (2 * BAND)));
                 float w = t * t * (3 - 2 * t);
                 if (w <= 0f) continue;
-                Vector4f q = new Vector4f(p, 1f).mul(new Matrix4f().translate(bx, by, bz).rotate(-value * w, axisVec)
+                Vector4f q = new Vector4f(p, 1f).mul(new Matrix4f().translate(bx, by, bz).rotate(value * w, axisVec)
                         .translate(-bx, -by, -bz));
                 v[i].set(q.x, q.y, q.z, 1f);
             }
@@ -143,10 +162,11 @@ final class SkinLayersBend {
          *  prueba visual (con +doblez la pierna de la capa se iba para atras). */
         Vector3f bend(Vector3f p) {
             float mid = (Math.abs(other.distanceTo(p)) - Math.abs(base.distanceTo(p))) / 2f;
+            if (otherHalf) mid = -mid;
             float t = Math.max(0f, Math.min(1f, (mid + BAND) / (2 * BAND)));
             float w = t * t * (3 - 2 * t);
             if (w <= 0f) return p;
-            Vector4f q = new Vector4f(p, 1f).mul(new Matrix4f().translate(bx, by, bz).rotate(-value * w, axisVec).translate(-bx, -by, -bz));
+            Vector4f q = new Vector4f(p, 1f).mul(new Matrix4f().translate(bx, by, bz).rotate(value * w, axisVec).translate(-bx, -by, -bz));
             return new Vector3f(q.x, q.y, q.z);
         }
 
