@@ -24,7 +24,7 @@ import org.joml.Vector3f;
  */
 public final class BowFirstPerson {
     /** Escala del arco en primera persona. */
-    private static final float S = 0.55f;
+    private static final float S = 0.65f;
     /** Punto al que apunta siempre el frente del arco (y la flecha): el centro de la pantalla, lejos. */
     private static final Vector3f TARGET = new Vector3f(0, 0, -14f);
     private static Vector3f FWD = new Vector3f(0, 0, -1), UP = new Vector3f(0, 1, 0);
@@ -37,10 +37,10 @@ public final class BowFirstPerson {
         UP = u.sub(new Vector3f(FWD).mul(u.dot(FWD))).normalize();
     }
     /** Agarre del arco (centro del puno izquierdo): abajo del punto de mira, asi la flecha se ve debajo y apunta al centro. */
-    private static final Vector3f L_IDLE = new Vector3f(-0.06f, -0.32f, -1.0f), L_AIM = new Vector3f(0.0f, -0.21f, -1.15f);
-    private static final Vector3f R_IDLE = new Vector3f(0.32f, -0.45f, -0.8f), R_QUIVER = new Vector3f(0.42f, 0.16f, 0.25f);
+    private static final Vector3f L_IDLE = new Vector3f(-0.05f, -0.36f, -1.25f), L_AIM = new Vector3f(0.0f, -0.25f, -1.35f);
+    private static final Vector3f R_IDLE = new Vector3f(0.34f, -0.5f, -0.95f), R_QUIVER = new Vector3f(0.42f, 0.16f, 0.25f);
     private static final Vector3f R_FLING = new Vector3f(0.42f, -0.2f, -0.5f);
-    private static final Vector3f SH_L = new Vector3f(-0.55f, -0.9f, -0.35f), SH_R = new Vector3f(0.5f, -0.85f, -0.25f);
+    private static final Vector3f SH_L = new Vector3f(-0.45f, -0.95f, -0.55f), SH_R = new Vector3f(0.5f, -0.85f, -0.25f);
 
     private static boolean wasDrawing;
     private static float releaseAt = -1000;
@@ -139,7 +139,10 @@ public final class BowFirstPerson {
         pose.translate(start.x, start.y, start.z);
         pose.mulPose(new Matrix4f(x.x, x.y, x.z, 0, dir.x, dir.y, dir.z, 0, zz.x, zz.y, zz.z, 0, 0, 0, 0, 1));
         // la mano queda en el centro del puno
-        pose.translate((right ? 1 : -1) / 16f, 0, 0);
+        // brazos un poco mas finos en primera persona (de lejos no tapan la mira)
+        pose.translate(0, 8f / 16f, 0);
+        pose.scale(0.8f, 1f, 0.8f);
+        pose.translate((right ? 1 : -1) / 16f, -8f / 16f, 0);
         ResourceLocation skin = p.getSkin().texture();
         ModelPart a = right ? m.rightArm : m.leftArm, s = right ? m.rightSleeve : m.leftSleeve;
         resetPart(a);
