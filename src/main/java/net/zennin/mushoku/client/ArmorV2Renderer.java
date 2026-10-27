@@ -218,8 +218,9 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
             org.joml.Vector3f normal = nrm.transform(new org.joml.Vector3f(quad.normal()));
             for (software.bernie.geckolib.cache.object.GeoVertex v : quad.vertices()) {
                 // a pixeles en el marco del torso
-                p.set(v.position()).mul(16f);
-                cubeRot.transformPosition(p);
+                p.set(v.position());
+                cubeRot.transformPosition(p);   // (en bloques: el giro del pano incluye su traslado al pivote)
+                p.mul(16f);
                 float dh = 12f - p.y;                      // cuanto esta por debajo de la cadera
                 float w = smoothstep((dh + 1.5f) / 10.5f) * 0.92f;
                 org.joml.Vector3f out = new org.joml.Vector3f(p).add(disp(p, skinR, skinL, w, a, b));
