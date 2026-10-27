@@ -419,11 +419,12 @@ def ghislaine():
     out.append(rbox(B, [-4.9, 11.6, -2.85], [9.8, 1.0, 5.7], 'wrap', None, pivot=(0, 12.1, 0), e=(0, 0, 7)))
     out.append(box(B, [1.6, 11.4, -3.05], [1.6, 1.4, 0.3], 'gold'))
     # taparrabos: panos largos adelante y atras, cortos a los costados
-    out.append(panel('clothF', (0, 12.0, -2.9), 4.4, 7.4, 'khaki', 'fray', flare=10))
-    out.append(panel('clothB', (0, 12.0, 2.9), 5.0, 7.8, 'khaki', 'fray', yaw=180, flare=10))
-    out += xm(panel('clothR', (-4.7, 12.0, 0), 4.6, 4.6, 'khaki', 'fray', yaw=90, flare=24))
-    out += xm(panel('clothFR', (-3.6, 12.0, -2.4), 2.6, 5.4, 'khaki', 'fray', yaw=40, flare=20))
-    out += xm(panel('clothB', (-3.6, 12.0, 2.4), 2.6, 5.4, 'khaki', 'fray', yaw=140, flare=20))
+    # (cada pano en su hueso de tela: se dobla con las piernas como la falda de Roxy)
+    out += ring_panel('g', (0, 12.0, -2.9), 4.4, 7.4, 'khaki', 'fray', yaw=0, flare=10)
+    out += ring_panel('g', (0, 12.0, 2.9), 5.0, 7.8, 'khaki', 'fray', yaw=180, flare=10)
+    out += xm(*ring_panel('g', (-4.7, 12.0, 0), 4.6, 4.6, 'khaki', 'fray', yaw=90, flare=24))
+    out += xm(*ring_panel('g', (-3.6, 12.0, -2.4), 2.6, 5.4, 'khaki', 'fray', yaw=40, flare=20))
+    out += xm(*ring_panel('g', (-3.6, 12.0, 2.4), 2.6, 5.4, 'khaki', 'fray', yaw=140, flare=20))
     out += sym([
         box(RA, [-9.1, 20.0, -3.1], [5.6, 4.4, 6.2], 'fur_tan', 'fur'),
         box(RA, [-8.6, 24.2, -2.6], [4.4, 0.8, 5.2], 'fur_tan', 'fur'),
@@ -457,9 +458,10 @@ def paul():
     out.append(rbox(B, [-0.6, 11.0, 2.75], [1.2, 14, 0.4], 'brown', 'stitch', pivot=(0, 18, 2.9), e=(0, 0, -34)))
     out.append(rbox(B, [-6.0, 4.0, -1.0], [1.4, 8.4, 2.2], 'black_leather', 'trim', pivot=(-5.3, 12, 0), e=(-20, 0, 8)))
     # escarcelas (adelante dos, costados y atras)
-    out += xm(panel('clothFR', (-2.3, 12.4, -3.0), 4.0, 5.0, 'leather_brown', 'rivets', flare=12))
-    out += xm(panel('clothR', (-4.9, 12.4, 0), 4.2, 4.4, 'leather_brown', 'rivets', yaw=90, flare=16))
-    out.append(panel('clothB', (0, 12.4, 3.0), 8.4, 4.6, 'gambeson', 'quilt', yaw=180, flare=12))
+    out += xm(*ring_panel('p', (-2.3, 12.4, -3.0), 4.0, 5.0, 'leather_brown', 'rivets', yaw=0, flare=12))
+    out += xm(*ring_panel('p', (-4.9, 12.4, 0), 4.2, 4.4, 'leather_brown', 'rivets', yaw=90, flare=16))
+    for x in (-2.8, 0.0, 2.8):  # atras en tres partes, asi cada pierna mueve la suya
+        out += ring_panel('p', (x, 12.4, 3.0), 3.0, 4.6, 'gambeson', 'quilt', yaw=180, flare=12)
     out += [
         box(LA, [3.4, 22.0, -3.1], [5.8, 2.6, 6.2], 'steel_d', 'rivets'),
         box(LA, [3.8, 20.2, -2.95], [5.4, 2.0, 5.9], 'steel_d', 'plates'),
@@ -503,7 +505,7 @@ def eris():
     out.append(box(B, [-4.9, 12.0, -2.9], [9.8, 0.9, 5.8], 'black_leather'))
     out.append(box(B, [3.9, 8.4, -1.4], [1.4, 3.8, 1.6], 'black_leather', 'stitch'))
     # falda corta tableada
-    out += skirt(B, 12.5, 4.4, 4.9, 2.9, 26, 'maroon', 'pleats_light', corner=3.0, cflare=28, cloth=True)
+    out += ring_skirt('e', 12.5, 4.4, 4.9, 2.9, 26, 'maroon', 'pleats_light', n=16)
     out += sym([
         box(RA, [-8.7, 22.4, -2.7], [5.4, 1.8, 5.4], 'fur_cream', 'fur'),
         box(RA, [-8.45, 15.0, -2.45], [4.9, 7.6, 4.9], 'maroon', 'folds'),

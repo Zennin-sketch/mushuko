@@ -1,0 +1,448 @@
+{
+ "skin": "remushoku:textures/entities/rudeus_greyrat.png",
+ "steps": [
+  {
+   "op": "setup",
+   "fov": 50
+  },
+  {
+   "op": "cam",
+   "pitch": 35,
+   "h": 2
+  },
+  {
+   "op": "cam",
+   "pitch": 4,
+   "h": 0
+  },
+  {
+   "op": "dummy",
+   "yaw": 90,
+   "dist": 3.6
+  },
+  {
+   "op": "equip",
+   "slot": "chest",
+   "v": ""
+  },
+  {
+   "op": "equip",
+   "slot": "legs",
+   "v": ""
+  },
+  {
+   "op": "equip",
+   "slot": "chest",
+   "v": "remushoku:eris_blouse"
+  },
+  {
+   "op": "equip",
+   "slot": "legs",
+   "v": "remushoku:eris_shorts"
+  },
+  {
+   "op": "equip",
+   "slot": "feet",
+   "v": "remushoku:eris_boots"
+  },
+  {
+   "op": "walk",
+   "t": 60
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "eris_side_a"
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "eris_side_b"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "dummy",
+   "yaw": 180,
+   "dist": 3.6
+  },
+  {
+   "op": "walk",
+   "t": 60
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "eris_front_a"
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "eris_front_b"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "dummy",
+   "yaw": -30,
+   "dist": 3.6
+  },
+  {
+   "op": "walk",
+   "t": 60
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "eris_34_a"
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "eris_34_b"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "dummy",
+   "yaw": -30,
+   "dist": 3.6
+  },
+  {
+   "op": "anim",
+   "v": "roll_forward"
+  },
+  {
+   "op": "wait",
+   "t": 5
+  },
+  {
+   "op": "shot",
+   "v": "eris_roll"
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "equip",
+   "slot": "chest",
+   "v": ""
+  },
+  {
+   "op": "equip",
+   "slot": "legs",
+   "v": ""
+  },
+  {
+   "op": "dummy",
+   "yaw": 90,
+   "dist": 3.6
+  },
+  {
+   "op": "equip",
+   "slot": "chest",
+   "v": ""
+  },
+  {
+   "op": "equip",
+   "slot": "legs",
+   "v": ""
+  },
+  {
+   "op": "equip",
+   "slot": "chest",
+   "v": "remushoku:ghislaine_top"
+  },
+  {
+   "op": "equip",
+   "slot": "legs",
+   "v": "remushoku:ghislaine_straps"
+  },
+  {
+   "op": "equip",
+   "slot": "feet",
+   "v": "remushoku:ghislaine_boots"
+  },
+  {
+   "op": "walk",
+   "t": 60
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "ghislaine_side_a"
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "ghislaine_side_b"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "dummy",
+   "yaw": 180,
+   "dist": 3.6
+  },
+  {
+   "op": "walk",
+   "t": 60
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "ghislaine_front_a"
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "ghislaine_front_b"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "dummy",
+   "yaw": -30,
+   "dist": 3.6
+  },
+  {
+   "op": "walk",
+   "t": 60
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "ghislaine_34_a"
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "ghislaine_34_b"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "dummy",
+   "yaw": -30,
+   "dist": 3.6
+  },
+  {
+   "op": "anim",
+   "v": "roll_forward"
+  },
+  {
+   "op": "wait",
+   "t": 5
+  },
+  {
+   "op": "shot",
+   "v": "ghislaine_roll"
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "equip",
+   "slot": "chest",
+   "v": ""
+  },
+  {
+   "op": "equip",
+   "slot": "legs",
+   "v": ""
+  },
+  {
+   "op": "dummy",
+   "yaw": 90,
+   "dist": 3.6
+  },
+  {
+   "op": "equip",
+   "slot": "chest",
+   "v": ""
+  },
+  {
+   "op": "equip",
+   "slot": "legs",
+   "v": ""
+  },
+  {
+   "op": "equip",
+   "slot": "chest",
+   "v": "remushoku:paul_armor"
+  },
+  {
+   "op": "equip",
+   "slot": "legs",
+   "v": "remushoku:paul_pants"
+  },
+  {
+   "op": "equip",
+   "slot": "feet",
+   "v": "remushoku:paul_boots"
+  },
+  {
+   "op": "walk",
+   "t": 60
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "paul_side_a"
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "paul_side_b"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "dummy",
+   "yaw": 180,
+   "dist": 3.6
+  },
+  {
+   "op": "walk",
+   "t": 60
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "paul_front_a"
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "paul_front_b"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "dummy",
+   "yaw": -30,
+   "dist": 3.6
+  },
+  {
+   "op": "walk",
+   "t": 60
+  },
+  {
+   "op": "wait",
+   "t": 9
+  },
+  {
+   "op": "shot",
+   "v": "paul_34_a"
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "paul_34_b"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "dummy",
+   "yaw": -30,
+   "dist": 3.6
+  },
+  {
+   "op": "anim",
+   "v": "roll_forward"
+  },
+  {
+   "op": "wait",
+   "t": 5
+  },
+  {
+   "op": "shot",
+   "v": "paul_roll"
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "equip",
+   "slot": "chest",
+   "v": ""
+  },
+  {
+   "op": "equip",
+   "slot": "legs",
+   "v": ""
+  }
+ ]
+}
