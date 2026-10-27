@@ -222,27 +222,37 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
                 cubeRot.transformPosition(p);
                 float dh = 12f - p.y;                      // cuanto esta por debajo de la cadera
                 float w = smoothstep((dh + 1.5f) / 10.5f) * 0.92f;
-                float dr = Math.abs(p.x - 1.9f), dl = Math.abs(p.x + 1.9f);
-                float sR = Math.max(0, Math.min(1, 0.5f + (dl - dr) / 6.5f));
-                float wr = w * sR, wl = w * (1 - sR);
-                org.joml.Vector3f out = new org.joml.Vector3f(p).mul(1 - wr - wl);
-                skinR.transformPosition(a.set(p));
-                skinL.transformPosition(b.set(p));
-                out.add(a.mul(wr)).add(b.mul(wl));
+                org.joml.Vector3f out = new org.joml.Vector3f(p).add(disp(p, skinR, skinL, w, a, b));
                 // ruedo: parte del movimiento viene de las piernas atrasadas
                 float hem = smoothstep((dh - 5f) / 6f) * 0.45f;
-                if (hem > 0) {
-                    lagR.transformPosition(a.set(p));
-                    lagL.transformPosition(b.set(p));
-                    org.joml.Vector3f lagged = new org.joml.Vector3f(p).mul(1 - wr - wl).add(a.mul(wr)).add(b.mul(wl));
-                    out.lerp(lagged, hem);
-                }
+                if (hem > 0) out.lerp(new org.joml.Vector3f(p).add(disp(p, lagR, lagL, w, a, b)), hem);
                 out.div(16f);
                 org.joml.Vector4f w4 = bodyPose.transform(new org.joml.Vector4f(out, 1f));
                 buffer.addVertex(w4.x(), w4.y(), w4.z(), colour, v.texU(), v.texV(), packedOverlay, packedLight, normal.x(), normal.y(), normal.z());
             }
         }
         if (bodyNormal == null) return;
+    }
+
+    /**
+     * Cuanto se mueve un vertice de tela con las piernas. De costado sigue a la pierna de su lado; adelante y atras
+     * la tela "envuelve" a las dos piernas (adelante va con la pierna mas adelantada, atras con la mas atrasada), asi
+     * los panos vecinos se mueven igual, no se cruzan y la pierna nunca la atraviesa.
+     */
+    private static org.joml.Vector3f disp(org.joml.Vector3f p, Matrix4f mR, Matrix4f mL, float w,
+                                         org.joml.Vector3f a, org.joml.Vector3f b) {
+        mR.transformPosition(a.set(p)).sub(p);
+        mL.transformPosition(b.set(p)).sub(p);
+        float dr = Math.abs(p.x - 1.9f), dl = Math.abs(p.x + 1.9f);
+        float sR = Math.max(0, Math.min(1, 0.5f + (dl - dr) / 6.5f));
+        org.joml.Vector3f d = new org.joml.Vector3f(a).mul(sR).add(new org.joml.Vector3f(b).mul(1 - sR));
+        // envolvente adelante/atras (adelante = -Z)
+        float cR = Math.min(1, 0.3f + sR * 1.4f), cL = Math.min(1, 0.3f + (1 - sR) * 1.4f);
+        float zr = a.z * cR, zl = b.z * cL;
+        float env = p.z < 0 ? Math.min(zr, zl) : Math.max(zr, zl);
+        float k = smoothstep(Math.abs(p.z) / (Math.abs(p.z) + Math.abs(p.x) + 0.01f) * 2f - 0.4f);
+        d.z = d.z + (env - d.z) * k;
+        return d.mul(w);
     }
 
     private static float smoothstep(float t) {

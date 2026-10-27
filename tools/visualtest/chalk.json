@@ -80,7 +80,7 @@
   },
   {
    "op": "cmd",
-   "v": "summon minecraft:zombie 0.5 120 7.5 {NoAI:1b}"
+   "v": "summon minecraft:villager 0.5 120 7.5 {NoAI:1b}"
   },
   {
    "op": "wait",
@@ -120,12 +120,17 @@
   },
   {
    "op": "cmd",
-   "v": "kill @e[type=minecraft:zombie]"
+   "v": "kill @e[type=minecraft:villager]"
   },
   {
    "op": "cam",
    "pitch": 4,
    "h": 0
+  },
+  {
+   "op": "dummy",
+   "yaw": 90,
+   "dist": 3.6
   },
   {
    "op": "equip",
@@ -146,11 +151,6 @@
    "op": "equip",
    "slot": "legs",
    "v": "remushoku:roxy_stockings"
-  },
-  {
-   "op": "dummy",
-   "yaw": 90,
-   "dist": 3.6
   },
   {
    "op": "walk",
