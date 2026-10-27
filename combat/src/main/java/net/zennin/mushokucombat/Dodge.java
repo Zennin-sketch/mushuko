@@ -21,10 +21,13 @@ import java.util.UUID;
 /**
  * Roll (espadachin) y dash (mago). El movimiento lo hace el cliente; aca se cobra la estamina, se avisa a los demas
  * jugadores para que vean la animacion y se resuelve la esquiva perfecta: si un golpe llega en los primeros
- * 6 ticks (0.3 s) de la esquiva, se anula todo el dano, suena un golpe metalico y el personaje brilla dorado.
+ * 6 ticks (0.3 s) de la esquiva, se anula todo el dano, suena un golpe metalico, el personaje brilla dorado y queda
+ * invulnerable 3 segundos.
  */
 public final class Dodge {
     public static final int PERFECT_WINDOW = 6;
+    /** Invulnerabilidad despues de una esquiva perfecta: 3 s (no la atraviesa ningun dano salvo el vacio o /kill). */
+    public static final int INVULNERABLE_TICKS = 60;
     private static final Map<UUID, Long> STARTED = new HashMap<>();
     private static final Set<String> RELAYED = Set.of("cast_pose", "cast_release",
             "hip_draw", "hip_sheathe", "back_draw", "back_sheathe",
@@ -81,16 +84,17 @@ public final class Dodge {
     private static final Map<UUID, Long> PERFECT_UNTIL = new HashMap<>();
 
     private static boolean tryPerfect(ServerPlayer p, DamageSource source) {
-        boolean fromAttack = source.getEntity() != null || source.getDirectEntity() != null || source.is(DamageTypeTags.IS_PROJECTILE);
-        if (!fromAttack || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return false;
+        if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return false; // vacio, /kill
         UUID id = p.getUUID();
         long now = p.serverLevel().getGameTime();
         Long until = PERFECT_UNTIL.get(id);
-        if (until != null && now <= until) return true; // otro golpe dentro de la misma esquiva perfecta
+        if (until != null && now <= until) return true; // invulnerable despues de una esquiva perfecta
+        boolean fromAttack = source.getEntity() != null || source.getDirectEntity() != null || source.is(DamageTypeTags.IS_PROJECTILE);
+        if (!fromAttack) return false;
         Long start = STARTED.get(id);
         if (start == null || now < start || now - start > PERFECT_WINDOW) return false;
         STARTED.remove(id);
-        PERFECT_UNTIL.put(id, start + PERFECT_WINDOW);
+        PERFECT_UNTIL.put(id, now + INVULNERABLE_TICKS);
         p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.45f, 1.9f);
         p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 0.8f, 2.0f);
         PerfectDodgePayload msg = new PerfectDodgePayload(p.getId());
