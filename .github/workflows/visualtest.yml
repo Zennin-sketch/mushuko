@@ -14,6 +14,9 @@ on:
       exclude:
         description: Mods a sacar (parte del nombre del archivo)
         default: ""
+      extras:
+        description: Extras (fresh = EMF/ETF + Fresh Animations)
+        default: ""
 
 permissions:
   contents: write
@@ -37,12 +40,13 @@ jobs:
           pip install -q portablemc==4.4.1
           mkdir -p mc/mods
           portablemc --main-dir mc --work-dir mc start fabric:1.21.1:0.16.5 --dry
-          python3 tools/visualtest/fetch_mods.py mc/mods
           cp $(ls build/libs/*.jar | grep -v sources) mc/mods/
           cp $(ls combat/build/libs/*.jar | grep -v sources) mc/mods/
           if [ -n "${{ inputs.exclude }}" ]; then rm -f mc/mods/*${{ inputs.exclude }}*; fi
           ls mc/mods
           printf 'onboardAccessibility:false\ntutorialStep:none\nskipMultiplayerWarning:true\nrenderDistance:5\nsimulationDistance:5\njoinedFirstServer:true\nguiScale:2\npauseOnLostFocus:false\nnarrator:0\nsoundCategory_master:0.0\ngraphicsMode:1\n' > mc/options.txt
+          python3 tools/visualtest/fetch_mods.py mc/mods "${{ inputs.extras }}"
+          ls mc/mods mc/resourcepacks 2>/dev/null || true
       - name: Correr la prueba
         run: |
           export LIBGL_ALWAYS_SOFTWARE=1
