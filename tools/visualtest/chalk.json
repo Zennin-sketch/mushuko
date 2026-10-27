@@ -120,6 +120,90 @@
   },
   {
    "op": "cmd",
+   "v": "setblock -1 120 8 minecraft:stone"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 0 120 8 minecraft:stone"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 1 120 8 minecraft:stone"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 2 120 8 minecraft:stone"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -3 120 8 minecraft:lever[face=floor,facing=east]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -2 120 8 remushoku:chalk_line[charged=true]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -1 121 8 remushoku:chalk_line[charged=true]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 0 121 8 remushoku:chalk_line[charged=true]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 0 120 7 minecraft:stone"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 0 121 7 remushoku:magic_circle[powered=true]{Spell:\"fireball\",Armed:1b}"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 1 121 8 remushoku:chalk_line[charged=true]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 2 121 8 remushoku:chalk_line[charged=true]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 3 120 8 remushoku:chalk_line[charged=true]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 4 120 8 minecraft:redstone_lamp"
+  },
+  {
+   "op": "wait",
+   "t": 10
+  },
+  {
+   "op": "shot",
+   "v": "slope_off"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -3 120 8 minecraft:lever[face=floor,facing=east,powered=true]"
+  },
+  {
+   "op": "wait",
+   "t": 3
+  },
+  {
+   "op": "shot",
+   "v": "slope_on"
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "shot",
+   "v": "slope_after"
+  },
+  {
+   "op": "cmd",
    "v": "kill @e[type=minecraft:villager]"
   },
   {

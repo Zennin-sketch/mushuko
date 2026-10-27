@@ -18,6 +18,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.RedstoneSide;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -36,8 +38,8 @@ public class ChalkLineBlock extends Block {
     public static final MapCodec<ChalkLineBlock> CODEC = simpleCodec(ChalkLineBlock::new);
     public static final BooleanProperty CHARGED = BooleanProperty.create("charged");
     public static final IntegerProperty POWER = BlockStateProperties.POWER;
-    public static final BooleanProperty NORTH = BlockStateProperties.NORTH, EAST = BlockStateProperties.EAST,
-            SOUTH = BlockStateProperties.SOUTH, WEST = BlockStateProperties.WEST;
+    public static final EnumProperty<RedstoneSide> NORTH = BlockStateProperties.NORTH_REDSTONE, EAST = BlockStateProperties.EAST_REDSTONE,
+            SOUTH = BlockStateProperties.SOUTH_REDSTONE, WEST = BlockStateProperties.WEST_REDSTONE;
     private static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 1, 16);
     /** Mientras se mide la senal de afuera, las lineas no cuentan (como hace la redstone vanilla). */
     private static boolean measuring, refreshing;
@@ -45,7 +47,7 @@ public class ChalkLineBlock extends Block {
     public ChalkLineBlock(Properties props) {
         super(props);
         registerDefaultState(stateDefinition.any().setValue(CHARGED, false).setValue(POWER, 0)
-                .setValue(NORTH, false).setValue(EAST, false).setValue(SOUTH, false).setValue(WEST, false));
+                .setValue(NORTH, RedstoneSide.NONE).setValue(EAST, RedstoneSide.NONE).setValue(SOUTH, RedstoneSide.NONE).setValue(WEST, RedstoneSide.NONE));
     }
 
     @Override
@@ -63,17 +65,43 @@ public class ChalkLineBlock extends Block {
         return level.getBlockState(below).isFaceSturdy(level, below, Direction.UP);
     }
 
-    public static BooleanProperty side(Direction d) {
+    public static EnumProperty<RedstoneSide> side(Direction d) {
         return switch (d) { case NORTH -> NORTH; case EAST -> EAST; case SOUTH -> SOUTH; default -> WEST; };
     }
 
-    private static boolean connects(BlockState self, BlockState other) {
-        if (other.getBlock() instanceof ChalkLineBlock) return true;
-        return self.getValue(CHARGED) && (other.isSignalSource() || other.is(Blocks.REDSTONE_WIRE) || other.getBlock() instanceof MagicCircleBlock);
+    private static boolean chalk(BlockState s) { return s.getBlock() instanceof ChalkLineBlock; }
+
+    private static boolean solid(BlockGetter level, BlockPos p) { return level.getBlockState(p).isRedstoneConductor(level, p); }
+
+    /** Como la redstone: de lado, subiendo por la pared del vecino o bajando al bloque de abajo del vecino. */
+    private static RedstoneSide sideFor(BlockState self, BlockGetter level, BlockPos pos, Direction d) {
+        BlockPos n = pos.relative(d);
+        BlockState o = level.getBlockState(n);
+        if (chalk(o)) return RedstoneSide.SIDE;
+        if (self.getValue(CHARGED) && (o.isSignalSource() || o.is(Blocks.REDSTONE_WIRE) || o.getBlock() instanceof MagicCircleBlock))
+            return RedstoneSide.SIDE;
+        if (!solid(level, pos.above()) && chalk(level.getBlockState(n.above())) && solid(level, n)) return RedstoneSide.UP;
+        if (!solid(level, n) && chalk(level.getBlockState(n.below()))) return RedstoneSide.SIDE;
+        return RedstoneSide.NONE;
     }
 
-    public BlockState withConnections(BlockState state, LevelReader level, BlockPos pos) {
-        for (Direction d : Direction.Plane.HORIZONTAL) state = state.setValue(side(d), connects(state, level.getBlockState(pos.relative(d))));
+    /** Lineas de tiza pegadas (al lado, arriba por la pared o abajo por el borde). */
+    private static java.util.List<BlockPos> links(BlockGetter level, BlockPos p) {
+        java.util.List<BlockPos> out = new java.util.ArrayList<>(4);
+        boolean openAbove = !solid(level, p.above());
+        for (Direction d : Direction.Plane.HORIZONTAL) {
+            BlockPos n = p.relative(d);
+            if (chalk(level.getBlockState(n))) out.add(n);
+            else {
+                if (openAbove && solid(level, n) && chalk(level.getBlockState(n.above()))) out.add(n.above());
+                if (!solid(level, n) && chalk(level.getBlockState(n.below()))) out.add(n.below());
+            }
+        }
+        return out;
+    }
+
+    public BlockState withConnections(BlockState state, BlockGetter level, BlockPos pos) {
+        for (Direction d : Direction.Plane.HORIZONTAL) state = state.setValue(side(d), sideFor(state, level, pos, d));
         return state;
     }
 
@@ -85,8 +113,19 @@ public class ChalkLineBlock extends Block {
     @Override
     protected BlockState updateShape(BlockState state, Direction dir, BlockState neighbor, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         if (dir == Direction.DOWN && !canSurvive(state, level, pos)) return Blocks.AIR.defaultBlockState();
-        if (dir.getAxis().isHorizontal()) return state.setValue(side(dir), connects(state, neighbor));
-        return state;
+        return withConnections(state, level, pos);
+    }
+
+    /** Avisa a las lineas de arriba y abajo en diagonal (subidas y bajadas). */
+    private static void touchDiagonals(Level level, BlockPos pos) {
+        for (Direction d : Direction.Plane.HORIZONTAL) {
+            for (BlockPos q : new BlockPos[]{pos.relative(d).above(), pos.relative(d).below()}) {
+                BlockState s = level.getBlockState(q);
+                if (!chalk(s)) continue;
+                BlockState ns = ((ChalkLineBlock) s.getBlock()).withConnections(s, level, q);
+                if (ns != s) level.setBlock(q, ns, Block.UPDATE_CLIENTS);
+            }
+        }
     }
 
     // ---------------------------------------------------------------- senal
@@ -113,20 +152,26 @@ public class ChalkLineBlock extends Block {
             level.removeBlock(pos, false);
             return;
         }
+        BlockState ns = withConnections(state, level, pos);
+        if (ns != state) level.setBlock(pos, ns, Block.UPDATE_CLIENTS);
         if (state.getValue(CHARGED)) refresh(level, pos);
     }
 
     @Override
     protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState old, boolean moving) {
-        if (!level.isClientSide && !old.is(state.getBlock()) && state.getValue(CHARGED)) refresh(level, pos);
+        if (level.isClientSide || old.is(state.getBlock())) return;
+        touchDiagonals(level, pos);
+        if (state.getValue(CHARGED)) refresh(level, pos);
     }
 
     @Override
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState now, boolean moving) {
         super.onRemove(state, level, pos, now, moving);
         if (!level.isClientSide && !moving && !now.is(this)) {
+            touchDiagonals(level, pos);
             level.updateNeighborsAt(pos, this);
             for (Direction d : Direction.values()) level.updateNeighborsAt(pos.relative(d), this);
+            for (BlockPos q : links(level, pos)) if (level.getBlockState(q).getValue(CHARGED)) refresh(level, q);
         }
     }
 
@@ -157,11 +202,8 @@ public class ChalkLineBlock extends Block {
         while (!todo.isEmpty() && net.size() < 512) {
             BlockPos p = todo.poll();
             if (!net.add(p)) continue;
-            for (Direction d : Direction.Plane.HORIZONTAL) {
-                BlockPos n = p.relative(d);
-                BlockState s = level.getBlockState(n);
-                if (!net.contains(n) && s.getBlock() instanceof ChalkLineBlock && s.getValue(CHARGED)) todo.add(n);
-            }
+            for (BlockPos n : links(level, p))
+                if (!net.contains(n) && level.getBlockState(n).getValue(CHARGED)) todo.add(n);
         }
         // fuentes de afuera
         java.util.Map<BlockPos, Integer> power = new java.util.HashMap<>();
@@ -175,8 +217,7 @@ public class ChalkLineBlock extends Block {
             BlockPos p = q.poll();
             int v = power.get(p) - 1;
             if (v <= 0) continue;
-            for (Direction d : Direction.Plane.HORIZONTAL) {
-                BlockPos n = p.relative(d);
+            for (BlockPos n : links(level, p)) {
                 Integer cur = power.get(n);
                 if (cur != null && cur < v) { power.put(n, v); q.add(n); }
             }
@@ -201,7 +242,7 @@ public class ChalkLineBlock extends Block {
             BlockPos p = todo.poll();
             BlockState s = level.getBlockState(p);
             if (!(s.getBlock() instanceof ChalkLineBlock) || s.getValue(CHARGED) || !seen.add(p)) continue;
-            for (Direction d : Direction.Plane.HORIZONTAL) todo.add(p.relative(d));
+            todo.addAll(links(level, p));
         }
         for (BlockPos p : seen) {
             BlockState s = level.getBlockState(p);

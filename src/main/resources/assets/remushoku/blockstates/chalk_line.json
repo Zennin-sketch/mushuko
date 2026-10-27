@@ -7,7 +7,7 @@
   },
   {
    "when": {
-    "north": "true"
+    "north": "side|up"
    },
    "apply": {
     "model": "remushoku:block/chalk_line_side",
@@ -16,7 +16,16 @@
   },
   {
    "when": {
-    "east": "true"
+    "north": "up"
+   },
+   "apply": {
+    "model": "remushoku:block/chalk_line_up",
+    "y": 0
+   }
+  },
+  {
+   "when": {
+    "east": "side|up"
    },
    "apply": {
     "model": "remushoku:block/chalk_line_side",
@@ -25,7 +34,16 @@
   },
   {
    "when": {
-    "south": "true"
+    "east": "up"
+   },
+   "apply": {
+    "model": "remushoku:block/chalk_line_up",
+    "y": 90
+   }
+  },
+  {
+   "when": {
+    "south": "side|up"
    },
    "apply": {
     "model": "remushoku:block/chalk_line_side",
@@ -34,10 +52,28 @@
   },
   {
    "when": {
-    "west": "true"
+    "south": "up"
+   },
+   "apply": {
+    "model": "remushoku:block/chalk_line_up",
+    "y": 180
+   }
+  },
+  {
+   "when": {
+    "west": "side|up"
    },
    "apply": {
     "model": "remushoku:block/chalk_line_side",
+    "y": 270
+   }
+  },
+  {
+   "when": {
+    "west": "up"
+   },
+   "apply": {
+    "model": "remushoku:block/chalk_line_up",
     "y": 270
    }
   }

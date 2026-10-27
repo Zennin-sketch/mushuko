@@ -28,6 +28,7 @@ public final class CircleTraps {
         return s.element == Element.NONE && s != Spell.DISTURB_MAGIC;
     }
 
+    /** target puede ser null (activado por una linea de tiza sin nadie encima): se ve y suena igual. */
     public static void trigger(ServerLevel level, BlockPos pos, Spell spell, Player owner, LivingEntity target) {
         int t = spell.level.tier;
         double x = pos.getX() + 0.5, y = pos.getY() + 0.1, z = pos.getZ() + 0.5;
@@ -35,47 +36,49 @@ public final class CircleTraps {
         burst(level, ParticleTypes.ENCHANT, x, y + 0.5, z, 60, 0.6);
         switch (spell.element) {
             case WATER -> {
-                target.hurt(magic, 3 + 2 * t);
-                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60 + 20 * t, Math.min(t, 4)));
-                target.setTicksFrozen(target.getTicksRequiredToFreeze() + 40 * t);
+                if (target != null) target.hurt(magic, 3 + 2 * t);
+                if (target != null) target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60 + 20 * t, Math.min(t, 4)));
+                if (target != null) target.setTicksFrozen(target.getTicksRequiredToFreeze() + 40 * t);
                 burst(level, ParticleTypes.SNOWFLAKE, x, y + 1, z, 30 + 10 * t, 0.8);
                 sound(level, x, y, z, SoundEvents.GLASS_BREAK, 1.2f);
             }
             case FIRE -> {
-                target.igniteForSeconds(3 + t);
-                target.hurt(level.damageSources().onFire(), 2 + 2 * t);
-                if (t >= 2) level.explode(owner, x, y, z, Math.min(1f + 0.5f * t, 4f), Level.ExplosionInteraction.NONE);
+                if (target != null) target.igniteForSeconds(3 + t);
+                if (target != null) target.hurt(level.damageSources().onFire(), 2 + 2 * t);
+                if (t >= 2 && !quiet) level.explode(owner, x, y, z, Math.min(1f + 0.5f * t, 4f), Level.ExplosionInteraction.NONE);
                 burst(level, ParticleTypes.FLAME, x, y + 0.5, z, 40 + 10 * t, 0.7);
                 sound(level, x, y, z, SoundEvents.FIRECHARGE_USE, 0.9f);
             }
             case EARTH -> {
-                target.hurt(magic, 4 + 2 * t);
-                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40 + 20 * t, 6));
-                target.setDeltaMovement(target.getDeltaMovement().x * 0.2, 0.4 + 0.1 * t, target.getDeltaMovement().z * 0.2);
-                target.hurtMarked = true;
+                if (target != null) target.hurt(magic, 4 + 2 * t);
+                if (target != null) target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40 + 20 * t, 6));
+                if (target != null) target.setDeltaMovement(target.getDeltaMovement().x * 0.2, 0.4 + 0.1 * t, target.getDeltaMovement().z * 0.2);
+                if (target != null) target.hurtMarked = true;
                 burst(level, new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()), x, y + 0.5, z, 50 + 10 * t, 0.6);
                 sound(level, x, y, z, SoundEvents.STONE_BREAK, 0.7f);
             }
             case WIND -> {
-                target.hurt(magic, 2 + t);
-                double dx = target.getX() - x, dz = target.getZ() - z;
-                double len = Math.max(0.1, Math.sqrt(dx * dx + dz * dz));
-                target.setDeltaMovement(dx / len * 0.4, 0.8 + 0.3 * t, dz / len * 0.4);
-                target.hurtMarked = true;
+                if (target != null) target.hurt(magic, 2 + t);
+                if (target != null) {
+                    double dx = target.getX() - x, dz = target.getZ() - z;
+                    double len = Math.max(0.1, Math.sqrt(dx * dx + dz * dz));
+                    target.setDeltaMovement(dx / len * 0.4, 0.8 + 0.3 * t, dz / len * 0.4);
+                    target.hurtMarked = true;
+                }
                 burst(level, ParticleTypes.CLOUD, x, y + 0.5, z, 40 + 10 * t, 0.5);
                 sound(level, x, y, z, SoundEvents.PHANTOM_FLAP, 0.6f);
             }
             case NONE -> {
                 if (spell == Spell.DISTURB_MAGIC) {
-                    target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 200, 1));
-                    target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 200, 1));
+                    if (target != null) target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 200, 1));
+                    if (target != null) target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 200, 1));
                     burst(level, ParticleTypes.WITCH, x, y + 1, z, 40, 0.6);
                 } else if (spell == Spell.MAGIC_SHIELD) {
-                    target.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 600, Math.min(t, 4)));
+                    if (target != null) target.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 600, Math.min(t, 4)));
                     burst(level, ParticleTypes.END_ROD, x, y + 1, z, 30, 0.6);
                 } else {
-                    target.heal(4 + 3 * t);
-                    target.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 100 + 20 * t, t >= 4 ? 1 : 0));
+                    if (target != null) target.heal(4 + 3 * t);
+                    if (target != null) target.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 100 + 20 * t, t >= 4 ? 1 : 0));
                     burst(level, ParticleTypes.HEART, x, y + 1, z, 10 + 2 * t, 0.6);
                 }
                 sound(level, x, y, z, SoundEvents.AMETHYST_BLOCK_CHIME, 1.2f);
@@ -83,11 +86,21 @@ public final class CircleTraps {
         }
     }
 
+    private static boolean quiet;
+
+    /** El mismo efecto sobre otro objetivo mas, sin repetir particulas, sonido ni explosion. */
+    public static void applyOnly(ServerLevel level, BlockPos pos, Spell spell, Player owner, LivingEntity target) {
+        quiet = true;
+        try { trigger(level, pos, spell, owner, target); } finally { quiet = false; }
+    }
+
     private static void burst(ServerLevel level, ParticleOptions p, double x, double y, double z, int n, double spread) {
+        if (quiet) return;
         level.sendParticles(p, x, y, z, n, spread, spread * 0.6, spread, 0.05);
     }
 
     private static void sound(ServerLevel level, double x, double y, double z, SoundEvent s, float pitch) {
+        if (quiet) return;
         level.playSound(null, x, y, z, s, SoundSource.BLOCKS, 1.2f, pitch);
     }
 }

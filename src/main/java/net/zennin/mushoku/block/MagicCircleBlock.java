@@ -204,37 +204,41 @@ public class MagicCircleBlock extends BaseEntityBlock {
     protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos from, boolean moving) {
         super.neighborChanged(state, level, pos, block, from, moving);
         if (level.isClientSide || !(level.getBlockEntity(pos) instanceof MagicCircleBlockEntity be)) return;
-        boolean powered = false;
-        for (Direction d : Direction.values()) {
-            BlockState n = level.getBlockState(pos.relative(d));
-            if (n.getBlock() instanceof ChalkLineBlock && n.getValue(ChalkLineBlock.CHARGED) && n.getValue(ChalkLineBlock.POWER) > 0) powered = true;
-        }
+        boolean powered = linePowered(level, pos);
         boolean rising = powered && !be.linePowered;
         be.linePowered = powered;
         if (!rising || !state.getValue(POWERED) || !be.armed()) return;
         Spell spell = be.spell();
         if (spell == null) return;
-        // el objetivo: lo mas cercano al circulo (como si lo pisara); si no hay nadie, el hechizo no se gasta
+        // Se activa como si alguien lo pisara: le afecta a todo lo que este sobre el circulo o pegado (hasta 1.5
+        // bloques); si no hay nadie, el hechizo se lanza igual en el circulo (se ve, suena y explota si es de fuego).
         boolean friendly = CircleTraps.isFriendly(spell);
-        LivingEntity target = null;
-        double best = Double.MAX_VALUE;
         net.minecraft.world.phys.Vec3 c = net.minecraft.world.phys.Vec3.atBottomCenterOf(pos);
-        for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(pos).inflate(4))) {
+        java.util.List<LivingEntity> hit = new java.util.ArrayList<>();
+        for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(pos).inflate(1.5, 1, 1.5))) {
             if (!e.isAlive() || e.isSpectator()) continue;
             boolean isOwner = be.owner() != null && be.owner().equals(e.getUUID());
             if (isOwner && !friendly) continue;
-            double dd = e.distanceToSqr(c);
-            if (dd < best) { best = dd; target = e; }
+            hit.add(e);
         }
-        if (target == null) {
-            ((ServerLevel) level).sendParticles(net.minecraft.core.particles.ParticleTypes.ENCHANT, c.x, c.y + 0.3, c.z, 20, 0.4, 0.1, 0.4, 0.3);
-            level.playSound(null, pos, SoundEvents.BEACON_AMBIENT, SoundSource.BLOCKS, 0.6f, 1.6f);
-            return;
-        }
+        hit.sort(java.util.Comparator.comparingDouble(e -> e.distanceToSqr(c)));
         be.setArmed(false);
         level.setBlock(pos, state.setValue(POWERED, false), Block.UPDATE_ALL);
         Player owner = be.owner() == null ? null : level.getPlayerByUUID(be.owner());
-        CircleTraps.trigger((ServerLevel) level, pos, spell, owner, target);
+        if (hit.isEmpty()) CircleTraps.trigger((ServerLevel) level, pos, spell, owner, null);
+        else CircleTraps.trigger((ServerLevel) level, pos, spell, owner, hit.get(0));
+        for (int k = 1; k < hit.size(); k++) CircleTraps.applyOnly((ServerLevel) level, pos, spell, owner, hit.get(k));
+    }
+
+    /** Hay una linea de tiza azul con senal tocando el circulo (al lado, o subiendo/bajando un bloque). */
+    private static boolean linePowered(Level level, BlockPos pos) {
+        for (Direction d : Direction.Plane.HORIZONTAL) {
+            for (BlockPos q : new BlockPos[]{pos.relative(d), pos.relative(d).above(), pos.relative(d).below()}) {
+                BlockState n = level.getBlockState(q);
+                if (n.getBlock() instanceof ChalkLineBlock && n.getValue(ChalkLineBlock.CHARGED) && n.getValue(ChalkLineBlock.POWER) > 0) return true;
+            }
+        }
+        return false;
     }
 
     // ---------- Ayudas ----------
