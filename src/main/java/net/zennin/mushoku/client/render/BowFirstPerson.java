@@ -37,10 +37,10 @@ public final class BowFirstPerson {
         UP = u.sub(new Vector3f(FWD).mul(u.dot(FWD))).normalize();
     }
     /** Agarre del arco (centro del puno izquierdo): en espera abajo a la derecha, tensando cerca del centro. */
-    private static final Vector3f L_IDLE = new Vector3f(0.16f, -0.3f, -0.68f), L_AIM = new Vector3f(0.05f, -0.13f, -0.74f);
-    private static final Vector3f R_IDLE = new Vector3f(0.19f, -0.42f, -0.5f), R_QUIVER = new Vector3f(0.42f, 0.16f, 0.25f);
-    private static final Vector3f R_FLING = new Vector3f(0.34f, -0.16f, 0.02f);
-    private static final Vector3f SH_L = new Vector3f(-0.36f, -0.62f, 0.12f), SH_R = new Vector3f(0.42f, -0.62f, 0.12f);
+    private static final Vector3f L_IDLE = new Vector3f(0.15f, -0.2f, -1.05f), L_AIM = new Vector3f(0.05f, -0.1f, -1.1f);
+    private static final Vector3f R_IDLE = new Vector3f(0.32f, -0.45f, -0.8f), R_QUIVER = new Vector3f(0.42f, 0.16f, 0.25f);
+    private static final Vector3f R_FLING = new Vector3f(0.42f, -0.2f, -0.5f);
+    private static final Vector3f SH_L = new Vector3f(-0.45f, -0.75f, -0.1f), SH_R = new Vector3f(0.45f, -0.7f, -0.1f);
 
     private static boolean wasDrawing;
     private static float releaseAt = -1000;
