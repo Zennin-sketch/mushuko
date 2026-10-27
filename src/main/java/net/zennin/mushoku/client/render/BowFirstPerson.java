@@ -37,7 +37,11 @@ public final class BowFirstPerson {
         UP = u.sub(new Vector3f(FWD).mul(u.dot(FWD))).normalize();
     }
     /** Agarre del arco (centro del puno izquierdo): abajo del punto de mira, asi la flecha se ve debajo y apunta al centro. */
-    private static final Vector3f L_IDLE = new Vector3f(-0.05f, -0.36f, -1.25f), L_AIM = new Vector3f(0.0f, -0.25f, -1.35f);
+    private static final Vector3f L_IDLE = new Vector3f(-0.07f, -0.36f, -1.0f), L_AIM = new Vector3f(-0.03f, -0.27f, -1.1f);
+    /** Cuanto mas arriba (sobre el eje del arco) queda el centro del arco respecto del puno, en bloques. */
+    private static final float GRIP_OFFSET = 0.11f;
+    /** Mano derecha tensando: apenas a la derecha de la cuerda. */
+    private static final Vector3f DRAW_HAND = new Vector3f(0.035f, -0.01f, 0f);
     private static final Vector3f R_IDLE = new Vector3f(0.34f, -0.5f, -0.95f), R_QUIVER = new Vector3f(0.42f, 0.16f, 0.25f);
     private static final Vector3f R_FLING = new Vector3f(0.42f, -0.2f, -0.5f);
     private static final Vector3f SH_L = new Vector3f(-0.45f, -0.95f, -0.55f), SH_R = new Vector3f(0.5f, -0.85f, -0.25f);
@@ -77,15 +81,18 @@ public final class BowFirstPerson {
         float breath = drawing ? 0 : (float) Math.sin(now * 0.08f) * 0.006f;
         L.y += breath;
         orient(L, aim);
+        // la mano agarra el arco un poco abajo/izquierda de la mitad: el centro del arco queda mas arriba en su eje
+        Vector3f G = new Vector3f(UP).mul(GRIP_OFFSET).add(L);
+        orient(G, aim);
         float back = BowRender.BRACE + BowRender.DRAW * pull;
-        Vector3f nock = new Vector3f(FWD).mul(-back * S / 16f).add(L).add(new Vector3f(UP).mul(-0.02f));
+        Vector3f nock = new Vector3f(FWD).mul(-back * S / 16f).add(G).add(new Vector3f(UP).mul(-0.02f));
         // mano derecha
         Vector3f R;
         boolean arrowInHand = false;
         if (drawing) {
-            R = new Vector3f(nock);
+            R = new Vector3f(nock).add(DRAW_HAND);
         } else if (loading) {
-            Vector3f rest = new Vector3f(FWD).mul(-BowRender.BRACE * S / 16f).add(L);
+            Vector3f rest = new Vector3f(FWD).mul(-BowRender.BRACE * S / 16f).add(G);
             if (load < 0.3f) R = lerp(R_IDLE, R_QUIVER, load / 0.3f);
             else if (load < 0.42f) R = new Vector3f(R_QUIVER);
             else if (load < 0.8f) { R = lerp(R_QUIVER, rest, (load - 0.42f) / 0.38f); arrowInHand = true; }
@@ -93,7 +100,7 @@ public final class BowFirstPerson {
         } else if (rel < 1f) {
             R = rel < 0.25f ? lerp(nock, R_FLING, rel / 0.25f) : lerp(R_FLING, R_IDLE, (rel - 0.25f) / 0.75f);
         } else if (loaded) {
-            R = lerp(R_IDLE, new Vector3f(FWD).mul(-BowRender.BRACE * S / 16f).add(L), 0.55f);
+            R = lerp(R_IDLE, new Vector3f(FWD).mul(-BowRender.BRACE * S / 16f).add(G), 0.55f);
         } else {
             R = new Vector3f(R_IDLE);
         }
@@ -104,7 +111,7 @@ public final class BowFirstPerson {
 
         // arco
         pose.pushPose();
-        pose.translate(L.x, L.y, L.z);
+        pose.translate(G.x, G.y, G.z);
         Vector3f z = new Vector3f(FWD).cross(UP).normalize();
         pose.mulPose(new Matrix4f(FWD.x, FWD.y, FWD.z, 0, UP.x, UP.y, UP.z, 0, z.x, z.y, z.z, 0, 0, 0, 0, 1));
         pose.scale(S, S, S);

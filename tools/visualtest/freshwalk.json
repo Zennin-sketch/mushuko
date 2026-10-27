@@ -16,6 +16,10 @@
    "h": 0
   },
   {
+   "op": "wait",
+   "t": 30
+  },
+  {
    "op": "equip",
    "slot": "chest",
    "v": ""

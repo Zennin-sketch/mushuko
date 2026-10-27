@@ -142,6 +142,10 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
     private static final Matrix4f F = new Matrix4f().translate(0, 24, 0).scale(-1, -1, 1);
     private static final Matrix4f F_INV = new Matrix4f(F).invert();
     private final Matrix4f skinR = new Matrix4f(), skinL = new Matrix4f(), lagR = new Matrix4f(), lagL = new Matrix4f();
+    /** Del marco del torso (geo, px) al marco propio de cada pierna (px del modelo vanilla) y de vuelta. */
+    private final Matrix4f[] toLeg = {new Matrix4f(), new Matrix4f()}, fromLeg = {new Matrix4f(), new Matrix4f()};
+    /** Medio ancho de la pierna con la media/pantalon puesto, mas el grosor de la tela. */
+    private static final float LEG_HALF = 2.65f;
     private final java.util.Map<Integer, float[]> springs = new java.util.HashMap<>();
     private String curBone;
 
@@ -164,6 +168,12 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
         Matrix4f bodyInv = partMatrix(base.body).invert();
         skinR.set(legSkin(bodyInv, base.rightLeg, -1.9f));
         skinL.set(legSkin(bodyInv, base.leftLeg, 1.9f));
+        Matrix4f body = partMatrix(base.body);
+        net.minecraft.client.model.geom.ModelPart[] legs = {base.rightLeg, base.leftLeg};
+        for (int i = 0; i < 2; i++) {
+            toLeg[i].set(partMatrix(legs[i])).invert().mul(body).mul(F);
+            fromLeg[i].set(toLeg[i]).invert();
+        }
         // copia atrasada (resorte) de las piernas para el ruedo
         float rx = base.rightLeg.xRot - base.body.xRot, lx = base.leftLeg.xRot - base.body.xRot;
         int id = currentEntity == null ? 0 : currentEntity.getId();
@@ -222,11 +232,13 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
                 cubeRot.transformPosition(p);   // (en bloques: el giro del pano incluye su traslado al pivote)
                 p.mul(16f);
                 float dh = 12f - p.y;                      // cuanto esta por debajo de la cadera
-                float w = smoothstep((dh + 1.5f) / 10.5f) * 0.92f;
+                float w = smoothstep((dh + 1.5f) / 8.5f) * 0.95f;
                 org.joml.Vector3f out = new org.joml.Vector3f(p).add(disp(p, skinR, skinL, w, a, b));
                 // ruedo: parte del movimiento viene de las piernas atrasadas
                 float hem = smoothstep((dh - 5f) / 6f) * 0.45f;
                 if (hem > 0) out.lerp(new org.joml.Vector3f(p).add(disp(p, lagR, lagL, w, a, b)), hem);
+                // choque: si la tela quedo adentro de una pierna, sale por la cara mas cercana (adelante/atras o costado)
+                collide(out, a);
                 out.div(16f);
                 org.joml.Vector4f w4 = bodyPose.transform(new org.joml.Vector4f(out, 1f));
                 buffer.addVertex(w4.x(), w4.y(), w4.z(), colour, v.texU(), v.texV(), packedOverlay, packedLight, normal.x(), normal.y(), normal.z());
@@ -254,6 +266,20 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
         float k = smoothstep(Math.abs(p.z) / (Math.abs(p.z) + Math.abs(p.x) + 0.01f) * 2f - 0.4f);
         d.z = d.z + (env - d.z) * k;
         return d.mul(w);
+    }
+
+    private void collide(org.joml.Vector3f p, org.joml.Vector3f q) {
+        for (int i = 0; i < 2; i++) {
+            toLeg[i].transformPosition(q.set(p));
+            if (q.y < 0.3f || q.y > 12.8f) continue;           // arriba de la cadera o abajo del pie
+            float ax = Math.abs(q.x), az = Math.abs(q.z);
+            if (ax >= LEG_HALF || az >= LEG_HALF) continue;
+            // adelante/atras se prefiere (asi la tela del medio no se va hacia la otra pierna)
+            if (LEG_HALF - az <= (LEG_HALF - ax) * 1.6f) q.z = q.z > 0 ? LEG_HALF : -LEG_HALF;
+            else q.x = q.x > 0 ? LEG_HALF : -LEG_HALF;
+            fromLeg[i].transformPosition(q);
+            p.set(q);
+        }
     }
 
     private static float smoothstep(float t) {

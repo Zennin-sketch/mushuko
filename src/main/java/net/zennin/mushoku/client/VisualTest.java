@@ -42,6 +42,7 @@ public final class VisualTest {
 
     private static JsonArray steps;
     private static int index, wait, ticksInWorld, walkTicks, dummyYaw;
+    private static float walkSpeed = 0.55f;
     private static boolean created;
     private static RemotePlayer dummy;
 
@@ -147,7 +148,11 @@ public final class VisualTest {
                 c.getMethod("play", AbstractClientPlayer.class, String.class, int.class).invoke(null, dummy, s.get("v").getAsString(), 0);
             }
             case "ready" -> ClientReadySpell.set(dummy.getId(), s.get("v").getAsString());
-            case "walk" -> walkTicks = s.get("t").getAsInt();
+            case "walk" -> {
+                walkTicks = s.get("t").getAsInt();
+                walkSpeed = s.has("speed") ? s.get("speed").getAsFloat() : 0.55f;
+                dummy.setSprinting(s.has("sprint") && s.get("sprint").getAsBoolean());
+            }
             case "use" -> {
                 // usar el item de la mano (para arcos): mantiene 'useTicks' ticks
                 ((net.zennin.mushoku.mixin.LivingEntityAccessor) dummy).remushoku$setFlag(2, false);
@@ -211,7 +216,7 @@ public final class VisualTest {
         dummy.yHeadRotO = dummyYaw;
         if (walkTicks > 0) {
             walkTicks--;
-            dummy.walkAnimation.update(0.55f, 1.0f);
+            dummy.walkAnimation.update(walkSpeed, 1.0f);
         }
     }
 }
