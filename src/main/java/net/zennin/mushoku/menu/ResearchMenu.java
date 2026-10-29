@@ -104,6 +104,16 @@ public class ResearchMenu extends AbstractContainerMenu {
             ItemStack st = input.getItem(i);
             if (st.is(net.zennin.mushoku.registry.ModItems.SCROLL) && net.zennin.mushoku.item.SpellData.get(st) == null) { st.shrink(1); break; }
         }
+        // la tinta y pluma se gasta: 8 grabados y se termina
+        if (!p.getAbilities().instabuild)
+            for (int i = 0; i < input.getContainerSize(); i++) {
+                ItemStack st = input.getItem(i);
+                if (st.is(net.zennin.mushoku.registry.ModItems.INKAND_QUILL)) {
+                    st.hurtAndBreak(1, (net.minecraft.server.level.ServerLevel) p.level(), p, it -> {});
+                    if (st.getDamageValue() >= st.getMaxDamage()) input.setItem(i, ItemStack.EMPTY);
+                    break;
+                }
+            }
         input.setChanged();
         if (!p.getAbilities().instabuild) { ModAttachments.set(p, m.withMana(m.mana() - cost)); ModNetworking.syncMana(p); }
         ItemStack out = net.zennin.mushoku.item.SpellData.with(new ItemStack(net.zennin.mushoku.registry.ModItems.SCROLL), s);

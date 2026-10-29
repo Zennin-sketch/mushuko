@@ -44,6 +44,30 @@ public class ResearchTableBlock extends HorizontalDirectionalBlock {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> b) { b.add(FACING, SIDE); }
 
+    /** Llama de la vela (en la mitad principal) y algun destello de la amatista. */
+    @Override
+    public void animateTick(BlockState state, Level level, BlockPos pos, net.minecraft.util.RandomSource rnd) {
+        if (state.getValue(SIDE)) return;
+        double[] c = rotate(13.75 / 16, 3.75 / 16, state.getValue(FACING));
+        level.addParticle(net.minecraft.core.particles.ParticleTypes.SMALL_FLAME, pos.getX() + c[0], pos.getY() + 20.2 / 16, pos.getZ() + c[1], 0, 0, 0);
+        if (rnd.nextInt(5) == 0)
+            level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, pos.getX() + c[0], pos.getY() + 20.8 / 16, pos.getZ() + c[1], 0, 0.01, 0);
+        if (rnd.nextInt(8) == 0) {
+            double[] g = rotate(11.5 / 16, 11.5 / 16, state.getValue(FACING));
+            level.addParticle(net.minecraft.core.particles.ParticleTypes.ENCHANT, pos.getX() + g[0], pos.getY() + 1.3, pos.getZ() + g[1], 0, 0.2, 0);
+        }
+    }
+
+    /** Punto del modelo (mirando al norte) girado como el bloque. */
+    private static double[] rotate(double x, double z, Direction facing) {
+        return switch (facing) {
+            case EAST -> new double[]{1 - z, x};
+            case SOUTH -> new double[]{1 - x, 1 - z};
+            case WEST -> new double[]{z, 1 - x};
+            default -> new double[]{x, z};
+        };
+    }
+
     /** Hacia donde esta la otra mitad, vista desde esta. */
     private static Direction toPartner(BlockState s) {
         Direction side = s.getValue(FACING).getCounterClockWise();

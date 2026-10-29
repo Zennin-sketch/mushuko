@@ -128,17 +128,30 @@ class Bark(Mat):
 
 
 class Leaves(Mat):
-    def __init__(self, base, light, holes=0.12, fruit=None):
+    def __init__(self, base, light, holes=0.12, fruit=None, fruit_rate=0.025, fruit2=None):
         self.base, self.light, self.holes = hexc(base), hexc(light), holes
         self.fruit = hexc(fruit) if fruit else None
+        self.fruit2 = hexc(fruit2) if fruit2 else None
+        self.rate = fruit_rate
 
     def color(self, face, x, y, w, h, rnd, cube):
         if rnd.random() < self.holes and face != 'up':
             return (0, 0, 0, 0)
         c = mix(self.base, self.light, rnd.random() * 0.6) if (x * 3 + y * 5) % 7 < 3 else mul(self.base, rnd.uniform(0.75, 1.0))
-        if self.fruit and rnd.random() < 0.025:
-            c = self.fruit
+        if self.fruit and rnd.random() < self.rate:
+            c = self.fruit if not self.fruit2 or rnd.random() < 0.6 else self.fruit2
         return c
+
+
+class Vine(Mat):
+    """Raices colgantes de manglar (o nada, si visible=False)."""
+    def __init__(self, base, tip, visible=True):
+        self.base, self.tip, self.visible = hexc(base), hexc(tip), visible
+
+    def color(self, face, x, y, w, h, rnd, cube):
+        if not self.visible:
+            return (0, 0, 0, 0)
+        return mix(self.base, self.tip, y / max(1, h - 1)) if face not in ('up', 'down') else self.base
 
 
 class Rock(Mat):
@@ -155,6 +168,39 @@ class Rock(Mat):
         if self.moss and ((face == 'up' and rnd.random() < self.moss_top) or (face != 'down' and y < 2 and rnd.random() < self.moss_top * 0.6)):
             c = mul(self.moss, rnd.uniform(0.8, 1.15))
         return c
+
+
+class Striped(Mat):
+    """Escamas rojas con franjas oscuras en chevron (lomo) y panza clara con placas (como Slyrak)."""
+    def __init__(self, base, stripe, belly=None, plate=None, every=5):
+        self.base, self.stripe = hexc(base), hexc(stripe)
+        self.belly = hexc(belly) if belly else None
+        self.plate = hexc(plate) if plate else None
+        self.every = every
+
+    def color(self, face, x, y, w, h, rnd, cube):
+        if face == 'down' and self.belly:
+            return self.plate if (self.plate and y % 3 == 0) else mul(self.belly, 1 + rnd.uniform(-0.04, 0.04))
+        c = mul(self.base, 1 + rnd.uniform(-0.06, 0.06))
+        k = (x + abs(y - h // 2) // 2 + cube['seed']) % self.every
+        if k == 0 or (k == 1 and rnd.random() < 0.5):
+            c = mix(c, self.stripe, 0.85)
+        if face in ('east', 'west') and self.belly and y >= h - 2:
+            c = mix(c, self.belly, 0.6)
+        if rnd.random() < 0.05:
+            c = mul(c, 1.25)
+        return c
+
+
+class Plates(Mat):
+    """Placas de la panza / cuello (crema con lineas)."""
+    def __init__(self, base, line):
+        self.base, self.line = hexc(base), hexc(line)
+
+    def color(self, face, x, y, w, h, rnd, cube):
+        if (y + cube['seed']) % 3 == 0 or (face in ('up', 'down') and x % 4 == 0):
+            return self.line
+        return mul(self.base, 1 + rnd.uniform(-0.04, 0.04))
 
 
 class Crystal(Mat):
@@ -174,14 +220,21 @@ class Crystal(Mat):
 
 
 class Membrane(Mat):
-    def __init__(self, base, vein):
+    """Membrana del ala: venas, borde oscuro y rasgaduras (huecos) en el borde de atras."""
+    def __init__(self, base, vein, edge=None, torn=0.0):
         self.base, self.vein = hexc(base), hexc(vein)
+        self.edge = hexc(edge) if edge else mul(self.vein, 0.8)
+        self.torn = torn
 
     def color(self, face, x, y, w, h, rnd, cube):
         if face in ('up', 'down'):
-            if x % 5 == 0 or (x + y) % 9 == 0:
+            if self.torn and y >= h - 2 and rnd.random() < self.torn:
+                return (0, 0, 0, 0)
+            if y >= h - 2:
+                return self.edge
+            if x % 6 == 0 or (x + y) % 11 == 0:
                 return self.vein
-            return mul(self.base, 1 + rnd.uniform(-0.05, 0.05) - y / max(1, h) * 0.15)
+            return mul(self.base, 1 + rnd.uniform(-0.05, 0.05) - y / max(1, h) * 0.18)
         return self.vein
 
 
@@ -268,7 +321,15 @@ class Model:
             for c in self.cubes:
                 if c['bone'] != n:
                     continue
-                cc = dict(origin=[round(v, 3) for v in c['origin']], size=[round(v, 3) for v in c['size']], uv=list(c['uv']))
+                # UV por cara (la region pintada exacta): con medidas no enteras el UV de caja corria las caras
+                u, v = c['uv']
+                _, _, (w, h, d) = self._uv_size(c)
+                faces = {'up': (u + d, v, w, d), 'down': (u + d + w, v, w, d), 'east': (u, v + d, d, h), 'north': (u + d, v + d, w, h),
+                         'west': (u + d + w, v + d, d, h), 'south': (u + 2 * d + w, v + d, w, h)}
+                uvf = {}
+                for fn, (fu, fv, fw, fh) in faces.items():
+                    uvf[fn] = dict(uv=[fu, fv + fh], uv_size=[fw, -fh]) if fn == 'down' else dict(uv=[fu, fv], uv_size=[fw, fh])
+                cc = dict(origin=[round(v2, 3) for v2 in c['origin']], size=[round(v2, 3) for v2 in c['size']], uv=uvf)
                 if c['inflate']:
                     cc['inflate'] = c['inflate']
                 if c['rot']:

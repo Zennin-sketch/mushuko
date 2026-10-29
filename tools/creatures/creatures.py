@@ -2,7 +2,7 @@
 Uso: python3 creatures.py  -> escribe geo/, animations/ y textures/entities/ de cada una."""
 import math, sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from geo import Model, Fur, Solid, Scales, Bark, Leaves, Rock, Crystal, Membrane, cycle, S, C, pulse
+from geo import Model, Fur, Solid, Scales, Bark, Leaves, Rock, Crystal, Membrane, Vine, Striped, Plates, cycle, S, C, pulse
 
 EYE_DARK = Solid('1a1210', 0.02)
 TEETH = Solid('efe8d8', 0.03)
@@ -285,7 +285,7 @@ def treant():
     m.bone('body', 'root', (0, 20, 0))
     m.cube('body', (-7, 20, -5), (14, 22, 10), 'bark')                       # tronco
     m.cube('body', (-8, 20, -6), (16, 6, 12), 'bark', inflate=0.3)            # cintura de raices
-    m.cube('body', (-6, 42, -4.5), (12, 6, 9), 'bark')                        # hombros
+    m.cube('body', (-8.5, 41, -4.5), (17, 6, 9), 'bark')                      # hombros (anchos: ahi nacen los brazos)
     # cara tallada: cejas, ojos y boca
     m.cube('body', (-5, 37, -5.3), (4, 1.5, 0.6), 'bark_dark')
     m.cube('body', (1, 37, -5.3), (4, 1.5, 0.6), 'bark_dark')
@@ -299,16 +299,21 @@ def treant():
         m.cube('crown', (x, y, z), (w, h, d), 'leaves')
     for (x, z, ang) in ((-6, 0, -25), (6, 2, 25), (0, 5, 0)):
         m.cube('crown', (x - 1, 46, z - 1), (2, 9, 2), 'bark', rot=(0, 0, ang), pivot=(x, 46, z))
+    # raices colgantes de la copa (manglar)
+    for (x, z, l) in ((-11, -5, 7), (-9, 6, 5), (10, -4, 6), (11, 5, 8), (-4, -8, 4), (5, 8, 5), (0, -9, 6)):
+        m.cube('crown', (x - 0.5, 47 - l, z - 0.5), (1, l, 1), 'vine')
     # brazos (ramas) con dedos
     for side, nm in ((-1, 'arm_r'), (1, 'arm_l')):
-        sx = side * 8
+        sx = side * 9
         m.bone(nm, 'body', (sx, 44, 0))
-        m.cube(nm, (sx - 2 + side * 1, 28, -2), (4, 16, 4), 'bark', rot=(0, 0, side * 10), pivot=(sx, 44, 0))
-        m.bone(nm + '_fore', nm, (sx + side * 3.5, 29, 0))
-        m.cube(nm + '_fore', (sx + side * 3.5 - 1.5, 16, -1.5), (3, 14, 3), 'bark')
+        m.cube(nm, (sx - 2.5, 41, -2.5), (5, 5, 5), 'bark', inflate=0.3)    # nudo del hombro
+        m.cube(nm, (sx - 2, 28, -2), (4, 16, 4), 'bark', rot=(0, 0, side * 5), pivot=(sx, 44, 0))
+        m.bone(nm + '_fore', nm, (sx + side * 1.4, 29, 0))
+        m.cube(nm + '_fore', (sx + side * 1.4 - 1.5, 16, -1.5), (3, 14, 3), 'bark')
+        m.cube(nm + '_fore', (sx + side * 1.4 - 2, 27, -2), (4, 3, 4), 'bark', inflate=0.2)  # codo
         for k, ang in ((-1, -20), (0, 0), (1, 20)):
-            m.cube(nm + '_fore', (sx + side * 3.5 + k * 1.2 - 0.5, 10, -0.5 + k * 0.5), (1, 6, 1), 'bark_dark', rot=(ang, 0, side * 10 * k),
-                   pivot=(sx + side * 3.5, 16, 0))
+            m.cube(nm + '_fore', (sx + side * 1.4 + k * 1.2 - 0.5, 10, -0.5 + k * 0.5), (1, 6, 1), 'bark_dark', rot=(ang, 0, side * 10 * k),
+                   pivot=(sx + side * 1.4, 16, 0))
         m.cube(nm, (sx + side * 1 - 3, 40, -3), (6, 4, 6), 'leaves')         # hojas en el hombro
     # piernas (raices)
     for side, nm in ((-1, 'leg_r'), (1, 'leg_l')):
@@ -343,208 +348,375 @@ def treant():
 
     anims = {'idle': cycle(4.0, 12, idle), 'walk': cycle(1.6, 8, walk), 'attack': cycle(1.0, 10, attack, loop=False)}
     base = dict(bark=Bark('6a4a2e', '3e2a18', moss='5e7a34', moss_amt=0.06), bark_dark=Solid('2e1e12', 0.08),
-                leaves=Leaves('3e7a2a', '7ab83c', holes=0.1), eye=Solid('c8ff6a', 0.03, glow=True))
+                leaves=Leaves('3e7a2a', '7ab83c', holes=0.1), eye=Solid('c8ff6a', 0.03, glow=True), vine=Vine('5a4a2a', '3a2a18'))
     elder = dict(bark=Bark('5a4430', '30221a', moss='4e7a2e', moss_amt=0.3), bark_dark=Solid('241810', 0.08),
-                 leaves=Leaves('2e6a26', '5e9a34', holes=0.06, fruit='c8a03a'), eye=Solid('ffe070', 0.03, glow=True))
+                 leaves=Leaves('2e6a26', '5e9a34', holes=0.06, fruit='c8a03a'), eye=Solid('ffe070', 0.03, glow=True), vine=Vine('5a4a2a', '3a2a18'))
     zombie = dict(bark=Bark('5a5450', '2e2a28', moss='4a3a5a', moss_amt=0.15), bark_dark=Solid('1c181a', 0.08),
-                  leaves=Leaves('4a4038', '6a5a48', holes=0.45), eye=Solid('c060ff', 0.03, glow=True))
+                  leaves=Leaves('4a4038', '6a5a48', holes=0.45), eye=Solid('c060ff', 0.03, glow=True), vine=Vine('000000', '000000', visible=False))
     stone = dict(bark=Rock('8a8680', '5a5752', moss='6a8a4a', moss_top=0.2), bark_dark=Solid('3a3834', 0.06),
-                 leaves=Rock('7a8a6a', '4a5a40', moss='6a9a40', moss_top=0.6), eye=Solid('ffa040', 0.03, glow=True))
+                 # copa mezcla de manglar (verde oscuro, raices colgantes) y azalea florecida (flores rosas y fucsias)
+                 leaves=Leaves('3a5e26', '6e9e3a', holes=0.07, fruit='e07ad0', fruit_rate=0.12, fruit2='b84aa8'),
+                 eye=Solid('ffa040', 0.03, glow=True), vine=Vine('6a5236', '3c7a2a'))
     m.save({'treant_lesser': base, 'treant_elder': elder, 'treant_zombie': zombie, 'treant_stone': stone}, anims)
 
 
-# ===================================================================== Wyrm Rojo (dragon)
+# ===================================================================== Wyrm Rojo (dragon, inspirado en Slyrak)
+WYRM_FOLD = {  # alas plegadas (en el suelo): se suman a la pose abierta del modelo
+    'wing_l': [0, 70, -18], 'wing_r': [0, -70, 18], 'wing_l_fore': [0, -150, 0], 'wing_r_fore': [0, 150, 0],
+    'wing_l_hand': [0, 150, 0], 'wing_r_hand': [0, -150, 0]}
+
+
 def red_wyrm():
     m = Model('red_wyrm', 256)
     m.bone('root', None, (0, 0, 0))
-    m.bone('body', 'root', (0, 20, 0))
-    m.cube('body', (-9, 14, -14), (18, 13, 28), 'scales')
-    m.cube('body', (-7, 13, -12), (14, 3, 24), 'belly')
-    for i in range(6):  # puas del lomo
-        m.cube('body', (-1, 27, -12 + i * 5), (2, 3 - (i % 2), 2.5), 'spike')
-    # cuello en 3 tramos y cabeza con cuernos
-    parent, z, y = 'body', -14, 24
-    for i in range(3):
-        b = 'neck%d' % i
-        m.bone(b, parent, (0, y, z), [-12 if i == 0 else -8, 0, 0])
-        m.cube(b, (-4 + i * 0.5, y - 4, z - 7), (8 - i, 8 - i, 7.5), 'scales')
-        m.cube(b, (-1, y + 3.5 - i, z - 6), (2, 2, 3), 'spike')
-        parent, z = b, z - 7
-    m.bone('head', parent, (0, y, z), [20, 0, 0])
-    m.cube('head', (-5, y - 3.5, z - 9), (10, 7, 9), 'scales')
-    m.cube('head', (-3.5, y - 3.5, z - 16), (7, 4.5, 7), 'scales')
-    for side in (-1, 1):
-        m.cube('head', (side * 3 - 0.75, y + 2.5, z - 5), (1.5, 1.5, 8), 'horn', rot=(-25, side * 12, 0), pivot=(side * 3, y + 3, z - 2))
-        m.cube('head', (side * 4.6 - 0.5, y + 0.5, z - 8.5), (1, 1.2, 2), 'eye')
-        m.cube('head', (side * 2 - 0.4, y - 3.6, z - 15.5), (0.8, 1.2, 0.8), TEETH)
-    m.bone('jaw', 'head', (0, y - 3, z - 4))
-    m.cube('jaw', (-3.3, y - 5.5, z - 15.5), (6.6, 2.5, 11.5), 'belly')
-    # alas: brazo y membrana
-    for side, nm in ((-1, 'wing_r'), (1, 'wing_l')):
-        sx = side * 8
-        m.bone(nm, 'body', (sx, 26, -8))
-        m.cube(nm, (sx if side > 0 else sx - 22, 25, -9), (22, 2, 2.5), 'scales')
-        m.cube(nm, (sx if side > 0 else sx - 22, 25.5, -7), (22, 0.6, 16), 'membrane')
-        m.bone(nm + '_tip', nm, (sx + side * 22, 26, -8))
-        m.cube(nm + '_tip', (sx + side * 22 if side > 0 else sx - 44, 25.2, -8.6), (22, 1.6, 1.8), 'scales')
-        m.cube(nm + '_tip', (sx + side * 22 if side > 0 else sx - 44, 25.5, -7), (22, 0.6, 13), 'membrane')
-        m.cube(nm + '_tip', (sx + side * 44 - (1 if side > 0 else 0) - 0.5, 24.5, -10), (1.5, 1.5, 3), 'horn')
-    for n, (x, z) in {'fl': (-7, -9), 'fr': (7, -9), 'bl': (-7, 9), 'br': (7, 9)}.items():
-        m.bone('leg_' + n, 'body', (x, 16, z))
-        m.cube('leg_' + n, (x - 2.5, 7, z - 3), (5, 10, 6), 'scales')
-        m.bone('shin_' + n, 'leg_' + n, (x, 8, z))
-        m.cube('shin_' + n, (x - 2, 1, z - 2), (4, 8, 4), 'scales')
-        m.cube('shin_' + n, (x - 2.5, 0, z - 4), (5, 1.5, 6), 'scales')
-        for k in (-1, 0, 1):
-            m.cube('shin_' + n, (x + k * 1.6 - 0.4, 0, z - 5), (0.8, 1, 1.2), CLAW)
-    parent, z = 'body', 14
+    m.bone('body', 'root', (0, 19, 0))
+    m.cube('body', (-8, 12, -15), (16, 13, 17), 'scales')                     # pecho
+    m.cube('body', (-6, 10.5, -14), (12, 2, 15), 'plates')                     # placas de la panza (pecho)
+    m.cube('body', (-7, 13, 1), (14, 11, 14), 'scales')                       # cadera
+    m.cube('body', (-5, 11.5, 1), (10, 2, 13), 'plates')
+    for i in range(7):                                                         # cresta del lomo
+        m.cube('body', (-0.8, 24.5 - (i % 2) * 0.5, -13 + i * 4), (1.6, 3 - (i % 2), 2.5), 'spike')
+    # cuello en S (5 tramos) con placas claras abajo
+    parent, z, y = 'body', -15, 22
+    rest = [-38, -12, 4, 10, 14]
     for i in range(5):
+        b = 'neck%d' % i
+        th = 7 - i * 0.5
+        m.bone(b, parent, (0, y, z), [rest[i], 0, 0])
+        m.cube(b, (-th / 2, y - th / 2, z - 6.5), (th, th, 7), 'scales')
+        m.cube(b, (-th / 2 + 0.8, y - th / 2 - 0.6, z - 6.3), (th - 1.6, 1.2, 6.6), 'plates')
+        m.cube(b, (-0.6, y + th / 2 - 0.3, z - 5), (1.2, 2.2, 2.4), 'spike')
+        parent, z = b, z - 6.5
+    # cabeza: craneo, hocico, corona de cuernos hacia atras, ojos y mandibula con dientes
+    m.bone('head', parent, (0, y, z), [30, 0, 0])
+    m.cube('head', (-4, y - 3, z - 7), (8, 6, 7), 'scales')
+    m.cube('head', (-3, y - 3, z - 14), (6, 4, 7), 'scales')
+    m.cube('head', (-3.5, y + 2.5, z - 8), (7, 1.5, 5), 'spike')               # ceja
+    for side in (-1, 1):
+        m.cube('head', (side * 3 - 0.8, y + 1.5, z - 2), (1.6, 1.6, 10), 'horn', rot=(-18, side * 14, 0), pivot=(side * 3, y + 2, z - 2))
+        m.cube('head', (side * 4 - 0.6, y - 0.5, z - 2), (1.2, 1.2, 7), 'horn', rot=(-5, side * 32, 0), pivot=(side * 4, y, z - 2))
+        m.cube('head', (side * 1.5 - 0.5, y + 2.5, z - 3), (1, 1, 6), 'horn', rot=(-30, side * 6, 0), pivot=(side * 1.5, y + 2.5, z - 3))
+        m.cube('head', (side * 4 - 0.4 + (0.2 if side > 0 else 0), y + 0.6, z - 6.5), (0.6, 1, 2), 'eye')
+        for k in range(3):
+            m.cube('head', (side * 2.4 - 0.3, y - 3.8, z - 13.5 + k * 2.2), (0.6, 1.1, 0.6), TEETH)
+    m.cube('head', (-0.8, y + 1, z - 14.2), (1.6, 1, 1), 'spike')               # cuernito del hocico
+    m.bone('jaw', 'head', (0, y - 2.5, z - 5))
+    m.cube('jaw', (-2.8, y - 4.8, z - 13.8), (5.6, 2.2, 9.5), 'plates')
+    for side in (-1, 1):
+        for k in range(3):
+            m.cube('jaw', (side * 2.2 - 0.3, y - 3, z - 13 + k * 2.4), (0.6, 1, 0.6), TEETH)
+    # alas grandes: brazo, antebrazo y mano con tres dedos; membrana entre los huesos (abiertas en el modelo)
+    for side, nm in ((1, 'wing_l'), (-1, 'wing_r')):
+        sx = side * 7
+        m.bone(nm, 'body', (sx, 24, -9))
+        o = lambda x0, L: (sx + (0 if side > 0 else -L) + x0 * side, )
+        m.cube(nm, (sx if side > 0 else sx - 16, 23, -10), (16, 2.6, 2.6), 'scales')
+        m.cube(nm, (sx if side > 0 else sx - 16, 23.6, -8), (16, 0.6, 16), 'membrane')
+        m.bone(nm + '_fore', nm, (sx + side * 16, 24, -9))
+        fx = sx + side * 16
+        m.cube(nm + '_fore', (fx if side > 0 else fx - 20, 23.2, -9.8), (20, 2, 2), 'scales')
+        m.cube(nm + '_fore', (fx if side > 0 else fx - 20, 23.6, -8), (20, 0.6, 18), 'membrane')
+        m.bone(nm + '_hand', nm + '_fore', (fx + side * 20, 24, -9))
+        hx = fx + side * 20
+        m.cube(nm + '_hand', (hx - 1.2, 23, -10.4), (2.4, 2.4, 2.4), 'scales')
+        m.cube(nm + '_hand', (hx - 0.6 + side * 0.6, 25, -11), (1.2, 3, 1.2), CLAW)  # pulgar con garra
+        for k, (ang, L) in enumerate(((15, 26), (40, 22), (68, 17))):
+            fy = side * ang
+            m.cube(nm + '_hand', (hx if side > 0 else hx - L, 23.4, -9.6), (L, 1.2, 1.2), 'horn', rot=(0, -fy, 0), pivot=(hx, 24, -9))
+            m.cube(nm + '_hand', (hx if side > 0 else hx - L, 23.7, -9), (L * 0.95, 0.5, 11 - k * 2), 'membrane_tip',
+                   rot=(0, -fy + side * 12, 0), pivot=(hx, 24, -9))
+    # patas: las de atras mas grandes
+    for n, (x, z, big) in {'fl': (-6, -10, 0), 'fr': (6, -10, 0), 'bl': (-6.5, 8, 1), 'br': (6.5, 8, 1)}.items():
+        w = 5 + big
+        m.bone('leg_' + n, 'body', (x, 15, z))
+        m.cube('leg_' + n, (x - w / 2, 7, z - w / 2 - 0.5), (w, 10, w + 1), 'scales', inflate=0.2)
+        m.bone('shin_' + n, 'leg_' + n, (x, 8, z))
+        m.cube('shin_' + n, (x - w / 2 + 0.8, 1.2, z - 1.5 + big), (w - 1.6, 8, w - 1.6), 'scales')
+        m.cube('shin_' + n, (x - w / 2, 0, z - 3.5), (w, 1.6, 6), 'scales')
+        for k in (-1, 0, 1):
+            m.cube('shin_' + n, (x + k * 1.6 - 0.4, 0, z - 5), (0.8, 1.2, 1.6), CLAW)
+    # cola larga con puas y punta de pala
+    parent, z = 'body', 15
+    for i in range(8):
         b = 'tail%d' % i
-        th = 9 - i * 1.6
-        m.bone(b, parent, (0, 22 - i * 0.6, z), [8 if i == 0 else 4, 0, 0])
-        m.cube(b, (-th / 2, 22 - i * 0.6 - th / 2, z), (th, th, 8.4), 'scales')
-        m.cube(b, (-0.8, 22 - i * 0.6 + th / 2 - 0.5, z + 2), (1.6, 2, 3), 'spike')
-        parent, z = b, z + 8
-    m.cube('tail4', (-3, 19, z - 3), (6, 1, 5), 'membrane')
+        th = 9 - i * 0.95
+        m.bone(b, parent, (0, 20 - i * 0.7, z), [6 if i == 0 else 3, 0, 0])
+        m.cube(b, (-th / 2, 20 - i * 0.7 - th / 2, z), (th, th, 7.4), 'scales')
+        m.cube(b, (-th / 2 + 0.6, 20 - i * 0.7 - th / 2 - 0.5, z + 0.2), (th - 1.2, 1, 7), 'plates')
+        m.cube(b, (-0.6, 20 - i * 0.7 + th / 2 - 0.5, z + 2.5), (1.2, 2 - i * 0.12, 2.5), 'spike')
+        parent, z = b, z + 7
+    m.cube('tail7', (-3, 13.5, z - 2), (6, 0.8, 6), 'spike', rot=(0, 45, 0), pivot=(0, 14, z + 1))
+
+    names = ['neck%d' % i for i in range(5)]
+
+    def fold(out, amt=1.0):
+        for k, v in WYRM_FOLD.items():
+            r = out.setdefault(k, {}).get('rotation', [0, 0, 0])
+            out[k]['rotation'] = [r[i] + v[i] * amt for i in range(3)]
+        return out
+
+    def tail(out, amp, speed=1.0, t=0.0):
+        for i in range(8):
+            out['tail%d' % i] = {'rotation': [2 * S(t, -i * 0.1), amp * S(t * speed, -i * 0.11), 0]}
+        return out
 
     def idle(t):
-        out = {'body': {'position': [0, 0.4 * S(t), 0]}, 'head': {'rotation': [3 * S(t, 0.2), 10 * S(t, 0, 0.5), 0]},
-               'jaw': {'rotation': [4 + 4 * S(t, 0.1), 0, 0]},
-               'wing_r': {'rotation': [0, 30, -50 + 4 * S(t)]}, 'wing_l': {'rotation': [0, -30, 50 - 4 * S(t)]},
-               'wing_r_tip': {'rotation': [0, 120, 0]}, 'wing_l_tip': {'rotation': [0, -120, 0]}}
-        for i in range(3):
-            out['neck%d' % i] = {'rotation': [(-12 if i == 0 else -8) + 2 * S(t, i * 0.1), 3 * S(t, i * 0.1, 0.5), 0]}
+        out = {'body': {'position': [0, 0.3 * S(t), 0]}, 'head': {'rotation': [3 * S(t, 0.2), 14 * S(t, 0, 0.5) * pulse(t, 0.2, 1), 0]},
+               'jaw': {'rotation': [3 + 3 * S(t, 0.1), 0, 0]}}
         for i in range(5):
-            out['tail%d' % i] = {'rotation': [8 if i == 0 else 4, 8 * S(t, -i * 0.12), 0]}
-        return out
+            out['neck%d' % i] = {'rotation': [1.5 * S(t, i * 0.08), 3 * S(t, i * 0.1, 0.5), 0]}
+        return tail(fold(out), 6, 1, t)
 
     def walk(t):
         out = idle(t)
-        out['body'] = {'position': [0, 0.8 * abs(S(t)), 0], 'rotation': [0, 3 * S(t), 2 * S(t)]}
+        out['body'] = {'position': [0, 0.6 * abs(S(t)), 0], 'rotation': [0, 2 * S(t), 2 * S(t)]}
         for n, ph in (('fl', 0), ('br', 0), ('fr', 0.5), ('bl', 0.5)):
-            out['leg_' + n] = {'rotation': [28 * S(t, ph), 0, 0]}
-            out['shin_' + n] = {'rotation': [-20 * max(0, S(t, ph + 0.25)), 0, 0]}
+            out['leg_' + n] = {'rotation': [26 * S(t, ph), 0, 0]}
+            out['shin_' + n] = {'rotation': [-18 * max(0, S(t, ph + 0.25)), 0, 0]}
         for i in range(5):
-            out['tail%d' % i] = {'rotation': [8 if i == 0 else 4, 14 * S(t, -i * 0.15), 0]}
+            out['neck%d' % i] = {'rotation': [2 * S(t, i * 0.1, 2), -3 * S(t, i * 0.1), 0]}
+        return tail(out, 12, 1, t)
+
+    def sleep(t):
+        out = {'body': {'position': [0, -6, 0]}, 'neck0': {'rotation': [30, -20, 0]}, 'neck1': {'rotation': [10, -30, 0]},
+               'neck2': {'rotation': [0, -30, 0]}, 'neck3': {'rotation': [-4, -25, 0]}, 'neck4': {'rotation': [-8, -15, 0]},
+               'head': {'rotation': [-20 + 2 * S(t), -10, 0]}, 'jaw': {'rotation': [0, 0, 0]}}
+        for n in ('fl', 'fr', 'bl', 'br'):
+            out['leg_' + n] = {'rotation': [-70 if n[0] == 'f' else 60, 0, 0]}
+            out['shin_' + n] = {'rotation': [60 if n[0] == 'f' else -50, 0, 0]}
+        fold(out, 1.05)
+        for i in range(8):
+            out['tail%d' % i] = {'rotation': [-2, -16 + 1.5 * S(t, -i * 0.1), 0]}
+        out['body']['scale'] = [1 + 0.02 * S(t), 1 + 0.03 * S(t), 1]
         return out
 
     def fly(t):
         f = S(t)
-        out = {'body': {'position': [0, -2 * f, 0], 'rotation': [-4, 0, 0]},
-               'wing_r': {'rotation': [0, 0, 45 * f]}, 'wing_l': {'rotation': [0, 0, -45 * f]},
-               'wing_r_tip': {'rotation': [0, 0, 25 * S(t, -0.12)]}, 'wing_l_tip': {'rotation': [0, 0, -25 * S(t, -0.12)]}}
+        out = {'body': {'position': [0, -2.5 * f, 0], 'rotation': [-3, 0, 0]},
+               'wing_l': {'rotation': [0, 0, -50 * f]}, 'wing_r': {'rotation': [0, 0, 50 * f]},
+               'wing_l_fore': {'rotation': [0, 0, -22 * S(t, -0.12)]}, 'wing_r_fore': {'rotation': [0, 0, 22 * S(t, -0.12)]},
+               'wing_l_hand': {'rotation': [0, 0, -18 * S(t, -0.2)]}, 'wing_r_hand': {'rotation': [0, 0, 18 * S(t, -0.2)]},
+               'neck0': {'rotation': [20, 0, 0]}, 'neck1': {'rotation': [8, 0, 0]}, 'head': {'rotation': [-14 + 3 * f, 0, 0]}}
         for n in ('fl', 'fr', 'bl', 'br'):
-            out['leg_' + n] = {'rotation': [40 if n[0] == 'b' else -20, 0, 0]}
-            out['shin_' + n] = {'rotation': [-30 if n[0] == 'b' else 30, 0, 0]}
-        for i in range(5):
-            out['tail%d' % i] = {'rotation': [2 + 3 * S(t, -i * 0.1), 4 * S(t, -i * 0.1, 0.5), 0]}
+            out['leg_' + n] = {'rotation': [55 if n[0] == 'b' else -25, 0, 0]}
+            out['shin_' + n] = {'rotation': [-35 if n[0] == 'b' else 45, 0, 0]}
+        for i in range(8):
+            out['tail%d' % i] = {'rotation': [-1 + 3 * S(t, -i * 0.1), 3 * S(t, -i * 0.1, 0.5), 0]}
         return out
 
-    def attack(t):
+    def glide(t):
+        out = fly(0.25)
+        out['body'] = {'position': [0, 0, 0], 'rotation': [4, 0, 6 * S(t)]}
+        for w, sgn in (('wing_l', -1), ('wing_r', 1)):
+            out[w] = {'rotation': [0, 0, sgn * (8 + 4 * S(t, 0.1))]}
+            out[w + '_fore'] = {'rotation': [0, 0, sgn * 3]}
+            out[w + '_hand'] = {'rotation': [0, 0, sgn * 2]}
+        return out
+
+    def hover(t):
+        out = fly(t)
+        out['body'] = {'position': [0, -1.5 * S(t), 0], 'rotation': [-28, 0, 0]}
+        out['neck0'] = {'rotation': [38, 0, 0]}
+        out['head'] = {'rotation': [8, 0, 0]}
+        for n in ('fl', 'fr'):
+            out['leg_' + n] = {'rotation': [-10 + 8 * S(t), 0, 0]}
+        return out
+
+    def takeoff(t):
+        crouch = pulse(t, 0, 0.45)
+        jump = pulse(t, 0.35, 1.0)
+        out = fly(min(1, t * 2.2))
+        out['body'] = {'position': [0, -4 * crouch + 8 * jump, 0], 'rotation': [-10 * jump, 0, 0]}
+        for n in ('bl', 'br'):
+            out['leg_' + n] = {'rotation': [-25 * crouch + 40 * jump, 0, 0]}
+        return out
+
+    def breath(t):
+        out = idle(t)
+        rise = pulse(t, 0, 0.25)
+        out['neck0'] = {'rotation': [-14 * rise + 22 * (t > 0.2), 0, 0]}
+        out['neck1'] = {'rotation': [8 * (t > 0.2), 0, 0]}
+        out['neck2'] = {'rotation': [-6, 0, 0]}
+        out['head'] = {'rotation': [-25 * rise - 18 * (t > 0.2), 2 * S(t, 0, 6), 0]}
+        out['jaw'] = {'rotation': [10 * rise + 40 * (t > 0.2) * (1 - pulse(t, 0.97, 1.0)), 0, 0]}
+        out['body'] = {'position': [0, 0, 0], 'rotation': [-4 * rise, 0, 0]}
+        return out
+
+    def bite(t):
         out = idle(t)
         rear = pulse(t, 0, 0.45)
-        bite = pulse(t, 0.35, 0.75)
-        out['neck0'] = {'rotation': [-12 - 25 * rear + 35 * bite, 0, 0]}
-        out['neck1'] = {'rotation': [-8 - 10 * rear + 15 * bite, 0, 0]}
-        out['head'] = {'rotation': [20 + 20 * rear - 30 * bite, 0, 0]}
-        out['jaw'] = {'rotation': [8 + 50 * pulse(t, 0.2, 0.7), 0, 0]}
-        out['body'] = {'position': [0, 0, -4 * bite], 'rotation': [-6 * rear + 6 * bite, 0, 0]}
-        out['wing_r'] = {'rotation': [0, 30 - 30 * rear, -50 + 60 * rear]}
-        out['wing_l'] = {'rotation': [0, -30 + 30 * rear, 50 - 60 * rear]}
+        b = pulse(t, 0.35, 0.8)
+        out['neck0'] = {'rotation': [-20 * rear + 40 * b, 0, 0]}
+        out['neck1'] = {'rotation': [-8 * rear + 16 * b, 0, 0]}
+        out['head'] = {'rotation': [20 * rear - 30 * b, 0, 0]}
+        out['jaw'] = {'rotation': [55 * pulse(t, 0.2, 0.7), 0, 0]}
+        out['body'] = {'position': [0, 0, -3 * b], 'rotation': [-4 * rear + 6 * b, 0, 0]}
         return out
 
-    pal = dict(scales=Scales('a02218', '5a0e0a', 'd8803a'), belly=Scales('d8904a', 'a05a28', 'f0c080'), spike=Solid('2a1410', 0.06),
-               horn=Solid('3a2a24', 0.05, edge='1a100c'), eye=Solid('ffd040', 0.02, glow=True), membrane=Membrane('c0482c', '6a160e'))
-    m.save({'red_wyrm': pal}, {'idle': cycle(3.0, 12, idle), 'walk': cycle(1.0, 8, walk), 'fly': cycle(0.9, 8, fly),
-                               'attack': cycle(0.9, 10, attack, loop=False)})
+    def tail_whip(t):
+        out = idle(t)
+        sw = S(t, -0.25) if 0.1 < t < 0.9 else -1
+        k = pulse(t, 0.05, 0.95)
+        out['body'] = {'rotation': [0, -25 * k * sw, 0]}
+        for i in range(8):
+            out['tail%d' % i] = {'rotation': [0, 18 * k * S(t, -i * 0.06), 0]}
+        return out
+
+    def wing(t):
+        out = idle(t)
+        o = pulse(t, 0, 1)
+        for w, sgn in (('wing_l', 1), ('wing_r', -1)):
+            out[w] = {'rotation': [0, -WYRM_FOLD[w][1] * o, -WYRM_FOLD[w][2] * o + sgn * 30 * o * S(t, 0, 3)]}
+            out[w + '_fore'] = {'rotation': [0, -WYRM_FOLD[w + '_fore'][1] * o, 0]}
+            out[w + '_hand'] = {'rotation': [0, -WYRM_FOLD[w + '_hand'][1] * o, 0]}
+        out['body'] = {'rotation': [-12 * o, 0, 0], 'position': [0, 2 * o, 0]}
+        return out
+
+    def roar(t):
+        out = idle(t)
+        r = pulse(t, 0.05, 0.95)
+        out['neck0'] = {'rotation': [-22 * r, 0, 0]}
+        out['neck1'] = {'rotation': [-10 * r, 0, 0]}
+        out['head'] = {'rotation': [-30 * r, 2 * S(t, 0, 8) * r, 0]}
+        out['jaw'] = {'rotation': [60 * r, 0, 0]}
+        for w in ('wing_l', 'wing_r'):
+            out[w]['rotation'] = [x * (1 - 0.5 * r) for x in out[w]['rotation']]
+        return out
+
+    pal = dict(scales=Striped('b02a1e', '3a0e0c', belly='e6d6be', plate='b8a68e', every=5), plates=Plates('ead9c0', 'b5a189'),
+               spike=Solid('2a1210', 0.06), horn=Solid('3a2a24', 0.05, edge='1a100c'), eye=Solid('ffd040', 0.02, glow=True),
+               membrane=Membrane('a8331f', '5a120c', edge='3a0a08', torn=0.0), membrane_tip=Membrane('9a2c1a', '520e0a', edge='2e0806', torn=0.35))
+    m.save({'red_wyrm': pal}, {'idle': cycle(3.0, 12, idle), 'walk': cycle(1.4, 8, walk), 'sleep': cycle(4.0, 8, sleep),
+                               'fly': cycle(1.0, 8, fly), 'glide': cycle(3.0, 8, glide), 'hover': cycle(0.7, 8, hover),
+                               'takeoff': cycle(1.2, 10, takeoff, loop=False), 'breath': cycle(2.0, 16, breath, loop=False),
+                               'bite': cycle(0.8, 10, bite, loop=False), 'tail': cycle(0.9, 10, tail_whip, loop=False),
+                               'wing': cycle(0.9, 12, wing, loop=False), 'roar': cycle(2.0, 16, roar, loop=False)})
 
 
 # ===================================================================== Hidra Manatita
 def hydra():
+    """Hidra de manatita: cuerpo verde oscuro y macizo, nueve cuellos largos con cabezas de cresta de cristal, el lomo
+    cubierto de racimos de cristal azul y una cola larga."""
     m = Model('manatite_hydra', 256)
     m.bone('root', None, (0, 0, 0))
     m.bone('body', 'root', (0, 18, 0))
-    m.cube('body', (-16, 12, -18), (32, 16, 36), 'scales')
-    m.cube('body', (-14, 10, -16), (28, 3, 32), 'belly')
-    # cristales de manatita en el lomo
-    for (x, z, h, ang) in ((-8, -8, 10, -15), (6, -4, 13, 12), (-3, 6, 9, 5), (9, 10, 8, 20), (-10, 12, 7, -25), (0, -14, 8, 0), (12, -12, 6, 30)):
-        m.cube('body', (x - 1.5, 26, z - 1.5), (3, h, 3), 'crystal', rot=(ang * 0.5, 45, ang), pivot=(x, 27, z))
-    for n, (x, z) in {'fl': (-14, -12), 'fr': (14, -12), 'bl': (-14, 12), 'br': (14, 12)}.items():
-        m.bone('leg_' + n, 'body', (x, 14, z))
-        m.cube('leg_' + n, (x - 4, 0, z - 4), (8, 15, 8), 'scales')
+    m.cube('body', (-15, 11, -16), (30, 17, 22), 'scales')                    # pecho (alto: de ahi salen los cuellos)
+    m.cube('body', (-13, 12, 6), (26, 14, 16), 'scales')                      # cadera
+    m.cube('body', (-12, 9.5, -14), (24, 2, 34), 'belly')
+    rnd = __import__('random').Random(7)
+    # racimos de cristal azul por todo el lomo (cada racimo: uno grande y dos chicos inclinados)
+    for (x, z, h) in ((-9, -10, 11), (8, -8, 13), (0, -2, 15), (-11, 2, 9), (10, 4, 10), (-4, 10, 12), (6, 14, 9),
+                      (-8, 18, 7), (2, 20, 8), (12, -14, 7), (-13, -15, 6), (0, -13, 9)):
+        y0 = 26 if z < 6 else 24.5
+        for j, (dx, dz, hh, tilt) in enumerate(((0, 0, h, 0), (1.8, 1.2, h * 0.6, 28), (-1.6, -1, h * 0.5, -32))):
+            ang = rnd.uniform(-20, 20)
+            m.cube('body', (x + dx - 1.4 + j * 0.2, y0, z + dz - 1.4), (2.8 - j * 0.6, hh, 2.8 - j * 0.6), 'crystal',
+                   rot=(ang * 0.6 + (tilt if j else 0) * 0.5, 45, ang + tilt), pivot=(x + dx, y0 + 0.5, z + dz))
+    for n, (x, z) in {'fl': (-13, -10), 'fr': (13, -10), 'bl': (-12, 14), 'br': (12, 14)}.items():
+        m.bone('leg_' + n, 'body', (x, 15, z))
+        m.cube('leg_' + n, (x - 4.5, 2, z - 4.5), (9, 13, 9), 'scales')
+        m.cube('leg_' + n, (x - 5, 0, z - 6), (10, 2.5, 10), 'scales')
+        m.cube('leg_' + n, (x + (1 if x > 0 else -1) * 3.5 - 1, 9, z - 1), (2, 4, 2), 'crystal', rot=(0, 45, (1 if x > 0 else -1) * 30), pivot=(x, 10, z))
         for k in (-1, 0, 1):
-            m.cube('leg_' + n, (x + k * 2.6 - 0.6, 0, z - 5.5), (1.2, 1.2, 2), CLAW)
-    parent, z = 'body', 18
-    for i in range(4):
+            m.cube('leg_' + n, (x + k * 3 - 0.7, 0, z - 7.5), (1.4, 1.4, 2.2), CLAW)
+    # cola larga y afinada con cristales
+    parent, z = 'body', 22
+    for i in range(7):
         b = 'tail%d' % i
-        th = 12 - i * 2.5
-        m.bone(b, parent, (0, 20, z))
-        m.cube(b, (-th / 2, 20 - th / 2, z), (th, th, 9), 'scales')
-        parent, z = b, z + 9
-    # cinco cuellos con cabezas
-    heads = [(-13, -42), (-6.5, -20), (0, 0), (6.5, 20), (13, 42)]
-    for k, (x, yaw) in enumerate(heads):
-        parent, nz, ny = 'body', -16, 24
-        for i in range(4):
+        th = 12 - i * 1.5
+        y = 20 - i * 1.2
+        m.bone(b, parent, (0, y, z), [5 if i == 0 else 2, 0, 0])
+        m.cube(b, (-th / 2, y - th / 2, z), (th, th, 8.5), 'scales')
+        m.cube(b, (-th / 2 + 1, y - th / 2 - 0.6, z + 0.3), (th - 2, 1, 8), 'belly')
+        if i < 5:
+            m.cube(b, (-1, y + th / 2 - 0.5, z + 3), (2, 5 - i * 0.7, 2), 'crystal', rot=(-25, 45, 0), pivot=(0, y + th / 2, z + 4))
+        parent, z = b, z + 8.5
+    # nueve cuellos: cinco abajo y cuatro arriba, abiertos en abanico
+    heads = [(-12, 23, -55, 22), (-6, 23, -27, 16), (0, 23, 0, 12), (6, 23, 27, 16), (12, 23, 55, 22),
+             (-9, 26.5, -40, 42), (-3, 27.5, -13, 52), (3, 27.5, 13, 52), (9, 26.5, 40, 42)]
+    NSEG = 5
+    NBEND = [0, 2, 3, 3, 2]
+    for k, (x, ny, yaw, lift) in enumerate(heads):
+        parent, nz = 'body', -14 if ny < 25 else -10
+        for i in range(NSEG):
             b = 'n%d_%d' % (k, i)
-            rot = [(-34 if i == 0 else -8 + i * 5), yaw if i == 0 else 0, (yaw * -0.25 if i == 0 else 0)]
-            m.bone(b, parent, (x if i == 0 else x, ny, nz), rot)
-            m.cube(b, (x - 2.6 + i * 0.3, ny - 2.6 + i * 0.3, nz - 7), (5.2 - i * 0.6, 5.2 - i * 0.6, 7.4), 'scales')
-            m.cube(b, (x - 0.6, ny + 2.2 - i * 0.3, nz - 5), (1.2, 1.5, 2), 'crystal')
-            parent, nz = b, nz - 7
+            th = 5.6 - i * 0.45
+            rot = [-lift if i == 0 else NBEND[i], yaw if i == 0 else 0, 0]
+            m.bone(b, parent, (x, ny, nz), rot)
+            m.cube(b, (x - th / 2, ny - th / 2, nz - 6.6), (th, th, 7), 'scales')
+            m.cube(b, (x - th / 2 + 0.7, ny - th / 2 - 0.5, nz - 6.4), (th - 1.4, 0.8, 6.6), 'belly')
+            if i % 2 == 0:
+                m.cube(b, (x - 0.6, ny + th / 2 - 0.4, nz - 4.5), (1.2, 2.2 - i * 0.2, 1.6), 'crystal')
+            parent, nz = b, nz - 6.6
         hb = 'h%d' % k
-        m.bone(hb, parent, (x, ny, nz), [25, 0, 0])
-        m.cube(hb, (x - 3.5, ny - 2.5, nz - 7), (7, 5, 7), 'scales')
-        m.cube(hb, (x - 2.5, ny - 2.5, nz - 12), (5, 3.5, 5), 'scales')
+        m.bone(hb, parent, (x, ny, nz), [18, 0, 0])
+        m.cube(hb, (x - 3.2, ny - 2.4, nz - 6.5), (6.4, 4.8, 6.5), 'scales')
+        m.cube(hb, (x - 2.3, ny - 2.4, nz - 11.5), (4.6, 3.2, 5), 'scales')
+        m.cube(hb, (x - 1.5, ny + 0.6, nz - 11.6), (3, 0.6, 0.6), 'spike')
+        # cresta de cristal: tres puntas hacia atras y dos a los costados
+        for j, (dx, hh, rx, rz) in enumerate(((0, 6, -55, 0), (-1.6, 4.5, -50, 18), (1.6, 4.5, -50, -18), (-2.8, 3, -35, 40), (2.8, 3, -35, -40))):
+            m.cube(hb, (x + dx - 0.7, ny + 2, nz - 4 + j * 0.3), (1.4, hh, 1.4), 'crystal', rot=(rx, 0, rz), pivot=(x + dx, ny + 2, nz - 3.5))
         for side in (-1, 1):
-            m.cube(hb, (x + side * 3.4 - 0.4, ny + 0.5, nz - 5.5), (0.8, 1, 1.4), 'eye')
-            m.cube(hb, (x + side * 2.2 - 0.6, ny + 2, nz - 3), (1.2, 3, 1.2), 'crystal', rot=(-35, 0, side * -20), pivot=(x + side * 2.2, ny + 2, nz - 3))
+            m.cube(hb, (x + side * 3.2 - 0.3 + (0.3 if side > 0 else 0), ny + 0.2, nz - 5.5), (0.6, 0.9, 1.6), 'eye')
         jb = 'j%d' % k
         m.bone(jb, hb, (x, ny - 2, nz - 4))
-        m.cube(jb, (x - 2.3, ny - 4, nz - 11.5), (4.6, 1.8, 8), 'belly')
-        m.cube(hb, (x - 1.6, ny - 3, nz - 11.5), (0.6, 1, 0.6), TEETH)
-        m.cube(hb, (x + 1, ny - 3, nz - 11.5), (0.6, 1, 0.6), TEETH)
+        m.cube(jb, (x - 2.1, ny - 3.8, nz - 11.3), (4.2, 1.6, 7.6), 'belly')
+        for side in (-1, 1):
+            m.cube(hb, (x + side * 1.6 - 0.3, ny - 3.2, nz - 11), (0.6, 1, 0.6), TEETH)
+            m.cube(jb, (x + side * 1.4 - 0.3, ny - 2.6, nz - 10.5), (0.6, 0.9, 0.6), TEETH)
 
     def necks(t, amp=1.0):
         out = {}
-        for k in range(5):
-            ph = k * 0.21
-            for i in range(4):
-                base = -30 if i == 0 else -10 + i * 6
-                out['n%d_%d' % (k, i)] = {'rotation': [base + 5 * amp * S(t, ph + i * 0.08), (heads[k][1] if i == 0 else 0) + 7 * amp * S(t, ph + 0.25 + i * 0.1), 0]}
-            out['h%d' % k] = {'rotation': [25 + 6 * S(t, ph + 0.4), 10 * S(t, ph, 0.5), 0]}
-            out['j%d' % k] = {'rotation': [6 + 8 * pulse((t + ph) % 1, 0.3, 0.5), 0, 0]}
+        for k, (x, ny, yaw, lift) in enumerate(heads):
+            ph = k * 0.137
+            for i in range(NSEG):
+                base = -lift if i == 0 else NBEND[i]
+                out['n%d_%d' % (k, i)] = {'rotation': [base + 4 * amp * S(t, ph + i * 0.08), (yaw if i == 0 else 0) + 6 * amp * S(t, ph + 0.25 + i * 0.1), 0]}
+            out['h%d' % k] = {'rotation': [18 + 6 * S(t, ph + 0.4), 12 * S(t, ph, 0.5), 0]}
+            out['j%d' % k] = {'rotation': [5 + 14 * pulse((t + ph) % 1, 0.3, 0.5), 0, 0]}
         return out
 
     def idle(t):
         out = necks(t)
         out['body'] = {'position': [0, 0.4 * S(t), 0]}
-        for i in range(4):
-            out['tail%d' % i] = {'rotation': [0, 6 * S(t, -i * 0.1), 0]}
+        for i in range(7):
+            out['tail%d' % i] = {'rotation': [0, 5 * S(t, -i * 0.1), 0]}
         return out
 
     def walk(t):
-        out = necks(t, 1.4)
+        out = necks(t, 1.5)
         out['body'] = {'position': [0, 0.7 * abs(S(t)), 0], 'rotation': [0, 2 * S(t), 3 * S(t)]}
         for n, ph in (('fl', 0), ('br', 0), ('fr', 0.5), ('bl', 0.5)):
-            out['leg_' + n] = {'rotation': [20 * S(t, ph), 0, 0]}
-        for i in range(4):
-            out['tail%d' % i] = {'rotation': [0, 12 * S(t, -i * 0.15), 0]}
+            out['leg_' + n] = {'rotation': [22 * S(t, ph), 0, 0]}
+        for i in range(7):
+            out['tail%d' % i] = {'rotation': [0, 10 * S(t, -i * 0.12), 0]}
         return out
 
     def attack(t):
         out = necks(t)
-        for k in (1, 2, 3):
+        for n, k in enumerate((1, 2, 3, 6, 7)):
             back = pulse(t, 0, 0.4)
-            strike = pulse(t, 0.3 + (k - 1) * 0.08, 0.75 + (k - 1) * 0.08)
-            out['n%d_0' % k] = {'rotation': [-30 - 25 * back + 45 * strike, heads[k][1], 0]}
-            out['h%d' % k] = {'rotation': [25 + 15 * back - 30 * strike, 0, 0]}
+            strike = pulse(t, 0.28 + n * 0.06, 0.72 + n * 0.06)
+            lift = heads[k][3]
+            out['n%d_0' % k] = {'rotation': [-lift - 20 * back + 50 * strike, heads[k][2], 0]}
+            out['h%d' % k] = {'rotation': [18 + 20 * back - 35 * strike, 0, 0]}
             out['j%d' % k] = {'rotation': [55 * strike, 0, 0]}
         return out
 
-    pal = dict(scales=Scales('3a5a6a', '1a2a34', '6a8a9a'), belly=Scales('8aa0a0', '4a6060', 'b8cccc'),
-               crystal=Crystal('6a4ad8', 'd8c8ff', '2a1a6a'), eye=Solid('ff4040', 0.02, glow=True))
-    m.save({'manatite_hydra': pal}, {'idle': cycle(4.0, 16, idle), 'walk': cycle(1.6, 8, walk), 'attack': cycle(1.2, 12, attack, loop=False)})
+    def roar(t):
+        out = necks(t, 0.4)
+        r = pulse(t, 0.05, 0.95)
+        for k, (x, ny, yaw, lift) in enumerate(heads):
+            out['n%d_0' % k]['rotation'][0] -= 18 * r
+            out['n%d_0' % k]['rotation'][1] = yaw * (1 + 0.35 * r)
+            out['h%d' % k] = {'rotation': [18 - 40 * r, 3 * S(t, k * 0.1, 8) * r, 0]}
+            out['j%d' % k] = {'rotation': [55 * r, 0, 0]}
+        return out
+
+    pal = dict(scales=Scales('2c4a2a', '16261a', '4a6a3a'), belly=Plates('7a8a5a', '4a5a38'),
+               crystal=Crystal('4aa0ff', 'd8f6ff', '2a5ec8'), eye=Solid('ffe060', 0.02, glow=True), spike=Solid('1a2a1a', 0.05))
+    m.save({'manatite_hydra': pal}, {'idle': cycle(4.0, 16, idle), 'walk': cycle(1.6, 8, walk),
+                                     'attack': cycle(1.2, 12, attack, loop=False), 'roar': cycle(2.0, 12, roar, loop=False)})
 
 
 if __name__ == '__main__':

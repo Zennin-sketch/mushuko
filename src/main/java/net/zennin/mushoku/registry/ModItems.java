@@ -49,7 +49,7 @@ public final class ModItems {
     public static final Item CHALK = register("chalk", new ChalkItem(new Item.Properties().durability(32)));
     /** Tiza rojiza (tiza rodeada de redstone): dibuja lineas que, imbuidas con Infusion de Mana, conducen redstone. */
     public static final Item REDSTONE_CHALK = register("redstone_chalk", new net.zennin.mushoku.item.RedstoneChalkItem(new Item.Properties().durability(64)));
-    public static final Item INKAND_QUILL = single("inkand_quill");
+    public static final Item INKAND_QUILL = register("inkand_quill", new Item(new Item.Properties().durability(8)));  // 8 grabados
     public static final Item INK_VIAL = simple("ink_vial");
     public static final Item MANA_POTION_SMALL = register("mana_potion_small", new net.zennin.mushoku.item.ManaPotionItem(150, new Item.Properties().stacksTo(16)));
     public static final Item MANA_POTION = register("mana_potion", new net.zennin.mushoku.item.ManaPotionItem(400, new Item.Properties().stacksTo(16)));

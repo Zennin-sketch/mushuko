@@ -112,13 +112,16 @@ public final class ModEntities {
             new Beast("treant_elder", "treant", "treant_elder", 1.6f, 5.0f, 1.25f, 140, 10, 0.2),
             new Beast("treant_zombie", "treant", "treant_zombie", 1.2f, 4.0f, 1f, 70, 7, 0.22),
             new Beast("treant_stone", "treant", "treant_stone", 1.3f, 4.0f, 1f, 110, 8, 0.18),
-            new Beast("red_wyrm", "red_wyrm", "red_wyrm", 2.6f, 2.2f, 1f, 220, 12, 0.3),
+            new Beast("red_wyrm", "red_wyrm", "red_wyrm", 9f, 8f, net.zennin.mushoku.entity.creature.WyrmEntity.SCALE, 500, 18, 0.32),
             new Beast("manatite_hydra", "manatite_hydra", "manatite_hydra", 4.5f, 5.0f, 1.4f, 600, 16, 0.24));
     public static final java.util.Map<String, EntityType<AnimatedMonster>> BEAST_TYPES = new java.util.LinkedHashMap<>();
     static {
         for (Beast b : BEASTS)
-            BEAST_TYPES.put(b.id(), creature(b.id(), b.w(), b.h(),
-                    (t, l) -> new AnimatedMonster(t, l, new AnimatedMonster.Anims("idle", "walk", "attack"))));
+            BEAST_TYPES.put(b.id(), b.id().equals("red_wyrm")
+                    ? Registry.register(BuiltInRegistries.ENTITY_TYPE, MushokuMod.id(b.id()), EntityType.Builder.<AnimatedMonster>of(
+                            (t, l) -> new net.zennin.mushoku.entity.creature.WyrmEntity(t, l), MobCategory.MONSTER)
+                            .sized(b.w(), b.h()).fireImmune().clientTrackingRange(16).build(b.id()))
+                    : creature(b.id(), b.w(), b.h(), (t, l) -> new AnimatedMonster(t, l, new AnimatedMonster.Anims("idle", "walk", "attack"))));
     }
 
     public static final EntityType<net.zennin.mushoku.entity.ThrownMushokuItem> THROWN_ITEM = Registry.register(BuiltInRegistries.ENTITY_TYPE,
@@ -226,7 +229,9 @@ public final class ModEntities {
                 {0x8A8680, 0xFFA040}, {0xA02218, 0xD8803A}, {0x3A5A6A, 0x6A4AD8}};
         for (int i = 0; i < BEASTS.size(); i++) {
             Beast b = BEASTS.get(i);
-            FabricDefaultAttributeRegistry.register(BEAST_TYPES.get(b.id()), AnimatedMonster.attributes(b.health(), b.damage(), b.speed(), 24));
+            FabricDefaultAttributeRegistry.register(BEAST_TYPES.get(b.id()), b.id().equals("red_wyrm")
+                    ? net.zennin.mushoku.entity.creature.WyrmEntity.wyrmAttributes()
+                    : AnimatedMonster.attributes(b.health(), b.damage(), b.speed(), 24));
             egg(b.id(), BEAST_TYPES.get(b.id()), beastEgg[i][0], beastEgg[i][1]);
         }
         egg("sg_bandit", SG_BANDIT, 0x993300, 0xCC0033);

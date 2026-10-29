@@ -99,18 +99,38 @@ def paint(spec):
     if long_hair:
         for y in range(5, 8):
             F(1, y, hair_px(1, y) if y >= 6 else None); F(6, y, hair_px(6, y) if y >= 6 else None)
-    # ojos grandes: fila de arriba = pestana/iris oscuro, abajo iris claro con brillo
+    # ojos de 2 px de alto (filas 4 y 5 de la cara) en el estilo de Fresh Moves: cada fila tiene un pixel de afuera
+    # (blanco o pestana) y uno de adentro (iris). Ademas se copian al rincon libre de la textura de la cabeza (u 4..7,
+    # v 2..5), que es de donde el pack de "solo ojos" saca los ojos que se mueven, parpadean y siguen la mirada.
+    lash = spec.get('lash', sh(hair, 0.35) if female else (238, 238, 242))
+    white = (244, 244, 248)
+    eye_rows = {4: (lash, sh(eye, 0.8 if female else 1.1)), 5: (white, sh(eye, 1.22 if female else 0.65))}
+    lids = {4: sh(lash, 0.9) if female else sh(skin, 0.92), 5: sh(skin, 1.0)}
+    raw = s.img.putpixel
+    for row, (outer, inner) in eye_rows.items():
+        F(1, row, outer); F(2, row, inner); F(5, row, inner); F(6, row, outer)
+        v = 2 * (row - 3)  # fila 4 de la cara -> v 2..3, fila 5 -> v 4..5 (como en la skin de Steve del pack)
+        for x, c in ((4, lids[row]), (5, lids[row]), (6, lids[row]), (7, lids[row])):
+            raw((x, v), tuple(c) + (255,))
+        for x, c in ((4, outer), (5, inner), (6, inner), (7, outer)):
+            raw((x, v + 1), tuple(c[:3]) + (255,))
+    if spec.get('liner'):  # delineado en punta hacia afuera
+        F(0, 4, spec['liner']); F(7, 4, spec['liner'])
+    # cejas: en la cara (fila 3) y en el rincon de cejas del pack (u 60..63, v 0) para que se muevan con la expresion
+    brow = sh(hair, 0.55)
+    for x in (1, 2, 5, 6):
+        if fringe[x] <= 3:
+            F(x, 3, brow)
+    for x in range(60, 64):
+        raw((x, 0), tuple(brow) + (255,))
+    # boca, rubor, pecas y cicatriz
     if female:
-        for ex in (1, 5):
-            F(ex, 4, sh(eye, 0.35)); F(ex + 1, 4, sh(eye, 0.45))
-            F(ex, 5, sh(eye, 1.1)); F(ex + 1, 5, sh(eye, 0.9))
-            F(ex + (1 if ex == 1 else 0), 4, (250, 248, 255))  # brillo del lado de adentro
         F(1, 6, (240, 160, 160)); F(6, 6, (240, 160, 160))
-        F(3, 7, sh(skin, 0.88)); F(4, 7, sh(skin, 0.88))
+        lip = spec.get('lips', sh(skin, 0.82))
+        F(3, 7, lip); F(4, 7, sh(lip, 0.9))
+        for (x, y) in spec.get('freckles', ()):
+            F(x, y, sh(skin, 0.78))
     else:
-        for ex, white in ((2, 1), (5, 6)):
-            F(white, 4, (238, 238, 242)); F(white, 5, (230, 230, 236))
-            F(ex, 4, sh(eye, 1.15)); F(ex, 5, sh(eye, 0.6))
         F(3, 7, sh(skin, 0.86)); F(4, 7, sh(skin, 0.86))
         if spec.get('scar'):
             F(5, 6, sh(skin, 0.75)); F(6, 7, sh(skin, 0.75))
@@ -132,6 +152,16 @@ def paint(spec):
             if f == 'bottom':
                 return None
             return sh(hood, (1.08 if y < 2 else 0.95 if y < 6 else 0.82) * (0.92 if (x + y) % 4 == 0 else 1))
+        if spec.get('bandana'):
+            bd = spec['bandana']
+            if f in ('front', 'right', 'left', 'back') and y in (1, 2):
+                return sh(bd, (1.05 if y == 1 else 0.85) * (1.25 if (x * 3 + y) % 5 == 0 else 1))
+            if f == 'top':
+                return sh(bd, 0.95 * (1.2 if (x + y) % 4 == 0 else 1))
+            if f == 'back' and 3 <= y <= 6 and x in (3, 4, 5) and (x - 3) <= (y - 3) + 1:
+                return sh(bd, 0.8 if x == 4 else 0.92)
+        if spec.get('ponytail') and f == 'back' and x in (3, 4) and y >= 1:
+            return spec['ponytail'] if y == 2 else hair_px(x, y)
         if spec.get('band') and y == 2 and f in ('front', 'right', 'left', 'back'):
             return spec['band'] if f != 'front' or 1 <= x <= 6 else sh(spec['band'], 0.8)
         if f == 'back' and long_hair:
@@ -297,13 +327,13 @@ SPECS = [
          fringe=[2, 3, 3, 2, 2, 3, 3, 2], mask=(140, 28, 30), shirt=(120, 36, 36), top=(92, 62, 40), vest_sleeves=True,
          belt=(50, 32, 20), pants=(70, 62, 52), boots=(54, 38, 26), bracer=(92, 62, 40), lace=(200, 180, 140), pouch=(110, 76, 44), dagger=True, pauldron=(70, 50, 34), scar=True),
     dict(name='outlaw_m_archer', female=False, slim=False, skin=SKIN_L, hair=(150, 110, 60), eye=(70, 120, 60),
-         fringe=[2, 2, 3, 2, 1, 2, 3, 2], hood=(64, 86, 48), shirt=(86, 110, 60), top=(110, 80, 50), vest_sleeves=True,
+         fringe=[2, 2, 3, 2, 1, 2, 3, 2], bandana=(176, 28, 30), shirt=(86, 110, 60), top=(110, 80, 50), vest_sleeves=True,
          belt=(60, 40, 24), pants=(92, 80, 60), boots=(70, 48, 30), strap=(60, 40, 22), glove=(90, 60, 36), cape=(64, 86, 48), pouch=(96, 70, 40)),
-    dict(name='outlaw_f_melee', female=True, slim=True, long=True, skin=SKIN_L, hair=(150, 30, 40), eye=(200, 60, 70),
-         fringe=[3, 3, 2, 2, 3, 3, 2, 2], band=(30, 30, 34), shirt=(222, 214, 232), top=(60, 40, 34), crop=True, vneck=True,
+    dict(name='outlaw_f_melee', female=True, slim=True, long=True, skin=SKIN_L, hair=(150, 30, 40), eye=(220, 170, 60),
+         fringe=[4, 3, 3, 2, 1, 2, 3, 4], ponytail=(30, 30, 34), liner=(36, 18, 24), lash=(48, 14, 22), lips=(196, 72, 84), shirt=(222, 214, 232), top=(60, 40, 34), crop=True, vneck=True,
          belt=(40, 28, 20), pants=(48, 44, 50), boots=(40, 30, 26), boot_h=6, bracer=(60, 40, 34), lace=(150, 30, 40), dagger=True, pouch=(80, 50, 40)),
     dict(name='outlaw_f_archer', female=True, slim=True, long=True, skin=SKIN_M, hair=(40, 46, 60), eye=(90, 170, 120),
-         fringe=[2, 3, 3, 2, 2, 3, 3, 2], hood=(70, 92, 56), shirt=(150, 170, 110), top=(96, 70, 46), vest_sleeves=True,
+         fringe=[3, 2, 3, 3, 2, 2, 3, 3], bandana=(176, 28, 30), freckles=((2, 6), (5, 6), (1, 7), (6, 7)), lips=(204, 124, 124), shirt=(150, 170, 110), top=(96, 70, 46), vest_sleeves=True,
          belt=(60, 40, 24), pants=(80, 70, 56), boots=(64, 44, 28), strap=(70, 46, 26), glove=(96, 66, 40), skirt=(96, 70, 46), pouch=(110, 80, 50)),
     # --- bestias (oso, perro, gato)
     dict(name='beast_bear_m', female=False, slim=False, skin=SKIN_T, hair=(96, 62, 36), eye=(150, 100, 40),

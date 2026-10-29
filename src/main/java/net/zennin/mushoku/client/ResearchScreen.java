@@ -13,14 +13,14 @@ import static net.zennin.mushoku.client.MedievalUi.*;
 
 /** Mesa de Investigacion: pergamino con los tres huecos, la flecha rúnica, la piedra que sale y el recetario al costado. */
 public class ResearchScreen extends AbstractContainerScreen<ResearchMenu> {
-    private static final int BOOK_W = 118, ENG_W = 132, ROW = 13, ROWS = 11;
+    private static final int BOOK_W = 140, ENG_W = 132, ROW = 13, ROWS = 11;
     private int scroll;
 
     public ResearchScreen(ResearchMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
         imageWidth = 176;
         imageHeight = 166;
-        inventoryLabelY = 72;
+        inventoryLabelY = 71;
     }
 
     @Override
@@ -33,8 +33,8 @@ public class ResearchScreen extends AbstractContainerScreen<ResearchMenu> {
     protected void renderBg(GuiGraphics g, float pt, int mx, int my) {
         int x = leftPos, y = topPos;
         g.blitSprite(WOOD, x - 4, y - 4, imageWidth + 8, imageHeight + 8);
-        g.blitSprite(PARCHMENT, x, y, imageWidth, 78);
-        g.blitSprite(PARCHMENT, x, y + 78, imageWidth, imageHeight - 78);
+        g.blitSprite(PARCHMENT, x, y, imageWidth, imageHeight);
+        g.fill(x + 6, y + 80, x + imageWidth - 6, y + 81, 0x405A4630);  // linea sobre el inventario
         // huecos
         for (int i = 0; i < 3; i++) slot(g, x + ResearchMenu.IN_X + i * 22 - 1, y + ResearchMenu.IN_Y - 1);
         slot(g, x + ResearchMenu.OUT_X - 5, y + ResearchMenu.OUT_Y - 5, 26);
@@ -55,31 +55,31 @@ public class ResearchScreen extends AbstractContainerScreen<ResearchMenu> {
             Component c = Component.translatable("gui.remushoku.research.cost", cost);
             g.drawString(font, c, x + imageWidth / 2 - font.width(c) / 2 + 10, y + 58, ok ? INK_GREEN : INK_RED, false);
         } else {
-            Component c = Component.translatable("gui.remushoku.research.hint");
-            g.drawString(font, c, x + imageWidth / 2 - font.width(c) / 2, y + 58, INK_SOFT, false);
+            var lines = font.split(Component.translatable("gui.remushoku.research.hint"), imageWidth - 16);
+            int yy = y + 58 - (lines.size() - 1) * 5;
+            for (var line : lines) { g.drawString(font, line, x + imageWidth / 2 - font.width(line) / 2, yy, INK_SOFT, false); yy += 9; }
         }
         // recetario
         int bx = leftPos - BOOK_W - 4, by = y;
         g.blitSprite(WOOD, bx - 4, by - 4, BOOK_W + 8, imageHeight + 8);
         g.blitSprite(PARCHMENT, bx, by, BOOK_W, imageHeight);
         g.drawString(font, Component.translatable("gui.remushoku.research.book"), bx + 6, by + 6, INK, false);
-        int ry = by + 20;
+        bookHover = ItemStack.EMPTY;
+        int ry = by + 19;
         for (ResearchRecipes.Recipe r : ResearchRecipes.ALL) {
+            boolean rowHover = mx >= bx + 2 && mx < bx + BOOK_W - 2 && my >= ry - 2 && my < ry + 18;
+            if (rowHover) g.fill(bx + 2, ry - 2, bx + BOOK_W - 2, ry + 18, 0x30FFE8A0);
+            g.fill(bx + 5, ry + 18, bx + BOOK_W - 5, ry + 19, 0x305A4630);
             int rx = bx + 5;
-            if (r.stones() > 0) {
-                icon(g, new ItemStack(SpellData.stoneFor(r.stoneTier())), rx, ry, 0.75f);
-                g.drawString(font, "3", rx + 10, ry + 6, INK, false);
-                rx += 18;
-            }
-            for (ResearchRecipes.Need n : r.needs()) {
-                icon(g, new ItemStack(n.item()), rx, ry, 0.75f);
-                if (n.count() > 1) g.drawString(font, String.valueOf(n.count()), rx + 10, ry + 6, INK, false);
-                rx += 18;
-            }
-            g.drawString(font, ">", rx + 1, ry + 3, INK_SOFT, false);
-            icon(g, ResearchRecipes.result(r), rx + 9, ry, 0.75f);
-            g.drawString(font, r.mana() + "✦", bx + BOOK_W - 6 - font.width(r.mana() + "✦"), ry + 3, 0xFF2A5FA0, false);
-            ry += 20;
+            java.util.List<ItemStack> ins = new java.util.ArrayList<>();
+            if (r.stones() > 0) ins.add(new ItemStack(SpellData.stoneFor(r.stoneTier()), 3));
+            for (ResearchRecipes.Need n : r.needs()) ins.add(new ItemStack(n.item(), n.count()));
+            for (ItemStack st : ins) { rx = item(g, st, rx, ry, mx, my) + 2; }
+            g.drawString(font, "→", rx + 1, ry + 4, INK_SOFT, false);
+            rx = item(g, ResearchRecipes.result(r), rx + 10, ry, mx, my);
+            String mana = r.mana() + "✦";
+            g.drawString(font, mana, bx + BOOK_W - 6 - font.width(mana), ry + 4, 0xFF2A5FA0, false);
+            ry += 21;
         }
         // grabado: lista de hechizos que conoce (con la pluma y un pergamino en blanco en los huecos)
         int ex = leftPos + imageWidth + 4, ey = topPos;
@@ -110,6 +110,23 @@ public class ResearchScreen extends AbstractContainerScreen<ResearchMenu> {
         }
         if (list.size() > ROWS)
             g.drawString(font, (scroll + 1) + "-" + Math.min(list.size(), scroll + ROWS) + "/" + list.size(), ex + 6, ey + imageHeight - 12, INK_SOFT, false);
+    }
+
+    private ItemStack bookHover = ItemStack.EMPTY;
+
+    /** Item del recetario en tamano real con su cantidad; devuelve donde termina. */
+    private int item(GuiGraphics g, ItemStack st, int x, int y, int mx, int my) {
+        g.renderItem(st, x, y);
+        g.renderItemDecorations(font, st, x, y);
+        if (mx >= x && mx < x + 16 && my >= y && my < y + 16) bookHover = st;
+        return x + 16;
+    }
+
+    @Override
+    public void render(GuiGraphics g, int mx, int my, float pt) {
+        super.render(g, mx, my, pt);
+        renderTooltip(g, mx, my);
+        if (!bookHover.isEmpty()) g.renderTooltip(font, bookHover, mx, my);
     }
 
     private java.util.List<net.zennin.mushoku.magic.Spell> known() {
@@ -154,9 +171,4 @@ public class ResearchScreen extends AbstractContainerScreen<ResearchMenu> {
         g.drawString(font, playerInventoryTitle, 8, inventoryLabelY, INK_SOFT, false);
     }
 
-    @Override
-    public void render(GuiGraphics g, int mx, int my, float pt) {
-        super.render(g, mx, my, pt);
-        renderTooltip(g, mx, my);
-    }
 }
