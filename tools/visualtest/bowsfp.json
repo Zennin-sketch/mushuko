@@ -144,6 +144,57 @@
   {
    "op": "shot",
    "v": "fp_after"
+  },
+  {
+   "op": "fp",
+   "v": false
+  },
+  {
+   "op": "wait",
+   "t": 10
+  },
+  {
+   "op": "shot",
+   "v": "tp_mid"
+  },
+  {
+   "op": "reload"
+  },
+  {
+   "op": "wait",
+   "t": 8
+  },
+  {
+   "op": "fp",
+   "v": true,
+   "fov": 70
+  },
+  {
+   "op": "wait",
+   "t": 3
+  },
+  {
+   "op": "shot",
+   "v": "fp_back_load"
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "shot",
+   "v": "fp_back_idle"
+  },
+  {
+   "op": "fpuse"
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "shot",
+   "v": "fp_back_draw"
   }
  ]
 }
