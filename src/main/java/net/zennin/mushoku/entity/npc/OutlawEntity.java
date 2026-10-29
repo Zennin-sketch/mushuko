@@ -89,7 +89,8 @@ public class OutlawEntity extends Monster implements RangedAttackMob {
         if (archer) setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
         else setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(random.nextFloat() < 0.35f ? Items.IRON_AXE
                 : random.nextFloat() < 0.5f ? Items.IRON_SWORD : Items.STONE_SWORD));
-        if (random.nextFloat() < 0.25f) setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
+        // los arqueros llevan su bandana roja a la vista: sin casco
+        if (!archer && random.nextFloat() < 0.25f) setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
     }
 
     @Override
