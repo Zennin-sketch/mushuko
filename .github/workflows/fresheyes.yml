@@ -1,0 +1,30 @@
+name: Fresh Moves solo ojos
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bajar Fresh Moves y sacarle el cuerpo
+        run: |
+          mkdir -p mods rp
+          python3 - <<'PY'
+          import json, urllib.request, urllib.parse
+          UA={'User-Agent':'mushoku-fresheyes'}
+          for gv in (['1.21.1'], ['1.21'], None):
+              q = {'game_versions': json.dumps(gv)} if gv else {}
+              vs = json.load(urllib.request.urlopen(urllib.request.Request('https://api.modrinth.com/v2/project/tras-fresh-player/version?' + urllib.parse.urlencode(q), headers=UA)))
+              if vs: break
+          f = next((x for x in vs[0]['files'] if x.get('primary')), vs[0]['files'][0])
+          print(vs[0]['version_number'], f['filename'])
+          open('rp/fm.zip', 'wb').write(urllib.request.urlopen(urllib.request.Request(f['url'], headers=UA)).read())
+          PY
+          python3 tools/fresh/eyes_only.py rp/fm.zip "rp/Fresh Moves solo ojos (Mushoku).zip"
+          unzip -l rp/fm.zip | grep -i -E "licen|terms|readme" || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fresh-moves-solo-ojos
+          path: rp/Fresh Moves solo ojos (Mushoku).zip

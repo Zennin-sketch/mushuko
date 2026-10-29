@@ -209,6 +209,7 @@ public final class SpellEffects {
     /** Rafaga: te impulsa hacia donde miras. */
     private static void blast(ServerPlayer p, ServerLevel level) {
         Vec3 look = p.getLookAngle().scale(1.5);
+        Escape.grant(p); // no te agarran telaranas ni lodo mientras dura el impulso
         p.setDeltaMovement(look);
         p.hurtMarked = true;
         p.resetFallDistance();

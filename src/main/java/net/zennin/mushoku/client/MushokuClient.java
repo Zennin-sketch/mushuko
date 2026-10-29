@@ -112,6 +112,8 @@ public class MushokuClient implements ClientModInitializer {
         });
         ClientPlayNetworking.registerGlobalReceiver(ActionPayload.TYPE, (payload, context) -> {
             if (payload.action() == ActionPayload.OPEN_CLASS_SCREEN) context.client().setScreen(new ClassPickScreen());
+            if (payload.action() == ActionPayload.ESCAPE && context.client().level != null)
+                net.zennin.mushoku.magic.Escape.clientUntil = context.client().level.getGameTime() + net.zennin.mushoku.magic.Escape.TICKS;
         });
         ClientPlayNetworking.registerGlobalReceiver(SwordSyncPayload.TYPE, (payload, context) -> ClientSwordState.set(payload.data()));
         ClientPlayNetworking.registerGlobalReceiver(GuildSyncPayload.TYPE, (payload, context) -> ClientGuildState.set(payload.data()));

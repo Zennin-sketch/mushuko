@@ -150,6 +150,9 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
     private final Matrix4f[] kneeTop = {new Matrix4f(), new Matrix4f()}, kneeBot = {new Matrix4f(), new Matrix4f()};
     private final Matrix4f[] kneeTopInv = {new Matrix4f(), new Matrix4f()}, kneeBotInv = {new Matrix4f(), new Matrix4f()};
     private final boolean[] knee = new boolean[2];
+    /** Caida: 0 parado, 1 cayendo rapido (suavizado por entidad). La tela se levanta y se abre. */
+    private float fall;
+    private final java.util.Map<Integer, float[]> falls = new java.util.HashMap<>();
     private static final String[] LEGS = {"rightLeg", "leftLeg"};
     private final java.util.Map<Integer, float[]> springs = new java.util.HashMap<>();
     private String curBone;
@@ -213,6 +216,21 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
         }
         lagR.set(legAngle(-1.9f, st[0] + base.body.xRot * 0, base.rightLeg.zRot));
         lagL.set(legAngle(1.9f, st[2], base.leftLeg.zRot));
+        // caida: cuanto baja por tick (los otros jugadores no mandan su velocidad: se usa el cambio de altura)
+        fall = 0;
+        if (currentEntity != null && !currentEntity.onGround()) {
+            float[] fs = falls.computeIfAbsent(id, k -> new float[]{0, now});
+            float fdt = Math.min(0.1f, Math.max(0f, (now - fs[1]) / 1000f));
+            fs[1] = now;
+            double dy = currentEntity.getY() - currentEntity.yOld;
+            float target = (float) Math.max(0, Math.min(1, (-dy - 0.18) / 0.7));
+            fs[0] += (target - fs[0]) * Math.min(1f, fdt * 6f);
+            fall = fs[0];
+        } else if (currentEntity != null) {
+            float[] fs = falls.get(id);
+            if (fs != null) { fs[0] = 0; fs[1] = now; }
+        }
+        if (falls.size() > 64) falls.clear();
         // las piernas reales de este cuadro, para mezclar el angulo atrasado con su posicion
         if (springs.size() > 64) springs.clear();
     }
@@ -269,6 +287,15 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
                 if (knee[0] || knee[1]) {
                     float dr = Math.abs(p.x - 1.9f), dl = Math.abs(p.x + 1.9f);
                     kneeSkin(out, w, Math.max(0, Math.min(1, 0.5f + (dl - dr) / 6.5f)), a);
+                }
+                // cayendo: la tela se levanta y se abre (mas cuanto mas abajo cuelga), con un aleteo
+                if (fall > 0.01f && dh > 0) {
+                    float k = fall * Math.min(dh, 16f);
+                    float ang = (float) Math.atan2(p.z, p.x);
+                    float flap = 1f + 0.18f * (float) Math.sin(net.minecraft.Util.getMillis() / 55.0 + ang * 3);
+                    out.y += k * 0.5f * flap;
+                    float r = (float) Math.sqrt(p.x * p.x + p.z * p.z);
+                    if (r > 0.5f) { out.x += p.x / r * k * 0.32f * flap; out.z += p.z / r * k * 0.32f * flap; }
                 }
                 // choque: si la tela quedo adentro de una pierna, sale por la cara mas cercana (adelante/atras o costado)
                 collide(out, a);

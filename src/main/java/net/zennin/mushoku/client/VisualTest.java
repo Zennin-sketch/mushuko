@@ -43,6 +43,7 @@ public final class VisualTest {
     private static JsonArray steps;
     private static int index, wait, ticksInWorld, walkTicks, dummyYaw;
     private static float walkSpeed = 0.55f;
+    private static int fallTicks;
     private static boolean created;
     private static RemotePlayer dummy;
 
@@ -148,6 +149,7 @@ public final class VisualTest {
                 c.getMethod("play", AbstractClientPlayer.class, String.class, int.class).invoke(null, dummy, s.get("v").getAsString(), 0);
             }
             case "ready" -> ClientReadySpell.set(dummy.getId(), s.get("v").getAsString());
+            case "fall" -> fallTicks = s.get("t").getAsInt();
             case "walk" -> {
                 walkTicks = s.get("t").getAsInt();
                 walkSpeed = s.has("speed") ? s.get("speed").getAsFloat() : 0.55f;
@@ -214,6 +216,17 @@ public final class VisualTest {
         dummy.yBodyRotO = dummyYaw;
         dummy.yHeadRot = dummyYaw;
         dummy.yHeadRotO = dummyYaw;
+        if (fallTicks > 0) {
+            // cayendo (simulado): no toca el piso y "baja" 0.8 por tick
+            fallTicks--;
+            dummy.setOnGround(false);
+            dummy.yOld = dummy.getY() + 0.8;
+            dummy.yo = dummy.getY() + 0.8;
+        } else if (dummy.yOld != dummy.getY()) {
+            dummy.setOnGround(true);
+            dummy.yOld = dummy.getY();
+            dummy.yo = dummy.getY();
+        }
         if (walkTicks > 0) {
             walkTicks--;
             dummy.walkAnimation.update(walkSpeed, 1.0f);

@@ -32,8 +32,8 @@ public class QuagmireMudBlock extends Block {
 
     @Override
     protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
-        // igual que la telarana; salvo que vaya rapido (Rafaga de viento y otros empujones): asi se escapa
-        if (entity.getDeltaMovement().lengthSqr() > 0.6 * 0.6) return;
+        // igual que la telarana; salvo durante la Rafaga (te saca del lodo)
+        if (net.zennin.mushoku.magic.Escape.active(entity)) return;
         entity.makeStuckInBlock(state, new Vec3(0.25, 0.05f, 0.25));
     }
 
