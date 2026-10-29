@@ -93,7 +93,7 @@ public class NpcChestLayer<T extends Mob> extends RenderLayer<T, PlayerModel<T>>
             pose.mulPose(Axis.XP.rotation(-0.32f - 0.05f * s + sp[0] * 0.12f * lag));
             pose.mulPose(Axis.ZP.rotation(sp[2] * 0.06f * lag));
             pose.scale(0.92f + 0.08f * s, 0.85f + 0.15f * s, 0.25f + 0.55f * s);
-            pose.translate(-px / 16f, 0, 2f / 16f);
+            pose.translate(-px / 16f, 0, 0);
             var vc = buffers.getBuffer(RenderType.entityCutoutNoCull(texture));
             (side == 0 ? right : left).render(pose, vc, light, overlay);
             var vo = buffers.getBuffer(RenderType.entityTranslucent(texture));
