@@ -40,6 +40,10 @@ body { background: var(--night); color: var(--parchment); font-family: var(--bod
 .xhair { position: absolute; left: 50%; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; pointer-events: none; display: none; }
 .xhair::before, .xhair::after { content: ""; position: absolute; background: rgba(255,255,255,.85); mix-blend-mode: difference; }
 .xhair::before { left: 8px; top: 0; width: 2px; height: 18px; } .xhair::after { top: 8px; left: 0; height: 2px; width: 18px; }
+.fpframe { position: absolute; border: 1px dashed rgba(255,255,255,.35); pointer-events: none; display: none; }
+.fpcams { position: absolute; left: 12px; top: 12px; display: none; gap: 4px; }
+.fpcams button { font: 500 12px var(--body); }
+.fpcams button.on { background: var(--gold); color: #17130b; }
 .fpnote { position: absolute; left: 12px; bottom: 10px; font: 500 12px var(--body); color: #ece3cf; background: rgba(14,17,23,.7); padding: 4px 8px; border-radius: 6px; display: none; }
 .bar { display: grid; gap: 8px; padding-block: 10px 14px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: 16px;
   border-top: 1px solid var(--line); background: var(--slate); }
@@ -119,9 +123,13 @@ aside h2:first-child { margin-top: 0; }
     <div id="view">
       <div class="hit" id="hit">IMPACTO</div>
       <div class="xhair" id="xhair"></div>
-      <div class="fpnote" id="fpnote">Vista del jugador: camara en los ojos, mirando al frente (como en el juego)</div>
+      <div class="fpframe" id="fpframe"></div>
+      <div class="fpnote" id="fpnote"></div>
+      <div class="fpcams" id="fpcams" role="group" aria-label="Camara de primera persona">
+        <button id="fp-view" class="on">Vista del jugador</button><button id="fp-free">Camara libre</button><button id="fp-exit">Volver a 3a persona</button>
+      </div>
       <div class="cams" role="group" aria-label="Camara">
-        <button id="cam-34">3/4 izq.</button><button id="cam-r34">3/4 der.</button><button id="cam-front">Frente</button><button id="cam-side">Lado</button><button id="cam-back">Atras</button><button id="cam-top">Arriba</button><button id="cam-fp" title="Lo que ve el jugador en el juego">1a persona</button>
+        <button id="cam-34">3/4 izq.</button><button id="cam-r34">3/4 der.</button><button id="cam-front">Frente</button><button id="cam-side">Lado</button><button id="cam-back">Atras</button><button id="cam-top">Arriba</button><button id="cam-fp" title="Editor de la primera persona: lo que ve el jugador en el juego">1a persona</button>
       </div>
     </div>
     <div class="bar">
@@ -152,6 +160,7 @@ aside h2:first-child { margin-top: 0; }
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { TransformControls } from 'three/addons/controls/TransformControls.js';
 
 const DATA = /*__DATA__*/null;
 const PI = Math.PI, D = PI / 180;
@@ -273,28 +282,9 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 0.95, 0); controls.enableDamping = true; controls.minDistance = 1.5; controls.maxDistance = 12;
 const CAMS = { '34': [-2.6, 1.7, -3.4], r34: [2.6, 1.5, -3.4], front: [0, 1.3, -4.2], side: [-4.2, 1.3, 0], back: [0, 1.6, 4.2], top: [0.01, 5.5, -0.6] };
 let camKey = '34';
-/* Primera persona: la camara queda en los ojos (1.62 bloques), mirando al frente, con el FOV del juego (70).
-   Se ocultan cabeza, torso y piernas, como cuando Player Animator dibuja los brazos en primera persona. */
-let fp = false;
-function fpVisible() {
-  if (!rig.parts) return;
-  for (const n of ['head', 'torso', 'rightLeg', 'leftLeg']) if (rig.parts[n]) rig.parts[n].g.visible = !fp;
-}
-function fpCamera() { camera.position.set(0, 1.62, 0); camera.lookAt(0, 1.62, -1); }
-function setFP(on) {
-  fp = on;
-  document.getElementById('cam-fp').classList.toggle('on', on);
-  document.getElementById('xhair').style.display = on ? 'block' : 'none';
-  document.getElementById('fpnote').style.display = on ? 'block' : 'none';
-  camera.fov = on ? 70 : 38; camera.updateProjectionMatrix();
-  controls.enabled = !on;
-  fpVisible();
-  if (on) fpCamera();
-}
-function cam(k) { if (fp) setFP(false); camKey = k; const f = camera.aspect < 0.9 ? 1.6 : 1; camera.position.set(...CAMS[k].map((v, i) => i === 1 ? v : v * f)); controls.target.set(0, 0.95, 0); controls.update(); }
+function cam(k) { camKey = k; const f = camera.aspect < 0.9 ? 1.6 : 1; camera.position.set(...CAMS[k].map((v, i) => i === 1 ? v : v * f)); controls.target.set(0, 0.95, 0); controls.update(); }
 cam('34');
 for (const k of Object.keys(CAMS)) document.getElementById('cam-' + k).onclick = () => cam(k);
-document.getElementById('cam-fp').onclick = () => { if (fp) cam(camKey); else setFP(true); };
 
 scene.add(new THREE.HemisphereLight(0xfff2dc, 0x223044, 1.15));
 const sun = new THREE.DirectionalLight(0xffffff, 1.5); sun.position.set(-3, 6, -4); scene.add(sun);
@@ -872,8 +862,8 @@ function frame(now) {
   apply(player);
   updateModBow();
   drawTimeline();
-  if (fp) { controls.enabled = false; fpVisible(); fpCamera(); } else controls.update();
-  renderer.render(scene, camera);
+  if (FP.on) fpFrame(dt);
+  else { controls.update(); renderer.render(scene, camera); }
   requestAnimationFrame(frame);
 }
 let wasCombo = false;
@@ -1134,7 +1124,7 @@ function rotateSeg(P, seg, axisW, ang) {
   }
 }
 function edKey(e) {
-  if (!ED.on) return;
+  if (!ED.on || (typeof FP !== 'undefined' && FP.on)) return;
   const tag = (e.target && e.target.tagName) || '';
   if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
   const k = e.key.toLowerCase();
@@ -1362,8 +1352,9 @@ $('ed-export').onclick = () => {
   try { navigator.clipboard.writeText(txt).then(done, () => $('ed-json').select()); } catch (e) { $('ed-json').select(); }
 };
 /** Todos los golpes que tienen keyframes guardados (de todas las armas), con su animacion final, en un solo texto. */
-$('ed-exportall').onclick = () => {
-  const keep = [ED.weapon, ED.hit, currentWeapon], slots = [], all = [];
+/** Todo lo editado (tercera persona: golpes con su animacion final; primera persona: sus keyframes) en un solo texto. */
+function exportAllText() {
+  const keep = [ED.weapon, ED.hit, currentWeapon], slots = [], all = [], fpAll = [];
   try { for (let i = 0; i < localStorage.length; i++) { const m = (localStorage.key(i) || '').match(/^mushoku-ed3-(.+)-(\d+)$/); if (m && DATA.weapons[m[1]]) slots.push([m[1], +m[2]]); } } catch (e) {}
   slots.sort((a, b) => a[0] === b[0] ? a[1] - b[1] : a[0] < b[0] ? -1 : 1);
   for (const [w, h] of slots) {
@@ -1373,13 +1364,18 @@ $('ed-exportall').onclick = () => {
     all.push({ nombre: ED.name, duracion: ED.length, arma: w, golpe: h,
       keyframes: edSorted().map(k => ({ tick: k.tick, frenar: k.stop, pose: k.pose })), animacion: edEmotecraft() });
   }
-  ED.weapon = keep[0]; ED.hit = keep[1]; equip(keep[2]); edLoadSlot(); edSync();
-  const txt = all.length ? JSON.stringify({ formato: 'mushoku-keyframes-3-todo', animaciones: all })
-    : 'Todavia no hay golpes con 2 o mas keyframes guardados.';
-  $('ed-json').value = txt;
-  if (!all.length) return;
-  const b = $('ed-exportall'), done = () => { b.textContent = `Copiado (${all.length} golpes)`; setTimeout(() => b.textContent = 'Copiar todo lo editado', 2000); };
-  try { navigator.clipboard.writeText(txt).then(done, () => $('ed-json').select()); } catch (e) { $('ed-json').select(); }
+  ED.weapon = keep[0]; ED.hit = keep[1]; equip(keep[2]); edLoadSlot(); if (ED.on) edSync();
+  try { for (let i = 0; i < localStorage.length; i++) { const m = (localStorage.key(i) || '').match(/^mushoku-fp1-(.+)$/); if (m && m[1] !== 'last') { const j = JSON.parse(localStorage.getItem(localStorage.key(i))); if (j && j.keyframes) fpAll.push(Object.assign({}, j, { name: m[1] })); } } } catch (e) {}
+  const count = all.length + fpAll.length;
+  return { count, text: count ? JSON.stringify({ formato: 'mushoku-keyframes-3-todo', animaciones: all, primeraPersona: fpAll })
+    : 'Todavia no hay nada editado (golpes con 2 o mas keyframes, o animaciones de primera persona).' };
+}
+$('ed-exportall').onclick = () => {
+  const r = exportAllText();
+  $('ed-json').value = r.text;
+  if (!r.count) return;
+  const b = $('ed-exportall'), done = () => { b.textContent = `Copiado (${r.count})`; setTimeout(() => b.textContent = 'Copiar todo lo editado', 2000); };
+  try { navigator.clipboard.writeText(r.text).then(done, () => $('ed-json').select()); } catch (e) { $('ed-json').select(); }
 };
 $('ed-import').onclick = () => {
   try {
@@ -1435,7 +1431,7 @@ renderer.domElement.addEventListener('pointerdown', e => {
   if (tool.mode && e.button === 0) { edConfirm(); downAt = null; }
 });
 renderer.domElement.addEventListener('pointerup', e => {
-  if (!ED.on || tool.mode || !downAt || e.button !== 0 || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 4) return;
+  if (FP.on || !ED.on || tool.mode || !downAt || e.button !== 0 || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 4) return;
   const r = renderer.domElement.getBoundingClientRect();
   ray.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), camera);
   for (const h of ray.intersectObject(rig.root, true)) {
@@ -1444,6 +1440,401 @@ renderer.domElement.addEventListener('pointerup', e => {
     if (seg) { edSelect(seg); break; }
   }
 });
+
+/* ================================================================ editor de PRIMERA PERSONA
+   Es otra animacion, aparte de la de tercera persona: brazos y objeto pegados a la camara del jugador, con la misma
+   cuenta que hace el juego (FpRender.java). Camara del juego: en los ojos, FOV vertical 70 (el de la mano en
+   Minecraft, no cambia con tu FOV), mirando a -Z. Todo en bloques. */
+
+const FP = { on: false, free: false, name: null, data: null, tick: 0, t: 0, playing: false, sel: 'rArm', bow: 'hunter_bow', clip: null };
+const FP_S = 0.65;
+const fpScene = new THREE.Scene();
+fpScene.background = new THREE.Color(0x9fc4f5);
+fpScene.add(new THREE.HemisphereLight(0xffffff, 0x5a6470, 1.2));
+{ const l = new THREE.DirectionalLight(0xffffff, 1.1); l.position.set(-2, 4, 1); fpScene.add(l); }
+{ // pasto y algunos bloques de referencia (el jugador mira desde 1.62 bloques de altura)
+  const c = document.createElement('canvas'); c.width = c.height = 32; const g = c.getContext('2d');
+  for (let y = 0; y < 32; y++) for (let x = 0; x < 32; x++) { const v = 90 + ((x * 7 + y * 13) % 17) * 3; g.fillStyle = `rgb(${v * 0.55 | 0},${v | 0},${v * 0.42 | 0})`; g.fillRect(x, y, 1, 1); }
+  g.strokeStyle = 'rgba(0,0,0,.18)'; g.strokeRect(0.5, 0.5, 31, 31);
+  const tex = new THREE.CanvasTexture(c); tex.magFilter = THREE.NearestFilter; tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(120, 120); tex.colorSpace = THREE.SRGBColorSpace;
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(120, 120), new THREE.MeshLambertMaterial({ map: tex }));
+  ground.rotation.x = -PI / 2; ground.position.y = -1.62; fpScene.add(ground);
+  for (const [x, z] of [[-3, -6], [2, -9], [5, -5], [-6, -12]]) {
+    const b = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshLambertMaterial({ color: 0x8a6a48 })); b.position.set(x + 0.5, -1.12, z + 0.5); fpScene.add(b);
+  }
+}
+const fpCam = new THREE.PerspectiveCamera(70, 16 / 9, 0.05, 300);
+const freeCam = new THREE.PerspectiveCamera(50, 16 / 9, 0.01, 300); freeCam.position.set(1.3, 0.45, 0.8);
+const freeOrbit = new OrbitControls(freeCam, renderer.domElement); freeOrbit.target.set(0, -0.25, -0.7); freeOrbit.enableDamping = true; freeOrbit.enabled = false;
+const viewCam = new THREE.PerspectiveCamera(70, 16 / 9, 0.05, 1.3); // solo para dibujar el cono de vision en la camara libre
+const camHelper = new THREE.CameraHelper(viewCam); camHelper.visible = false; fpScene.add(camHelper);
+const eyeMark = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), new THREE.MeshBasicMaterial({ color: 0xd9ab4e, wireframe: true }));
+eyeMark.position.set(0, 0.1, 0.25); eyeMark.visible = false; fpScene.add(eyeMark);
+
+/* ---------------------------------------------------------------- rig: dos brazos y el objeto */
+const fpRoot = new THREE.Group(); fpScene.add(fpRoot);
+function fpArm(part) { const g = new THREE.Group(); g.userData.part = part; const m = new THREE.Group(); m.scale.setScalar(1 / 16); g.add(m); g.userData.model = m; fpRoot.add(g); return g; }
+const fpR = fpArm('rArm'), fpL = fpArm('lArm');
+function fpBuildArms() {
+  const slim = document.getElementById('slim').checked;
+  for (const [g, right] of [[fpR, true], [fpL, false]]) {
+    const m = g.userData.model; m.clear();
+    const aw = slim ? 3 : 4;
+    const cube = right ? [-3 + (slim ? 1 : 0), -2, -2, aw, 12, 4] : [-1, -2, -2, aw, 12, 4];
+    const layers = right ? [[40, 16, 0], [40, 32, 0.25]] : [[32, 48, 0], [48, 48, 0.25]];
+    const off = new THREE.Group(); off.position.x = slim ? (right ? -0.5 : 0.5) : 0; m.add(off);
+    for (const [U, V, inf] of layers) { const me = new THREE.Mesh(boxGeom(U, V, ...cube, inf), skinMat); me.userData.part = g.userData.part; off.add(me); }
+  }
+}
+// objeto: arco (relativo al brazo izquierdo) o arma (relativo a la mano derecha, como ItemInHandLayer)
+const fpBowHold = new THREE.Group(); fpBowHold.userData.part = 'item'; fpL.add(fpBowHold);
+const fpBowBody = new THREE.Group(); fpBowBody.scale.setScalar(FP_S / 16); fpBowHold.add(fpBowBody);
+const fpChain = new THREE.Group(); fpR.add(fpChain);
+{ const r1 = new THREE.Group(); r1.rotation.x = -PI / 2; fpChain.add(r1); const r2 = new THREE.Group(); r2.rotation.y = PI; r1.add(r2);
+  const t = new THREE.Group(); t.position.set(1 / 16, 2 / 16, -10 / 16); r2.add(t); fpChain.userData.tip = t; }
+const fpWeaponHold = new THREE.Group(); fpWeaponHold.userData.part = 'item'; fpChain.userData.tip.add(fpWeaponHold);
+const fpWeaponBody = new THREE.Group(); fpWeaponBody.scale.setScalar(1 / 16); fpWeaponHold.add(fpWeaponBody);
+const fpArrow = new THREE.Group(); fpArrow.scale.setScalar(1 / 16); fpRoot.add(fpArrow);
+let fpWeaponFor = null;
+function fpBuildWeapon(id) {
+  if (fpWeaponFor === id) return; fpWeaponFor = id; fpWeaponBody.clear();
+  const w = DATA.weapons[id]; if (!w || w.kind === 'modbow') return;
+  const disp = Object.keys(w.display || {}).length ? w.display : (w.kind === 'block' && !w.elements.length ? HANDHELD : {});
+  const tr = disp.translation || [0, 0, 0], ro = disp.rotation || [0, 0, 0], sc = disp.scale || [1, 1, 1];
+  const dg = new THREE.Group(); dg.position.set(tr[0], tr[1], tr[2]); dg.rotation.order = 'XYZ'; dg.rotation.set(ro[0] * D, ro[1] * D, ro[2] * D);
+  const sg = new THREE.Group(); sg.scale.set(sc[0], sc[1], sc[2]); dg.add(sg);
+  const og = new THREE.Group(); og.position.set(-8, -8, -8); sg.add(og);
+  og.add(w.kind === 'geo' ? buildGeoModel(w) : buildBlockModel(w));
+  dg.traverse(o => { if (o.isMesh) o.userData.part = 'item'; });
+  fpWeaponBody.add(dg);
+}
+
+/* ---------------------------------------------------------------- animaciones */
+const BOW_FP = [['bow_idle', 'Arco: en espera (sin flecha)'], ['bow_loaded', 'Arco: en espera (con flecha)'], ['bow_load', 'Arco: recargar (R)'],
+  ['bow_draw', 'Arco: tensar (mantener clic)'], ['bow_release', 'Arco: soltar']];
+function fpList() {
+  const out = BOW_FP.map(([n, l]) => ({ name: n, label: l, kind: 'bow' }));
+  for (const [id, w] of Object.entries(DATA.weapons)) {
+    if (w.kind === 'modbow' || !w.family || !DATA.families[w.family]) continue;
+    DATA.families[w.family].attacks.forEach((a, i) => out.push({ name: a.anim, label: `${w.label}: golpe ${i + 1}`, kind: 'weapon', weapon: id }));
+  }
+  return out;
+}
+const v3 = a => new THREE.Vector3(a[0], a[1], a[2]);
+/** Brazo del hombro a la mano (centro del puno), igual que tools/fp/fp_defaults.py. */
+function fpArmPose(sh, hand, right) {
+  const d = v3(hand).sub(v3(sh)).normalize();
+  const x = new THREE.Vector3(-1, 0, 0); x.sub(d.clone().multiplyScalar(x.dot(d))).normalize();
+  const z = x.clone().cross(d).normalize();
+  const p = v3(hand).sub(d.clone().multiplyScalar(0.5)).add(x.clone().multiplyScalar((right ? 1 : -1) / 16));
+  const q = new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(x, d, z));
+  return { p: [p.x, p.y, p.z], q: [q.x, q.y, q.z, q.w] };
+}
+function fpDefault(item) {
+  if (DATA.fp && DATA.fp[item.name]) return JSON.parse(JSON.stringify(DATA.fp[item.name]));
+  // golpe sin animacion de primera persona: brazo derecho con el arma al frente, izquierdo abajo (fuera de pantalla)
+  const len = (DATA.anims[item.name] && DATA.anims[item.name].emote.endTick) || 20;
+  const pose = { rArm: fpArmPose([0.5, -0.85, -0.25], [0.34, -0.42, -0.85], true), lArm: fpArmPose([-0.6, -1.6, 0.0], [-0.55, -1.25, -0.5], false),
+    item: { p: [0, 0, 0], q: [0, 0, 0, 1] } };
+  return { name: item.name, length: len, loop: false, keyframes: [{ tick: 0, stop: false, pose }, { tick: len, stop: true, pose: JSON.parse(JSON.stringify(pose)) }] };
+}
+const fpKey = n => 'mushoku-fp1-' + n;
+function fpLoad(item) {
+  try { const j = JSON.parse(localStorage.getItem(fpKey(item.name)) || 'null'); if (j && j.keyframes) return j; } catch (e) {}
+  return fpDefault(item);
+}
+function fpStore() { try { localStorage.setItem(fpKey(FP.name), JSON.stringify(FP.data)); } catch (e) {} fpRenderKeys(); }
+function fpEdited(name) { try { return localStorage.getItem(fpKey(name)) != null; } catch (e) { return false; } }
+
+/* curva igual a FpAnim.java: Hermite (Catmull-Rom), "frenar" = velocidad cero; cuaterniones en el mismo hemisferio */
+const FP_PARTS = ['rArm', 'lArm', 'item'];
+function fpFlat(pose) { const o = []; for (const k of FP_PARTS) { const P = pose[k] || { p: [0, 0, 0], q: [0, 0, 0, 1] }; o.push(...P.p, ...P.q); } return o; }
+function fpUnflat(a) { const o = {}; FP_PARTS.forEach((k, i) => { const b = i * 7; let q = a.slice(b + 3, b + 7); const l = Math.hypot(...q) || 1; q = q.map(c => c / l); o[k] = { p: a.slice(b, b + 3), q }; }); return o; }
+function fpEval(data, t) {
+  const ks = data.keyframes.slice().sort((a, b) => a.tick - b.tick);
+  const P = ks.map(k => fpFlat(k.pose));
+  for (let i = 1; i < P.length; i++) for (let part = 0; part < 3; part++) {
+    const o = part * 7 + 3; let d = 0; for (let c = 0; c < 4; c++) d += P[i][o + c] * P[i - 1][o + c];
+    if (d < 0) for (let c = 0; c < 4; c++) P[i][o + c] = -P[i][o + c];
+  }
+  const n = ks.length;
+  if (!n) return null;
+  if (data.loop && data.length > 0) t = ((t % data.length) + data.length) % data.length;
+  if (n === 1 || t <= ks[0].tick) return fpUnflat(P[0]);
+  if (t >= ks[n - 1].tick) return fpUnflat(P[n - 1]);
+  let i = 0; while (i < n - 2 && t > ks[i + 1].tick) i++;
+  const t0 = ks[i].tick, t1 = ks[i + 1].tick, dt = Math.max(1e-4, t1 - t0), u = (t - t0) / dt, u2 = u * u, u3 = u2 * u;
+  const h00 = 2 * u3 - 3 * u2 + 1, h10 = u3 - 2 * u2 + u, h01 = -2 * u3 + 3 * u2, h11 = u3 - u2;
+  const tan = (k, c) => (ks[k].stop || k === 0 || k === n - 1) ? 0 : (P[k + 1][c] - P[k - 1][c]) / Math.max(1e-4, ks[k + 1].tick - ks[k - 1].tick);
+  const out = [];
+  for (let c = 0; c < 21; c++) out.push(h00 * P[i][c] + h10 * tan(i, c) * dt + h01 * P[i + 1][c] + h11 * tan(i + 1, c) * dt);
+  return fpUnflat(out);
+}
+
+/* ---------------------------------------------------------------- aplicar pose y estado del arco */
+function fpCurrentItem() { return fpList().find(x => x.name === FP.name); }
+function fpApply(pose) {
+  fpR.position.set(...pose.rArm.p); fpR.quaternion.set(...pose.rArm.q);
+  fpL.position.set(...pose.lArm.p); fpL.quaternion.set(...pose.lArm.q);
+  const it = fpCurrentItem(), hold = it && it.kind === 'bow' ? fpBowHold : fpWeaponHold;
+  hold.position.set(...pose.item.p); hold.quaternion.set(...pose.item.q);
+}
+function fpReadPose() {
+  const it = fpCurrentItem(), hold = it && it.kind === 'bow' ? fpBowHold : fpWeaponHold;
+  const rd = g => ({ p: [g.position.x, g.position.y, g.position.z].map(v => +v.toFixed(5)), q: [g.quaternion.x, g.quaternion.y, g.quaternion.z, g.quaternion.w].map(v => +v.toFixed(5)) });
+  return { rArm: rd(fpR), lArm: rd(fpL), item: rd(hold) };
+}
+/** Lo que pone el juego y no se anima: cuanto se tensa la cuerda y donde esta la flecha. */
+function fpBowState(name, t, len) {
+  const k = len > 0 ? t / len : 0;
+  if (name === 'bow_draw') return { pull: Math.min(1, k), onString: true, inHand: false, k };
+  if (name === 'bow_load') return { pull: 0, onString: k >= 0.8, inHand: k >= 0.42 && k < 0.8, k };
+  if (name === 'bow_loaded') return { pull: 0, onString: true, inHand: false, k };
+  return { pull: 0, onString: false, inHand: false, k };
+}
+function fpDrawBow(t) {
+  const it = fpCurrentItem();
+  fpBowBody.clear(); fpArrow.clear();
+  fpBowHold.visible = !!it && it.kind === 'bow';
+  fpWeaponHold.visible = !!it && it.kind === 'weapon';
+  if (!it) return;
+  if (it.kind === 'weapon') { fpBuildWeapon(it.weapon); return; }
+  const st = fpBowState(FP.name, t, FP.data.length);
+  drawModBow(fpBowBody, BOW_STYLES[FP.bow] || BOW_STYLES.hunter_bow, BRACE + DRAWLEN * st.pull, st.onString);
+  fpBowBody.traverse(o => { if (o.isMesh) o.userData.part = 'item'; });
+  if (st.inHand) { // flecha en la mano derecha, de apuntar arriba a quedar como el arco (igual que el juego)
+    fpRoot.updateMatrixWorld(true);
+    const fwd = new THREE.Vector3(1, 0, 0).applyQuaternion(fpBowHold.getWorldQuaternion(new THREE.Quaternion()));
+    const kk = (x => x * x * (3 - 2 * x))(Math.max(0, Math.min(1, (st.k - 0.42) / 0.38)));
+    const dir = new THREE.Vector3(0.1, 0.85, 0.5).normalize().lerp(fwd, kk).normalize();
+    const hand = new THREE.Vector3(0, 8 / 16, 0).applyQuaternion(fpR.quaternion).add(fpR.position);
+    bowArrow(fpArrow, hand.multiplyScalar(16).add(dir.clone().multiplyScalar(-2)), dir, 17 * FP_S);
+  }
+}
+
+/* ---------------------------------------------------------------- gizmo (mover / rotar con el mouse) */
+const tc = new TransformControls(fpCam, renderer.domElement);
+tc.setSize(0.75); tc.setSpace('local'); fpScene.add(tc);
+tc.addEventListener('dragging-changed', e => { freeOrbit.enabled = FP.free && !e.value; if (!e.value) fpCommit(); });
+tc.addEventListener('objectChange', () => { fpHandleMoved(); fpDrawBow(FP.tick); fpFields(); });
+function fpSelGroup() { const it = fpCurrentItem(); return FP.sel === 'rArm' ? fpR : FP.sel === 'lArm' ? fpL : (it && it.kind === 'bow' ? fpBowHold : fpWeaponHold); }
+/* Los brazos se manejan desde el puno (el hombro queda fuera de la pantalla): el gizmo va en un "asa" en el centro del
+   puno y el brazo la sigue rigido. */
+const fpHandle = new THREE.Object3D(); fpRoot.add(fpHandle);
+const fpHandleOff = new THREE.Matrix4();
+function fpSyncHandle() {
+  const g = fpSelGroup(); if (g !== fpR && g !== fpL) return;
+  fpHandle.position.copy(new THREE.Vector3(0, 8 / 16, 0).applyQuaternion(g.quaternion).add(g.position));
+  fpHandle.quaternion.copy(g.quaternion); fpHandle.updateMatrix(); g.updateMatrix();
+  fpHandleOff.copy(fpHandle.matrix).invert().multiply(g.matrix);
+}
+function fpHandleMoved() {
+  const g = fpSelGroup(); if (g !== fpR && g !== fpL) return;
+  fpHandle.updateMatrix();
+  new THREE.Matrix4().multiplyMatrices(fpHandle.matrix, fpHandleOff).decompose(g.position, g.quaternion, new THREE.Vector3());
+}
+function fpAttach() {
+  if (FP.playing) { tc.detach(); return; }
+  const g = fpSelGroup();
+  if (g === fpR || g === fpL) { fpSyncHandle(); tc.attach(fpHandle); } else tc.attach(g);
+}
+/** Guardar lo que se movio en el keyframe del tick actual (se crea si no existe). */
+function fpCommit() {
+  const pose = fpReadPose();
+  let k = FP.data.keyframes.find(k => k.tick === FP.tick);
+  if (!k) { k = { tick: FP.tick, stop: false, pose }; FP.data.keyframes.push(k); FP.data.keyframes.sort((a, b) => a.tick - b.tick); }
+  else k.pose = pose;
+  fpStore(); fpFields();
+}
+
+/* ---------------------------------------------------------------- panel */
+const fpPanel = document.createElement('div'); fpPanel.className = 'ed'; fpPanel.hidden = true; fpPanel.style.display = 'none';
+side.prepend(fpPanel);
+fpPanel.innerHTML = `
+  <div class="grp"><b>Primera persona</b>
+    <p class="hint">Animacion aparte de la de tercera persona: lo que ve el jugador en el juego (camara en los ojos, FOV 70).
+      Lo que muevas se guarda solo en el keyframe del tick actual.</p>
+    <div class="r"><select id="fp-anim" aria-label="Animacion de primera persona"></select></div>
+    <div class="r" id="fp-bowrow"><label for="fp-bow">Arco</label><select id="fp-bow"></select></div>
+    <div class="r"><button id="fp-reset">Volver a la del juego</button><span class="hint" id="fp-state"></span></div>
+  </div>
+  <div class="grp"><b>Tiempo</b>
+    <div class="r"><button class="gold" id="fp-play">Reproducir</button><button id="fp-prev">&lt;</button>
+      <label for="fp-tick">Tick</label><input type="number" id="fp-tick" min="0"><button id="fp-next">&gt;</button>
+      <label for="fp-len">de</label><input type="number" id="fp-len" min="2" max="400"></div>
+    <input type="range" id="fp-slider" min="0" max="20" step="0.05" aria-label="Linea de tiempo" style="width:100%;accent-color:var(--gold)">
+    <div class="keys" id="fp-keys"></div>
+    <div class="r"><label class="chk"><input type="checkbox" id="fp-stop"> Frenar en este keyframe</label><button id="fp-del">Borrar keyframe</button></div>
+    <div class="r"><button id="fp-copy">Copiar pose</button><button id="fp-paste">Pegar pose</button></div>
+  </div>
+  <div class="grp"><b>Parte</b>
+    <div class="parts" id="fp-parts"><button data-p="rArm">Brazo der.</button><button data-p="lArm">Brazo izq.</button><button data-p="item">Objeto</button></div>
+    <div class="r"><button id="fp-move">Mover (G)</button><button id="fp-rot">Rotar (R)</button><button id="fp-space">Ejes: propios</button></div>
+    <div id="fp-fields"></div>
+    <p class="hint">Clic en un brazo o en el objeto para elegirlo. Arrastra las flechas o los aros. V o Inicio: volver a la vista del jugador. Espacio: reproducir.</p>
+  </div>
+  <div class="grp"><b>Enviar a Claude</b>
+    <p class="hint">Igual que en tercera persona: copia todo y pegamelo en el chat (incluye primera y tercera persona).</p>
+    <div class="r"><button class="gold" id="fp-export">Copiar todo lo editado</button></div>
+    <textarea id="fp-json" spellcheck="false" aria-label="Texto para enviar"></textarea>
+  </div>`;
+const $f = id => document.getElementById(id);
+for (const [id, w] of Object.entries(DATA.weapons)) if (w.kind === 'modbow') $f('fp-bow').insertAdjacentHTML('beforeend', `<option value="${id}">${w.label}</option>`);
+function fpFillList() {
+  const sel = $f('fp-anim'); sel.innerHTML = '';
+  let grp = null, last = '';
+  for (const it of fpList()) {
+    const g = it.kind === 'bow' ? 'Arco del mod' : DATA.weapons[it.weapon].label;
+    if (g !== last) { grp = document.createElement('optgroup'); grp.label = g; sel.appendChild(grp); last = g; }
+    const o = document.createElement('option'); o.value = it.name; o.textContent = it.label + (fpEdited(it.name) ? '  (editada)' : ''); grp.appendChild(o);
+  }
+  sel.value = FP.name;
+}
+const FIELDS = [['px', 'Pos X'], ['py', 'Pos Y'], ['pz', 'Pos Z'], ['rx', 'Giro X'], ['ry', 'Giro Y'], ['rz', 'Giro Z']];
+$f('fp-fields').innerHTML = FIELDS.map(([id, l]) => `<div class="ax"><span>${l}${id[0] === 'p' ? ' (bloques)' : ' (grados)'}</span><span></span><input type="number" step="${id[0] === 'p' ? 0.01 : 1}" id="fpf-${id}"></div>`).join('');
+function fpFields() {
+  const g = fpSelGroup(), e = new THREE.Euler().setFromQuaternion(g.quaternion, 'XYZ');
+  const vals = { px: g.position.x, py: g.position.y, pz: g.position.z, rx: e.x / D, ry: e.y / D, rz: e.z / D };
+  for (const [id] of FIELDS) { const el = $f('fpf-' + id); if (document.activeElement !== el) el.value = (+vals[id]).toFixed(id[0] === 'p' ? 3 : 1); }
+  for (const b of $f('fp-parts').children) b.classList.toggle('sel', b.dataset.p === FP.sel);
+  $f('fp-move').classList.toggle('sel', tc.mode === 'translate'); $f('fp-rot').classList.toggle('sel', tc.mode === 'rotate');
+  const k = FP.data.keyframes.find(k => k.tick === FP.tick);
+  $f('fp-stop').checked = !!(k && k.stop); $f('fp-stop').disabled = !k; $f('fp-del').disabled = !k;
+  if (!tc.dragging && tc.object === fpHandle) fpSyncHandle();
+}
+for (const [id] of FIELDS) $f('fpf-' + id).onchange = ev => {
+  const g = fpSelGroup(), v = +ev.target.value;
+  if (id[0] === 'p') g.position['xyz'['pxpypz'.indexOf(id) / 2]] = v;
+  else { const e = new THREE.Euler().setFromQuaternion(g.quaternion, 'XYZ'); e['xyz'.indexOf(id[1]) === 0 ? 'x' : id[1]] = v * D; g.quaternion.setFromEuler(e); }
+  fpDrawBow(FP.tick); fpCommit();
+};
+function fpRenderKeys() {
+  const box = $f('fp-keys'); box.innerHTML = '';
+  for (const k of FP.data.keyframes.slice().sort((a, b) => a.tick - b.tick)) {
+    const b = document.createElement('button'); b.textContent = k.tick; if (k.tick === FP.tick) b.classList.add('sel'); if (k.stop) b.classList.add('stop');
+    b.onclick = () => fpGo(k.tick); box.appendChild(b);
+  }
+  $f('fp-len').value = FP.data.length; $f('fp-slider').max = FP.data.length; $f('fp-tick').value = FP.tick;
+  $f('fp-slider').value = FP.playing ? FP.t : FP.tick;
+}
+function fpShowTick(t) {
+  const k = !FP.playing && FP.data.keyframes.find(k => k.tick === t);
+  const pose = k ? k.pose : fpEval(FP.data, t);
+  if (pose) fpApply(pose);
+  fpRoot.updateMatrixWorld(true);
+  fpDrawBow(t);
+  const it = fpCurrentItem(), st = it && it.kind === 'bow' ? fpBowState(FP.name, t, FP.data.length) : null;
+  $f('fp-state').textContent = st ? (st.inHand ? 'flecha en la mano' : st.onString ? (FP.name === 'bow_draw' ? `cuerda tensada ${Math.round(st.pull * 100)}%` : 'flecha en la cuerda') : 'sin flecha') : '';
+}
+function fpGo(t) { FP.playing = false; $f('fp-play').textContent = 'Reproducir'; FP.tick = Math.max(0, Math.min(FP.data.length, Math.round(t))); FP.t = FP.tick; fpShowTick(FP.tick); fpAttach(); fpRenderKeys(); fpFields(); }
+function fpOpen(name) {
+  FP.name = name; const it = fpCurrentItem();
+  FP.data = fpLoad(it); FP.tick = 0; FP.t = 0;
+  $f('fp-bowrow').style.display = it.kind === 'bow' ? '' : 'none';
+  if (FP.sel === 'item' && !it) FP.sel = 'rArm';
+  fpFillList(); fpGo(0);
+  try { localStorage.setItem('mushoku-fp1-last', name); } catch (e) {}
+}
+$f('fp-anim').onchange = e => fpOpen(e.target.value);
+$f('fp-bow').onchange = e => { FP.bow = e.target.value; fpShowTick(FP.playing ? FP.t : FP.tick); };
+$f('fp-reset').onclick = () => { try { localStorage.removeItem(fpKey(FP.name)); } catch (e) {} fpOpen(FP.name); };
+$f('fp-play').onclick = () => { FP.playing = !FP.playing; $f('fp-play').textContent = FP.playing ? 'Pausa' : 'Reproducir'; FP.t = FP.tick; fpAttach(); if (!FP.playing) fpGo(FP.tick); };
+$f('fp-prev').onclick = () => fpGo(FP.tick - 1);
+$f('fp-next').onclick = () => fpGo(FP.tick + 1);
+$f('fp-tick').onchange = e => fpGo(+e.target.value);
+$f('fp-slider').oninput = e => fpGo(+e.target.value);
+$f('fp-len').onchange = e => { FP.data.length = Math.max(2, Math.min(400, Math.round(+e.target.value))); fpStore(); fpGo(Math.min(FP.tick, FP.data.length)); };
+$f('fp-stop').onchange = e => { const k = FP.data.keyframes.find(k => k.tick === FP.tick); if (k) { k.stop = e.target.checked; fpStore(); } };
+$f('fp-del').onclick = () => { if (FP.data.keyframes.length <= 1) return; FP.data.keyframes = FP.data.keyframes.filter(k => k.tick !== FP.tick); fpStore(); fpGo(FP.tick); };
+$f('fp-copy').onclick = () => { FP.clip = fpReadPose(); };
+$f('fp-paste').onclick = () => { if (!FP.clip) return; fpApply(FP.clip); fpCommit(); fpShowTick(FP.tick); };
+for (const b of $f('fp-parts').children) b.onclick = () => { FP.sel = b.dataset.p; fpAttach(); fpFields(); };
+$f('fp-move').onclick = () => { tc.setMode('translate'); fpFields(); };
+$f('fp-rot').onclick = () => { tc.setMode('rotate'); fpFields(); };
+$f('fp-space').onclick = () => { tc.setSpace(tc.space === 'local' ? 'world' : 'local'); $f('fp-space').textContent = tc.space === 'local' ? 'Ejes: propios' : 'Ejes: de la camara'; };
+$f('fp-export').onclick = () => { const txt = exportAllText(); $f('fp-json').value = txt.text; if (txt.count) try { navigator.clipboard.writeText(txt.text).then(() => { $f('fp-export').textContent = `Copiado (${txt.count})`; setTimeout(() => $f('fp-export').textContent = 'Copiar todo lo editado', 2000); }, () => $f('fp-json').select()); } catch (e) { $f('fp-json').select(); } };
+
+/* ---------------------------------------------------------------- entrar / salir, camaras */
+function fpSetFree(on) {
+  FP.free = on; freeOrbit.enabled = on; camHelper.visible = on; eyeMark.visible = on;
+  tc.camera = on ? freeCam : fpCam;
+  $f('fp-view').classList.toggle('on', !on); $f('fp-free').classList.toggle('on', on);
+  $f('xhair').style.display = on ? 'none' : 'block';
+  $f('fpnote').textContent = on ? 'Camara libre: arrastra para girar, rueda para acercar. V o Inicio vuelve a la vista del jugador.' : 'Vista del jugador (como en el juego). El recuadro punteado es una pantalla 16:9.';
+  fpResize();
+}
+function fpEnter(on) {
+  FP.on = on;
+  fpPanel.hidden = !on; fpPanel.style.display = on ? '' : 'none';
+  for (const c of side.children) if (c !== fpPanel) { if (on) { c.dataset.fpd = c.style.display; c.style.display = 'none'; } else c.style.display = c.dataset.fpd || ''; }
+  document.querySelector('.cams').style.display = on ? 'none' : '';
+  $f('fpcams').style.display = on ? 'flex' : 'none';
+  $f('fpnote').style.display = on ? 'block' : 'none';
+  $f('fpframe').style.display = on ? 'block' : 'none';
+  document.querySelector('.bar').style.display = on ? 'none' : '';
+  controls.enabled = !on;
+  if (on) {
+    fpBuildArms();
+    let last = null; try { last = localStorage.getItem('mushoku-fp1-last'); } catch (e) {}
+    fpOpen(last && fpList().some(x => x.name === last) ? last : 'bow_idle');
+    fpSetFree(false);
+  } else { tc.detach(); $f('xhair').style.display = 'none'; }
+  resize();
+}
+document.getElementById('cam-fp').onclick = () => fpEnter(true);
+$f('fp-exit').onclick = () => fpEnter(false);
+$f('fp-view').onclick = () => fpSetFree(false);
+$f('fp-free').onclick = () => fpSetFree(true);
+document.getElementById('slim').addEventListener('change', () => { if (FP.on) fpBuildArms(); });
+window.addEventListener('keydown', e => {
+  if (!FP.on) return;
+  const tag = (e.target && e.target.tagName) || '';
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  const k = e.key.toLowerCase();
+  if (k === 'v' || e.key === 'Home') { fpSetFree(false); e.preventDefault(); }
+  else if (k === 'g') { tc.setMode('translate'); fpFields(); }
+  else if (k === 'r') { tc.setMode('rotate'); fpFields(); }
+  else if (k === ' ') { $f('fp-play').onclick(); e.preventDefault(); }
+  else if (k === 'arrowleft') fpGo(FP.tick - 1);
+  else if (k === 'arrowright') fpGo(FP.tick + 1);
+}, true);
+// clic para elegir parte
+const fpRay = new THREE.Raycaster();
+let fpDown = null;
+renderer.domElement.addEventListener('pointerdown', e => { if (FP.on) fpDown = [e.clientX, e.clientY]; });
+renderer.domElement.addEventListener('pointerup', e => {
+  if (!FP.on || !fpDown || e.button !== 0 || tc.dragging || Math.hypot(e.clientX - fpDown[0], e.clientY - fpDown[1]) > 4) return;
+  const r = renderer.domElement.getBoundingClientRect();
+  fpRay.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), FP.free ? freeCam : fpCam);
+  for (const h of fpRay.intersectObject(fpRoot, true)) {
+    let o = h.object, part = null;
+    while (o && !part) { part = o.userData.part; o = o.parent; }
+    if (part) { FP.sel = part; fpAttach(); fpFields(); break; }
+  }
+});
+function fpResize() {
+  const w = view.clientWidth, h = view.clientHeight; if (!w || !h) return;
+  fpCam.aspect = w / h; fpCam.updateProjectionMatrix();
+  freeCam.aspect = w / h; freeCam.updateProjectionMatrix();
+  viewCam.aspect = 16 / 9; viewCam.updateProjectionMatrix(); camHelper.update();
+  // recuadro 16:9 del juego (misma altura de imagen: el FOV vertical es fijo)
+  const fr = $f('fpframe'); let fw = h * 16 / 9, fh = h; if (fw > w) { fw = w; fh = w * 9 / 16; }
+  // si la vista es mas angosta que 16:9, el juego ve mas a los costados de lo que entra aca
+  fr.style.width = Math.min(w, h * 16 / 9) + 'px'; fr.style.height = h + 'px';
+  fr.style.left = (w - Math.min(w, h * 16 / 9)) / 2 + 'px'; fr.style.top = '0px';
+}
+new ResizeObserver(() => { if (FP.on) fpResize(); }).observe(view);
+function fpFrame(dt) {
+  if (FP.playing) {
+    FP.t += dt * 20 * speed;
+    if (FP.t > FP.data.length + (FP.data.loop ? 0 : 8)) FP.t = 0;
+    const t = Math.min(FP.t, FP.data.length);
+    fpShowTick(t);
+    $f('fp-slider').value = t; $f('fp-tick').value = Math.floor(t);
+  }
+  if (FP.free) freeOrbit.update();
+  renderer.render(fpScene, FP.free ? freeCam : fpCam);
+}
 
 buildPlayer(false);
 edTagParts();

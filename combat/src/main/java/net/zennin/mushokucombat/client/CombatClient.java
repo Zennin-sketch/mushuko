@@ -27,6 +27,16 @@ public final class CombatClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        // Golpes de Better Combat: si el Taller tiene una animacion de primera persona con ese nombre, se usa esa
+        try {
+            net.bettercombat.api.client.BetterCombatClientEvents.ATTACK_START.register((player, hand) -> {
+                String anim = hand.attack() == null ? null : hand.attack().animation();
+                net.zennin.mushoku.client.fp.FpAttack.start(anim, player.getCurrentItemAttackStrengthDelay());
+            });
+        } catch (Throwable t) {
+            org.slf4j.LoggerFactory.getLogger("mushoku_combat").warn("Sin primera persona de golpes (Better Combat cambio su API): {}", t.toString());
+        }
+
         CombatAnimations.init();
         // con el arma guardada (modo combate apagado) el arco del mod tampoco se dibuja en la otra mano
         net.zennin.mushoku.client.render.BowRender.armBend = (p, arm, pose) -> {
