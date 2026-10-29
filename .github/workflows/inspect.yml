@@ -28,7 +28,8 @@ jobs:
           cd ../x
           for j in META-INF/jars/*.jar; do [ -f "$j" ] && unzip -qo "$j" 'net/bettercombat/*' 2>/dev/null || true; done
           if [ -n "${{ inputs.grep }}" ]; then find . -name '*.class' | grep -E "${{ inputs.grep }}" > ../out/classes.txt || true; fi
-          for c in ${{ inputs.classes }}; do javap -p -cp . "$c" >> ../out/javap.txt 2>&1 || true; done
+          CLS=$(echo "${{ inputs.classes }}" | tr '%' '$')
+          for c in $CLS; do javap -p -cp . "$c" >> ../out/javap.txt 2>&1 || true; done
       - name: Subir
         run: |
           cd out && git init -q && git checkout -q -b vt-inspect

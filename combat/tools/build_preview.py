@@ -80,7 +80,14 @@ def main(anim_dir, out):
                        ('mana_bow', 'Arco de mana'), ('demon_bow', 'Arco demoniaco')):
         weapons[bid] = dict(kind='modbow', label=label, family=None, style=bid)
     sheaths = json.load(open(os.path.join(REPO, 'combat', 'src', 'main', 'resources', 'assets', 'mushoku_combat', 'sheaths.json')))
-    data = dict(anims=anims, weapons=weapons, families=families, extra=catalog.EXTRA, sheaths=sheaths)
+    # Animaciones de primera persona del juego (src/main/resources/assets/remushoku/fp_animations): punto de partida del editor
+    fp_dir = os.path.join(REPO, 'src', 'main', 'resources', 'assets', 'remushoku', 'fp_animations')
+    fp = {}
+    if os.path.isdir(fp_dir):
+        for f in sorted(os.listdir(fp_dir)):
+            if f.endswith('.json'):
+                fp[f[:-5]] = json.load(open(os.path.join(fp_dir, f)))
+    data = dict(anims=anims, weapons=weapons, families=families, extra=catalog.EXTRA, sheaths=sheaths, fp=fp)
     tpl = open(os.path.join(HERE, 'preview_template.html'), encoding='utf-8').read()
     html = tpl.replace('/*__DATA__*/null', json.dumps(data, separators=(',', ':')))
     os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
