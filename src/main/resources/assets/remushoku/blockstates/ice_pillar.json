@@ -1,0 +1,13 @@
+{
+ "variants": {
+  "part=middle": {
+   "model": "remushoku:block/ice_pillar_middle"
+  },
+  "part=bottom": {
+   "model": "remushoku:block/ice_pillar_bottom"
+  },
+  "part=top": {
+   "model": "remushoku:block/ice_pillar_top"
+  }
+ }
+}

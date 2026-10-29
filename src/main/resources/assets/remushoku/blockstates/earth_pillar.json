@@ -1,0 +1,13 @@
+{
+ "variants": {
+  "part=middle": {
+   "model": "remushoku:block/earth_pillar_middle"
+  },
+  "part=bottom": {
+   "model": "remushoku:block/earth_pillar_bottom"
+  },
+  "part=top": {
+   "model": "remushoku:block/earth_pillar_top"
+  }
+ }
+}

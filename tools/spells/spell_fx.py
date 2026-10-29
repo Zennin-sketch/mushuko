@@ -188,6 +188,36 @@ def earth_spike():
         group('stone', 'solid', [], emit=emitter(14, 12, (5, 1, 5), (1.4, 0.3), ('9a8a72', '6a5c4a'), outward=0.6, rise=0.5, burst=True)),
     ], life=50, scale=1.6, cam=6, outro=[10, 30, 0])
 
+def earth_pillar_burst():
+    """Pilar de Tierra: al salir el pilar, revientan lajas de roca alrededor de la base, salta el cascote y se levanta
+    polvo (el pilar en si son bloques que van subiendo)."""
+    rnd = random.Random(21)
+    groups = []
+    for k in range(7):
+        a = k / 7 * 2 * math.pi + rnd.uniform(-0.25, 0.25)
+        r = rnd.uniform(6.5, 9)
+        tilt = rnd.uniform(18, 34)
+        h = rnd.uniform(8, 14)
+        base = (r * math.cos(a), -1, r * math.sin(a))
+        # cada laja se inclina hacia afuera (gira el pincho y lo apunta segun su angulo)
+        sh = spike((0, 0, 0), tilt, h, rnd.uniform(1.6, 2.6), 6, '7d6a56', 'b5a389')
+        for b in sh:
+            b['at'] = [b['at'][0], b['at'][1], b['at'][2]]
+        t0 = 1 + k * 0.7
+        groups.append(group('stone', 'solid', sh, offset=list(base), tilt=[0, -math.degrees(a), 0], rise=[t0, t0 + 4, h + 3]))
+    rubble = []
+    for k in range(16):
+        a = k / 16 * 2 * math.pi + rnd.uniform(-0.2, 0.2)
+        r = rnd.uniform(5, 10)
+        sz = rnd.uniform(1.2, 2.8)
+        rubble.append(box((r * math.cos(a), sz * 0.35, r * math.sin(a)), (sz, sz * 0.8, sz), lerp_hex('5e4f3e', '9a8a72', rnd.random()),
+                          rot=(rnd.uniform(0, 40), rnd.uniform(0, 90), rnd.uniform(0, 40))))
+    groups.append(group('stone', 'solid', rubble, grow=[0, 4]))
+    groups.append(group('stone', 'solid', [], emit=emitter(18, 14, (6, 1, 6), (1.6, 0.3), ('9a8a72', '6a5c4a'), outward=0.9, rise=0.8, burst=True)))
+    groups.append(group('cloud', 'translucent', [], emit=emitter(12, 24, (7, 1, 7), (3.0, 4.5), ('b8a890', '8a7c68'), alpha=0.55, outward=0.5, rise=0.3, burst=True)))
+    return fx('Pilar de tierra (estallido de la base)', ['earth_pillar'], groups, life=70, scale=1.6, cam=6, outro=[14, 20, 0])
+
+
 # ================================================================ Cristales de hielo (Ice Pillar / Absolute Zero)
 def crystal(base, tilt, height, hw, color0, color1):
     """Prisma de hielo con punta piramidal, inclinado tilt=(x,z) grados."""
@@ -519,5 +549,5 @@ FX_MODELS = dict(fireball_form=fireball_form, water_ball_form=water_ball_form, s
                  icicle_form=icicle_form, wind_blade_form=wind_blade_form, wind_drill_form=wind_drill_form,
                  water_arrow_form=water_arrow_form, fire_crescent_form=fire_crescent_form,
                  glow_fire=glow_fire, glow_water=glow_water, glow_earth=glow_earth, glow_wind=glow_wind, glow_none=glow_none, water_arrow=water_arrow, fire_crescent=fire_crescent, storm_cloud=storm_cloud_small, cumulonimbus=cumulonimbus,
-                 earth_spike=earth_spike, ice_crystals=ice_crystals, fire_burst=fire_burst, water_wall=water_wall,
+                 earth_spike=earth_spike, earth_pillar_burst=earth_pillar_burst, ice_crystals=ice_crystals, fire_burst=fire_burst, water_wall=water_wall,
                  magic_shield=magic_shield)

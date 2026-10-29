@@ -37,8 +37,8 @@ public class MushokuClient implements ClientModInitializer {
             if (context.client().level.getEntity(payload.entityId()) instanceof net.minecraft.world.entity.player.Player pl)
                 net.zennin.mushoku.data.ModAttachments.setQuiver(pl, payload.quiver());
         }));
-        BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.cutout(), ModBlocks.MAGIC_CIRCLE, ModBlocks.GLOW, ModBlocks.SHELF);
-        BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.translucent(), ModBlocks.CLIMB_BLOCK, ModBlocks.ABSOLUTE_BARRIER, ModBlocks.BLOCK_SAND_CLOUD);
+        BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.cutout(), ModBlocks.EARTH_PILLAR, ModBlocks.MAGIC_CIRCLE, ModBlocks.GLOW, ModBlocks.SHELF);
+        BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.translucent(), ModBlocks.ICE_PILLAR, ModBlocks.CLIMB_BLOCK, ModBlocks.ABSOLUTE_BARRIER, ModBlocks.BLOCK_SAND_CLOUD);
         ModKeys.init();
         CastingClient.init();
         SwordClient.init();

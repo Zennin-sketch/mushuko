@@ -41,6 +41,16 @@ public final class ModBlocks {
             new net.zennin.mushoku.block.QuagmireMudBlock(BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.MUD)
                     .sound(SoundType.MUD).strength(0.5f).noLootTable().pushReaction(PushReaction.BLOCK)));
 
+    /** Pilar de Hielo: tramos de cristal de hielo (los pone el hechizo y se van solos). */
+    public static final net.zennin.mushoku.block.SpellPillarBlock ICE_PILLAR = Registry.register(BuiltInRegistries.BLOCK, MushokuMod.id("ice_pillar"),
+            new net.zennin.mushoku.block.SpellPillarBlock(BlockBehaviour.Properties.of().noOcclusion().strength(0.6f).sound(SoundType.GLASS)
+                    .friction(0.98f).noLootTable().pushReaction(PushReaction.BLOCK).lightLevel(s -> 3)
+                    .isViewBlocking((s, l, pp) -> false).isSuffocating((s, l, pp) -> false)));
+    /** Pilar de Tierra: tramos de roca. */
+    public static final net.zennin.mushoku.block.SpellPillarBlock EARTH_PILLAR = Registry.register(BuiltInRegistries.BLOCK, MushokuMod.id("earth_pillar"),
+            new net.zennin.mushoku.block.SpellPillarBlock(BlockBehaviour.Properties.of().noOcclusion().strength(1.2f).sound(SoundType.STONE)
+                    .noLootTable().pushReaction(PushReaction.BLOCK).isViewBlocking((s, l, pp) -> false).isSuffocating((s, l, pp) -> false)));
+
     /** Linea de tiza rojiza / azul (la dibuja la tiza rojiza; azul conduce redstone). No suelta nada. */
     public static final Block CHALK_LINE = Registry.register(BuiltInRegistries.BLOCK, MushokuMod.id("chalk_line"),
             new net.zennin.mushoku.block.ChalkLineBlock(BlockBehaviour.Properties.of()

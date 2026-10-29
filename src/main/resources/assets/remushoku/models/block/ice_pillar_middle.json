@@ -1,0 +1,133 @@
+{
+ "parent": "block/block",
+ "textures": {
+  "t": "remushoku:block/ice_pillar",
+  "particle": "remushoku:block/ice_pillar"
+ },
+ "elements": [
+  {
+   "from": [
+    3,
+    0,
+    3
+   ],
+   "to": [
+    13,
+    16,
+    13
+   ],
+   "faces": {
+    "north": {
+     "texture": "#t"
+    },
+    "south": {
+     "texture": "#t"
+    },
+    "east": {
+     "texture": "#t"
+    },
+    "west": {
+     "texture": "#t"
+    },
+    "up": {
+     "texture": "#t"
+    },
+    "down": {
+     "texture": "#t"
+    }
+   },
+   "rotation": {
+    "axis": "y",
+    "angle": 45,
+    "origin": [
+     8,
+     8,
+     8
+    ]
+   }
+  },
+  {
+   "from": [
+    11,
+    4,
+    6.5
+   ],
+   "to": [
+    13.5,
+    11,
+    9
+   ],
+   "faces": {
+    "north": {
+     "texture": "#t"
+    },
+    "south": {
+     "texture": "#t"
+    },
+    "east": {
+     "texture": "#t"
+    },
+    "west": {
+     "texture": "#t"
+    },
+    "up": {
+     "texture": "#t"
+    },
+    "down": {
+     "texture": "#t"
+    }
+   },
+   "rotation": {
+    "axis": "z",
+    "angle": 22.5,
+    "origin": [
+     12,
+     4,
+     7.5
+    ]
+   }
+  },
+  {
+   "from": [
+    3,
+    9,
+    2.5
+   ],
+   "to": [
+    5,
+    14,
+    4.5
+   ],
+   "faces": {
+    "north": {
+     "texture": "#t"
+    },
+    "south": {
+     "texture": "#t"
+    },
+    "east": {
+     "texture": "#t"
+    },
+    "west": {
+     "texture": "#t"
+    },
+    "up": {
+     "texture": "#t"
+    },
+    "down": {
+     "texture": "#t"
+    }
+   },
+   "rotation": {
+    "axis": "x",
+    "angle": -22.5,
+    "origin": [
+     4,
+     9,
+     3.5
+    ]
+   }
+  }
+ ],
+ "ambientocclusion": false
+}

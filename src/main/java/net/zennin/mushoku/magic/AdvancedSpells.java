@@ -47,7 +47,7 @@ public final class AdvancedSpells {
             }
             case ICE_PILLAR -> {
                 BlockHitResult hit = lookBlock(p, 11);
-                boolean ok = pillar(p, level, Blocks.BLUE_ICE.defaultBlockState(), ParticleTypes.SNOWFLAKE, SoundEvents.GLASS_BREAK);
+                boolean ok = pillar(p, level, net.zennin.mushoku.registry.ModBlocks.ICE_PILLAR, ParticleTypes.SNOWFLAKE, SoundEvents.GLASS_BREAK);
                 if (ok && hit != null)
                     net.zennin.mushoku.entity.SpellFxEntity.spawn(level, "ice_crystals", Vec3.atBottomCenterOf(hit.getBlockPos().above()), p.getYRot(), 2.2f, 120, null);
                 return ok;
@@ -207,7 +207,11 @@ public final class AdvancedSpells {
             // ================= TIERRA =================
             case STONE_CANNON -> shoot(p, proj(p, MagicProjectile.ROCK, 6f).size(1.6f).knockback(1f), 1.8f, 0f, SoundEvents.STONE_BREAK);
             case EARTH_PILLAR -> {
-                return pillar(p, level, Blocks.STONE.defaultBlockState(), new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()), SoundEvents.STONE_PLACE);
+                BlockHitResult hit = lookBlock(p, 11);
+                boolean ok = pillar(p, level, net.zennin.mushoku.registry.ModBlocks.EARTH_PILLAR, new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()), SoundEvents.STONE_PLACE);
+                if (ok && hit != null)
+                    net.zennin.mushoku.entity.SpellFxEntity.spawn(level, "earth_pillar_burst", Vec3.atBottomCenterOf(hit.getBlockPos().above()), p.getYRot(), 1.6f, 70, null);
+                return ok;
             }
             case EARTH_LANCE -> earthLance(p, level);
             case EARTH_WALL -> {
@@ -446,7 +450,7 @@ public final class AdvancedSpells {
     }
 
     /** Pilar de 7 bloques que sale del bloque que mires (hasta 11) y lanza a quien este encima. */
-    private static boolean pillar(ServerPlayer p, ServerLevel level, BlockState state, ParticleOptions part, SoundEvent snd) {
+    private static boolean pillar(ServerPlayer p, ServerLevel level, net.zennin.mushoku.block.SpellPillarBlock block, ParticleOptions part, SoundEvent snd) {
         BlockHitResult b = lookBlock(p, 11);
         if (b == null) return false;
         BlockPos base = b.getBlockPos();
@@ -457,7 +461,13 @@ public final class AdvancedSpells {
         }
         for (int y = 1; y <= 7; y++) {
             final int yy = y;
-            Tasks.later(y, () -> TempBlocks.place(level, base.above(yy), state, 200 - yy));
+            Tasks.later(y, () -> {
+                if (TempBlocks.place(level, base.above(yy), block.part(yy, 7), 200 - yy)) {
+                    Vec3 at = Vec3.atBottomCenterOf(base.above(yy));
+                    level.sendParticles(part, at.x, at.y + 0.2, at.z, 8, 0.35, 0.15, 0.35, 0.05);
+                    if (yy % 2 == 1) level.playSound(null, at.x, at.y, at.z, snd, SoundSource.PLAYERS, 0.7f, 0.8f + yy * 0.08f);
+                }
+            });
         }
         particles(level, part, Vec3.atCenterOf(base.above()), 30, 0.8);
         sound(level, Vec3.atCenterOf(base), snd, 1.5f);
