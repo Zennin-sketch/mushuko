@@ -32,8 +32,50 @@ public final class Locomotion extends PlayerAnimationFrame {
 
     private Locomotion(AbstractClientPlayer player) { this.player = player; }
 
+    /** Capa de los ciclos del taller: correr (loco_run) y quieto (loco_idle). */
+    private static final ResourceLocation CYCLES = net.zennin.mushokucombat.MushokuCombat.id("loco_cycles");
+    private static final java.util.Map<AbstractClientPlayer, String> STATE = new java.util.WeakHashMap<>();
+    private static final java.util.Map<AbstractClientPlayer, dev.kosmx.playerAnim.api.layered.modifier.SpeedModifier> SPEED = new java.util.WeakHashMap<>();
+
     static void init() {
-        PlayerAnimationAccess.REGISTER_ANIMATION_EVENT.register((player, stack) -> stack.addAnimLayer(PRIORITY, new Locomotion(player)));
+        PlayerAnimationAccess.REGISTER_ANIMATION_EVENT.register((player, stack) -> {
+            stack.addAnimLayer(PRIORITY, new Locomotion(player));
+            var layer = new dev.kosmx.playerAnim.api.layered.ModifierLayer<dev.kosmx.playerAnim.api.layered.IAnimation>();
+            var speed = new dev.kosmx.playerAnim.api.layered.modifier.SpeedModifier(1f);
+            layer.addModifierLast(speed);
+            stack.addAnimLayer(PRIORITY - 10, layer);
+            PlayerAnimationAccess.getPlayerAssociatedData(player).set(CYCLES, layer);
+            SPEED.put(player, speed);
+        });
+        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(mc -> {
+            if (mc.level == null || mc.isPaused()) return;
+            for (AbstractClientPlayer p : mc.level.players()) cycles(p);
+        });
+    }
+
+    /** Elige el ciclo (correr / quieto / ninguno) y ajusta su velocidad a la del jugador. */
+    @SuppressWarnings("unchecked")
+    private static void cycles(AbstractClientPlayer p) {
+        String want = "";
+        if (!packAnimates() && p.getPose() == Pose.STANDING && !p.isPassenger() && !p.isFallFlying() && !p.isSwimming() && !p.isSleeping()
+                && !p.isShiftKeyDown() && !p.isUsingItem() && p.onGround()) {
+            float amount = Math.min(1f, p.walkAnimation.speed());
+            boolean cloak = p.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST).is(net.zennin.mushoku.item.ArmorV2.FLAME_CLOAK);
+            if (amount <= 0.02f) want = "loco_idle";
+            else if (p.isSprinting() && !cloak) want = "loco_run";
+        }
+        var sp = SPEED.get(p);
+        if (sp != null) sp.speed = "loco_run".equals(want) ? Math.max(0.55f, Math.min(1.6f, p.walkAnimation.speed() * 1.25f)) : 1f;
+        if (want.equals(STATE.getOrDefault(p, ""))) return;
+        STATE.put(p, want);
+        Object data = PlayerAnimationAccess.getPlayerAssociatedData(p).get(CYCLES);
+        if (!(data instanceof dev.kosmx.playerAnim.api.layered.ModifierLayer<?> raw)) return;
+        var layer = (dev.kosmx.playerAnim.api.layered.ModifierLayer<dev.kosmx.playerAnim.api.layered.IAnimation>) raw;
+        var fade = dev.kosmx.playerAnim.api.layered.modifier.AbstractFadeModifier.standardFadeIn(want.isEmpty() ? 4 : 6,
+                dev.kosmx.playerAnim.core.util.Ease.INOUTSINE);
+        if (want.isEmpty()) { layer.replaceAnimationWithFade(fade, null); return; }
+        var anim = dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry.getAnimation(net.zennin.mushokucombat.MushokuCombat.id(want));
+        layer.replaceAnimationWithFade(fade, anim == null ? null : anim.playAnimation());
     }
 
     /** Un pack de recursos ya anima al jugador (se revisa cada tanto: el jugador puede cambiar los packs). */
@@ -74,12 +116,12 @@ public final class Locomotion extends PlayerAnimationFrame {
         active = amount > 0.02f && !packAnimates() && p.getPose() == Pose.STANDING && !p.isPassenger() && !p.isFallFlying()
                 && !p.isSwimming() && !p.isSleeping() && !p.isShiftKeyDown() && !p.isUsingItem();
         if (!active) return;
-        boolean run = p.isSprinting();
+        boolean run = false; // correr: lo hace el ciclo del taller (loco_run)
         // Capa Atrapallamas: brazos quietos bajo la capa y pasos a la mitad (como pidio el diseno de la capa)
         boolean cloak = p.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST).is(net.zennin.mushoku.item.ArmorV2.FLAME_CLOAK);
         float phase = p.walkAnimation.position(partial) * 0.6662f;
         float a = amount;
-        if (run && !cloak) { sprint(phase, a); return; }
+        if (p.isSprinting() && !cloak) { active = false; return; }
         // ---- caminar: el muslo va y viene (menos que vanilla) y la rodilla se dobla al pasar hacia adelante
         float thigh = (run ? 0.85f : 0.72f) * (cloak ? 0.5f : 1f);
         float kneeMax = (run ? 1.2f : 0.75f) * (cloak ? 0.6f : 1f), kneeBase = run ? 0.2f : 0.06f;

@@ -32,7 +32,8 @@ BUST = {'bust_r': [-2.2, 22.0, -2.4], 'bust_l': [2.2, 22.0, -2.4]}
 
 
 def bust(mat, det=None):
-    return xm(box('bust_r', [-4.45, 17.4, -4.6], [4.4, 4.6, 2.2], mat, det))
+    # volumen apoyado en el torso y una rampa arriba que lo une con el pecho
+    return xm(box('bust_r', [-4.45, 17.4, -4.6], [4.4, 4.6, 2.2], mat, det), box('bust_r', [-4.45, 22.0, -3.6], [4.4, 1.5, 1.2], mat))
 # Huesos de tela (hijos del torso) que el renderer mueve con las piernas: F adelante, B atras, R/L costados (R = derecha
 # del jugador = -X), FR/FL las dos hojas de adelante de un abrigo abierto.
 CLOTH = ('clothF', 'clothB', 'clothR', 'clothL', 'clothFR', 'clothFL')

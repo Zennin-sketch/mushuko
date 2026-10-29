@@ -24,8 +24,17 @@ def keep(key):
     return bool(EYE.match(target)) or target not in BODY
 
 
+# Piezas cuyo modelo tambien se saca: asi el cuerpo, los brazos y las piernas son los de vanilla (con codos y rodillas
+# del mod) y el pack solo cambia la cabeza (donde estan los ojos).
+BODY_GEOM = BODY - {'head', 'headwear'}
+
+
 def filter_jem(data):
     removed = 0
+    models = data.get('models', [])
+    kept = [m for m in models if m.get('part') not in BODY_GEOM]
+    removed += len(models) - len(kept)
+    data['models'] = kept
     def walk(m):
         nonlocal removed
         anims = m.get('animations')

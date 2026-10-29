@@ -32,15 +32,17 @@ public class NpcChestLayer<T extends Mob> extends RenderLayer<T, PlayerModel<T>>
     public record Shape(float size, float bounce) {}
 
     public static final Map<String, Shape> SHAPES = Map.of(
-            "roxy_migurdia", new Shape(0.55f, 0.6f),
-            "sylphiette_greyrat", new Shape(0.8f, 0.8f),
+            "roxy_migurdia", new Shape(0.3f, 0.45f),
+            "sylphiette_greyrat", new Shape(0.7f, 0.75f),
             "eris_greyrat", new Shape(1.0f, 1.0f),
             "ghislaine", new Shape(1.35f, 1.15f));
 
     private final ResourceLocation texture;
     private final Shape shape;
-    private final ModelPart right, left, rightOver, leftOver;
+    private final ModelPart right, left, rightOver, leftOver, rightSlope, leftSlope;
     private static final Map<Integer, float[]> springs = new HashMap<>();
+    /** Los ms se cuentan desde aca (un float con los ms del reloj perderia precision). */
+    private static final long BASE = net.minecraft.Util.getMillis();
     private static final Map<net.minecraft.world.entity.EntityType<?>, Shape> BY_TYPE = new HashMap<>();
 
     /** Lo llama MushokuClient al registrar cada companero: asi la ropa del mod (ArmorV2) sabe a quien darle pecho. */
@@ -65,7 +67,12 @@ public class NpcChestLayer<T extends Mob> extends RenderLayer<T, PlayerModel<T>>
         root.addOrReplaceChild("l", CubeListBuilder.create().texOffs(22, 20).addBox(0, 0, -2, 4, 4, 2), PartPose.ZERO);
         root.addOrReplaceChild("ro", CubeListBuilder.create().texOffs(18, 36).addBox(-4, 0, -2, 4, 4, 2, new CubeDeformation(0.25f)), PartPose.ZERO);
         root.addOrReplaceChild("lo", CubeListBuilder.create().texOffs(22, 36).addBox(0, 0, -2, 4, 4, 2, new CubeDeformation(0.25f)), PartPose.ZERO);
+        // rampa de arriba: une el pecho con el torso (asi no parece pegado en el aire)
+        root.addOrReplaceChild("rs", CubeListBuilder.create().texOffs(18, 19).addBox(-4, -1.5f, -2, 4, 1.5f, 2), PartPose.ZERO);
+        root.addOrReplaceChild("ls", CubeListBuilder.create().texOffs(22, 19).addBox(0, -1.5f, -2, 4, 1.5f, 2), PartPose.ZERO);
         ModelPart baked = LayerDefinition.create(mesh, 64, 64).bakeRoot();
+        rightSlope = baked.getChild("rs");
+        leftSlope = baked.getChild("ls");
         right = baked.getChild("r");
         left = baked.getChild("l");
         rightOver = baked.getChild("ro");
@@ -89,12 +96,19 @@ public class NpcChestLayer<T extends Mob> extends RenderLayer<T, PlayerModel<T>>
             float s = shape.size();
             // rebote: sube/baja, se inclina y se mueve un poco al costado (cada lado algo distinto)
             float lag = side == 0 ? 1f : 0.92f;
-            pose.translate(sp[2] * 0.02f * lag, sp[0] * 0.06f * lag, 0);
-            pose.mulPose(Axis.XP.rotation(-0.32f - 0.05f * s + sp[0] * 0.12f * lag));
-            pose.mulPose(Axis.ZP.rotation(sp[2] * 0.06f * lag));
-            pose.scale(0.92f + 0.08f * s, 0.85f + 0.15f * s, 0.25f + 0.55f * s);
-            pose.translate(-px / 16f, 0, 0);
+            float depth = 0.3f + 0.5f * s;
             var vc = buffers.getBuffer(RenderType.entityCutoutNoCull(texture));
+            // la rampa queda pegada al torso; abajo el volumen, apoyado de lleno en el torso, es el que rebota
+            pose.pushPose();
+            pose.scale(1f, 1f, depth * 0.55f);
+            pose.translate(-px / 16f, 0, 0);
+            (side == 0 ? rightSlope : leftSlope).render(pose, vc, light, overlay);
+            pose.popPose();
+            pose.translate(sp[2] * 0.015f * lag, sp[0] * 0.035f * lag, 0);
+            pose.mulPose(Axis.XP.rotation(sp[0] * 0.09f * lag));
+            pose.mulPose(Axis.ZP.rotation(sp[2] * 0.05f * lag));
+            pose.scale(1f, 0.9f + 0.1f * s, depth);
+            pose.translate(-px / 16f, 0, 0);
             (side == 0 ? right : left).render(pose, vc, light, overlay);
             var vo = buffers.getBuffer(RenderType.entityTranslucent(texture));
             (side == 0 ? rightOver : leftOver).render(pose, vo, light, overlay);
@@ -108,8 +122,8 @@ public class NpcChestLayer<T extends Mob> extends RenderLayer<T, PlayerModel<T>>
      * ultimo giro}. Lo empujan los pasos (dos por ciclo), los saltos/caidas y los giros del cuerpo.
      */
     public static float[] spring(net.minecraft.world.entity.LivingEntity e, Shape shape, float partial) {
-        float[] s = springs.computeIfAbsent(e.getId(), k -> new float[]{0, 0, 0, 0, net.minecraft.Util.getMillis(), (float) e.getY(), e.yBodyRot});
-        float now = net.minecraft.Util.getMillis();
+        float[] s = springs.computeIfAbsent(e.getId(), k -> new float[]{0, 0, 0, 0, (float) (net.minecraft.Util.getMillis() - BASE), (float) e.getY(), e.yBodyRot});
+        float now = (float) (net.minecraft.Util.getMillis() - BASE);
         float dt = Math.min(0.05f, Math.max(0f, (now - s[4]) / 1000f));
         s[4] = now;
         float y = (float) Mth.lerp(partial, e.yo, e.getY());

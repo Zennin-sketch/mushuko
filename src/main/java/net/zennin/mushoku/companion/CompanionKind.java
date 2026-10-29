@@ -39,7 +39,7 @@ public enum CompanionKind {
             s -> s.is(Items.BOOK) || isStone(s.getItem()) || s.getItem() == ModItems.AQUA_HEARTIA || s.is(Items.CLAY_BALL),
             s -> s.is(Items.ROTTEN_FLESH) || s.is(Items.SPIDER_EYE),
             Map.of("joke", 1.3f, "chat", 1.1f, "story", 1.1f, "flirt", 1.0f, "compliment", 1.0f)),
-    GHISLAINE("ghislaine", "ghislaine", false, 256, 20, 16, 32, Combat.GHISLAINE, () -> Items.IRON_SWORD, true,
+    GHISLAINE("ghislaine", "ghislaine", false, 256, 20, 16, 32, Combat.GHISLAINE, () -> ModItems.HIRAMUNE, true,
             s -> s.is(Items.COOKED_BEEF) || s.is(Items.BEEF) || s.is(Items.COOKED_PORKCHOP) || s.is(Items.PORKCHOP) || s.getItem() instanceof SwordItem,
             s -> s.is(Items.BOOK) || s.is(Items.WRITABLE_BOOK) || s.is(Items.PAPER),
             Map.of("story", 0.7f, "joke", 0.8f, "compliment", 1.1f, "flirt", 0.8f, "chat", 0.9f)),

@@ -763,6 +763,46 @@ a.key(9, 'stop', **P(root(up=-0.06, lean=6), torso(lean=4), head(down=4),
 a.key(20, 'stop', **P(root(up=-0.07, lean=7), dict(larm=L((-3, -1.5, 11.5), (0, 1, 0.2)))))
 a.key(30, 'stop', **NEUTRAL_P)
 
+# =============================================================== CAMINAR / CORRER / QUIETO (Locomotion)
+# Ciclos que usa el caminar propio del addon: 'loco_run' al correr y 'loco_idle' quieto. Se pueden editar en el taller.
+# La cabeza no se exporta (sigue la mirada). El ciclo de correr dura un paso doble: 0 = pie derecho adelante,
+# 10 = pie izquierdo adelante; en el juego se acelera o frena segun la velocidad.
+LOCO_PARTS = {'body', 'torso', 'rightArm', 'leftArm', 'rightLeg', 'leftLeg'}
+
+def _run_pose(side):
+    s = 1 if side == 'r' else -1
+    fwd_leg, back_leg = ((0.02 * s, -0.86, 0.5), 22), ((0.02 * s, -0.9, -0.42), 62)
+    fwd_hand, back_hand = (-4.2 * s, -6.5, 6.0), (5.2 * s, -9.0, -4.5)
+    legs_ = dict(rleg=fwd_leg, lleg=back_leg) if side == 'r' else dict(lleg=fwd_leg, rleg=back_leg)
+    arms_ = dict(larm=L(fwd_hand, (0, 0.35, 1)), rarm=R(back_hand, (0, 0.2, -1))) if side == 'r' else \
+        dict(rarm=R(fwd_hand, (0, 0.35, 1)), larm=L(back_hand, (0, 0.2, -1)))
+    return P(root(lean=9, up=-0.03), torso(turn=7 * s, lean=2), legs_, arms_)
+
+def _run_pass(side):
+    s = 1 if side == 'r' else -1
+    support, swing = ((0, -1, 0.04), 16), ((0, -0.78, 0.22), 88)
+    legs_ = dict(rleg=support, lleg=swing) if side == 'r' else dict(lleg=support, rleg=swing)
+    return P(root(lean=9, up=0.035), torso(turn=0, lean=2), legs_,
+             dict(rarm=R((5.3, -10.5, 1.0), (0, 0.3, 1)), larm=L((-5.3, -10.5, 1.0), (0, 0.3, 1))))
+
+r = anim('loco_run', 'Correr (ciclo de un paso doble, se repite)', end=20, loop=True, ret=0, stop=100000, lag=(), ground=False)
+r.only = LOCO_PARTS
+r.key(0, 'smooth', **_run_pose('r'))
+r.key(5, 'smooth', **_run_pass('r'))
+r.key(10, 'smooth', **_run_pose('l'))
+r.key(15, 'smooth', **_run_pass('l'))
+r.key(20, 'smooth', **_run_pose('r'))
+
+i = anim('loco_idle', 'Quieto (respira y se acomoda, se repite)', end=60, loop=True, ret=0, stop=100000, lag=(), ground=False)
+i.only = LOCO_PARTS
+IDLE_A = P(root(up=0.0), torso(lean=0.5), dict(rarm=R((5.3, -11.8, 0.4), (0, 0.1, 1)), larm=L((-5.3, -11.8, 0.4), (0, 0.1, 1))),
+           dict(rleg=((0.03, -1, 0.01), 3), lleg=((-0.03, -1, -0.01), 2)))
+IDLE_B = P(root(up=0.012), torso(lean=-1.2), dict(rarm=R((5.5, -11.6, 0.0), (0, 0.1, 1)), larm=L((-5.5, -11.6, 0.0), (0, 0.1, 1))),
+           dict(rleg=((0.03, -1, 0.01), 2), lleg=((-0.03, -1, -0.01), 1)))
+i.key(0, 'smooth', **IDLE_A)
+i.key(30, 'smooth', **IDLE_B)
+i.key(60, 'smooth', **IDLE_A)
+
 # =============================================================== PRUEBA (solo para la prueba visual: pose fija con codos, rodillas y cintura doblados)
 _t = anim('vt_bend', 'Prueba: pose fija con dobleces grandes', end=20, loop=True, ret=10, stop=100000)
 _t.key(0, 'smooth', **NEUTRAL_P)

@@ -247,13 +247,13 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
             if (sh == null) return;
             float[] sp = NpcChestLayer.spring((net.minecraft.world.entity.LivingEntity) currentEntity, sh, partialTick);
             float lag = bone.getName().endsWith("_r") ? 1f : 0.92f, s = sh.size();
-            bone.setRotX(0.32f + 0.05f * s - sp[0] * 0.12f * lag);
-            bone.setRotZ(-sp[2] * 0.06f * lag);
-            bone.setPosY(-sp[0] * 0.96f * lag);
-            bone.setPosX(-sp[2] * 0.32f * lag);
-            bone.setScaleX(0.92f + 0.08f * s);
-            bone.setScaleY(0.85f + 0.15f * s);
-            bone.setScaleZ(0.25f + 0.55f * s);
+            bone.setRotX(-sp[0] * 0.09f * lag);
+            bone.setRotZ(-sp[2] * 0.05f * lag);
+            bone.setPosY(-sp[0] * 0.56f * lag);
+            bone.setPosX(-sp[2] * 0.24f * lag);
+            bone.setScaleX(1f);
+            bone.setScaleY(0.9f + 0.1f * s);
+            bone.setScaleZ(0.3f + 0.5f * s);
         }
         String prev = curBone;
         curBone = bone.getName();
