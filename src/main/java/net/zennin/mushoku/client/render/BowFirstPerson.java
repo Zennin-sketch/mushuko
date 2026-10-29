@@ -74,6 +74,10 @@ public final class BowFirstPerson {
         boolean loading = load >= 0 && load < 1f;
         boolean loaded = BowSystem.isLoaded(bow) || (load >= 0.8f && load < 1.6f);
         float rel = (now - releaseAt) / 10f;
+        if (net.zennin.mushoku.client.fp.FpAnimations.get("bow_idle") != null) {
+            animated(p, bow, now, drawing, pull, loading, load, loaded, rel, pose, buffers, light);
+            return;
+        }
 
         // mano izquierda (arco) y orientacion del arco
         float aim = drawing ? Math.min(1, pull * 3) : (rel < 1 ? 1 - rel : 0);
@@ -127,6 +131,49 @@ public final class BowFirstPerson {
             Vector3f dir = new Vector3f(0.1f, 0.85f, 0.5f).normalize().lerp(FWD, t).normalize();
             int[] col = ArrowRender.colors(ammo);
             ArrowRender.draw(pose, Mesh3D.solid(buffers), new Vector3f(R).mul(16f).add(new Vector3f(dir).mul(-2f)), dir,
+                    new Vector3f(0, 1, 0), 17f * S, col[0], col[1], light, OverlayTexture.NO_OVERLAY);
+        }
+    }
+
+    /**
+     * Primera persona hecha en el Taller (animaciones bow_idle, bow_loaded, bow_load, bow_draw, bow_release en
+     * assets/remushoku/fp_animations). Lo que no se anima (cuanto se tensa la cuerda, la flecha) lo pone el juego.
+     */
+    private static void animated(AbstractClientPlayer p, ItemStack bow, float now, boolean drawing, float pull, boolean loading,
+                                 float load, boolean loaded, float rel, PoseStack pose, MultiBufferSource buffers, int light) {
+        String name;
+        float tick;
+        boolean arrowInHand = false, onString;
+        if (drawing) { name = "bow_draw"; tick = pull; onString = true; }
+        else if (loading) { name = "bow_load"; tick = load; arrowInHand = load >= 0.42f && load < 0.8f; onString = load >= 0.8f; }
+        else if (rel < 1f) { name = "bow_release"; tick = rel; onString = false; }
+        else if (loaded) { name = "bow_loaded"; tick = -1; onString = true; }
+        else { name = "bow_idle"; tick = -1; onString = false; }
+        net.zennin.mushoku.client.fp.FpAnim anim = net.zennin.mushoku.client.fp.FpAnimations.get(name);
+        if (anim == null) anim = net.zennin.mushoku.client.fp.FpAnimations.get(loaded ? "bow_loaded" : "bow_idle");
+        if (anim == null) anim = net.zennin.mushoku.client.fp.FpAnimations.get("bow_idle");
+        // las de una vez van de 0 a su largo segun el avance; las de espera, con el reloj
+        float t = tick < 0 ? now : tick * anim.length;
+        float[] fp = net.zennin.mushoku.client.fp.FpRender.pose("bow", anim, t, now);
+        net.zennin.mushoku.client.fp.FpRender.arms(p, pose, buffers, light, fp);
+        ItemStack ammo = p.getProjectile(bow);
+        if (ammo.isEmpty()) ammo = new ItemStack(Items.ARROW);
+        float back = BowRender.BRACE + BowRender.DRAW * pull;
+        pose.pushPose();
+        net.zennin.mushoku.client.fp.FpRender.toItem(pose, fp, net.zennin.mushoku.client.fp.FpAnim.L_ARM);
+        pose.scale(S, S, S);
+        BowRender.draw(pose, buffers, BowRender.style(bow), back, onString, ammo, light, OverlayTexture.NO_OVERLAY);
+        pose.popPose();
+        if (arrowInHand) {
+            // la flecha va en la mano derecha, de apuntar arriba a quedar como el arco
+            org.joml.Quaternionf bq = net.zennin.mushoku.client.fp.FpRender.rot(fp, net.zennin.mushoku.client.fp.FpAnim.L_ARM)
+                    .mul(net.zennin.mushoku.client.fp.FpRender.rot(fp, net.zennin.mushoku.client.fp.FpAnim.ITEM));
+            Vector3f fwd = bq.transform(new Vector3f(1, 0, 0));
+            float k = smooth((load - 0.42f) / 0.38f);
+            Vector3f dir = new Vector3f(0.1f, 0.85f, 0.5f).normalize().lerp(fwd, k).normalize();
+            Vector3f hand = net.zennin.mushoku.client.fp.FpRender.fist(fp, net.zennin.mushoku.client.fp.FpAnim.R_ARM);
+            int[] col = ArrowRender.colors(ammo);
+            ArrowRender.draw(pose, Mesh3D.solid(buffers), new Vector3f(hand).mul(16f).add(new Vector3f(dir).mul(-2f)), dir,
                     new Vector3f(0, 1, 0), 17f * S, col[0], col[1], light, OverlayTexture.NO_OVERLAY);
         }
     }

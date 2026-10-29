@@ -20,6 +20,7 @@ public class MushokuClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         VisualTest.init();
+        net.zennin.mushoku.client.fp.FpAnimations.init();
         // Arcos y carcaj del mod: modelos 3D lisos dibujados por codigo (client/render)
         for (net.minecraft.world.item.Item it : net.zennin.mushoku.registry.ModItems.ALL) {
             if (it instanceof net.zennin.mushoku.item.MushokuBowItem bow)

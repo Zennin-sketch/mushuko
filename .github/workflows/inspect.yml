@@ -1,0 +1,37 @@
+name: Inspeccionar mods
+on:
+  workflow_dispatch:
+    inputs:
+      classes:
+        description: Clases a mostrar con javap (separadas por espacio)
+        default: ""
+      grep:
+        description: Patron para listar clases del jar
+        default: ""
+permissions:
+  contents: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Bajar y mirar
+        run: |
+          mkdir -p mods out
+          python3 tools/visualtest/fetch_mods.py mods
+          cd mods
+          for j in *.jar; do unzip -qo "$j" -d "../x" 'net/bettercombat/*' 'META-INF/jars/*' 2>/dev/null || true; done
+          cd ../x
+          for j in META-INF/jars/*.jar; do [ -f "$j" ] && unzip -qo "$j" 'net/bettercombat/*' 2>/dev/null || true; done
+          if [ -n "${{ inputs.grep }}" ]; then find . -name '*.class' | grep -E "${{ inputs.grep }}" > ../out/classes.txt || true; fi
+          for c in ${{ inputs.classes }}; do javap -p -cp . "$c" >> ../out/javap.txt 2>&1 || true; done
+      - name: Subir
+        run: |
+          cd out && git init -q && git checkout -q -b vt-inspect
+          git config user.name "inspect" && git config user.email "inspect@users.noreply.github.com"
+          git add -A && git commit -q -m inspect
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" vt-inspect
