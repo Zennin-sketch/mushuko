@@ -203,6 +203,12 @@ public final class VisualTest {
                 if (keepScreen) mc.setScreen(new net.minecraft.client.gui.screens.inventory.InventoryScreen(mc.player));
                 else mc.setScreen(null);
             }
+            case "book" -> {
+                keepScreen = true;
+                mc.options.hideGui = false;
+                mc.setScreen(new SpellBookScreen());
+            }
+            case "closescreen" -> { keepScreen = false; mc.setScreen(null); mc.options.hideGui = true; }
             default -> log("paso desconocido " + op);
         }
     }
