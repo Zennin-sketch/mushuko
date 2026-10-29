@@ -104,6 +104,7 @@ public class MushokuClient implements ClientModInitializer {
             ClientManaState.maxMana = payload.maxMana();
             ClientManaState.playerClass = payload.playerClass();
         });
+        ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.SpellXpPayload.TYPE, (payload, context) -> ClientSpellXp.set(payload.uses()));
         ClientPlayNetworking.registerGlobalReceiver(MagicSyncPayload.TYPE, (payload, context) -> {
             ClientManaState.queued = payload.queued();
             ClientManaState.noElement = payload.noElement();

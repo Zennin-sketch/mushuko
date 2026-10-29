@@ -19,6 +19,7 @@ public final class ModNetworking {
     public static void init() {
         PayloadTypeRegistry.playS2C().register(ManaSyncPayload.TYPE, ManaSyncPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(MagicSyncPayload.TYPE, MagicSyncPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(SpellXpPayload.TYPE, SpellXpPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ReadySpellPayload.TYPE, ReadySpellPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(PlayAnimPayload.TYPE, PlayAnimPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(RefinePayloads.Open.TYPE, RefinePayloads.Open.CODEC);

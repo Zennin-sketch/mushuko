@@ -80,7 +80,8 @@ public final class AddonSpells {
             case FROST_WIND -> mist(p, 7, 240, ParticleTypes.SNOWFLAKE, e -> {
                 e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 3));
                 e.setTicksFrozen(Math.min(e.getTicksRequiredToFreeze() + 60, e.getTicksFrozen() + 30));
-                e.hurt(p.damageSources().freeze(), 2f);
+                e.clearFire();
+                e.hurt(p.damageSources().freeze(), SpellMastery.dmg(p, 2f));
             });
             case QUAGMIRE -> {
                 // Lodazal: un cilindro de lodo de radio 7 ADELANTE del que conjura (el queda en el borde, afuera). En cada
@@ -148,6 +149,11 @@ public final class AddonSpells {
         sound(p, snd, 0.8f);
         Tasks.repeat(0, 4, 100, tick -> {
             if (!p.isAlive()) return false;
+            // lo que cae silba / zumba desde arriba mientras dura la lluvia
+            if (tick % 12 == 0) {
+                SoundEvent fall = kind == MagicProjectile.FIRE ? SoundEvents.BLAZE_SHOOT : kind == MagicProjectile.ROCK ? SoundEvents.POINTED_DRIPSTONE_FALL : SoundEvents.GLASS_HIT;
+                level.playSound(null, c.x, c.y + 10, c.z, fall, SoundSource.PLAYERS, 0.9f, 0.7f + level.random.nextFloat() * 0.5f);
+            }
             for (int i = 0; i < 2; i++) {
                 double x = c.x + (level.random.nextDouble() - 0.5) * 15, z = c.z + (level.random.nextDouble() - 0.5) * 15;
                 // radio de impacto amplio: con la puntería al azar de la lluvia, pegar justo era casi imposible

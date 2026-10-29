@@ -37,6 +37,7 @@ public class MushokuMod implements ModInitializer {
         ModAttachments.init();
         ModNetworking.init();
         ManaSystem.init();
+        net.zennin.mushoku.magic.SpellMastery.init();
         TempBlocks.init();
         Tasks.init();
         PlayerClasses.init();

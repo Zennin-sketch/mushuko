@@ -2614,5 +2614,17 @@
   "gui.remushoku.refine.broken": "La piedra se rompió",
   "gui.remushoku.refine.rolling": "Las runas deciden",
   "gui.remushoku.refine.success": "¡La piedra ascendió!",
-  "gui.remushoku.refine.fail": "La piedra se hizo añicos"
+  "gui.remushoku.refine.fail": "La piedra se hizo añicos",
+  "book.remushoku.lv": "Nv %s",
+  "book.remushoku.mastery": "Dominio: nivel %s/%s",
+  "book.remushoku.uses": "Usos: %s/%s para el siguiente nivel",
+  "book.remushoku.gate": "Para subir de nivel: %s de maná máximo",
+  "book.remushoku.cost": "Maná: %s (base %s)",
+  "book.remushoku.nether_water": "En el Nether cuesta 10%% más",
+  "book.remushoku.damage": "Daño: %s (+%s%%)",
+  "book.remushoku.next_power": "Más daño al llegar a nivel %s",
+  "book.remushoku.use_req": "Requiere %s de maná máximo para usarlo",
+  "msg.remushoku.mastery_need_mana": "Necesitás %s de maná máximo para usar este hechizo",
+  "msg.remushoku.mastery_up": "¡%s subió a nivel %s!",
+  "msg.remushoku.mastery_gate": "%s no puede subir de nivel hasta que tengas %s de maná máximo"
 }

@@ -86,7 +86,9 @@ public final class SpellCasting {
         }
         ManaData mana = ModAttachments.get(p);
         boolean creative = p.getAbilities().instabuild;
-        if (!creative && mana.mana() < spell.level.cost) {
+        if (!SpellMastery.canUse(p, spell)) return;
+        double cost = SpellMastery.cost(p, spell);
+        if (!creative && mana.mana() < cost) {
             msg(p, Component.translatable("msg.remushoku.no_mana").withStyle(ChatFormatting.RED));
             return;
         }
@@ -101,8 +103,9 @@ public final class SpellCasting {
             if (spell == Spell.HEALING) net.zennin.mushoku.party.Parties.healMembers(p, 4f);
             else if (spell == Spell.X_HEALING) net.zennin.mushoku.party.Parties.healMembers(p, 8f);
             else if (spell == Spell.SHRINE_HEALING) net.zennin.mushoku.party.Parties.healMembers(p, 16f);
+            SpellMastery.gain(p, spell);
             if (!creative) {
-                ManaData after = mana.withMana(mana.mana() - spell.level.cost);
+                ManaData after = mana.withMana(mana.mana() - cost);
                 after = after.withMaxMana(after.maxMana() + spell.level.maxManaGain);
                 ModAttachments.set(p, after);
             }

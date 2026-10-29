@@ -38,6 +38,7 @@ public final class SpellEffects {
 
     public static boolean cast(Spell spell, ServerPlayer p) {
         ServerLevel level = p.serverLevel();
+        SpellMastery.begin(p, spell);
         switch (spell) {
             case WATER_BALL -> shoot(p, MagicProjectile.WATER, 3f, 1.5f, SoundEvents.PLAYER_SPLASH);
             case ICE_SMASH -> shoot(p, MagicProjectile.ICE, 4f, 2f, SoundEvents.GLASS_BREAK);
@@ -176,7 +177,7 @@ public final class SpellEffects {
         LivingEntity target = lookEntity(p, 4);
         if (target != null) {
             target.igniteForSeconds(5);
-            target.hurt(p.damageSources().onFire(), 3f);
+            target.hurt(p.damageSources().onFire(), SpellMastery.dmg(p, 3f));
             particles(level, ParticleTypes.FLAME, target.position().add(0, 1, 0), 20, 0.4);
         } else {
             HitResult hit = p.pick(4, 1f, true);

@@ -59,12 +59,14 @@ public final class StaffLogic {
             return InteractionResultHolder.pass(staff);
         }
         ManaData mana = ModAttachments.get(sp);
-        double cost = spell.level.cost * (1 - discount);
+        if (!net.zennin.mushoku.magic.SpellMastery.canUse(sp, spell)) return InteractionResultHolder.fail(staff);
+        double cost = net.zennin.mushoku.magic.SpellMastery.cost(sp, spell) * (1 - discount);
         if (mana.mana() < cost && !sp.getAbilities().instabuild) {
             sp.displayClientMessage(Component.translatable("msg.remushoku.no_mana").withStyle(ChatFormatting.RED), true);
             return InteractionResultHolder.fail(staff);
         }
         if (SpellEffects.cast(spell, sp)) {
+            net.zennin.mushoku.magic.SpellMastery.gain(sp, spell);
             ManaData after = mana;
             if (!sp.getAbilities().instabuild) after = after.withMana(after.mana() - cost);
             after = after.withMaxMana(after.maxMana() + spell.level.maxManaGain);

@@ -2614,5 +2614,17 @@
   "gui.remushoku.refine.broken": "The stone broke",
   "gui.remushoku.refine.rolling": "The runes decide",
   "gui.remushoku.refine.success": "The stone ascended!",
-  "gui.remushoku.refine.fail": "The stone shattered"
+  "gui.remushoku.refine.fail": "The stone shattered",
+  "book.remushoku.lv": "Lv %s",
+  "book.remushoku.mastery": "Mastery: level %s/%s",
+  "book.remushoku.uses": "Casts: %s/%s for the next level",
+  "book.remushoku.gate": "To level up: %s max mana",
+  "book.remushoku.cost": "Mana: %s (base %s)",
+  "book.remushoku.nether_water": "Costs 10%% more in the Nether",
+  "book.remushoku.damage": "Damage: %s (+%s%%)",
+  "book.remushoku.next_power": "More damage at level %s",
+  "book.remushoku.use_req": "Requires %s max mana to use",
+  "msg.remushoku.mastery_need_mana": "You need %s max mana to use this spell",
+  "msg.remushoku.mastery_up": "%s reached level %s!",
+  "msg.remushoku.mastery_gate": "%s cannot level up until you have %s max mana"
 }

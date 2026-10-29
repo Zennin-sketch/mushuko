@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * marca en el servidor y se avisa al cliente (el movimiento del jugador lo calcula su cliente).
  */
 public final class Escape {
-    public static final int TICKS = 16;
+    public static final int TICKS = 50;
     private static final Map<UUID, Long> SERVER = new ConcurrentHashMap<>();
     /** Lado cliente: hasta que tick del mundo el jugador local se escapa. */
     public static long clientUntil = -1;

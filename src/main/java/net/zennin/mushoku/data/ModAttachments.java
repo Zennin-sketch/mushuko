@@ -115,6 +115,20 @@ public final class ModAttachments {
     @SuppressWarnings("UnstableApiUsage")
     public static void setArcher(Player player, ArcherData d) { player.setAttached(ARCHER, d); }
 
+    /** Lanzamientos de cada hechizo (dominio del hechizo, SpellMastery). */
+    @SuppressWarnings("UnstableApiUsage")
+    public static final AttachmentType<java.util.Map<String, Integer>> SPELL_XP = AttachmentRegistry.<java.util.Map<String, Integer>>builder()
+            .persistent(com.mojang.serialization.Codec.unboundedMap(com.mojang.serialization.Codec.STRING, com.mojang.serialization.Codec.INT))
+            .copyOnDeath()
+            .initializer(java.util.Map::of)
+            .buildAndRegister(MushokuMod.id("spell_xp"));
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static java.util.Map<String, Integer> spellXp(Player player) { return player.getAttachedOrCreate(SPELL_XP); }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static void setSpellXp(Player player, java.util.Map<String, Integer> m) { player.setAttached(SPELL_XP, java.util.Map.copyOf(m)); }
+
     private ModAttachments() {}
 
     @SuppressWarnings("UnstableApiUsage")

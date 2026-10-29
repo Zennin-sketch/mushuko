@@ -41,13 +41,15 @@ public final class SilentCasting {
             return;
         }
         ManaData mana = ModAttachments.get(p);
-        double cost = s.level.cost + EXTRA_COST;
+        if (!net.zennin.mushoku.magic.SpellMastery.canUse(p, s)) return;
+        double cost = net.zennin.mushoku.magic.SpellMastery.cost(p, s) + EXTRA_COST;
         if (mana.mana() < cost && !p.getAbilities().instabuild) {
             p.displayClientMessage(Component.translatable("msg.remushoku.no_mana").withStyle(ChatFormatting.RED), true);
             return;
         }
         if (p.getCooldowns().isOnCooldown(net.zennin.mushoku.registry.ModItems.SILENT_TOME)) return;
         if (SpellEffects.cast(s, p)) {
+            net.zennin.mushoku.magic.SpellMastery.gain(p, s);
             ManaData after = p.getAbilities().instabuild ? mana : mana.withMana(mana.mana() - cost);
             ModAttachments.set(p, after.withMaxMana(after.maxMana() + s.level.maxManaGain));
             p.getCooldowns().addCooldown(net.zennin.mushoku.registry.ModItems.SILENT_TOME, 10);

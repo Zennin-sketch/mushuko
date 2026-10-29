@@ -41,6 +41,9 @@ public class MagicProjectile extends ThrowableProjectile {
     private float incendiary = 0f;
     /** Radio de impacto (lluvias): pega a todo lo que pasa cerca y, al caer, a todo lo que esta alrededor. */
     private float area = 0f;
+    /** Cuantos objetivos atraviesa antes de frenar (Corte de Llama). */
+    private int pierce = 0;
+    private final java.util.Set<Integer> pierced = new java.util.HashSet<>();
 
     public MagicProjectile(EntityType<? extends MagicProjectile> type, Level level) {
         super(type, level);
@@ -51,7 +54,8 @@ public class MagicProjectile extends ThrowableProjectile {
         this.entityData.set(KIND, kind);
         // Ultimo Suspiro / Aqua Heartia en la mano amplifican la magia
         this.damage = owner instanceof net.minecraft.world.entity.player.Player p
-                ? damage * net.zennin.mushoku.extra.ExtraTicks.magicAmp(p) * net.zennin.mushoku.race.RaceSystem.affinity(p, kind) : damage;
+                ? damage * net.zennin.mushoku.extra.ExtraTicks.magicAmp(p) * net.zennin.mushoku.race.RaceSystem.affinity(p, kind)
+                  * net.zennin.mushoku.magic.SpellMastery.mult(p) : damage;
     }
 
     public MagicProjectile size(float s) { this.entityData.set(SIZE, s); return this; }
@@ -59,6 +63,7 @@ public class MagicProjectile extends ThrowableProjectile {
     public MagicProjectile explosion(float power) { this.explosion = power; return this; }
     public MagicProjectile incendiary(float power) { this.incendiary = power; return this; }
     public MagicProjectile area(float radius) { this.area = radius; return this; }
+    public MagicProjectile pierce(int n) { this.pierce = n; return this; }
     public MagicProjectile lift() { this.lift = true; this.entityData.set(VARIANT, VARIANT_DRILL); return this; }
     public MagicProjectile variant(int v) { this.entityData.set(VARIANT, v); return this; }
     public int variant() { return this.entityData.get(VARIANT); }
@@ -126,7 +131,7 @@ public class MagicProjectile extends ThrowableProjectile {
 
     @Override
     protected boolean canHitEntity(Entity target) {
-        return super.canHitEntity(target) && target != getOwner();
+        return super.canHitEntity(target) && target != getOwner() && !pierced.contains(target.getId());
     }
 
     @Override
@@ -147,6 +152,12 @@ public class MagicProjectile extends ThrowableProjectile {
                 case WIND -> living.knockback(0.5, getX() - living.getX(), getZ() - living.getZ());
                 default -> living.clearFire();
             }
+            // la magia de agua (agua y hielo) apaga al que se esta quemando
+            if (kind() == ICE && living.isOnFire()) {
+                living.clearFire();
+                level().playSound(null, living.getX(), living.getY(), living.getZ(), net.minecraft.sounds.SoundEvents.FIRE_EXTINGUISH,
+                        net.minecraft.sounds.SoundSource.PLAYERS, 0.6f, 1.2f);
+            }
             if (knockback > 0) {
                 Vec3 dir = getDeltaMovement().normalize();
                 living.push(dir.x * knockback, 0.2 * knockback, dir.z * knockback);
@@ -155,6 +166,24 @@ public class MagicProjectile extends ThrowableProjectile {
             if (lift) {
                 living.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 30, 2));
             }
+        }
+    }
+
+    /** Sonido al caer las lluvias (fuego, puas, hielo). */
+    private void impactSound() {
+        var r = level().random;
+        float pitch = 0.85f + r.nextFloat() * 0.3f;
+        switch (kind()) {
+            case FIRE -> {
+                level().playSound(null, getX(), getY(), getZ(), net.minecraft.sounds.SoundEvents.FIRECHARGE_USE, net.minecraft.sounds.SoundSource.PLAYERS, 0.55f, pitch);
+                level().playSound(null, getX(), getY(), getZ(), net.minecraft.sounds.SoundEvents.GENERIC_BURN, net.minecraft.sounds.SoundSource.PLAYERS, 0.35f, pitch);
+            }
+            case ROCK -> {
+                level().playSound(null, getX(), getY(), getZ(), net.minecraft.sounds.SoundEvents.POINTED_DRIPSTONE_LAND, net.minecraft.sounds.SoundSource.PLAYERS, 0.8f, pitch);
+                level().playSound(null, getX(), getY(), getZ(), net.minecraft.sounds.SoundEvents.STONE_BREAK, net.minecraft.sounds.SoundSource.PLAYERS, 0.5f, pitch * 0.8f);
+            }
+            case ICE -> level().playSound(null, getX(), getY(), getZ(), net.minecraft.sounds.SoundEvents.GLASS_BREAK, net.minecraft.sounds.SoundSource.PLAYERS, 0.5f, pitch * 1.3f);
+            default -> level().playSound(null, getX(), getY(), getZ(), net.minecraft.sounds.SoundEvents.GENERIC_SPLASH, net.minecraft.sounds.SoundSource.PLAYERS, 0.5f, pitch);
         }
     }
 
@@ -171,7 +200,15 @@ public class MagicProjectile extends ThrowableProjectile {
 
     @Override
     protected void onHit(HitResult result) {
+        // atraviesa: le pega y sigue de largo (hasta 'pierce' objetivos; el siguiente lo frena)
+        if (pierce > 0 && result instanceof EntityHitResult eh && !level().isClientSide) {
+            pierced.add(eh.getEntity().getId());
+            strike(eh.getEntity());
+            pierce--;
+            return;
+        }
         super.onHit(result);
+        if (!level().isClientSide && area > 0) impactSound();
         if (!level().isClientSide && area > 0 && isAlive()) areaImpact();
         if (!level().isClientSide) {
             if (level() instanceof ServerLevel sl) {

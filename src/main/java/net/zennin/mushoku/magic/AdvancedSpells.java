@@ -56,8 +56,10 @@ public final class AdvancedSpells {
             case BLIZZARD_STORM -> {
                 for (float yaw = -15f; yaw <= 15f; yaw += 10f)
                     shoot(p, proj(p, MagicProjectile.ICE, 6f).size(1.3f), 1.8f, yaw, null);
-                for (LivingEntity e : around(level, p.position(), 8, p))
+                for (LivingEntity e : around(level, p.position(), 8, p)) {
                     e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 80, 2));
+                    e.clearFire();
+                }
                 particles(level, ParticleTypes.SNOWFLAKE, p.position().add(0, 1, 0), 120, 4.0);
                 sound(level, p.position(), SoundEvents.POWDER_SNOW_PLACE, 1.5f);
             }
@@ -105,8 +107,9 @@ public final class AdvancedSpells {
             case ABSOLUTE_ZERO -> {
                 for (LivingEntity e : around(level, p.position(), 12, p)) {
                     e.setTicksFrozen(e.getTicksRequiredToFreeze() + 300);
+                    e.clearFire();
                     e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 120, 10));
-                    e.hurt(p.damageSources().freeze(), 12f);
+                    e.hurt(p.damageSources().freeze(), SpellMastery.dmg(p, 12f));
                 }
                 BlockPos base = p.blockPosition();
                 for (BlockPos pos : BlockPos.betweenClosed(base.offset(-8, -3, -8), base.offset(8, 3, 8))) {
@@ -133,8 +136,9 @@ public final class AdvancedSpells {
             case FLAME_SLICE -> {
                 // Se ve un solo tajo de fuego ancho; los costados son golpes invisibles para cubrir el mismo abanico
                 for (float yaw = -10f; yaw <= 10f; yaw += 10f)
-                    shoot(p, yaw == 0f ? proj(p, MagicProjectile.FIRE, 6f).size(1.4f).variant(MagicProjectile.VARIANT_SLICE)
-                            : proj(p, MagicProjectile.FIRE, 6f).variant(MagicProjectile.VARIANT_HIDDEN), 2f, yaw, null);
+                    // atraviesa hasta 3 objetivos
+                    shoot(p, yaw == 0f ? proj(p, MagicProjectile.FIRE, 6f).size(1.4f).variant(MagicProjectile.VARIANT_SLICE).pierce(3)
+                            : proj(p, MagicProjectile.FIRE, 6f).variant(MagicProjectile.VARIANT_HIDDEN).pierce(3), 2f, yaw, null);
                 sound(level, p.position(), SoundEvents.BLAZE_SHOOT, 1f);
             }
             case EXPLOSION -> {
@@ -153,7 +157,7 @@ public final class AdvancedSpells {
                     level.sendParticles(ParticleTypes.FLAME, c.x, c.y + 1.5, c.z, 20, 0.8, 1.5, 0.8, 0.05);
                     if (t % 10 == 0) {
                         for (LivingEntity e : around(level, c, 3, p)) {
-                            e.hurt(p.damageSources().indirectMagic(p, p), 4f);
+                            e.hurt(p.damageSources().indirectMagic(p, p), SpellMastery.dmg(p, 4f));
                             e.igniteForSeconds(4);
                             e.push(0, 0.6, 0);
                             e.hurtMarked = true;
@@ -164,35 +168,38 @@ public final class AdvancedSpells {
                 sound(level, c, SoundEvents.LAVA_POP, 2f);
             }
             case FLASH_OVER -> {
-                for (LivingEntity e : around(level, p.position(), 8, p)) {
-                    e.hurt(p.damageSources().indirectMagic(p, p), 12f);
+                // Fogonazo: radio 10
+                for (LivingEntity e : around(level, p.position(), 10, p)) {
+                    e.hurt(p.damageSources().indirectMagic(p, p), SpellMastery.dmg(p, 12f));
                     e.igniteForSeconds(8);
                 }
-                for (int r = 1; r <= 8; r += 2) {
+                for (int r = 1; r <= 10; r += 2) {
                     final int rad = r;
                     Tasks.later(r, () -> ring(level, p.position(), rad, ParticleTypes.FLAME));
                 }
                 sound(level, p.position(), SoundEvents.FIRECHARGE_USE, 2f);
             }
-            case MINEFIELD -> {
-                Vec3 c = targetPoint(p, 40);
-                for (int i = 0; i < 8; i++) {
-                    double ox = (p.getRandom().nextDouble() - 0.5) * 12, oz = (p.getRandom().nextDouble() - 0.5) * 12;
-                    Vec3 at = c.add(ox, 0, oz);
-                    level.sendParticles(ParticleTypes.SMOKE, at.x, at.y + 0.2, at.z, 10, 0.2, 0.1, 0.2, 0.01);
-                    Tasks.later(30 + i * 6, () -> level.explode(p, at.x, at.y, at.z, 2f, Level.ExplosionInteraction.MOB));
-                }
-            }
+            case MINEFIELD -> minefield(p, level);
             case NUCLEAR_STRIKE -> {
+                // la explosion crece con el nivel del hechizo: 8, y +2 en los niveles 5, 10, 15 y 20
                 Vec3 c = targetPoint(p, 100);
+                int tier = SpellMastery.castLevel(p) / 5;
+                float power = 8f + 2f * tier;
+                double ringR = 6 + 1.5 * tier;
                 Tasks.repeat(0, 4, 60, t -> {
-                    level.sendParticles(ParticleTypes.END_ROD, c.x, c.y + 10 - t / 6.0, c.z, 6, 0.3, 0.3, 0.3, 0.01);
-                    ring(level, c, 6, ParticleTypes.FLAME);
+                    level.sendParticles(ParticleTypes.END_ROD, c.x, c.y + 10 - t / 6.0, c.z, 6 + tier * 2, 0.3, 0.3, 0.3, 0.01);
+                    ring(level, c, ringR, ParticleTypes.FLAME);
                     return true;
                 });
                 Tasks.later(60, () -> {
-                    level.explode(p, c.x, c.y, c.z, 8f, Level.ExplosionInteraction.MOB);
-                    level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, c.x, c.y + 1, c.z, 6, 3, 2, 3, 0);
+                    level.explode(p, c.x, c.y, c.z, power, Level.ExplosionInteraction.MOB);
+                    level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, c.x, c.y + 1, c.z, 6 + tier * 3, 3 + tier, 2 + tier * 0.5, 3 + tier, 0);
+                    net.zennin.mushoku.entity.SpellFxEntity.spawn(level, "fire_burst", c, 0, 6f + tier * 2f, 20, null);
+                    // onda de calor que crece con el nivel
+                    for (int r = 2; r <= ringR * 2; r += 2) {
+                        final int rad = r;
+                        Tasks.later(r / 2, () -> ring(level, c, rad, ParticleTypes.FLAME));
+                    }
                 });
                 sound(level, c, SoundEvents.BEACON_ACTIVATE, 3f);
             }
@@ -230,7 +237,7 @@ public final class AdvancedSpells {
                 Tasks.repeat(0, 20, 200, t -> {
                     if (!p.isAlive()) return false;
                     for (LivingEntity e : around(level, p.position(), 10, p)) {
-                        e.hurt(p.damageSources().indirectMagic(p, p), 2f);
+                        e.hurt(p.damageSources().indirectMagic(p, p), SpellMastery.dmg(p, 2f));
                         e.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 40, 0));
                     }
                     level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.SAND.defaultBlockState()),
@@ -262,7 +269,7 @@ public final class AdvancedSpells {
                 for (LivingEntity e : around(level, Vec3.atCenterOf(base), 7, p)) {
                     e.push(0, 1.5, 0);
                     e.hurtMarked = true;
-                    e.hurt(p.damageSources().indirectMagic(p, p), 15f);
+                    e.hurt(p.damageSources().indirectMagic(p, p), SpellMastery.dmg(p, 15f));
                 }
                 sound(level, Vec3.atCenterOf(base), SoundEvents.STONE_PLACE, 3f);
             }
@@ -298,7 +305,7 @@ public final class AdvancedSpells {
                         Vec3 away = e.position().subtract(p.position()).normalize().scale(1.2);
                         e.push(away.x, 0.3, away.z);
                         e.hurtMarked = true;
-                        e.hurt(p.damageSources().indirectMagic(p, p), 3f);
+                        e.hurt(p.damageSources().indirectMagic(p, p), SpellMastery.dmg(p, 3f));
                     }
                     ring(level, p.position(), 3 + (t / 10) % 7, ParticleTypes.CLOUD);
                     return true;
@@ -312,7 +319,7 @@ public final class AdvancedSpells {
                         Vec3 in = c.subtract(e.position()).normalize().scale(0.4);
                         e.push(in.x, 0.35, in.z);
                         e.hurtMarked = true;
-                        if (t % 10 == 0) e.hurt(p.damageSources().indirectMagic(p, p), 2f);
+                        if (t % 10 == 0) e.hurt(p.damageSources().indirectMagic(p, p), SpellMastery.dmg(p, 2f));
                     }
                     for (int h = 0; h < 8; h++) {
                         double a = (t * 0.6 + h) % (Math.PI * 2);
@@ -328,7 +335,7 @@ public final class AdvancedSpells {
                 for (LivingEntity e : targets) {
                     e.push(0, 2.0, 0);
                     e.hurtMarked = true;
-                    e.hurt(p.damageSources().indirectMagic(p, p), 15f);
+                    e.hurt(p.damageSources().indirectMagic(p, p), SpellMastery.dmg(p, 15f));
                 }
                 for (int i = 0; i < Math.min(5, targets.size()); i++) lightning(level, p, targets.get(i).position());
                 for (int r = 2; r <= 20; r += 3) ring(level, p.position(), r, ParticleTypes.CLOUD);
@@ -446,7 +453,7 @@ public final class AdvancedSpells {
         for (LivingEntity e : around(level, Vec3.atCenterOf(base.above()), 2, p)) {
             e.push(0, 1.4, 0);
             e.hurtMarked = true;
-            e.hurt(p.damageSources().indirectMagic(p, p), 5f);
+            e.hurt(p.damageSources().indirectMagic(p, p), SpellMastery.dmg(p, 5f));
         }
         for (int y = 1; y <= 7; y++) {
             final int yy = y;
@@ -471,13 +478,17 @@ public final class AdvancedSpells {
     /** Ola: empuja y moja todo lo que tengas adelante. */
     private static void wave(ServerPlayer p, ServerLevel level) {
         Vec3 look = p.getLookAngle();
+        // apaga lo encendido a lo largo de la ola
+        Vec3 flat = new Vec3(look.x, 0, look.z).normalize();
+        for (int i = 2; i <= 8; i += 3) douse(level, p.position().add(flat.scale(i)), 3, 3);
+        douse(level, p.position(), 2, 2);
         for (LivingEntity e : around(level, p.position(), 8, p)) {
             Vec3 to = e.position().subtract(p.position()).normalize();
             if (to.dot(look) < 0.3) continue;
             e.push(look.x * 2.0, 0.4, look.z * 2.0);
             e.hurtMarked = true;
             e.clearFire();
-            e.hurt(p.damageSources().indirectMagic(p, p), 4f);
+            e.hurt(p.damageSources().indirectMagic(p, p), SpellMastery.dmg(p, 4f));
         }
         for (int i = 1; i <= 8; i++) {
             Vec3 at = p.position().add(look.x * i, 0.5, look.z * i);
@@ -485,6 +496,118 @@ public final class AdvancedSpells {
             level.sendParticles(ParticleTypes.FALLING_WATER, at.x, at.y + 1, at.z, 10, 1.2, 0.4, 1.2, 0);
         }
         sound(level, p.position(), SoundEvents.PLAYER_SPLASH_HIGH_SPEED, 1.5f);
+    }
+
+    /**
+     * Campo Minado: se forma una bolita de fuego en la mano, el mago la lanza y salen las minas hacia el cielo, suben
+     * por encima del punto marcado, caen en abanico y quedan armadas en el suelo: estallan cuando alguien las pisa o
+     * cuando se les acaba el tiempo.
+     */
+    private static void minefield(ServerPlayer p, ServerLevel level) {
+        Vec3 c = targetPoint(p, 40);
+        int charge = 12;
+        // 1) bolita de fuego en la mano (sigue la mano mientras se carga)
+        Tasks.repeat(0, 1, charge, t -> {
+            Vec3 hand = hand(p);
+            float s = 0.04f + t * 0.012f;
+            level.sendParticles(ParticleTypes.FLAME, hand.x, hand.y, hand.z, 3, s, s, s, 0.005);
+            if (t % 3 == 0) level.sendParticles(ParticleTypes.SMALL_FLAME, hand.x, hand.y, hand.z, 2, s * 1.5, s * 1.5, s * 1.5, 0.01);
+            if (t == 0) level.playSound(null, hand.x, hand.y, hand.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.5f, 1.6f);
+            return p.isAlive();
+        });
+        int n = 8;
+        Tasks.later(charge, () -> {
+            p.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);
+            Vec3 from = hand(p);
+            level.playSound(null, from.x, from.y, from.z, SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1f, 1.3f);
+            for (int i = 0; i < n; i++) {
+                double ox = (p.getRandom().nextDouble() - 0.5) * 12, oz = (p.getRandom().nextDouble() - 0.5) * 12;
+                Vec3 land = ground(level, c.add(ox, 0, oz));
+                Vec3 apex = c.add(ox * 0.35, 14 + p.getRandom().nextDouble() * 3, oz * 0.35);
+                int up = 18 + i, down = 12;
+                final int idx = i;
+                // 2) sube desde la mano hasta arriba del objetivo y 3) cae a su lugar
+                Tasks.repeat(i, 1, up + down, t -> {
+                    Vec3 at;
+                    if (t < up) {
+                        double u = (t + 1) / (double) up, k = 1 - u;
+                        Vec3 ctrl = from.add(apex).scale(0.5).add(0, 10, 0);
+                        at = from.scale(k * k).add(ctrl.scale(2 * k * u)).add(apex.scale(u * u));
+                    } else {
+                        double u = (t - up + 1) / (double) down;
+                        at = apex.add(land.subtract(apex).scale(u * u));
+                    }
+                    level.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 4, 0.08, 0.08, 0.08, 0.01);
+                    level.sendParticles(ParticleTypes.SMOKE, at.x, at.y, at.z, 1, 0.05, 0.05, 0.05, 0.0);
+                    if (t == up) level.playSound(null, at.x, at.y, at.z, SoundEvents.FIREWORK_ROCKET_TWINKLE_FAR, SoundSource.PLAYERS, 0.4f, 1.6f);
+                    if (t == up + down - 1) arm(p, level, land, 40 + idx * 6);
+                    return true;
+                });
+            }
+        });
+    }
+
+    /** Mina armada en el suelo: humea y brilla; estalla si alguien la pisa o al acabarse el tiempo. */
+    private static void arm(ServerPlayer p, ServerLevel level, Vec3 at, int fuse) {
+        level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.5f, 0.8f);
+        boolean[] done = {false};
+        float power = 2f + 0.25f * (SpellMastery.castLevel(p) / 5);
+        Tasks.repeat(0, 2, fuse, t -> {
+            if (done[0]) return false;
+            level.sendParticles(ParticleTypes.SMALL_FLAME, at.x, at.y + 0.1, at.z, 2, 0.12, 0.02, 0.12, 0.0);
+            if (t % 6 == 0) level.sendParticles(ParticleTypes.SMOKE, at.x, at.y + 0.2, at.z, 2, 0.1, 0.05, 0.1, 0.01);
+            boolean stepped = !around(level, at, 1.3, p).isEmpty();
+            if (stepped || t >= fuse - 2) {
+                done[0] = true;
+                level.explode(p, at.x, at.y, at.z, power, Level.ExplosionInteraction.MOB);
+                return false;
+            }
+            return true;
+        });
+    }
+
+    /** Mano derecha del jugador (adelante y un poco abajo de los ojos). */
+    private static Vec3 hand(ServerPlayer p) {
+        Vec3 look = p.getLookAngle();
+        Vec3 right = new Vec3(-look.z, 0, look.x).normalize();
+        if (p.getMainArm() == net.minecraft.world.entity.HumanoidArm.LEFT) right = right.scale(-1);
+        return p.getEyePosition().add(look.scale(0.6)).add(right.scale(0.35)).add(0, -0.45, 0);
+    }
+
+    /** Baja el punto hasta el primer bloque solido (busca hasta 10 abajo y 4 arriba). */
+    private static Vec3 ground(ServerLevel level, Vec3 v) {
+        BlockPos b = BlockPos.containing(v.x, v.y + 4, v.z);
+        for (int i = 0; i < 14; i++) {
+            if (!level.getBlockState(b.below()).getCollisionShape(level, b.below()).isEmpty() && level.getBlockState(b).getCollisionShape(level, b).isEmpty())
+                return new Vec3(v.x, b.getY(), v.z);
+            b = b.below();
+        }
+        return v;
+    }
+
+    /**
+     * Inundacion apaga todo lo encendido en su alcance: fuego (comun, de alma, sobre netherrack), fogatas, velas y
+     * tortas con vela. Los portales no se tocan.
+     */
+    private static void douse(ServerLevel level, Vec3 c, int r, int h) {
+        BlockPos base = BlockPos.containing(c);
+        boolean any = false;
+        for (BlockPos pos : BlockPos.betweenClosed(base.offset(-r, -2, -r), base.offset(r, h, r))) {
+            BlockState st = level.getBlockState(pos);
+            if (st.getBlock() instanceof net.minecraft.world.level.block.BaseFireBlock) {
+                level.removeBlock(pos, false);
+                any = true;
+            } else if (st.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT)
+                    && st.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT)
+                    && (st.getBlock() instanceof net.minecraft.world.level.block.CampfireBlock
+                        || st.getBlock() instanceof net.minecraft.world.level.block.AbstractCandleBlock)) {
+                if (st.getBlock() instanceof net.minecraft.world.level.block.CampfireBlock)
+                    net.minecraft.world.level.block.CampfireBlock.dowse(null, level, pos.immutable(), st);
+                level.setBlock(pos, st.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT, false), 11);
+                any = true;
+            }
+        }
+        if (any) level.playSound(null, c.x, c.y, c.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 1f, 1f);
     }
 
     /** Lanza de tierra: una fila de pinchos de piedra sale del suelo hacia adelante. */
@@ -498,7 +621,7 @@ public final class AdvancedSpells {
                 level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()),
                         at.x, at.y + 0.5, at.z, 25, 0.4, 0.6, 0.4, 0.1);
                 for (LivingEntity e : around(level, at, 1.4, p)) {
-                    e.hurt(p.damageSources().indirectMagic(p, p), 6f);
+                    e.hurt(p.damageSources().indirectMagic(p, p), SpellMastery.dmg(p, 6f));
                     e.push(0, 0.7, 0);
                     e.hurtMarked = true;
                 }
