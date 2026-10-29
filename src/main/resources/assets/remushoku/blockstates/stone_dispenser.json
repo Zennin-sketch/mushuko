@@ -1,0 +1,48 @@
+{
+ "variants": {
+  "facing=down,triggered=false": {
+   "model": "remushoku:block/stone_dispenser_vertical",
+   "x": 180
+  },
+  "facing=down,triggered=true": {
+   "model": "remushoku:block/stone_dispenser_vertical",
+   "x": 180
+  },
+  "facing=up,triggered=false": {
+   "model": "remushoku:block/stone_dispenser_vertical"
+  },
+  "facing=up,triggered=true": {
+   "model": "remushoku:block/stone_dispenser_vertical"
+  },
+  "facing=north,triggered=false": {
+   "model": "remushoku:block/stone_dispenser"
+  },
+  "facing=north,triggered=true": {
+   "model": "remushoku:block/stone_dispenser"
+  },
+  "facing=east,triggered=false": {
+   "model": "remushoku:block/stone_dispenser",
+   "y": 90
+  },
+  "facing=east,triggered=true": {
+   "model": "remushoku:block/stone_dispenser",
+   "y": 90
+  },
+  "facing=south,triggered=false": {
+   "model": "remushoku:block/stone_dispenser",
+   "y": 180
+  },
+  "facing=south,triggered=true": {
+   "model": "remushoku:block/stone_dispenser",
+   "y": 180
+  },
+  "facing=west,triggered=false": {
+   "model": "remushoku:block/stone_dispenser",
+   "y": 270
+  },
+  "facing=west,triggered=true": {
+   "model": "remushoku:block/stone_dispenser",
+   "y": 270
+  }
+ }
+}

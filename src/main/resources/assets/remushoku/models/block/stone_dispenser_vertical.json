@@ -1,0 +1,7 @@
+{
+ "parent": "minecraft:block/orientable_vertical",
+ "textures": {
+  "front": "remushoku:block/stone_dispenser_front_vertical",
+  "side": "remushoku:block/stone_dispenser_top"
+ }
+}

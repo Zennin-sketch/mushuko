@@ -1,0 +1,20 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "remushoku:block/research_table",
+   "y": 0
+  },
+  "facing=east": {
+   "model": "remushoku:block/research_table",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "remushoku:block/research_table",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "remushoku:block/research_table",
+   "y": 270
+  }
+ }
+}

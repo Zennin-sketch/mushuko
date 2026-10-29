@@ -2626,5 +2626,14 @@
   "book.remushoku.use_req": "Requires %s max mana to use",
   "msg.remushoku.mastery_need_mana": "You need %s max mana to use this spell",
   "msg.remushoku.mastery_up": "%s reached level %s!",
-  "msg.remushoku.mastery_gate": "%s cannot level up until you have %s max mana"
+  "msg.remushoku.mastery_gate": "%s cannot level up until you have %s max mana",
+  "block.remushoku.ice_pillar": "Ice Pillar",
+  "block.remushoku.earth_pillar": "Earth Pillar",
+  "block.remushoku.stone_dispenser": "Stone Dispenser",
+  "block.remushoku.research_table": "Research Table",
+  "container.remushoku.stone_dispenser": "Stone Dispenser",
+  "container.remushoku.research_table": "Research Table",
+  "gui.remushoku.research.cost": "Costs %s mana",
+  "gui.remushoku.research.hint": "Place the materials",
+  "gui.remushoku.research.book": "Research"
 }

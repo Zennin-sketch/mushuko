@@ -1,0 +1,24 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "misc",
+ "pattern": [
+  "BKB",
+  "PPP",
+  "P P"
+ ],
+ "key": {
+  "B": {
+   "item": "minecraft:book"
+  },
+  "K": {
+   "item": "minecraft:amethyst_shard"
+  },
+  "P": {
+   "tag": "minecraft:planks"
+  }
+ },
+ "result": {
+  "count": 1,
+  "id": "remushoku:research_table"
+ }
+}

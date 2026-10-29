@@ -132,9 +132,7 @@ public class MagicCircleBlock extends BaseEntityBlock {
                 return ItemInteractionResult.CONSUME;
             }
             consume(sp, stack, 1);
-            be.setArmed(true);
-            level.setBlock(pos, state.setValue(POWERED, true), Block.UPDATE_ALL);
-            level.playSound(null, pos, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 0.8f, 1.5f);
+            arm(level, pos, state, be);
             msg(sp, "msg.remushoku.circle_armed", ChatFormatting.LIGHT_PURPLE);
         }
         return ItemInteractionResult.CONSUME;
@@ -178,6 +176,13 @@ public class MagicCircleBlock extends BaseEntityBlock {
             msg(sp, "msg.remushoku.circle_empty", ChatFormatting.GRAY);
         }
         return InteractionResult.CONSUME;
+    }
+
+    /** Carga el circulo (la piedra ya se gasto): queda listo para activarse. */
+    public static void arm(Level level, BlockPos pos, BlockState state, MagicCircleBlockEntity be) {
+        be.setArmed(true);
+        level.setBlock(pos, state.setValue(POWERED, true), Block.UPDATE_ALL);
+        level.playSound(null, pos, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 0.8f, 1.5f);
     }
 
     // ---------- Trampa ----------

@@ -32,6 +32,7 @@ public class MushokuMod implements ModInitializer {
         ModBlocks.init();
         ModWorldgen.init();
         ModItems.init();
+        net.zennin.mushoku.menu.ModMenus.init();
         ModEntities.init();
         ModTabs.init();
         ModAttachments.init();

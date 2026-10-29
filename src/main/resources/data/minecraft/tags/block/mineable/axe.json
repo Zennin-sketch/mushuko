@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "remushoku:shelf"
+    "remushoku:shelf",
+    "remushoku:research_table"
   ]
 }

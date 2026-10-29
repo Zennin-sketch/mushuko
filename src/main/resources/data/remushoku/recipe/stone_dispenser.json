@@ -1,0 +1,27 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "redstone",
+ "pattern": [
+  "LLL",
+  "CSC",
+  "CAC"
+ ],
+ "key": {
+  "L": {
+   "item": "minecraft:lapis_lazuli"
+  },
+  "C": {
+   "item": "minecraft:copper_ingot"
+  },
+  "S": {
+   "tag": "remushoku:magic_stone"
+  },
+  "A": {
+   "item": "minecraft:amethyst_shard"
+  }
+ },
+ "result": {
+  "count": 1,
+  "id": "remushoku:stone_dispenser"
+ }
+}

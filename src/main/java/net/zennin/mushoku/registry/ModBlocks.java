@@ -98,6 +98,16 @@ public final class ModBlocks {
 
     private ModBlocks() {}
 
+    /** Dispensador de Piedras: carga circulos magicos con una piedra al recibir senal. */
+    public static final Block STONE_DISPENSER = withItem("stone_dispenser", new net.zennin.mushoku.block.StoneDispenserBlock(
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DISPENSER).sound(SoundType.COPPER)));
+    public static final BlockEntityType<net.zennin.mushoku.block.StoneDispenserBlockEntity> STONE_DISPENSER_BE = Registry.register(
+            BuiltInRegistries.BLOCK_ENTITY_TYPE, MushokuMod.id("stone_dispenser"),
+            BlockEntityType.Builder.of(net.zennin.mushoku.block.StoneDispenserBlockEntity::new, STONE_DISPENSER).build(null));
+    /** Mesa de Investigacion: ahi se fabrican y mejoran las piedras de mana. */
+    public static final Block RESEARCH_TABLE = withItem("research_table", new net.zennin.mushoku.block.ResearchTableBlock(
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.CRAFTING_TABLE).noOcclusion().lightLevel(s -> 5)));
+
     private static Block withItem(String name, Block block) {
         Registry.register(BuiltInRegistries.BLOCK, MushokuMod.id(name), block);
         Item item = Registry.register(BuiltInRegistries.ITEM, MushokuMod.id(name), new BlockItem(block, new Item.Properties()));

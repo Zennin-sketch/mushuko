@@ -2626,5 +2626,14 @@
   "book.remushoku.use_req": "Requiere %s de maná máximo para usarlo",
   "msg.remushoku.mastery_need_mana": "Necesitás %s de maná máximo para usar este hechizo",
   "msg.remushoku.mastery_up": "¡%s subió a nivel %s!",
-  "msg.remushoku.mastery_gate": "%s no puede subir de nivel hasta que tengas %s de maná máximo"
+  "msg.remushoku.mastery_gate": "%s no puede subir de nivel hasta que tengas %s de maná máximo",
+  "block.remushoku.ice_pillar": "Pilar de Hielo",
+  "block.remushoku.earth_pillar": "Pilar de Tierra",
+  "block.remushoku.stone_dispenser": "Dispensador de Piedras",
+  "block.remushoku.research_table": "Mesa de Investigación",
+  "container.remushoku.stone_dispenser": "Dispensador de Piedras",
+  "container.remushoku.research_table": "Mesa de Investigación",
+  "gui.remushoku.research.cost": "Cuesta %s de maná",
+  "gui.remushoku.research.hint": "Poné los materiales",
+  "gui.remushoku.research.book": "Investigaciones"
 }

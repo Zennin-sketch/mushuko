@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "remushoku:magic_ore"
+    "remushoku:magic_ore",
+    "remushoku:stone_dispenser"
   ]
 }
