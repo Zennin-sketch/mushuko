@@ -240,6 +240,21 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
                                   software.bernie.geckolib.cache.object.GeoBone bone, net.minecraft.client.renderer.RenderType renderType,
                                   net.minecraft.client.renderer.MultiBufferSource bufferSource, com.mojang.blaze3d.vertex.VertexConsumer buffer,
                                   boolean isReRender, float partialTick, int packedLight, int packedOverlay, int colour) {
+        if (bone.getName().startsWith("bust_")) {
+            // pecho: solo en las NPC que lo tienen (NpcChestLayer), con el mismo tamano y rebote que el de la skin
+            NpcChestLayer.Shape sh = currentEntity instanceof net.minecraft.world.entity.LivingEntity le ? NpcChestLayer.shapeOf(le) : null;
+            bone.setHidden(sh == null);
+            if (sh == null) return;
+            float[] sp = NpcChestLayer.spring((net.minecraft.world.entity.LivingEntity) currentEntity, sh, partialTick);
+            float lag = bone.getName().endsWith("_r") ? 1f : 0.92f, s = sh.size();
+            bone.setRotX(0.32f + 0.05f * s - sp[0] * 0.12f * lag);
+            bone.setRotZ(-sp[2] * 0.06f * lag);
+            bone.setPosY(-sp[0] * 0.96f * lag);
+            bone.setPosX(-sp[2] * 0.32f * lag);
+            bone.setScaleX(0.92f + 0.08f * s);
+            bone.setScaleY(0.85f + 0.15f * s);
+            bone.setScaleZ(0.25f + 0.55f * s);
+        }
         String prev = curBone;
         curBone = bone.getName();
         super.renderRecursively(poseStack, animatable, bone, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);

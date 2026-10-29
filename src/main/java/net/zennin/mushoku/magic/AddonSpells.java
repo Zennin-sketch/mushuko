@@ -89,13 +89,15 @@ public final class AddonSpells {
                 if (fwd.lengthSqr() < 1e-4) fwd = Vec3.directionFromRotation(0, p.getYRot());
                 fwd = fwd.normalize();
                 BlockPos feet = p.blockPosition();
-                double cx = p.getX() + fwd.x * 8, cz = p.getZ() + fwd.z * 8;
+                // lanzado por un circulo magico: centrado en el circulo (como antes, a los pies)
+                boolean circle = p instanceof net.fabricmc.fabric.api.entity.FakePlayer;
+                double cx = circle ? p.getX() : p.getX() + fwd.x * 8, cz = circle ? p.getZ() : p.getZ() + fwd.z * 8;
                 int made = 0;
                 for (int dx = -8; dx <= 8; dx++) for (int dz = -8; dz <= 8; dz++) {
                     int bx = (int) Math.floor(cx) + dx, bz = (int) Math.floor(cz) + dz;
                     double ox = bx + 0.5 - cx, oz = bz + 0.5 - cz;
                     if (ox * ox + oz * oz > 49) continue;
-                    if (bx == feet.getX() && bz == feet.getZ()) continue; // nunca bajo los pies del que conjura
+                    if (bx == feet.getX() && bz == feet.getZ()) continue; // nunca bajo los pies del que conjura (ni bajo el circulo)
                     for (int dy = 0; dy <= 4; dy++) {
                         BlockPos bp = new BlockPos(bx, feet.getY() - dy, bz);
                         var st = level.getBlockState(bp);

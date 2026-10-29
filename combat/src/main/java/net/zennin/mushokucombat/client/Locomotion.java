@@ -79,36 +79,57 @@ public final class Locomotion extends PlayerAnimationFrame {
         boolean cloak = p.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST).is(net.zennin.mushoku.item.ArmorV2.FLAME_CLOAK);
         float phase = p.walkAnimation.position(partial) * 0.6662f;
         float a = amount;
-        // ---- piernas: el muslo va y viene (menos que vanilla) y la rodilla se dobla al pasar hacia adelante
-        // (corriendo, estilo anime: rodillas altas, mas adelante que atras)
-        float thigh = (run ? 0.95f : 0.72f) * (cloak ? 0.5f : 1f);
-        float kneeMax = (run ? 1.7f : 0.75f) * (cloak ? 0.6f : 1f), kneeBase = run ? 0.3f : 0.06f;
+        if (run && !cloak) { sprint(phase, a); return; }
+        // ---- caminar: el muslo va y viene (menos que vanilla) y la rodilla se dobla al pasar hacia adelante
+        float thigh = (run ? 0.85f : 0.72f) * (cloak ? 0.5f : 1f);
+        float kneeMax = (run ? 1.2f : 0.75f) * (cloak ? 0.6f : 1f), kneeBase = run ? 0.2f : 0.06f;
         float rx = Mth.cos(phase) * thigh * a, lx = Mth.cos(phase + Mth.PI) * thigh * a;
         float rSwing = Math.max(0, Mth.sin(phase)), lSwing = Math.max(0, -Mth.sin(phase));
         float rKnee = a * (kneeBase + kneeMax * rSwing * rSwing), lKnee = a * (kneeBase + kneeMax * lSwing * lSwing);
-        // con la rodilla doblada el muslo sube mas adelante (rodilla alta; el pie no raspa el piso)
-        float lift = run ? 0.42f : 0.25f;
-        rx -= rKnee * lift;
-        lx -= lKnee * lift;
+        rx -= rKnee * 0.25f;
+        lx -= lKnee * 0.25f;
         rightLeg.rot = new Vec3f(rx, 0, 0.0f);
         leftLeg.rot = new Vec3f(lx, 0, 0.0f);
         rightLeg.bend = new Pair<>(0f, rKnee);
         leftLeg.bend = new Pair<>(0f, lKnee);
-        // ---- torso: corriendo se inclina para adelante (doblado en la cintura) y gira con los hombros
-        lean = run ? 0.38f * a : 0.04f * a;
-        twist = Mth.cos(phase) * (run ? 0.16f : 0.06f) * a;
-        if (cloak) { lean *= 0.5f; return; }
-        // ---- brazos: opuestos a las piernas, con el codo flexionado; corriendo, braceo grande y cruzando un poco
-        float arm = run ? 1.35f : 0.55f;
-        float ra = Mth.cos(phase + Mth.PI) * arm * a, la = Mth.cos(phase) * arm * a;
-        float elbow = run ? 1.55f : 0.3f;
-        float rElbow = a * (elbow + (run ? 0.3f : 0.2f) * Math.max(0, -Mth.cos(phase + Mth.PI))),
-              lElbow = a * (elbow + (run ? 0.3f : 0.2f) * Math.max(0, -Mth.cos(phase)));
-        // brazo que va adelante cruza hacia el centro del pecho
-        float rIn = run ? Math.max(0, -Mth.cos(phase + Mth.PI)) * 0.35f * a : 0, lIn = run ? Math.max(0, -Mth.cos(phase)) * 0.35f * a : 0;
-        rightArm.rot = new Vec3f(ra - (run ? 0.3f : 0f) * a, rIn, run ? 0.1f * a : 0.04f * a);
-        leftArm.rot = new Vec3f(la - (run ? 0.3f : 0f) * a, -lIn, run ? -0.1f * a : -0.04f * a);
+        lean = (run ? 0.2f : 0.04f) * a * (cloak ? 0.5f : 1f);
+        twist = Mth.cos(phase) * 0.06f * a;
+        if (cloak) return;
+        // brazos: opuestos a las piernas, con el codo apenas doblado
+        float ra = Mth.cos(phase + Mth.PI) * 0.55f * a, la = Mth.cos(phase) * 0.55f * a;
+        float rElbow = a * (0.3f + 0.2f * Math.max(0, -Mth.cos(phase + Mth.PI))), lElbow = a * (0.3f + 0.2f * Math.max(0, -Mth.cos(phase)));
+        rightArm.rot = new Vec3f(ra, 0, 0.04f * a);
+        leftArm.rot = new Vec3f(la, 0, -0.04f * a);
         rightArm.bend = new Pair<>(0f, -rElbow);
         leftArm.bend = new Pair<>(0f, -lElbow);
+    }
+
+    /**
+     * Correr al estilo Mo' Bends: cuerpo inclinado hacia adelante, rebote del cuerpo en cada paso, zancadas largas con
+     * la rodilla de adelante bien alta y la de atras estirada, y brazos a 90 grados bombeando adelante y atras.
+     */
+    private void sprint(float phase, float a) {
+        float s = Mth.sin(phase), c = Mth.cos(phase);
+        // piernas: zancada larga; la que va adelante sube con la rodilla doblada, la de atras queda casi estirada
+        float stride = 1.05f;
+        float rx = c * stride * a, lx = -c * stride * a;
+        float rKnee = a * (0.15f + 1.75f * (float) Math.pow(Math.max(0, s), 1.4)), lKnee = a * (0.15f + 1.75f * (float) Math.pow(Math.max(0, -s), 1.4));
+        rx -= rKnee * 0.45f + 0.15f * a;
+        lx -= lKnee * 0.45f + 0.15f * a;
+        rightLeg.rot = new Vec3f(rx, 0, 0.03f * a);
+        leftLeg.rot = new Vec3f(lx, 0, -0.03f * a);
+        rightLeg.bend = new Pair<>(0f, rKnee);
+        leftLeg.bend = new Pair<>(0f, lKnee);
+        // cuerpo: inclinado y rebotando (baja cuando apoya, sube entre pasos)
+        lean = 0.5f * a;
+        twist = c * 0.2f * a;
+        body.pos = new Vec3f(0f, -Math.abs(s) * 0.07f * a + 0.03f * a, 0f);
+        // brazos: codo a 90 grados, bombean opuestos a las piernas; los hombros un poco abiertos
+        float swing = 1.15f;
+        float ra = -c * swing * a - 0.35f * a, la = c * swing * a - 0.35f * a;
+        rightArm.rot = new Vec3f(ra, 0, 0.14f * a);
+        leftArm.rot = new Vec3f(la, 0, -0.14f * a);
+        rightArm.bend = new Pair<>(0f, -1.55f * a);
+        leftArm.bend = new Pair<>(0f, -1.55f * a);
     }
 }

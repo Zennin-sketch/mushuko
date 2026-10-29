@@ -51,6 +51,8 @@ public final class ModItems {
     public static final Item REDSTONE_CHALK = register("redstone_chalk", new net.zennin.mushoku.item.RedstoneChalkItem(new Item.Properties().durability(64)));
     public static final Item INKAND_QUILL = single("inkand_quill");
     public static final Item INK_VIAL = simple("ink_vial");
+    /** Polvo de refinado: sube la probabilidad de refinar una piedra (de un fragmento de amatista). */
+    public static final Item REFINING_DUST = register("refining_dust", new net.zennin.mushoku.item.TooltipItem(new Item.Properties(), "tooltip.remushoku.refining_dust"));
     public static final Item CLASS_CHANGE_ITEM = register("class_change_item", new ClassChangeItem(new Item.Properties().stacksTo(16)));
     public static final Item SUMMON_SCROLL_KALMAN = register("summon_scroll_kalman", new SummonScrollItem(new Item.Properties().stacksTo(1)));
     public static final Item DEMON_EYE = register("demon_eye", new ExtraItems.ScreenItem("demon_eye", "tooltip.remushoku.demon_eye", new Item.Properties().stacksTo(16)));

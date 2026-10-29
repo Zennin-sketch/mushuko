@@ -31,6 +31,11 @@ public final class ModBlocks {
                     .pushReaction(PushReaction.DESTROY)
                     .lightLevel(s -> s.getValue(MagicCircleBlock.POWERED) ? 7 : 2)));
 
+    /** Piedra magica apoyada en el piso para refinarla (no tiene item: se pone con Shift + clic derecho). */
+    public static final Block REFINING_STONE = Registry.register(BuiltInRegistries.BLOCK, MushokuMod.id("refining_stone"),
+            new net.zennin.mushoku.block.RefiningStoneBlock(BlockBehaviour.Properties.of().noOcclusion().strength(0.4f)
+                    .sound(SoundType.AMETHYST).noLootTable().pushReaction(PushReaction.DESTROY).lightLevel(s -> 6)));
+
     /** Lodo del hechizo Lodazal: se ve como barro entero, se pisa como una losa (te hundis) y frena como telarana. */
     public static final Block QUAGMIRE_MUD = Registry.register(BuiltInRegistries.BLOCK, MushokuMod.id("quagmire_mud"),
             new net.zennin.mushoku.block.QuagmireMudBlock(BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.MUD)
@@ -76,6 +81,10 @@ public final class ModBlocks {
     public static final BlockEntityType<ShelfBlockEntity> SHELF_BE = Registry.register(
             BuiltInRegistries.BLOCK_ENTITY_TYPE, MushokuMod.id("shelf"),
             BlockEntityType.Builder.of(ShelfBlockEntity::new, SHELF).build(null));
+
+    public static final BlockEntityType<net.zennin.mushoku.block.RefiningStoneBlockEntity> REFINING_STONE_BE = Registry.register(
+            BuiltInRegistries.BLOCK_ENTITY_TYPE, MushokuMod.id("refining_stone"),
+            BlockEntityType.Builder.of(net.zennin.mushoku.block.RefiningStoneBlockEntity::new, REFINING_STONE).build(null));
 
     private ModBlocks() {}
 

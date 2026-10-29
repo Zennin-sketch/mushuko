@@ -30,6 +30,11 @@ public final class CircleTraps {
 
     /** target puede ser null (activado por una linea de tiza sin nadie encima): se ve y suena igual. */
     public static void trigger(ServerLevel level, BlockPos pos, Spell spell, Player owner, LivingEntity target) {
+        // El circulo lanza el hechizo de verdad (el mismo efecto que al conjurarlo), centrado en el circulo
+        if (!isFriendly(spell) && !quiet && castReal(level, pos, spell, owner)) {
+            burst(level, ParticleTypes.ENCHANT, pos.getX() + 0.5, pos.getY() + 0.6, pos.getZ() + 0.5, 60, 0.6);
+            return;
+        }
         int t = spell.level.tier;
         double x = pos.getX() + 0.5, y = pos.getY() + 0.1, z = pos.getZ() + 0.5;
         DamageSource magic = owner != null ? level.damageSources().indirectMagic(owner, owner) : level.damageSources().magic();
@@ -87,6 +92,26 @@ public final class CircleTraps {
     }
 
     private static boolean quiet;
+
+    /**
+     * Un "conjurador" invisible parado en el circulo, mirando al piso: los hechizos de area quedan centrados en el
+     * circulo, los que apuntan a un bloque eligen el del circulo y los proyectiles revientan ahi (sobre quien lo piso).
+     */
+    private static boolean castReal(ServerLevel level, BlockPos pos, Spell spell, Player owner) {
+        try {
+            java.util.UUID id = java.util.UUID.nameUUIDFromBytes(("mushoku-circle-" + (owner != null ? owner.getUUID() : "none")).getBytes());
+            String name = owner != null ? owner.getGameProfile().getName() : "Circulo";
+            net.fabricmc.fabric.api.entity.FakePlayer caster = net.fabricmc.fabric.api.entity.FakePlayer.get(level,
+                    new com.mojang.authlib.GameProfile(id, name.length() > 16 ? name.substring(0, 16) : name));
+            caster.moveTo(pos.getX() + 0.5, pos.getY() + 0.1, pos.getZ() + 0.5, 0f, 90f);
+            caster.setYHeadRot(0f);
+            caster.setInvisible(true);
+            caster.setInvulnerable(true);
+            return SpellEffects.cast(spell, caster);
+        } catch (Throwable e) {
+            return false;
+        }
+    }
 
     /** El mismo efecto sobre otro objetivo mas, sin repetir particulas, sonido ni explosion. */
     public static void applyOnly(ServerLevel level, BlockPos pos, Spell spell, Player owner, LivingEntity target) {

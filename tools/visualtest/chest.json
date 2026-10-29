@@ -1,0 +1,94 @@
+{
+ "skin": "remushoku:textures/entities/rudeus_greyrat.png",
+ "steps": [
+  {
+   "op": "setup",
+   "fov": 50
+  },
+  {
+   "op": "cam",
+   "pitch": 8,
+   "h": 0.2
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:ghislaine -2.4 120 4.2 {NoAI:1b,Silent:1b,Rotation:[180f,0f],Tags:[\"vt\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:eris_greyrat -0.8 120 4.2 {NoAI:1b,Silent:1b,Rotation:[180f,0f],Tags:[\"vt\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:roxy_migurdia 0.8 120 4.2 {NoAI:1b,Silent:1b,Rotation:[180f,0f],Tags:[\"vt\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:sylphiette_greyrat 2.4 120 4.2 {NoAI:1b,Silent:1b,Rotation:[180f,0f],Tags:[\"vt\"]}"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "shot",
+   "v": "chest_front"
+  },
+  {
+   "op": "cmd",
+   "v": "execute as @e[tag=vt] at @s run tp @s ~ ~ ~ 90 0"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "shot",
+   "v": "chest_side"
+  },
+  {
+   "op": "cmd",
+   "v": "kill @e[tag=vt]"
+  },
+  {
+   "op": "wait",
+   "t": 5
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:ghislaine -2.4 120 4.2 {NoAI:1b,Silent:1b,Rotation:[180f,0f],Tags:[\"vt\"],ArmorItems:[{},{},{id:\"remushoku:ghislaine_top\",count:1},{}]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:eris_greyrat -0.8 120 4.2 {NoAI:1b,Silent:1b,Rotation:[180f,0f],Tags:[\"vt\"],ArmorItems:[{},{},{id:\"remushoku:eris_blouse\",count:1},{}]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:roxy_migurdia 0.8 120 4.2 {NoAI:1b,Silent:1b,Rotation:[180f,0f],Tags:[\"vt\"],ArmorItems:[{},{},{id:\"remushoku:roxy_robe\",count:1},{}]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:sylphiette_greyrat 2.4 120 4.2 {NoAI:1b,Silent:1b,Rotation:[180f,0f],Tags:[\"vt\"],ArmorItems:[{},{},{id:\"remushoku:eris_blouse\",count:1},{}]}"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "shot",
+   "v": "chest_outfit_front"
+  },
+  {
+   "op": "cmd",
+   "v": "execute as @e[tag=vt] at @s run tp @s ~ ~ ~ 90 0"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "shot",
+   "v": "chest_outfit_side"
+  }
+ ]
+}

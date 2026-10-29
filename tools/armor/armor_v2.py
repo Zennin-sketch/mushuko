@@ -25,7 +25,14 @@ BONES = {  # hueso de armadura -> (hueso del cuerpo, pivote)
     'armorLeftBoot': ('bipedLeftLeg', [1.9, 12, 0]),
 }
 MIRROR = {'armorRightArm': 'armorLeftArm', 'armorRightLeg': 'armorLeftLeg', 'armorRightBoot': 'armorLeftBoot',
-          'clothFR': 'clothFL', 'clothR': 'clothL'}
+          'clothFR': 'clothFL', 'clothR': 'clothL', 'bust_r': 'bust_l'}
+# Pecho de las NPC (NpcChestLayer): dos huesos colgados del torso que el renderer solo muestra si quien lo lleva
+# tiene pecho, y los escala y hace rebotar igual que el pecho de la skin
+BUST = {'bust_r': [-2.2, 22.0, -2.4], 'bust_l': [2.2, 22.0, -2.4]}
+
+
+def bust(mat, det=None):
+    return xm(box('bust_r', [-4.45, 17.4, -4.6], [4.4, 4.6, 2.2], mat, det))
 # Huesos de tela (hijos del torso) que el renderer mueve con las piernas: F adelante, B atras, R/L costados (R = derecha
 # del jugador = -X), FR/FL las dos hojas de adelante de un abrigo abierto.
 CLOTH = ('clothF', 'clothB', 'clothR', 'clothL', 'clothFR', 'clothFL')
@@ -357,6 +364,7 @@ def roxy():
     # --- blusa y corse
     out.append(box(B, [-4.4, 12, -2.4], [8.8, 12.2, 4.8], 'blouse', 'folds'))
     out.append(box(B, [-4.65, 12.6, -2.65], [9.3, 5.4, 5.3], 'corset', 'lace'))
+    out += bust('blouse', 'folds')
     out.append(box(B, [-3.0, 17.9, -2.75], [6.0, 1.0, 0.35], 'corset'))
     out.append(box(B, [-4.8, 16.1, -2.8], [9.6, 0.9, 5.6], 'roxy_band', 'stitch'))
     out.append(box(B, [-0.8, 15.95, -3.0], [1.6, 1.2, 0.3], 'gold'))
@@ -407,6 +415,7 @@ def ghislaine():
     out.append(rbox(H, [-4.4, 27.9, -4.45], [4.6, 0.5, 0.4], 'black_leather', pivot=(0.6, 28.1, -4.4), e=(0, 0, 0)))
     # pecho
     out.append(box(B, [-4.35, 18.3, -2.35], [8.7, 4.0, 4.7], 'wrap', 'bands'))
+    out += bust('wrap', 'bands')
     out += xm(box(B, [-3.6, 22.3, -2.35], [1.3, 1.9, 4.7], 'wrap'))
     out.append(rbox(B, [-0.6, 11.5, -2.85], [1.2, 13.4, 0.4], 'black_leather', 'rivets', pivot=(0, 18.2, -2.7), e=(0, 0, -32)))
     out.append(rbox(B, [-0.6, 11.5, 2.45], [1.2, 13.4, 0.4], 'black_leather', 'rivets', pivot=(0, 18.2, 2.6), e=(0, 0, 32)))
@@ -495,6 +504,7 @@ def eris():
     # chaqueta abierta, blusa y cinta
     out.append(box(B, [-4.45, 12, -2.45], [8.9, 12.2, 4.9], 'maroon', 'folds'))
     out.append(box(B, [-1.7, 16.8, -2.6], [3.4, 7.2, 0.3], 'shirt', 'folds'))
+    out += bust('shirt', 'folds')
     out += xm(box(B, [-4.6, 16.8, -2.75], [2.9, 7.4, 0.5], 'maroon', 'lapel'))
     out.append(box(B, [-0.7, 22.0, -2.95], [1.4, 1.2, 0.4], 'black'))
     out += xm(rbox(B, [-2.4, 21.9, -2.9], [1.7, 1.3, 0.3], 'black', pivot=(-0.7, 22.5, -2.8), e=(0, 0, 14)))
@@ -765,6 +775,10 @@ def geo(name, boxes, tex):
         if tops:
             bones[cb] = dict(name=cb, parent='armorBody', pivot=[0, round(max(tops), 3), 0], cubes=[])
             order.append(cb)
+    for bb, piv in BUST.items():
+        if any(bx['bone'] == bb for bx in boxes):
+            bones[bb] = dict(name=bb, parent='armorBody', pivot=piv, cubes=[])
+            order.append(bb)
     # Huesos de tela por zona (ring_*): pivote en el borde de arriba de su pano, colgados del torso
     for b in boxes:
         if b['bone'].startswith('ring_') and b['bone'] not in bones:

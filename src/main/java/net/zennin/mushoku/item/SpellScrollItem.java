@@ -30,7 +30,7 @@ public class SpellScrollItem extends Item {
         }
         if (SpellEffects.cast(spell, sp)) {
             if (!sp.getAbilities().instabuild) stack.shrink(1);
-            sp.getCooldowns().addCooldown(this, 10);
+            sp.getCooldowns().addCooldown(this, 100); // 5 s entre pergaminos (para no spamearlos)
         }
         return InteractionResultHolder.consume(stack);
     }

@@ -21,6 +21,14 @@ public final class ModNetworking {
         PayloadTypeRegistry.playS2C().register(MagicSyncPayload.TYPE, MagicSyncPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ReadySpellPayload.TYPE, ReadySpellPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(PlayAnimPayload.TYPE, PlayAnimPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(RefinePayloads.Open.TYPE, RefinePayloads.Open.CODEC);
+        PayloadTypeRegistry.playS2C().register(RefinePayloads.Spin.TYPE, RefinePayloads.Spin.CODEC);
+        PayloadTypeRegistry.playS2C().register(RefinePayloads.Result.TYPE, RefinePayloads.Result.CODEC);
+        PayloadTypeRegistry.playC2S().register(RefinePayloads.Action.TYPE, RefinePayloads.Action.CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(RefinePayloads.Action.TYPE, (payload, ctx) -> {
+            ServerPlayer p = ctx.player();
+            p.server.execute(() -> net.zennin.mushoku.refine.Refining.action(p, payload.pos(), payload.action()));
+        });
         PayloadTypeRegistry.playS2C().register(QuiverSyncPayload.TYPE, QuiverSyncPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ActionPayload.TYPE, ActionPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(SwordSyncPayload.TYPE, SwordSyncPayload.CODEC);
@@ -102,6 +110,11 @@ public final class ModNetworking {
                 }
             });
         });
+    }
+
+    /** Manda un mensaje al jugador si su cliente lo entiende. */
+    public static void send(ServerPlayer p, net.minecraft.network.protocol.common.custom.CustomPacketPayload payload) {
+        if (ServerPlayNetworking.canSend(p, payload.type())) ServerPlayNetworking.send(p, payload);
     }
 
     public static void syncMana(ServerPlayer player) {

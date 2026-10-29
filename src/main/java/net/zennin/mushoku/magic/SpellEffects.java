@@ -47,6 +47,7 @@ public final class SpellEffects {
             case WATER_SHIELD -> waterShield(p, level);
             case ICE_BLADE -> giveIceBlade(p, level);
             case HEAT_HAND -> heatHand(p, level);
+            case STONE_REFINING -> { return net.zennin.mushoku.refine.Refining.cast(p); }
             case BURNING_PLACE -> burningPlace(p, level);
             case BLAST -> blast(p, level);
             case SOFT_LANDING -> selfEffect(p, level, new MobEffectInstance(MobEffects.SLOW_FALLING, 200, 0), ParticleTypes.CLOUD);
@@ -179,12 +180,26 @@ public final class SpellEffects {
             particles(level, ParticleTypes.FLAME, target.position().add(0, 1, 0), 20, 0.4);
         } else {
             HitResult hit = p.pick(4, 1f, true);
-            if (hit instanceof BlockHitResult b) {
+            if (hit instanceof BlockHitResult b && hit.getType() == HitResult.Type.BLOCK) {
                 BlockPos pos = b.getBlockPos();
                 if (level.getFluidState(pos).is(Fluids.WATER) || level.getFluidState(pos).is(Fluids.FLOWING_WATER)) {
                     level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
                     particles(level, ParticleTypes.CLOUD, Vec3.atCenterOf(pos), 15, 0.4);
                 } else {
+                    // mechero: enciende fogatas y velas, y si no, prende fuego en la cara que miras (como el encendedor)
+                    var st = level.getBlockState(pos);
+                    if (net.minecraft.world.level.block.CampfireBlock.canLight(st) || net.minecraft.world.level.block.CandleBlock.canLight(st)
+                            || net.minecraft.world.level.block.CandleCakeBlock.canLight(st)) {
+                        level.setBlock(pos, st.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT, true), 11);
+                    } else if (st.is(Blocks.TNT)) {
+                        net.minecraft.world.level.block.TntBlock.explode(level, pos);
+                        level.removeBlock(pos, false);
+                    } else {
+                        BlockPos firePos = pos.relative(b.getDirection());
+                        if (net.minecraft.world.level.block.BaseFireBlock.canBePlacedAt(level, firePos, b.getDirection()))
+                            level.setBlock(firePos, net.minecraft.world.level.block.BaseFireBlock.getState(level, firePos), 11);
+                    }
+                    level.playSound(null, pos, SoundEvents.FLINTANDSTEEL_USE, net.minecraft.sounds.SoundSource.PLAYERS, 1f, 1f);
                     particles(level, ParticleTypes.FLAME, Vec3.atCenterOf(pos), 15, 0.4);
                 }
             }

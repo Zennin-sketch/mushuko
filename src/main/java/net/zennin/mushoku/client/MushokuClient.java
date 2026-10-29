@@ -84,6 +84,7 @@ public class MushokuClient implements ClientModInitializer {
         AnimatedRenderer.register(ModEntities.SNOW_DRAKE_MOM, "snowdrakemommy", "snowdrakemommytxt", 1.5f);
         for (var k : net.zennin.mushoku.companion.CompanionKind.values())
             HumanoidNpcRenderer.register(ModEntities.COMPANIONS.get(k), k.texture, k.slim);
+            NpcChestLayer.registerType(ModEntities.COMPANIONS.get(k), k.texture);
         HumanoidNpcRenderer.register(ModEntities.VILLAGER_GUARD, "villager_guard");
         ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.RaceSyncPayload.TYPE, (payload, context) -> ClientRaceState.set(payload.data()));
         ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.CompanionStatePayload.TYPE, (payload, context) -> CompanionScreen.receive(payload.state()));
@@ -110,6 +111,10 @@ public class MushokuClient implements ClientModInitializer {
             ClientManaState.earth = payload.earth();
             ClientManaState.wind = payload.wind();
         });
+        ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.RefinePayloads.Open.TYPE, (payload, context) -> RefineScreen.onOpen(payload));
+        ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.RefinePayloads.Spin.TYPE, (payload, context) -> RefineScreen.onSpin(payload));
+        ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.RefinePayloads.Result.TYPE, (payload, context) -> RefineScreen.onResult(payload));
+        net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(net.zennin.mushoku.registry.ModBlocks.REFINING_STONE_BE, RefiningStoneRenderer::new);
         ClientPlayNetworking.registerGlobalReceiver(ActionPayload.TYPE, (payload, context) -> {
             if (payload.action() == ActionPayload.OPEN_CLASS_SCREEN) context.client().setScreen(new ClassPickScreen());
             if (payload.action() == ActionPayload.ESCAPE && context.client().level != null)
