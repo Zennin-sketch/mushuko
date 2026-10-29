@@ -101,6 +101,12 @@ public final class MushokuCommands {
                         .then(Commands.literal("clase").executes(c -> {
                             PlayerClasses.reset(c.getSource().getPlayerOrException());
                             return 1;
-                        }))));
+                        }))
+                        // lanzar un hechizo por su nombre (pruebas): /mushoku lanzar quagmire
+                        .then(Commands.literal("lanzar").then(Commands.argument("hechizo", StringArgumentType.word()).executes(c -> {
+                            net.zennin.mushoku.magic.Spell sp = net.zennin.mushoku.magic.Spell.byId(StringArgumentType.getString(c, "hechizo"));
+                            if (sp == null) { c.getSource().sendFailure(Component.literal("Hechizo desconocido")); return 0; }
+                            return net.zennin.mushoku.magic.SpellEffects.cast(sp, c.getSource().getPlayerOrException()) ? 1 : 0;
+                        })))));
     }
 }

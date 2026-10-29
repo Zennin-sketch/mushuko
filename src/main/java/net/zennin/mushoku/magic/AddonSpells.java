@@ -83,16 +83,23 @@ public final class AddonSpells {
                 e.hurt(p.damageSources().freeze(), 2f);
             });
             case QUAGMIRE -> {
-                Vec3 c = target(p, 30);
-                BlockPos center = BlockPos.containing(c);
-                for (BlockPos bp : BlockPos.betweenClosed(center.offset(-4, -2, -4), center.offset(4, 1, 4))) {
-                    if (bp.distSqr(center) > 20) continue;
-                    var st = level.getBlockState(bp);
-                    if (level.getBlockState(bp.above()).isAir() && st.isSolidRender(level, bp) && !st.hasBlockEntity())
-                        TempBlocks.place(level, bp.immutable(), Blocks.MUD.defaultBlockState(), 200);
+                // Lodazal: el suelo bajo el que conjura se vuelve lodo en un cilindro de radio 7. En cada columna se usa
+                // el bloque de abajo de los pies; si ahi hay aire (o luz, pasto...) se baja, hasta 4 bloques.
+                BlockPos feet = p.blockPosition().below();
+                int made = 0;
+                for (int dx = -7; dx <= 7; dx++) for (int dz = -7; dz <= 7; dz++) {
+                    if (dx * dx + dz * dz > 49) continue;
+                    for (int dy = 0; dy < 4; dy++) {
+                        BlockPos bp = feet.offset(dx, -dy, dz);
+                        var st = level.getBlockState(bp);
+                        if (st.getCollisionShape(level, bp).isEmpty() && st.getFluidState().isEmpty()) continue; // aire, luz, pasto: mas abajo
+                        if (st.getFluidState().isEmpty() && TempBlocks.replace(level, bp, net.zennin.mushoku.registry.ModBlocks.QUAGMIRE_MUD.defaultBlockState(), 400)) made++;
+                        break;
+                    }
                 }
-                mist(p, 4, 200, ParticleTypes.FALLING_DRIPSTONE_WATER, e -> e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 3)));
+                fx(level, p.position(), ParticleTypes.FALLING_DRIPSTONE_WATER, 60, 4);
                 sound(p, SoundEvents.MUD_BRICKS_BREAK, 0.6f);
+                if (made == 0) return false;
             }
             case STONE_BLADE -> {
                 ItemStack blade = new ItemStack(net.zennin.mushoku.addon.AddonItems.STONE_BLADE);
@@ -133,7 +140,8 @@ public final class AddonSpells {
             if (!p.isAlive()) return false;
             for (int i = 0; i < 2; i++) {
                 double x = c.x + (level.random.nextDouble() - 0.5) * 15, z = c.z + (level.random.nextDouble() - 0.5) * 15;
-                MagicProjectile proj = new MagicProjectile(level, p, kind, dmg);
+                // radio de impacto amplio: con la puntería al azar de la lluvia, pegar justo era casi imposible
+                MagicProjectile proj = new MagicProjectile(level, p, kind, dmg).area(1.6f).size(1.4f);
                 proj.setPos(x, c.y + 15, z);
                 proj.shoot(0, -1, 0, 1.2f, 2f);
                 level.addFreshEntity(proj);

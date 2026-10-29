@@ -39,6 +39,8 @@ public class MagicProjectile extends ThrowableProjectile {
     private boolean lift = false;
     /** Estallido de fuego al impactar (como la carga de un ghast): no rompe bloques, prende fuego al azar alrededor. */
     private float incendiary = 0f;
+    /** Radio de impacto (lluvias): pega a todo lo que pasa cerca y, al caer, a todo lo que esta alrededor. */
+    private float area = 0f;
 
     public MagicProjectile(EntityType<? extends MagicProjectile> type, Level level) {
         super(type, level);
@@ -56,6 +58,7 @@ public class MagicProjectile extends ThrowableProjectile {
     public MagicProjectile knockback(float k) { this.knockback = k; return this; }
     public MagicProjectile explosion(float power) { this.explosion = power; return this; }
     public MagicProjectile incendiary(float power) { this.incendiary = power; return this; }
+    public MagicProjectile area(float radius) { this.area = radius; return this; }
     public MagicProjectile lift() { this.lift = true; this.entityData.set(VARIANT, VARIANT_DRILL); return this; }
     public MagicProjectile variant(int v) { this.entityData.set(VARIANT, v); return this; }
     public int variant() { return this.entityData.get(VARIANT); }
@@ -90,6 +93,14 @@ public class MagicProjectile extends ThrowableProjectile {
             }
         } else if (tickCount > 100) {
             discard();
+        } else if (area > 0 && isAlive()) {
+            // espoleta de proximidad: si pasa cerca de alguien, estalla ahi
+            Entity owner = getOwner();
+            if (!level().getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(area, area * 0.6, area),
+                    e -> e.isAlive() && e != owner && !e.isSpectator()).isEmpty()) {
+                areaImpact();
+                discard();
+            }
         }
     }
 
@@ -121,7 +132,12 @@ public class MagicProjectile extends ThrowableProjectile {
     @Override
     protected void onHitEntity(EntityHitResult hit) {
         super.onHitEntity(hit);
-        Entity target = hit.getEntity();
+        if (area > 0) return; // las lluvias pegan en area (onHit)
+        strike(hit.getEntity());
+    }
+
+    /** Dano y efecto del elemento sobre un objetivo. */
+    private void strike(Entity target) {
         target.hurt(damageSources().indirectMagic(this, getOwner()), damage);
         if (target instanceof LivingEntity living) {
             switch (kind()) {
@@ -142,9 +158,21 @@ public class MagicProjectile extends ThrowableProjectile {
         }
     }
 
+    /** Impacto en area: le pega a todos los que esten en el radio (menos al que lo lanzo). */
+    private void areaImpact() {
+        Entity owner = getOwner();
+        for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(area * 1.3, area, area * 1.3),
+                e -> e.isAlive() && e != owner && !e.isSpectator())) {
+            strike(e);
+        }
+        if (level() instanceof ServerLevel sl)
+            sl.sendParticles(particle(), getX(), getY(), getZ(), Math.round(14 * sizeScale()), 0.5 * area, 0.3, 0.5 * area, 0.05);
+    }
+
     @Override
     protected void onHit(HitResult result) {
         super.onHit(result);
+        if (!level().isClientSide && area > 0 && isAlive()) areaImpact();
         if (!level().isClientSide) {
             if (level() instanceof ServerLevel sl) {
                 sl.sendParticles(particle(), getX(), getY(), getZ(), Math.round(10 * sizeScale()), 0.3 * sizeScale(), 0.3 * sizeScale(), 0.3 * sizeScale(), 0.05);

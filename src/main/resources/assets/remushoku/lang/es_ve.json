@@ -2593,5 +2593,6 @@
   "tooltip.remushoku.redstone_chalk": "Clic derecho en el suelo: dibuja una línea. Lanzale Infusión de Maná para que se vuelva azul y conduzca redstone (activa círculos mágicos cargados)",
   "spell.remushoku.mana_infusion": "Infusión de Maná",
   "msg.remushoku.infusion_nothing": "Mirá una línea de tiza rojiza para infundirle maná",
-  "msg.remushoku.infusion_done": "La tiza absorbe el maná (%s bloques)"
+  "msg.remushoku.infusion_done": "La tiza absorbe el maná (%s bloques)",
+  "block.remushoku.quagmire_mud": "Lodo"
 }

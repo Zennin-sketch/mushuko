@@ -1,0 +1,20 @@
+{
+ "skin": "remushoku:textures/entities/rudeus_greyrat.png",
+ "steps": [
+  {"op": "setup", "fov": 60},
+  {"op": "cmd", "v": "fill -10 119 -10 10 119 10 minecraft:grass_block"},
+  {"op": "cmd", "v": "fill 3 119 3 5 119 5 minecraft:air"},
+  {"op": "cmd", "v": "fill 3 117 3 5 117 5 minecraft:dirt"},
+  {"op": "cmd", "v": "setblock -2 120 1 minecraft:short_grass"},
+  {"op": "cam", "pitch": 50, "h": 3},
+  {"op": "wait", "t": 20},
+  {"op": "shot", "v": "q_before"},
+  {"op": "cmd", "v": "mushoku lanzar quagmire"},
+  {"op": "wait", "t": 10},
+  {"op": "shot", "v": "q_after"},
+  {"op": "cmd", "v": "summon minecraft:pig 2.5 120 -1.5"},
+  {"op": "wait", "t": 30},
+  {"op": "cam", "pitch": 10, "h": 0},
+  {"op": "shot", "v": "q_pig"}
+ ]
+}

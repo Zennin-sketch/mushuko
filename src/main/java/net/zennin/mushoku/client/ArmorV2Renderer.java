@@ -244,12 +244,11 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
                 cubeRot.transformPosition(p);   // (en bloques: el giro del pano incluye su traslado al pivote)
                 p.mul(16f);
                 float dh = 12f - p.y;                      // cuanto esta por debajo de la cadera
-                // la tela acompana a medias a la pierna (cuelga, no es rigida); lo que falta lo hace el choque con la pierna
-                float w = smoothstep((dh + 1.5f) / 8.5f) * 0.5f;
+                // la tela va con la pierna al mismo tiempo (sin atrasarse): pegada del todo a partir de ~6 px bajo la cadera
+                float w = smoothstep((dh + 1f) / 7f);
                 org.joml.Vector3f out = new org.joml.Vector3f(p).add(disp(p, skinR, skinL, w, a, b));
                 // ruedo: parte del movimiento viene de las piernas atrasadas
-                float hem = smoothstep((dh - 5f) / 6f) * 0.45f;
-                if (hem > 0) out.lerp(new org.joml.Vector3f(p).add(disp(p, lagR, lagL, w, a, b)), hem);
+                // (sin balanceo atrasado del ruedo: hacia que la tela fuera mas lenta que los pies y se atravesaran)
                 // choque: si la tela quedo adentro de una pierna, sale por la cara mas cercana (adelante/atras o costado)
                 collide(out, a);
                 out.div(16f);

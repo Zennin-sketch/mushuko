@@ -2593,5 +2593,6 @@
   "tooltip.remushoku.redstone_chalk": "Right click the ground: draws a line. Cast Mana Infusion on it to turn it blue and carry redstone (triggers armed magic circles)",
   "spell.remushoku.mana_infusion": "Mana Infusion",
   "msg.remushoku.infusion_nothing": "Look at a reddish chalk line to infuse it with mana",
-  "msg.remushoku.infusion_done": "The chalk absorbs the mana (%s blocks)"
+  "msg.remushoku.infusion_done": "The chalk absorbs the mana (%s blocks)",
+  "block.remushoku.quagmire_mud": "Mud"
 }
