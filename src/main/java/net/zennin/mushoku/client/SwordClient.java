@@ -21,8 +21,12 @@ public final class SwordClient {
         if (mc.player == null) return;
         boolean swordsman = net.zennin.mushoku.magic.SpellCasting.isSwordsmanClass(ClientManaState.playerClass);
         boolean archer = net.zennin.mushoku.magic.SpellCasting.isArcherClass(ClientManaState.playerClass);
+        ClassContext.Mode mode = ClassContext.mode();
         while (ModKeys.MENU.consumeClick()) {
-            if (swordsman && mc.screen == null)
+            // con arco en la mano abre el menu del arquero; si no, el del espadachin
+            if (archer && mode == ClassContext.Mode.ARCHER && mc.screen == null)
+                mc.setScreen(ClientArcherState.data.school().isEmpty() ? new ArcherSchoolScreen() : new ArcherScreen());
+            else if (swordsman && mc.screen == null)
                 mc.setScreen(ClientSwordState.data.style().isEmpty() ? new AffinityScreen() : new SwordsmanScreen());
             else if (archer && mc.screen == null)
                 mc.setScreen(ClientArcherState.data.school().isEmpty() ? new ArcherSchoolScreen() : new ArcherScreen());
@@ -31,9 +35,18 @@ public final class SwordClient {
         KeyMapping[] keys = {ModKeys.SKILL_1, ModKeys.SKILL_2, ModKeys.SKILL_3};
         for (int i = 0; i < 3; i++) {
             while (keys[i].consumeClick()) {
-                if ((swordsman || silentMage) && mc.screen == null) ClientPlayNetworking.send(new SwordActionPayload(SwordActionPayload.USE_SLOT, i, ""));
-                else if (archer && mc.screen == null)
-                    ClientPlayNetworking.send(new net.zennin.mushoku.network.ArcherActionPayload(net.zennin.mushoku.network.ArcherActionPayload.USE_SLOT, i, ""));
+                if (mc.screen != null) continue;
+                // segun lo que tenga en la mano: arco = arquero, espada = espadachin, si no = mago (conjuro silencioso)
+                switch (mode) {
+                    case ARCHER -> ClientPlayNetworking.send(new net.zennin.mushoku.network.ArcherActionPayload(net.zennin.mushoku.network.ArcherActionPayload.USE_SLOT, i, ""));
+                    case SWORDSMAN -> ClientPlayNetworking.send(new SwordActionPayload(SwordActionPayload.USE_SLOT, i, ""));
+                    case MAGE -> {
+                        if (silentMage) ClientPlayNetworking.send(new SwordActionPayload(SwordActionPayload.USE_SILENT, i, ""));
+                        else if (swordsman) ClientPlayNetworking.send(new SwordActionPayload(SwordActionPayload.USE_SLOT, i, ""));
+                        else if (archer) ClientPlayNetworking.send(new net.zennin.mushoku.network.ArcherActionPayload(net.zennin.mushoku.network.ArcherActionPayload.USE_SLOT, i, ""));
+                    }
+                    default -> {}
+                }
             }
         }
         while (ModKeys.ADVENTURER.consumeClick()) if (mc.screen == null) mc.setScreen(new AdventurerScreen());

@@ -2635,5 +2635,8 @@
   "container.remushoku.research_table": "Mesa de Investigación",
   "gui.remushoku.research.cost": "Cuesta %s de maná",
   "gui.remushoku.research.hint": "Poné los materiales",
-  "gui.remushoku.research.book": "Investigaciones"
+  "gui.remushoku.research.book": "Investigaciones",
+  "hud.remushoku.mode.mage": "◆ Mago (sin arma en la mano)",
+  "hud.remushoku.mode.swordsman": "◆ Espadachín (espada en la mano)",
+  "hud.remushoku.mode.archer": "◆ Arquero (arco en la mano)"
 }

@@ -67,6 +67,8 @@ public final class ModNetworking {
                         if (net.zennin.mushoku.sword.SwordSystem.isSwordsman(p)) SwordSkills.useSlot(p, payload.slot());
                         else net.zennin.mushoku.extra.SilentCasting.useSlot(p, payload.slot());
                     }
+                    // multiclase sin espada en la mano: conjuro silencioso
+                    case SwordActionPayload.USE_SILENT -> net.zennin.mushoku.extra.SilentCasting.useSlot(p, payload.slot());
                     default -> {}
                 }
             });

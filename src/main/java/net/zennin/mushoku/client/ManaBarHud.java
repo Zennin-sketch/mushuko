@@ -44,7 +44,14 @@ public final class ManaBarHud {
         g.drawString(mc.font, text, X + FX + (FW - tw) / 2, Y + FY + 1, 0xFFFFFFFF, true);
 
         int line = Y + H + 4;
-        if (net.zennin.mushoku.magic.SpellCasting.isSwordsmanClass(ClientManaState.playerClass)) line = renderSwordsman(g, mc, line);
+        // multiclase: solo las ranuras de lo que esta usando (segun la mano), con su nombre arriba; asi no se pisan
+        ClassContext.Mode mode = ClassContext.mode();
+        if (ClassContext.multi() && mode != ClassContext.Mode.NONE) {
+            g.drawString(mc.font, Component.translatable("hud.remushoku.mode." + mode.name().toLowerCase(java.util.Locale.ROOT)), X + 2, line, 0xFFFFE08A, true);
+            line += 11;
+        }
+        if (mode == ClassContext.Mode.SWORDSMAN) line = renderSwordsman(g, mc, line);
+        else if (mode == ClassContext.Mode.ARCHER) line = renderArcher(g, mc, line);
         line = renderExtra(g, mc, line);
         if (ClientManaState.playerClass != 0 && ClientRaceState.data.race().isEmpty()) {
             g.drawString(mc.font, Component.translatable("hud.remushoku.pick_race", ModKeys.ADVENTURER.getTranslatedKeyMessage()), X + 2, line, 0xFFFFD27F, true);
@@ -58,6 +65,7 @@ public final class ManaBarHud {
         Spell queued = ClientManaState.queued.isEmpty() ? null : Spell.byId(ClientManaState.queued);
         if (queued != null) {
             g.drawString(mc.font, Component.translatable("hud.remushoku.queued", Component.translatable(queued.translationKey())), X + 2, line, 0xFF8FD8FF, true);
+            line += 11;
         }
 
         if (CastingClient.casting) {
@@ -102,6 +110,19 @@ public final class ManaBarHud {
         return line + 2;
     }
 
+    private static int renderArcher(GuiGraphics g, Minecraft mc, int line) {
+        var d = ClientArcherState.data;
+        if (d.school().isEmpty()) return line;
+        KeyMapping[] keys = {ModKeys.SKILL_1, ModKeys.SKILL_2, ModKeys.SKILL_3};
+        for (int i = 0; i < 3; i++) {
+            var s = net.zennin.mushoku.archer.ArcherSkill.byId(d.slot(i));
+            Component name = s == null ? Component.literal("-") : Component.translatable(s.translationKey());
+            g.drawString(mc.font, Component.translatable("hud.remushoku.slot", keys[i].getTranslatedKeyMessage(), name), X + 2, line, 0xFFB8E68A, true);
+            line += 10;
+        }
+        return line + 2;
+    }
+
     /** Ojos demoniacos, conjuro silencioso e Identificacion (nombre de lo que miras bajo la mira). */
     private static int renderExtra(GuiGraphics g, Minecraft mc, int line) {
         var d = ClientExtraState.data;
@@ -113,7 +134,7 @@ public final class ManaBarHud {
                     Component.translatable("eye.remushoku." + d.eye(i))), X + 2, line, on ? 0xFFD58CFF : 0xFF8A7A9A, true);
             line += 10;
         }
-        if (net.zennin.mushoku.magic.SpellCasting.isMageClass(ClientManaState.playerClass) && d.silent()) {
+        if (ClassContext.mode() == ClassContext.Mode.MAGE && d.silent()) {
             KeyMapping[] keys = {ModKeys.SKILL_1, ModKeys.SKILL_2, ModKeys.SKILL_3};
             for (int i = 0; i < 3; i++) {
                 Spell s = d.silentSlot(i).isEmpty() ? null : Spell.byId(d.silentSlot(i));

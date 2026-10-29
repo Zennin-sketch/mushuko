@@ -2635,5 +2635,8 @@
   "container.remushoku.research_table": "Research Table",
   "gui.remushoku.research.cost": "Costs %s mana",
   "gui.remushoku.research.hint": "Place the materials",
-  "gui.remushoku.research.book": "Research"
+  "gui.remushoku.research.book": "Research",
+  "hud.remushoku.mode.mage": "◆ Mage (no weapon in hand)",
+  "hud.remushoku.mode.swordsman": "◆ Swordsman (sword in hand)",
+  "hud.remushoku.mode.archer": "◆ Archer (bow in hand)"
 }
