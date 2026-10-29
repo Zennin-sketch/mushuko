@@ -1,0 +1,61 @@
+name: Fresh Moves - volcar ojos
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bajar Fresh Moves y volcar las partes de los ojos
+        run: |
+          mkdir -p rp out
+          python3 - <<'PY'
+          import json, urllib.request, urllib.parse
+          UA={'User-Agent':'mushoku-fmdump'}
+          for gv in (['1.21.1'], ['1.21'], None):
+              q = {'game_versions': json.dumps(gv)} if gv else {}
+              vs = json.load(urllib.request.urlopen(urllib.request.Request('https://api.modrinth.com/v2/project/tras-fresh-player/version?' + urllib.parse.urlencode(q), headers=UA)))
+              if vs: break
+          f = next((x for x in vs[0]['files'] if x.get('primary')), vs[0]['files'][0])
+          open('rp/fm.zip', 'wb').write(urllib.request.urlopen(urllib.request.Request(f['url'], headers=UA)).read())
+          PY
+          cd rp && unzip -q -o fm.zip -d fm && cd ..
+          find rp/fm -type f | sed 's#rp/fm/##' | sort > out/files.txt
+          python3 - <<'PY'
+          import json, glob, os
+          out = open('out/eyes.txt', 'w')
+          for p in glob.glob('rp/fm/**/optifine/cem/player*.jem', recursive=True) + glob.glob('rp/fm/**/optifine/cem/player*.jpm', recursive=True):
+              d = json.load(open(p))
+              out.write('==== %s\n' % p)
+              out.write('textureSize %s texture %s\n' % (d.get('textureSize'), d.get('texture')))
+              def walk(m, depth, path):
+                  name = m.get('id') or m.get('part') or m.get('model')
+                  info = {k: m[k] for k in ('id','part','model','texture','textureSize','translate','rotate','mirrorTexture','invertAxis','scale','attach') if k in m}
+                  boxes = m.get('boxes', [])
+                  out.write('%s%s %s\n' % ('  ' * depth, path + '/' + str(name), json.dumps(info)))
+                  for b in boxes:
+                      out.write('%s  box %s\n' % ('  ' * depth, json.dumps(b)))
+                  for s in m.get('submodels', []) or []:
+                      walk(s, depth + 1, path + '/' + str(name))
+                  if 'submodel' in m: walk(m['submodel'], depth + 1, path + '/' + str(name))
+              for m in d.get('models', []):
+                  walk(m, 0, '')
+              anims = []
+              for m in d.get('models', []):
+                  for a in m.get('animations', []) or []:
+                      for k, v in a.items():
+                          if any(t in k for t in ('eye','blink','brow','lid','lash','var','varb')):
+                              anims.append('%s = %s' % (k, v))
+              out.write('---- animaciones de ojos (%d)\n' % len(anims))
+              for a in anims[:400]: out.write(a + '\n')
+          PY
+          for f in $(grep -i -E "\.png$" out/files.txt | grep -i -E "eye|player|skin|template" | head -40); do mkdir -p "out/png/$(dirname "$f")"; cp "rp/fm/$f" "out/png/$f"; done
+          ls -R out | head -50
+      - name: Subir resultados
+        run: |
+          cd out
+          git init -q && git checkout -q -b vt-fmdump
+          git add -A && git -c user.name=ci -c user.email=ci@x commit -qm dump
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" vt-fmdump
