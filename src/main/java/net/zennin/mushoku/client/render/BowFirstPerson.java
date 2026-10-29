@@ -180,8 +180,8 @@ public final class BowFirstPerson {
 
     /** Brazo del jugador (con su skin y manga) desde su hombro, con el centro del puno en 'hand'. */
     private static void arm(AbstractClientPlayer p, PoseStack pose, MultiBufferSource buffers, int light, boolean right, Vector3f hand) {
-        if (!(Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(p) instanceof PlayerRenderer r)) return;
-        PlayerModel<AbstractClientPlayer> m = r.getModel();
+        PlayerModel<AbstractClientPlayer> m = net.zennin.mushoku.client.fp.FpRender.ownModel(
+                p.getSkin().model() == net.minecraft.client.resources.PlayerSkin.Model.SLIM);
         Vector3f sh = right ? SH_R : SH_L;
         Vector3f dir = new Vector3f(hand).sub(sh).normalize();
         // el cubo del brazo va de -2 a 10 px; el centro del puno (2 px antes de la punta) queda en 'hand'

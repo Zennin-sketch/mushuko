@@ -83,8 +83,8 @@ public final class FpRender {
     }
 
     public static void arm(AbstractClientPlayer player, PoseStack pose, MultiBufferSource buffers, int light, boolean right, float[] p) {
-        if (!(Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player) instanceof PlayerRenderer r)) return;
-        PlayerModel<AbstractClientPlayer> m = r.getModel();
+        boolean slim = player.getSkin().model() == net.minecraft.client.resources.PlayerSkin.Model.SLIM;
+        PlayerModel<AbstractClientPlayer> m = ownModel(slim);
         int part = right ? FpAnim.R_ARM : FpAnim.L_ARM;
         Vector3f a = pos(p, part);
         pose.pushPose();
@@ -93,7 +93,7 @@ public final class FpRender {
         ResourceLocation skin = player.getSkin().texture();
         ModelPart arm = right ? m.rightArm : m.leftArm, sleeve = right ? m.rightSleeve : m.leftSleeve;
         // brazo fino (Alex): el cubo es de 3 px; se corre medio px para que el puno quede en el mismo lugar
-        if (player.getSkin().model() == net.minecraft.client.resources.PlayerSkin.Model.SLIM) pose.translate((right ? -0.5f : 0.5f) / 16f, 0, 0);
+        if (slim) pose.translate((right ? -0.5f : 0.5f) / 16f, 0, 0);
         reset(arm);
         reset(sleeve);
         arm.render(pose, buffers.getBuffer(RenderType.entitySolid(skin)), light, OverlayTexture.NO_OVERLAY);
@@ -123,6 +123,23 @@ public final class FpRender {
                 rightHand ? ItemDisplayContext.THIRD_PERSON_RIGHT_HAND : ItemDisplayContext.THIRD_PERSON_LEFT_HAND, !rightHand,
                 pose, buffers, light);
         pose.popPose();
+    }
+
+    private static PlayerModel<AbstractClientPlayer> wide, slimModel;
+
+    /**
+     * Modelo del jugador propio (vanilla, armado aca): los packs de animacion (EMF/Fresh Moves) cambian las piezas del
+     * modelo del jugador cuando se dibujan, y en primera persona los brazos tienen que quedar donde dice la animacion.
+     */
+    public static PlayerModel<AbstractClientPlayer> ownModel(boolean slim) {
+        if (slim) {
+            if (slimModel == null) slimModel = new PlayerModel<>(net.minecraft.client.model.geom.builders.LayerDefinition.create(
+                    PlayerModel.createMesh(net.minecraft.client.model.geom.builders.CubeDeformation.NONE, true), 64, 64).bakeRoot(), true);
+            return slimModel;
+        }
+        if (wide == null) wide = new PlayerModel<>(net.minecraft.client.model.geom.builders.LayerDefinition.create(
+                PlayerModel.createMesh(net.minecraft.client.model.geom.builders.CubeDeformation.NONE, false), 64, 64).bakeRoot(), false);
+        return wide;
     }
 
     private static void reset(ModelPart part) {

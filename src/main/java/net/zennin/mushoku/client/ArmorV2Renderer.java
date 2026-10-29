@@ -164,7 +164,19 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
         return new Matrix4f(F).mul(t).mul(F_INV);
     }
 
+    private static int dbgCount;
+
     private void skinSetup(net.minecraft.client.model.HumanoidModel<?> base) {
+        if (System.getProperty("mushoku.legdebug") != null && currentEntity instanceof net.minecraft.client.player.AbstractClientPlayer pl
+                && (dbgCount++ % 15) == 0
+                && net.minecraft.client.Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(pl) instanceof net.minecraft.client.renderer.entity.player.PlayerRenderer pr) {
+            var pm = pr.getModel();
+            org.slf4j.LoggerFactory.getLogger("remushoku").info("legdebug armor R({},{},{} rx{} rz{}) body({},{} rx{} ry{}) | player R({},{},{} rx{} rz{}) body({},{} rx{} ry{}) model={}",
+                    f(base.rightLeg.x), f(base.rightLeg.y), f(base.rightLeg.z), f(base.rightLeg.xRot), f(base.rightLeg.zRot),
+                    f(base.body.y), f(base.body.z), f(base.body.xRot), f(base.body.yRot),
+                    f(pm.rightLeg.x), f(pm.rightLeg.y), f(pm.rightLeg.z), f(pm.rightLeg.xRot), f(pm.rightLeg.zRot),
+                    f(pm.body.y), f(pm.body.z), f(pm.body.xRot), f(pm.body.yRot), pm.rightLeg.getClass().getSimpleName());
+        }
         Matrix4f bodyInv = partMatrix(base.body).invert();
         skinR.set(legSkin(bodyInv, base.rightLeg, -1.9f));
         skinL.set(legSkin(bodyInv, base.leftLeg, 1.9f));
@@ -282,6 +294,8 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
             p.set(q);
         }
     }
+
+    private static String f(float v) { return String.format(java.util.Locale.ROOT, "%.2f", v); }
 
     private static float smoothstep(float t) {
         t = Math.max(0, Math.min(1, t));
