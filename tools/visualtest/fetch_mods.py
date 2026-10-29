@@ -4,7 +4,8 @@ Uso: fetch_mods.py <carpeta mods> [extras] ; extras 'fresh' agrega EMF/ETF y baj
 import json, os, sys, urllib.parse, urllib.request
 
 SLUGS = ['fabric-api', 'better-combat', 'playeranimator', 'cloth-config', '3dskinlayers']
-EXTRA = {'fresh': (['entity-model-features', 'entitytexturefeatures'], ['fresh-animations', 'tras-fresh-player'])}
+EXTRA = {'fresh': (['entity-model-features', 'entitytexturefeatures'], ['fresh-animations', 'tras-fresh-player']),
+         'fresheyes': (['entity-model-features', 'entitytexturefeatures'], ['fresh-animations', 'tras-fresh-player:eyes'])}
 out = sys.argv[1]
 extras = [e for e in (sys.argv[2] if len(sys.argv) > 2 else '').split(',') if e]
 os.makedirs(out, exist_ok=True)
@@ -50,7 +51,17 @@ if packs:
     os.makedirs(rp, exist_ok=True)
     names = []
     for slug in packs:
+        eyes = slug.endswith(':eyes')
+        slug = slug.split(':')[0]
         n = get(slug, rp, None, [['1.21.1'], ['1.21'], ['1.21.4'], None])
+        if n and eyes:
+            # Fresh Moves solo ojos (tools/fresh/eyes_only.py)
+            import subprocess
+            here = os.path.dirname(os.path.abspath(__file__))
+            out_name = 'FreshMovesSoloOjos.zip'
+            subprocess.run(['python3', os.path.join(here, '..', 'fresh', 'eyes_only.py'), os.path.join(rp, n), os.path.join(rp, out_name)], check=True)
+            os.remove(os.path.join(rp, n))
+            n = out_name
         if n:
             names.append(n)
     opt = os.path.join(out, '..', 'options.txt')
