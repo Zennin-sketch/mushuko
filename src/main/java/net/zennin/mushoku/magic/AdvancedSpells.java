@@ -210,7 +210,7 @@ public final class AdvancedSpells {
                 BlockHitResult hit = lookBlock(p, 11);
                 boolean ok = pillar(p, level, net.zennin.mushoku.registry.ModBlocks.EARTH_PILLAR, new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()), SoundEvents.STONE_PLACE);
                 if (ok && hit != null)
-                    net.zennin.mushoku.entity.SpellFxEntity.spawn(level, "earth_pillar_burst", Vec3.atBottomCenterOf(hit.getBlockPos().above()), p.getYRot(), 1.6f, 70, null);
+                    net.zennin.mushoku.entity.SpellFxEntity.spawn(level, "earth_pillar_burst", Vec3.atBottomCenterOf(hit.getBlockPos().above()), p.getYRot(), 1.2f, 70, null);
                 return ok;
             }
             case EARTH_LANCE -> earthLance(p, level);

@@ -130,6 +130,7 @@ EXTRA = [
     dict(group='Conjuro', items=['cast_pose', 'cast_release'], weapon='aqua_heartia'),
     dict(group='Desenvainar y guardar (cintura)', items=['hip_draw', 'hip_sheathe'], weapon='migurd_sword'),
     dict(group='Desenvainar y guardar (espalda)', items=['back_draw', 'back_sheathe'], weapon='kajakut'),
+    dict(group='Caminar: correr y quieto (diseñalos vos)', items=['loco_run', 'loco_idle'], weapon=None),
     dict(group='Poses', items=['pose_staff', 'pose_spear'], weapon='aqua_heartia'),
     dict(group='Arco del mod (arco en la izquierda)', items=['bow_idle', 'bow_load', 'bow_draw', 'bow_release'], weapon='hunter_bow'),
     dict(group='Arco vanilla', items=['bow_draw_r', 'bow_release_r'], weapon=None),

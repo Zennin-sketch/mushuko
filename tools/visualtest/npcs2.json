@@ -1,0 +1,106 @@
+{
+ "skin": "remushoku:textures/entities/rudeus_greyrat.png",
+ "steps": [
+  {
+   "op": "setup",
+   "fov": 50
+  },
+  {
+   "op": "cmd",
+   "v": "difficulty easy"
+  },
+  {
+   "op": "cmd",
+   "v": "gamerule doMobSpawning false"
+  },
+  {
+   "op": "cam",
+   "pitch": 8,
+   "h": 0.2
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:outlaw_m_melee -2.4 120 4.2 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[180f,0f],Tags:[\"vt\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:outlaw_m_archer -0.8 120 4.2 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[180f,0f],Tags:[\"vt\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:outlaw_f_melee 0.8 120 4.2 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[180f,0f],Tags:[\"vt\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:outlaw_f_archer 2.4 120 4.2 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[180f,0f],Tags:[\"vt\"]}"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "shot",
+   "v": "outlaws_front"
+  },
+  {
+   "op": "cmd",
+   "v": "execute as @e[tag=vt] at @s run tp @s ~ ~ ~ 90 0"
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "shot",
+   "v": "outlaws_side"
+  },
+  {
+   "op": "cmd",
+   "v": "tp @e[tag=vt] 0 200 0"
+  },
+  {
+   "op": "cmd",
+   "v": "kill @e[tag=vt]"
+  },
+  {
+   "op": "wait",
+   "t": 5
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:beast_bear_f -2.4 120 4.2 {NoAI:1b,Silent:1b,Rotation:[180f,0f],Tags:[\"vt2\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:beast_dog_f -0.8 120 4.2 {NoAI:1b,Silent:1b,Rotation:[180f,0f],Tags:[\"vt2\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:beast_cat_f 0.8 120 4.2 {NoAI:1b,Silent:1b,Rotation:[180f,0f],Tags:[\"vt2\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:beast_cat_m 2.4 120 4.2 {NoAI:1b,Silent:1b,Rotation:[180f,0f],Tags:[\"vt2\"]}"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "shot",
+   "v": "beasts_front"
+  },
+  {
+   "op": "cmd",
+   "v": "execute as @e[tag=vt2] at @s run tp @s ~ ~ ~ 90 0"
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "shot",
+   "v": "beasts_side"
+  }
+ ]
+}
