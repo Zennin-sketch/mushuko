@@ -361,9 +361,9 @@ def treant():
 
 
 # ===================================================================== Wyrm Rojo (dragon, inspirado en Slyrak)
-WYRM_FOLD = {  # alas plegadas (en el suelo): se suman a la pose abierta del modelo
-    'wing_l': [0, 70, -18], 'wing_r': [0, -70, 18], 'wing_l_fore': [0, -150, 0], 'wing_r_fore': [0, 150, 0],
-    'wing_l_hand': [0, 150, 0], 'wing_r_hand': [0, -150, 0]}
+WYRM_FOLD = {  # alas plegadas pegadas al costado (en el suelo): se suman a la pose abierta del modelo
+    'wing_l': [0, 85, -10], 'wing_r': [0, -85, 10], 'wing_l_fore': [0, -170, -30], 'wing_r_fore': [0, 170, 30],
+    'wing_l_hand': [0, 175, 0], 'wing_r_hand': [0, -175, 0]}
 
 
 def red_wyrm():
