@@ -134,7 +134,9 @@ public final class VisualTest {
                 // camara: alto de los ojos y mirada (pitch); 'h' sube/baja la camara
                 double h = s.has("h") ? s.get("h").getAsDouble() : 0;
                 float pitch = s.has("pitch") ? s.get("pitch").getAsFloat() : 0;
-                mc.player.connection.sendCommand(String.format(java.util.Locale.ROOT, "tp @s 0.5 %.2f 0.5 0 %.1f", 120 + h, pitch));
+                double cx = s.has("x") ? s.get("x").getAsDouble() : 0.5, cz = s.has("z") ? s.get("z").getAsDouble() : 0.5;
+                float cyaw = s.has("yaw") ? s.get("yaw").getAsFloat() : 0;
+                mc.player.connection.sendCommand(String.format(java.util.Locale.ROOT, "tp @s %.2f %.2f %.2f %.1f %.1f", cx, 120 + h, cz, cyaw, pitch));
                 mc.player.getAbilities().flying = true;
                 wait = 3;
             }
@@ -202,6 +204,15 @@ public final class VisualTest {
                 if (keepScreen) { mc.options.guiScale().set(4); mc.resizeDisplay(); }
                 if (keepScreen) mc.setScreen(new net.minecraft.client.gui.screens.inventory.InventoryScreen(mc.player));
                 else mc.setScreen(null);
+            }
+            case "useblock" -> {
+                // abre la pantalla de un bloque (mesa, alambique...) como si el jugador le hiciera clic derecho
+                net.minecraft.core.BlockPos bp = new net.minecraft.core.BlockPos(s.get("x").getAsInt(), s.get("y").getAsInt(), s.get("z").getAsInt());
+                keepScreen = true;
+                mc.options.hideGui = false;
+                if (s.has("scale")) { mc.options.guiScale().set(s.get("scale").getAsInt()); mc.resizeDisplay(); }
+                mc.gameMode.useItemOn(mc.player, net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.phys.BlockHitResult(
+                        net.minecraft.world.phys.Vec3.atCenterOf(bp), net.minecraft.core.Direction.UP, bp, false));
             }
             case "mobwalk" -> mobWalk = s.get("t").getAsInt();
             case "book" -> {

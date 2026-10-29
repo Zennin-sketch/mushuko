@@ -1,0 +1,375 @@
+{
+ "skin": "remushoku:textures/entities/rudeus_greyrat.png",
+ "steps": [
+  {
+   "op": "setup",
+   "fov": 70
+  },
+  {
+   "op": "cmd",
+   "v": "difficulty easy"
+  },
+  {
+   "op": "cmd",
+   "v": "gamerule doMobSpawning false"
+  },
+  {
+   "op": "cmd",
+   "v": "gamerule mobGriefing false"
+  },
+  {
+   "op": "cmd",
+   "v": "fill -40 119 -10 40 119 30 minecraft:grass_block"
+  },
+  {
+   "op": "cmd",
+   "v": "fill -40 119 30 40 119 90 minecraft:grass_block"
+  },
+  {
+   "op": "cmd",
+   "v": "fill -40 120 -10 40 150 30 minecraft:air"
+  },
+  {
+   "op": "cmd",
+   "v": "fill -40 120 30 40 150 90 minecraft:air"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:cobra_ruby -1.5 120 4.0 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[90f,0f],Tags:[\"cr\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:cobra_ivory 1.5 120 4.0 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[270f,0f],Tags:[\"cr\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:almond_anaconda 0.0 120 8.0 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[90f,0f],Tags:[\"cr\"]}"
+  },
+  {
+   "op": "cam",
+   "pitch": 20,
+   "h": 2
+  },
+  {
+   "op": "wait",
+   "t": 40
+  },
+  {
+   "op": "shot",
+   "v": "snakes_sides"
+  },
+  {
+   "op": "cmd",
+   "v": "tp @e[tag=cr] 0 300 0"
+  },
+  {
+   "op": "cmd",
+   "v": "kill @e[tag=cr]"
+  },
+  {
+   "op": "wait",
+   "t": 5
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:treant_stone 0.0 120 6.0 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[200f,0f],Tags:[\"cr\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:treant_zombie 4.0 120 7.0 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[200f,0f],Tags:[\"cr\"]}"
+  },
+  {
+   "op": "cam",
+   "pitch": 8,
+   "h": 3
+  },
+  {
+   "op": "wait",
+   "t": 40
+  },
+  {
+   "op": "shot",
+   "v": "treant_stone_front"
+  },
+  {
+   "op": "cmd",
+   "v": "execute as @e[tag=cr] at @s run tp @s ~ ~ ~ 110 0"
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "shot",
+   "v": "treant_stone_side"
+  },
+  {
+   "op": "cmd",
+   "v": "tp @e[tag=cr] 0 300 0"
+  },
+  {
+   "op": "cmd",
+   "v": "kill @e[tag=cr]"
+  },
+  {
+   "op": "wait",
+   "t": 5
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:manatite_hydra 0.0 120 16.0 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[200f,0f],Tags:[\"cr\"]}"
+  },
+  {
+   "op": "cam",
+   "pitch": 10,
+   "h": 6
+  },
+  {
+   "op": "wait",
+   "t": 40
+  },
+  {
+   "op": "shot",
+   "v": "hydra_front"
+  },
+  {
+   "op": "mobwalk",
+   "t": 40
+  },
+  {
+   "op": "wait",
+   "t": 10
+  },
+  {
+   "op": "shot",
+   "v": "hydra_walk"
+  },
+  {
+   "op": "cmd",
+   "v": "execute as @e[tag=cr] at @s run tp @s ~ ~ ~ 110 0"
+  },
+  {
+   "op": "wait",
+   "t": 25
+  },
+  {
+   "op": "shot",
+   "v": "hydra_side"
+  },
+  {
+   "op": "cmd",
+   "v": "tp @e[tag=cr] 0 300 0"
+  },
+  {
+   "op": "cmd",
+   "v": "kill @e[tag=cr]"
+  },
+  {
+   "op": "wait",
+   "t": 5
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:red_wyrm 0.0 120 55.0 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[200f,0f],Tags:[\"cr\"]}"
+  },
+  {
+   "op": "cam",
+   "pitch": 12,
+   "h": 10
+  },
+  {
+   "op": "wait",
+   "t": 50
+  },
+  {
+   "op": "shot",
+   "v": "wyrm_front"
+  },
+  {
+   "op": "cmd",
+   "v": "execute as @e[tag=cr] at @s run tp @s ~ ~ ~ 110 0"
+  },
+  {
+   "op": "wait",
+   "t": 25
+  },
+  {
+   "op": "shot",
+   "v": "wyrm_side"
+  },
+  {
+   "op": "mobwalk",
+   "t": 40
+  },
+  {
+   "op": "wait",
+   "t": 10
+  },
+  {
+   "op": "shot",
+   "v": "wyrm_walk"
+  },
+  {
+   "op": "cmd",
+   "v": "tp @e[tag=cr] 0 300 0"
+  },
+  {
+   "op": "cmd",
+   "v": "kill @e[tag=cr]"
+  },
+  {
+   "op": "wait",
+   "t": 5
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:red_wyrm 0 120 55 {PersistenceRequired:1b,Rotation:[180f,0f],Tags:[\"cr\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon minecraft:cow 0 120 35 {PersistenceRequired:1b,Tags:[\"cr\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon minecraft:cow 3 120 37 {PersistenceRequired:1b,Tags:[\"cr\"]}"
+  },
+  {
+   "op": "cam",
+   "pitch": 8,
+   "h": 8,
+   "z": -10
+  },
+  {
+   "op": "wait",
+   "t": 60
+  },
+  {
+   "op": "shot",
+   "v": "wyrm_ai_1"
+  },
+  {
+   "op": "wait",
+   "t": 60
+  },
+  {
+   "op": "shot",
+   "v": "wyrm_ai_2"
+  },
+  {
+   "op": "wait",
+   "t": 80
+  },
+  {
+   "op": "shot",
+   "v": "wyrm_ai_3"
+  },
+  {
+   "op": "wait",
+   "t": 80
+  },
+  {
+   "op": "shot",
+   "v": "wyrm_ai_4"
+  },
+  {
+   "op": "cmd",
+   "v": "time set 18000"
+  },
+  {
+   "op": "wait",
+   "t": 200
+  },
+  {
+   "op": "shot",
+   "v": "wyrm_ai_night"
+  },
+  {
+   "op": "cmd",
+   "v": "time set 6000"
+  },
+  {
+   "op": "cmd",
+   "v": "tp @e[tag=cr] 0 300 0"
+  },
+  {
+   "op": "cmd",
+   "v": "kill @e[tag=cr]"
+  },
+  {
+   "op": "wait",
+   "t": 5
+  },
+  {
+   "op": "cam",
+   "pitch": 30,
+   "h": 0.6
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 0 120 2 remushoku:research_table[facing=north]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -1 120 2 remushoku:research_table[facing=north,side=true]"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "shot",
+   "v": "table_close"
+  },
+  {
+   "op": "cam",
+   "pitch": 45,
+   "h": 0.8,
+   "x": -0.0,
+   "z": 0.2,
+   "yaw": 20
+  },
+  {
+   "op": "wait",
+   "t": 10
+  },
+  {
+   "op": "shot",
+   "v": "table_close2"
+  },
+  {
+   "op": "cmd",
+   "v": "give @s remushoku:inkand_quill"
+  },
+  {
+   "op": "cmd",
+   "v": "give @s remushoku:scroll 4"
+  },
+  {
+   "op": "cmd",
+   "v": "give @s minecraft:paper 6"
+  },
+  {
+   "op": "cam",
+   "pitch": 40,
+   "h": 0
+  },
+  {
+   "op": "useblock",
+   "x": 0,
+   "y": 120,
+   "z": 2,
+   "scale": 2
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "shot",
+   "v": "research_ui"
+  },
+  {
+   "op": "closescreen"
+  }
+ ]
+}
