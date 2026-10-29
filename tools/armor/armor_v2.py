@@ -358,8 +358,8 @@ def roxy():
     out.append(box(B, [-4.4, 12, -2.4], [8.8, 12.2, 4.8], 'blouse', 'folds'))
     out.append(box(B, [-4.65, 12.6, -2.65], [9.3, 5.4, 5.3], 'corset', 'lace'))
     out.append(box(B, [-3.0, 17.9, -2.75], [6.0, 1.0, 0.35], 'corset'))
-    out.append(box(B, [-4.8, 12.1, -2.8], [9.6, 0.9, 5.6], 'roxy_band', 'stitch'))
-    out.append(box(B, [-0.8, 11.95, -3.0], [1.6, 1.2, 0.3], 'gold'))
+    out.append(box(B, [-4.8, 14.1, -2.8], [9.6, 0.9, 5.6], 'roxy_band', 'stitch'))
+    out.append(box(B, [-0.8, 13.95, -3.0], [1.6, 1.2, 0.3], 'gold'))
     # pechera con volados (jabot) y cuello con volado y lazo negro
     for k in range(3):
         out.append(box(B, [-1.4 + k * 0.2, 21.4 - k * 1.3, -2.85 - k * 0.05], [2.8 - k * 0.4, 1.3, 0.45], 'blouse', 'frill'))
@@ -368,13 +368,13 @@ def roxy():
     out.append(box(B, [-0.6, 22.3, -3.25], [1.2, 1.1, 0.5], 'frill_black'))
     out += xm(rbox(B, [-2.4, 22.2, -3.15], [1.8, 1.3, 0.4], 'frill_black', pivot=(-0.6, 22.8, -3.0), e=(0, 0, 12)))
     out += xm(rbox(B, [-0.9, 19.6, -3.1], [0.6, 2.7, 0.3], 'frill_black', pivot=(-0.6, 22.3, -3.0), e=(0, 0, -14)))
-    # falda: piso negro con tablas y volado blanco abajo
-    out += ring_skirt('s', 12.9, 5.4, 4.9, 2.95, 24, 'frill_black', 'pleats', n=16)
-    out += ring_skirt('f', 8.2, 2.6, 6.9, 5.0, 34, 'blouse', 'frill', n=20)
+    # falda: piso negro con tablas y volado blanco abajo (2 px mas arriba que la cintura, para no chocar con las piernas)
+    out += ring_skirt('s', 14.9, 5.4, 4.9, 2.95, 24, 'frill_black', 'pleats', n=16)
+    out += ring_skirt('f', 10.2, 2.6, 6.9, 5.0, 34, 'blouse', 'frill', n=20)
     # moño grande atras
-    out.append(box(B, [-0.9, 12.9, 2.7], [1.8, 1.6, 0.9], 'frill_black'))
-    out += xm(rbox(B, [-3.9, 12.6, 2.8], [3.0, 2.4, 0.6], 'frill_black', 'folds', pivot=(-0.9, 13.7, 3.1), e=(0, 0, -10)))
-    out += xm(rbox(B, [-1.6, 8.6, 2.9], [0.9, 4.2, 0.3], 'frill_black', pivot=(-0.6, 12.9, 3.1), e=(-18, 0, -14)))
+    out.append(box(B, [-0.9, 14.9, 2.7], [1.8, 1.6, 0.9], 'frill_black'))
+    out += xm(rbox(B, [-3.9, 14.6, 2.8], [3.0, 2.4, 0.6], 'frill_black', 'folds', pivot=(-0.9, 15.7, 3.1), e=(0, 0, -10)))
+    out += xm(rbox(B, [-1.6, 10.6, 2.9], [0.9, 4.2, 0.3], 'frill_black', pivot=(-0.6, 14.9, 3.1), e=(-18, 0, -14)))
     # mangas abullonadas: hombro con ribete negro, globo, franja, manga y puno con volado
     out += sym([
         box(RA, [-8.8, 23.5, -2.8], [5.2, 0.8, 5.6], 'frill_black'),

@@ -58,11 +58,28 @@ public class SpellBookScreen extends BookScreen {
             String name = font.plainSubstrByWidth(Component.translatable(s.translationKey()).getString(), PAGE_W - 4);
             g.drawString(font, name, x, y, known ? INK : 0xFF8A7A62, false);
             String lvl = Component.translatable("level.remushoku." + s.level.tier).getString();
-            int ax = x;
-            for (char c : s.combo.toCharArray()) {
-                ResourceLocation tex = switch (c) { case 'u' -> UP; case 'd' -> DOWN; case 'l' -> LEFT; default -> RIGHT; };
-                g.blit(tex, ax, y + 9, 9, 9, 0f, 0f, 16, 16, 16, 16);
-                ax += 10;
+            // flechas (en los combinados: las del primero, un "+" y las del segundo), achicadas si no entran
+            String arrows = s.arrows();
+            Spell[] parts = s.combined() ? s.parts() : null;
+            int room = PAGE_W - 8 - font.width(lvl);
+            if (arrows == null && parts != null) { // combinado con un hechizo sin elemento: se escribe con la tecla Combinar
+                String txt = font.plainSubstrByWidth(Component.translatable(parts[0].translationKey()).getString() + " + "
+                        + Component.translatable(parts[1].translationKey()).getString(), room);
+                g.drawString(font, txt, x, y + 10, INK_SOFT, false);
+            } else if (arrows != null) {
+                int n = arrows.length() + (parts != null ? 1 : 0);
+                int step = Math.max(5, Math.min(10, room / Math.max(1, n))), size = Math.min(9, step - 1);
+                int ax = x;
+                for (int k = 0; k < arrows.length(); k++) {
+                    if (parts != null && k == parts[0].combo.length()) {
+                        g.drawString(font, "+", ax + (step - font.width("+")) / 2, y + 9 + (size - 8) / 2, INK, false);
+                        ax += step;
+                    }
+                    char c = arrows.charAt(k);
+                    ResourceLocation tex = switch (c) { case 'u' -> UP; case 'd' -> DOWN; case 'l' -> LEFT; default -> RIGHT; };
+                    g.blit(tex, ax, y + 9, size, size, 0f, 0f, 16, 16, 16, 16);
+                    ax += step;
+                }
             }
             g.drawString(font, lvl, x + PAGE_W - 4 - font.width(lvl), y + 10, known ? INK_GREEN : INK_SOFT, false);
         }

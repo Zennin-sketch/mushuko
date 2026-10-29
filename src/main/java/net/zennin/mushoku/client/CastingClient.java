@@ -55,7 +55,7 @@ public final class CastingClient {
         }
         toggleHeld = toggle;
 
-        if (casting && combo.length() < 8) {
+        if (casting && combo.length() < net.zennin.mushoku.magic.SpellCasting.MAX_COMBO) {
             if (up && !upPrev) combo += 'u';
             if (down && !downPrev) combo += 'd';
             if (left && !leftPrev) combo += 'l';

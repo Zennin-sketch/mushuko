@@ -30,19 +30,35 @@ public final class SpellCasting {
         return isMageClass(cls) || (cls == CLASS_SWORDSMAN && ModAttachments.sword(p).knows(SwordSkill.NG_MAGIC.id));
     }
 
+    /** Flechas maximas por combo (los combinados de corrido llevan dos hechizos). */
+    public static final int MAX_COMBO = 16;
+
     public static void onCombo(ServerPlayer p, String combo) {
         if (!canCast(p)) return;
-        if (combo == null || combo.length() < 3 || combo.length() > 8 || !combo.matches("[udlr]+")) {
+        if (combo == null || combo.length() < 3 || combo.length() > MAX_COMBO || !combo.matches("[udlr]+")) {
             msg(p, Component.translatable("msg.remushoku.no_spell").withStyle(ChatFormatting.GRAY));
             return;
         }
         MagicData m = ModAttachments.magic(p);
-        Spell spell = Spell.fromCombo(combo, m.noElement());
+        boolean creative = p.getAbilities().instabuild;
+        Spell spell = combo.length() <= 8 ? Spell.fromCombo(combo, m.noElement()) : null;
+        if (spell == null) {
+            // hechizo combinado escrito de corrido: las flechas del primero y despues las del segundo
+            Spell[] split = Spell.splitCombined(combo, m.noElement());
+            if (split != null) {
+                for (int i = 0; i < 2; i++) {
+                    if (!creative && m.level(split[i].element) < split[i].level.tier) {
+                        msg(p, Component.translatable("msg.remushoku.not_learned").withStyle(ChatFormatting.RED));
+                        return;
+                    }
+                }
+                spell = split[2];
+            }
+        }
         if (spell == null) {
             msg(p, Component.translatable("msg.remushoku.no_spell").withStyle(ChatFormatting.GRAY));
             return;
         }
-        boolean creative = p.getAbilities().instabuild;
         if (!creative && ModAttachments.get(p).playerClass() == CLASS_SWORDSMAN && spell.level.tier > 2) {
             msg(p, Component.translatable("msg.remushoku.swordsman_spell_limit").withStyle(ChatFormatting.RED));
             return;

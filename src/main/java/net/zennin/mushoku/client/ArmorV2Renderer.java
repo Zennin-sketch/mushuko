@@ -145,7 +145,7 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
     /** Del marco del torso (geo, px) al marco propio de cada pierna (px del modelo vanilla) y de vuelta. */
     private final Matrix4f[] toLeg = {new Matrix4f(), new Matrix4f()}, fromLeg = {new Matrix4f(), new Matrix4f()};
     /** Medio ancho de la pierna con la media/pantalon puesto, mas el grosor de la tela. */
-    private static final float LEG_HALF = 2.65f;
+    private static final float LEG_HALF = 2.85f;
     private final java.util.Map<Integer, float[]> springs = new java.util.HashMap<>();
     private String curBone;
 
@@ -232,7 +232,8 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
                 cubeRot.transformPosition(p);   // (en bloques: el giro del pano incluye su traslado al pivote)
                 p.mul(16f);
                 float dh = 12f - p.y;                      // cuanto esta por debajo de la cadera
-                float w = smoothstep((dh + 1.5f) / 8.5f) * 0.95f;
+                // la tela acompana a medias a la pierna (cuelga, no es rigida); lo que falta lo hace el choque con la pierna
+                float w = smoothstep((dh + 1.5f) / 8.5f) * 0.5f;
                 org.joml.Vector3f out = new org.joml.Vector3f(p).add(disp(p, skinR, skinL, w, a, b));
                 // ruedo: parte del movimiento viene de las piernas atrasadas
                 float hem = smoothstep((dh - 5f) / 6f) * 0.45f;
@@ -271,7 +272,7 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
     private void collide(org.joml.Vector3f p, org.joml.Vector3f q) {
         for (int i = 0; i < 2; i++) {
             toLeg[i].transformPosition(q.set(p));
-            if (q.y < 0.3f || q.y > 12.8f) continue;           // arriba de la cadera o abajo del pie
+            if (q.y < -0.5f || q.y > 13f) continue;            // arriba de la cadera o abajo del pie
             float ax = Math.abs(q.x), az = Math.abs(q.z);
             if (ax >= LEG_HALF || az >= LEG_HALF) continue;
             // adelante/atras se prefiere (asi la tela del medio no se va hacia la otra pierna)

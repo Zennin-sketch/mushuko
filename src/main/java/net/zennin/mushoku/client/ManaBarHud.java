@@ -62,7 +62,7 @@ public final class ManaBarHud {
 
         if (CastingClient.casting) {
             String combo = CastingClient.combo;
-            int size = 16, gap = 2;
+            int size = combo.length() > 10 ? 12 : 16, gap = 2;
             int total = Math.max(1, combo.length()) * (size + gap) - gap;
             int sx = (g.guiWidth() - total) / 2, sy = g.guiHeight() / 2 - 40;
             g.drawCenteredString(mc.font, Component.translatable("hud.remushoku.casting"), g.guiWidth() / 2, sy - 22, 0xFFFFFFFF);

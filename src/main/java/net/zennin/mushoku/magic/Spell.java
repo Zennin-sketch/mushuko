@@ -122,13 +122,47 @@ public enum Spell {
     /** Hechizo combinado (no se forma con flechas). */
     public boolean combined() { return combo.startsWith("+"); }
 
-    /** Combinaciones del addon: primer hechizo + segundo hechizo (en cualquier orden). */
+    /** Combinaciones del addon: {primer hechizo, segundo hechizo, resultado}. */
+    private static final Spell[][] COMBOS = {
+            {FIREBALL, FIREBALL, FIRE_RAIN}, {ICICLE_LANCE, ICICLE_LANCE, FREEZING_RAIN}, {STONE_CANNON, STONE_CANNON, SPIKE_RAIN},
+            {WATER_SHIELD, BURNING_PLACE, DEEP_MIST}, {DEEP_MIST, WATER_BALL, POISON_MIST}, {FLOOD_FLUSH, SAND_CLOUD, QUAGMIRE},
+            {ICE_BLADE, EARTH_PILLAR, STONE_BLADE}, {DEEP_MIST, ICE_FORTRESS, FROST_WIND}};
+
+    /** Primer hechizo + segundo hechizo (en cualquier orden). */
     public static Spell combine(Spell a, Spell b) {
-        for (Spell[] c : new Spell[][]{
-                {FIREBALL, FIREBALL, FIRE_RAIN}, {ICICLE_LANCE, ICICLE_LANCE, FREEZING_RAIN}, {STONE_CANNON, STONE_CANNON, SPIKE_RAIN},
-                {WATER_SHIELD, BURNING_PLACE, DEEP_MIST}, {DEEP_MIST, WATER_BALL, POISON_MIST}, {FLOOD_FLUSH, SAND_CLOUD, QUAGMIRE},
-                {ICE_BLADE, EARTH_PILLAR, STONE_BLADE}, {DEEP_MIST, ICE_FORTRESS, FROST_WIND}}) {
+        for (Spell[] c : COMBOS) {
             if ((c[0] == a && c[1] == b) || (c[0] == b && c[1] == a)) return c[2];
+        }
+        return null;
+    }
+
+    /** Los dos hechizos que forman este hechizo combinado (null si no es combinado). */
+    public Spell[] parts() {
+        for (Spell[] c : COMBOS) if (c[2] == this) return new Spell[]{c[0], c[1]};
+        return null;
+    }
+
+    /**
+     * Flechas para formarlo: las del hechizo, o en los combinados las del primero seguidas de las del segundo
+     * (los combinados con un hechizo sin elemento no se pueden escribir de corrido: devuelve null).
+     */
+    public String arrows() {
+        if (!combined()) return combo;
+        Spell[] p = parts();
+        if (p == null || p[0].combined() || p[1].combined() || p[0].element == Element.NONE || p[1].element == Element.NONE) return null;
+        return p[0].combo + p[1].combo;
+    }
+
+    /**
+     * Un combo largo escrito de corrido: se parte en dos hechizos que existan y se combinan. Devuelve {a, b, resultado}
+     * o null.
+     */
+    public static Spell[] splitCombined(String combo, boolean noElementMode) {
+        for (int i = 3; i <= combo.length() - 3; i++) {
+            Spell a = fromCombo(combo.substring(0, i), noElementMode), b = fromCombo(combo.substring(i), noElementMode);
+            if (a == null || b == null) continue;
+            Spell r = combine(a, b);
+            if (r != null) return new Spell[]{a, b, r};
         }
         return null;
     }
