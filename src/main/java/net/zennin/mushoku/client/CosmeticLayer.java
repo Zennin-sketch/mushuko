@@ -35,20 +35,27 @@ public class CosmeticLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         if (player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST).getItem() instanceof net.zennin.mushoku.item.ArmorV2Item v && v.fullBody) return;
         Appearance a = ClientAppearance.get(player);
         if (a == null || a.model() == null) return;
-        CosmeticModel m = CosmeticModel.get(a.model());
+        float hurt = player.hurtTime > 0 ? Math.max(0f, (player.hurtTime - partialTick) / 10f) : 0f;
+        renderTrait(pose, buffers, light, getParentModel().head, a.model(), a.height(), a.color(), player.getSkin().texture(), ageInTicks, hurt);
+    }
+
+    /**
+     * Dibuja un rasgo (orejas, cuernos, gema) sobre una cabeza. Lo usan el jugador y las NPC (bestias).
+     * custom >= 0: color fijo en vez del pelo/piel de la skin.
+     */
+    public static void renderTrait(PoseStack pose, MultiBufferSource buffers, int light, net.minecraft.client.model.geom.ModelPart head,
+                                   String model, int height, int custom, ResourceLocation skin, float ageInTicks, float hurt) {
+        CosmeticModel m = CosmeticModel.get(model);
         if (m.parts.isEmpty() && m.chains.isEmpty()) return;
         pose.pushPose();
-        getParentModel().head.translateAndRotate(pose);
+        head.translateAndRotate(pose);
         // Marco del rasgo: +X derecha, +Y arriba, +Z adelante (el modelo del jugador tiene los tres ejes al reves)
         pose.scale(-1f / 16f, -1f / 16f, -1f / 16f);
-        pose.translate(0, m.heights[Mth.clamp(a.height(), 0, m.heights.length - 1)], 0);
+        pose.translate(0, m.heights[Mth.clamp(height, 0, m.heights.length - 1)], 0);
         PoseStack.Pose last = pose.last();
-        ResourceLocation skin = player.getSkin().texture();
         // Orejas articuladas (se recalculan cada cuadro: balanceo, tic y se echan atras al recibir un golpe)
         java.util.List<CosmeticChain.Quad> quads = new java.util.ArrayList<>();
-        float hurt = player.hurtTime > 0 ? Math.max(0f, (player.hurtTime - partialTick) / 10f) : 0f;
         for (CosmeticChain chain : m.chains) quads.addAll(chain.quads(ageInTicks, hurt));
-        int custom = a.color();  // color elegido: reemplaza a la piel/pelo de la skin
         // Primero todo lo que usa la skin y despues lo de color fijo (no se pueden mezclar dos buffers a la vez)
         VertexConsumer skinVc = buffers.getBuffer(RenderType.entityCutoutNoCull(skin));
         for (CosmeticModel.Part p : m.parts) {

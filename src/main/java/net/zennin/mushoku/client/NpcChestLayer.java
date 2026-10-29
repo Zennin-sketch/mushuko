@@ -31,11 +31,14 @@ public class NpcChestLayer<T extends Mob> extends RenderLayer<T, PlayerModel<T>>
     /** Tamano por personaje (textura de la skin): cuanto sobresale y cuanto rebota. */
     public record Shape(float size, float bounce) {}
 
-    public static final Map<String, Shape> SHAPES = Map.of(
-            "roxy_migurdia", new Shape(0.3f, 0.45f),
-            "sylphiette_greyrat", new Shape(0.7f, 0.75f),
-            "eris_greyrat", new Shape(1.0f, 1.0f),
-            "ghislaine", new Shape(1.35f, 1.15f));
+    public static final Map<String, Shape> SHAPES = Map.ofEntries(
+            Map.entry("outlaw_f_melee", new Shape(0.95f, 1.0f)), Map.entry("outlaw_f_archer", new Shape(0.75f, 0.85f)),
+            Map.entry("beast_bear_f", new Shape(1.25f, 1.1f)), Map.entry("beast_dog_f", new Shape(0.95f, 1.0f)),
+            Map.entry("beast_cat_f", new Shape(0.8f, 0.9f)),
+            Map.entry("roxy_migurdia", new Shape(0.3f, 0.45f)),
+            Map.entry("sylphiette_greyrat", new Shape(0.7f, 0.75f)),
+            Map.entry("eris_greyrat", new Shape(1.0f, 1.0f)),
+            Map.entry("ghislaine", new Shape(1.35f, 1.15f)));
 
     private final ResourceLocation texture;
     private final Shape shape;

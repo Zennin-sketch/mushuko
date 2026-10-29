@@ -87,6 +87,16 @@ public class MushokuClient implements ClientModInitializer {
             NpcChestLayer.registerType(ModEntities.COMPANIONS.get(k), k.texture);
         }
         HumanoidNpcRenderer.register(ModEntities.VILLAGER_GUARD, "villager_guard");
+        for (var t : ModEntities.OUTLAWS) {
+            String id = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(t).getPath();
+            HumanoidNpcRenderer.register(t, id, id.contains("_f_"));
+            NpcChestLayer.registerType(t, id);
+        }
+        for (var e : ModEntities.BEASTFOLK.entrySet()) {
+            String tribe = e.getKey().split("_")[1];
+            HumanoidNpcRenderer.register(e.getValue(), e.getKey(), e.getKey().endsWith("_f"), "beast_" + tribe);
+            NpcChestLayer.registerType(e.getValue(), e.getKey());
+        }
         ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.RaceSyncPayload.TYPE, (payload, context) -> ClientRaceState.set(payload.data()));
         ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.CompanionStatePayload.TYPE, (payload, context) -> CompanionScreen.receive(payload.state()));
         HumanoidNpcRenderer.register(ModEntities.SG_BANDIT, "sgbandittxt");

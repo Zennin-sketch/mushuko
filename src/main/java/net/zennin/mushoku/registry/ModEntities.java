@@ -44,6 +44,29 @@ public final class ModEntities {
     public static final EntityType<BanditEntity> NG_BANDIT = humanoid("ng_bandit", MobCategory.MONSTER,
             (t, l) -> new BanditEntity(t, l, BanditEntity.Style.NORTH_GOD));
     public static final EntityType<MageBanditEntity> M_BANDIT = humanoid("m_bandit", MobCategory.MONSTER, MageBanditEntity::new);
+    // --- Bandidos comunes (hombres y mujeres; cuerpo a cuerpo y arqueros) ---
+    public static final EntityType<net.zennin.mushoku.entity.npc.OutlawEntity> OUTLAW_M_MELEE = humanoid("outlaw_m_melee", MobCategory.MONSTER,
+            (t, l) -> new net.zennin.mushoku.entity.npc.OutlawEntity(t, l, false));
+    public static final EntityType<net.zennin.mushoku.entity.npc.OutlawEntity> OUTLAW_M_ARCHER = humanoid("outlaw_m_archer", MobCategory.MONSTER,
+            (t, l) -> new net.zennin.mushoku.entity.npc.OutlawEntity(t, l, true));
+    public static final EntityType<net.zennin.mushoku.entity.npc.OutlawEntity> OUTLAW_F_MELEE = humanoid("outlaw_f_melee", MobCategory.MONSTER,
+            (t, l) -> new net.zennin.mushoku.entity.npc.OutlawEntity(t, l, false));
+    public static final EntityType<net.zennin.mushoku.entity.npc.OutlawEntity> OUTLAW_F_ARCHER = humanoid("outlaw_f_archer", MobCategory.MONSTER,
+            (t, l) -> new net.zennin.mushoku.entity.npc.OutlawEntity(t, l, true));
+    /** id -> {arquero} de los bandidos comunes. */
+    public static final java.util.List<EntityType<net.zennin.mushoku.entity.npc.OutlawEntity>> OUTLAWS =
+            java.util.List.of(OUTLAW_M_MELEE, OUTLAW_M_ARCHER, OUTLAW_F_MELEE, OUTLAW_F_ARCHER);
+
+    // --- Hombres y mujeres bestia (oso, perro, gato) ---
+    public static final java.util.Map<String, EntityType<net.zennin.mushoku.entity.npc.BeastfolkEntity>> BEASTFOLK = new java.util.LinkedHashMap<>();
+    static {
+        for (var tribe : net.zennin.mushoku.entity.npc.BeastfolkEntity.Tribe.values())
+            for (String g : new String[]{"m", "f"}) {
+                String id = "beast_" + tribe.name().toLowerCase(java.util.Locale.ROOT) + "_" + g;
+                BEASTFOLK.put(id, humanoid(id, MobCategory.CREATURE, (t, l) -> new net.zennin.mushoku.entity.npc.BeastfolkEntity(t, l, tribe)));
+            }
+    }
+
     public static final EntityType<KalmanEntity> KALMAN = humanoid("kalman_3", MobCategory.MONSTER, KalmanEntity::new);
 
     // --- NPCs de ciudad ---
@@ -153,6 +176,22 @@ public final class ModEntities {
             EntityType<CompanionEntity> t = COMPANIONS.get(CompanionKind.values()[sp[0]]);
             SpawnPlacements.register(t, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, net.minecraft.world.entity.Mob::checkMobSpawnRules);
             BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), MobCategory.CREATURE, t, sp[1], 1, 1);
+        }
+        for (var t : OUTLAWS) {
+            boolean archer = t == OUTLAW_M_ARCHER || t == OUTLAW_F_ARCHER;
+            FabricDefaultAttributeRegistry.register(t, net.zennin.mushoku.entity.npc.OutlawEntity.attributes(archer));
+            String id = BuiltInRegistries.ENTITY_TYPE.getKey(t).getPath();
+            egg(id, t, 0x5A3E2A, archer ? 0x6E8B3D : 0xA03030);
+            SpawnPlacements.register(t, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules);
+            BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), MobCategory.MONSTER, t, 4, 1, 3);
+        }
+        int[] beastColors = {0x6B4A2E, 0x8C8C8C, 0xD08A3A};
+        for (var e : BEASTFOLK.entrySet()) {
+            var tribe = net.zennin.mushoku.entity.npc.BeastfolkEntity.Tribe.valueOf(e.getKey().split("_")[1].toUpperCase(java.util.Locale.ROOT));
+            FabricDefaultAttributeRegistry.register(e.getValue(), net.zennin.mushoku.entity.npc.BeastfolkEntity.attributes(tribe));
+            egg(e.getKey(), e.getValue(), beastColors[tribe.ordinal()], e.getKey().endsWith("_f") ? 0xF0C0D0 : 0x3A5A8A);
+            SpawnPlacements.register(e.getValue(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, net.minecraft.world.entity.Mob::checkMobSpawnRules);
+            BiomeModifications.addSpawn(BiomeSelectors.tag(net.minecraft.tags.BiomeTags.IS_FOREST), MobCategory.CREATURE, e.getValue(), 2, 1, 2);
         }
         egg("sg_bandit", SG_BANDIT, 0x993300, 0xCC0033);
         egg("ng_bandit", NG_BANDIT, 0x993300, 0x0000FF);
