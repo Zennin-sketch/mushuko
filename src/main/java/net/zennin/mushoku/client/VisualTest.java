@@ -203,6 +203,7 @@ public final class VisualTest {
                 if (keepScreen) mc.setScreen(new net.minecraft.client.gui.screens.inventory.InventoryScreen(mc.player));
                 else mc.setScreen(null);
             }
+            case "mobwalk" -> mobWalk = s.get("t").getAsInt();
             case "book" -> {
                 keepScreen = true;
                 mc.options.hideGui = false;
@@ -213,8 +214,16 @@ public final class VisualTest {
         }
     }
 
+    private static int mobWalk;
+
     /** El maniqui no se mueve solo: cada tick se le fija la rotacion y, si camina, la animacion de las piernas. */
     private static void keepDummy(Minecraft mc) {
+        if (mobWalk > 0 && mc.level != null) {
+            mobWalk--;
+            for (var e : mc.level.entitiesForRendering())
+                if (e instanceof net.minecraft.world.entity.LivingEntity le && !(e instanceof net.minecraft.world.entity.player.Player))
+                    le.walkAnimation.update(0.7f, 1f);
+        }
         if (dummy == null) return;
         dummy.setYRot(dummyYaw);
         dummy.yRotO = dummyYaw;

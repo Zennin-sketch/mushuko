@@ -97,6 +97,30 @@ public final class ModEntities {
     public static final EntityType<AnimatedMonster> SNOW_DRAKE_MOM = creature("snow_drake_mom", 2f, 5f,
             (t, l) -> new AnimatedBoss(t, l, new AnimatedMonster.Anims("Idle", "Walk", "Bite"), AnimatedBoss.Kind.DRAKE_MOM));
 
+    // --- Criaturas del mundo de Mushoku Tensei (diseno propio; mecanicas basicas por ahora) ---
+    /** id -> {geo, textura, ancho, alto, escala, vida, dano, velocidad}. */
+    public record Beast(String id, String geo, String texture, float w, float h, float scale, double health, double damage, double speed) {}
+    public static final java.util.List<Beast> BEASTS = java.util.List.of(
+            new Beast("pack_coyote", "pack_coyote", "pack_coyote", 0.8f, 0.9f, 1f, 16, 3, 0.36),
+            new Beast("acid_wolf", "acid_wolf", "acid_wolf", 1.0f, 1.2f, 1f, 28, 5, 0.34),
+            new Beast("sacred_beast", "sacred_beast", "sacred_beast", 1.6f, 2.0f, 1f, 200, 10, 0.34),
+            new Beast("rock_turtle", "rock_turtle", "rock_turtle", 2.4f, 2.3f, 1f, 120, 8, 0.18),
+            new Beast("almond_anaconda", "almond_anaconda", "almond_anaconda", 1.4f, 0.6f, 1f, 60, 7, 0.26),
+            new Beast("cobra_ivory", "fang_cobra", "cobra_ivory", 0.7f, 1.2f, 1f, 18, 5, 0.3),
+            new Beast("cobra_ruby", "fang_cobra", "cobra_ruby", 0.7f, 1.2f, 1f, 22, 6, 0.3),
+            new Beast("treant_lesser", "treant", "treant_lesser", 1.0f, 3.0f, 0.75f, 40, 5, 0.22),
+            new Beast("treant_elder", "treant", "treant_elder", 1.6f, 5.0f, 1.25f, 140, 10, 0.2),
+            new Beast("treant_zombie", "treant", "treant_zombie", 1.2f, 4.0f, 1f, 70, 7, 0.22),
+            new Beast("treant_stone", "treant", "treant_stone", 1.3f, 4.0f, 1f, 110, 8, 0.18),
+            new Beast("red_wyrm", "red_wyrm", "red_wyrm", 2.6f, 2.2f, 1f, 220, 12, 0.3),
+            new Beast("manatite_hydra", "manatite_hydra", "manatite_hydra", 4.5f, 5.0f, 1.4f, 600, 16, 0.24));
+    public static final java.util.Map<String, EntityType<AnimatedMonster>> BEAST_TYPES = new java.util.LinkedHashMap<>();
+    static {
+        for (Beast b : BEASTS)
+            BEAST_TYPES.put(b.id(), creature(b.id(), b.w(), b.h(),
+                    (t, l) -> new AnimatedMonster(t, l, new AnimatedMonster.Anims("idle", "walk", "attack"))));
+    }
+
     public static final EntityType<net.zennin.mushoku.entity.ThrownMushokuItem> THROWN_ITEM = Registry.register(BuiltInRegistries.ENTITY_TYPE,
             MushokuMod.id("thrown_item"), EntityType.Builder.<net.zennin.mushoku.entity.ThrownMushokuItem>of(net.zennin.mushoku.entity.ThrownMushokuItem::new, MobCategory.MISC)
                     .sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(10).build("thrown_item"));
@@ -196,6 +220,14 @@ public final class ModEntities {
             egg(e.getKey(), e.getValue(), beastColors[tribe.ordinal()], e.getKey().endsWith("_f") ? 0xF0C0D0 : 0x3A5A8A);
             SpawnPlacements.register(e.getValue(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, net.minecraft.world.entity.Mob::checkMobSpawnRules);
             BiomeModifications.addSpawn(BiomeSelectors.tag(net.minecraft.tags.BiomeTags.IS_FOREST), MobCategory.CREATURE, e.getValue(), 2, 1, 2);
+        }
+        int[][] beastEgg = {{0xB08A5A, 0x6E5232}, {0x2C3A2A, 0x6CFF3A}, {0xF4F2EC, 0xFFD24A}, {0x8A8478, 0x5E8A3A}, {0xC8A46A, 0x6A4A24},
+                {0xE8E2D0, 0x3A6AD0}, {0x3A1A1E, 0xD02030}, {0x6A4A2E, 0x7AB83C}, {0x5A4430, 0xC8A03A}, {0x5A5450, 0xC060FF},
+                {0x8A8680, 0xFFA040}, {0xA02218, 0xD8803A}, {0x3A5A6A, 0x6A4AD8}};
+        for (int i = 0; i < BEASTS.size(); i++) {
+            Beast b = BEASTS.get(i);
+            FabricDefaultAttributeRegistry.register(BEAST_TYPES.get(b.id()), AnimatedMonster.attributes(b.health(), b.damage(), b.speed(), 24));
+            egg(b.id(), BEAST_TYPES.get(b.id()), beastEgg[i][0], beastEgg[i][1]);
         }
         egg("sg_bandit", SG_BANDIT, 0x993300, 0xCC0033);
         egg("ng_bandit", NG_BANDIT, 0x993300, 0x0000FF);

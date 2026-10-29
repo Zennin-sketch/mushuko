@@ -11,8 +11,20 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
 /** Renderer GeckoLib con los modelos, animaciones y texturas del original (assets/remushoku/geo, animations). */
 public class AnimatedRenderer<T extends net.minecraft.world.entity.Entity & software.bernie.geckolib.animatable.GeoAnimatable> extends GeoEntityRenderer<T> {
     public AnimatedRenderer(EntityRendererProvider.Context ctx, String geo, String texture, float shadow) {
+        this(ctx, geo, texture, shadow, 1f);
+    }
+
+    /** scale = tamano del modelo; si existe la textura <textura>_glowmask, esas partes brillan en la oscuridad. */
+    public AnimatedRenderer(EntityRendererProvider.Context ctx, String geo, String texture, float shadow, float scale) {
         super(ctx, new Model<>(geo, texture));
         this.shadowRadius = shadow;
+        if (scale != 1f) withScale(scale);
+        if (ctx.getResourceManager().getResource(MushokuMod.id("textures/entities/" + texture + "_glowmask.png")).isPresent())
+            addRenderLayer(new software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer<>(this));
+    }
+
+    public static <T extends net.minecraft.world.entity.Entity & software.bernie.geckolib.animatable.GeoAnimatable> void register(EntityType<T> type, String geo, String texture, float shadow, float scale) {
+        EntityRendererRegistry.register(type, ctx -> new AnimatedRenderer<>(ctx, geo, texture, shadow, scale));
     }
 
     public static <T extends net.minecraft.world.entity.Entity & software.bernie.geckolib.animatable.GeoAnimatable> void register(EntityType<T> type, String geo, String texture, float shadow) {

@@ -77,6 +77,8 @@ public class MushokuClient implements ClientModInitializer {
         EntityRendererRegistry.register(ModEntities.THROWN_ITEM, net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.PartySyncPayload.TYPE, (payload, context) -> ClientPartyState.set(payload));
         AnimatedRenderer.register(ModEntities.SWAP_TOTEM, "tptotem", "tptotemtexture", 0.4f);
+        for (var b : ModEntities.BEASTS)
+            AnimatedRenderer.register(ModEntities.BEAST_TYPES.get(b.id()), b.geo(), b.texture(), b.w() * 0.5f, b.scale());
         AnimatedRenderer.register(ModEntities.ASSAULT_DOG, "assaultdog2", "assaultdog", 0.6f);
         AnimatedRenderer.register(ModEntities.MUCKY_RAT, "muckyrat", "muckyrattxt", 0.15f);
         AnimatedRenderer.register(ModEntities.DEADLY_WRAITH, "deadlywraith", "deadlywraithtxt", 0.5f);

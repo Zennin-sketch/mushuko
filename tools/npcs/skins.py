@@ -60,63 +60,88 @@ def paint(spec):
     skin, hair, eye = spec['skin'], spec['hair'], spec['eye']
     long_hair, female = spec.get('long', False), spec['female']
 
-    # ------------------------------------------------------------------ cabeza
+    # ------------------------------------------------------------------ cabeza (estilo de las NPC del mod)
+    strand = random.Random(len(spec['name']) * 7)
+    tones = [sh(hair, 1.18), sh(hair, 1.05), sh(hair, 0.95), sh(hair, 0.82), sh(hair, 0.68)]
+
+    def hair_px(x, y, h=8):
+        """Pelo con mechones verticales: tono por columna, mas oscuro abajo y una franja de brillo arriba."""
+        col = (x * 3 + (x // 2)) % 3
+        t = col + (1 if y > h * 0.55 else 0) + (1 if y > h * 0.8 else 0)
+        if y in (1, 2) and (x + y) % 3 == 0:
+            t = 0
+        return tones[max(0, min(4, t + (1 if strand.random() < 0.15 else 0)))]
+
     def head(f, x, y, w, h):
         if f == 'top':
-            return sh(hair, rnd())
+            return hair_px(x, 2)
         if f == 'bottom':
             return sh(skin, 0.8)
         if f == 'back':
-            return sh(hair, rnd() * (0.85 if y > 5 else 1))
+            return hair_px(x, y)
         if f in ('right', 'left'):
-            # costados: pelo arriba; la oreja humana queda tapada (llevan orejas de bestia o pelo)
-            if y <= 3 or long_hair or (x >= 4 if f == 'right' else x <= 3):
-                return sh(hair, rnd() * (0.9 if y > 4 else 1))
-            return sh(skin, 0.92)
-        # frente: cara
-        return sh(skin, 1.0)
+            near_face = (x >= 5 if f == 'right' else x <= 2)
+            if y <= 3 or long_hair or not near_face or y <= 4:
+                return hair_px(x, y)
+            return sh(skin, 0.9)
+        return sh(skin, 1.0 if y < 6 else 1.04)
     s.fill('head', head)
     F = lambda x, y, c: s.px('head', 'front', x, y, c)
-    # flequillo
-    fringe = spec.get('fringe', [2, 3, 2, 1, 2, 3, 2, 2])
+    # flequillo con mechones que bajan hasta los ojos, y mechones laterales que enmarcan la cara
+    fringe = spec.get('fringe', [3, 4, 3, 2, 3, 4, 3, 3])
     for x in range(8):
         for y in range(fringe[x]):
-            F(x, y, sh(hair, 1.05 if y == 0 else 0.95))
-    if long_hair or female:
-        for y in range(2, 7):
-            F(0, y, sh(hair, 0.9)); F(7, y, sh(hair, 0.9))
-    # ojos grandes: pestana oscura arriba, iris, brillo, parte baja mas clara
-    lash = sh(hair, 0.35) if not female else (30, 20, 25)
-    for ex in (1, 5):
-        F(ex, 3, lash); F(ex + 1, 3, lash)
-        F(ex, 4, sh(eye, 0.75)); F(ex + 1, 4, (250, 250, 255))
-        F(ex, 5, sh(eye, 1.15)); F(ex + 1, 5, sh(eye, 0.95))
+            F(x, y, hair_px(x, y + 1))
+        F(x, fringe[x], sh(hair_px(x, 3), 0.75) if fringe[x] < 5 and strand.random() < 0.5 else None)
+    side = 8 if long_hair else 6
+    for y in range(2, side):
+        F(0, y, hair_px(0, y)); F(7, y, hair_px(7, y))
+    if long_hair:
+        for y in range(5, 8):
+            F(1, y, hair_px(1, y) if y >= 6 else None); F(6, y, hair_px(6, y) if y >= 6 else None)
+    # ojos grandes: fila de arriba = pestana/iris oscuro, abajo iris claro con brillo
     if female:
-        F(0, 3, lash); F(7, 3, lash)
-        F(1, 6, (238, 150, 150)); F(6, 6, (238, 150, 150))
-    # boca
-    F(3, 7 if not spec.get('mask') else 7, sh(skin, 0.7)); F(4, 7, sh(skin, 0.75))
+        for ex in (1, 5):
+            F(ex, 4, sh(eye, 0.35)); F(ex + 1, 4, sh(eye, 0.45))
+            F(ex, 5, sh(eye, 1.1)); F(ex + 1, 5, sh(eye, 0.9))
+            F(ex + (1 if ex == 1 else 0), 4, (250, 248, 255))  # brillo del lado de adentro
+        F(1, 6, (240, 160, 160)); F(6, 6, (240, 160, 160))
+        F(3, 7, sh(skin, 0.88)); F(4, 7, sh(skin, 0.88))
+    else:
+        for ex, white in ((2, 1), (5, 6)):
+            F(white, 4, (238, 238, 242)); F(white, 5, (230, 230, 236))
+            F(ex, 4, sh(eye, 1.15)); F(ex, 5, sh(eye, 0.6))
+        F(3, 7, sh(skin, 0.86)); F(4, 7, sh(skin, 0.86))
+        if spec.get('scar'):
+            F(5, 6, sh(skin, 0.75)); F(6, 7, sh(skin, 0.75))
     if spec.get('mask'):
         for x in range(8):
             for y in (6, 7):
-                F(x, y, sh(spec['mask'], rnd() * (0.85 if y == 7 else 1)))
+                F(x, y, sh(spec['mask'], (1.05 if y == 6 else 0.85) * (0.92 if x in (0, 7) else 1)))
         for y in (6, 7):
-            s.px('head', 'right', 7 - 0, y, sh(spec['mask'], 0.8)); s.px('head', 'left', 0, y, sh(spec['mask'], 0.8))
-    # capa del sombrero: pelo largo y vincha / capucha
+            s.px('head', 'right', 7, y, sh(spec['mask'], 0.8)); s.px('head', 'left', 0, y, sh(spec['mask'], 0.8))
+            s.px('head', 'right', 6, y, sh(spec['mask'], 0.75)); s.px('head', 'left', 1, y, sh(spec['mask'], 0.75))
+    # capa del sombrero: volumen del pelo (mechones sueltos), vincha o capucha
     def hat(f, x, y, w, h):
         if spec.get('hood'):
             hood = spec['hood']
             if f == 'front':
-                return sh(hood, 0.85) if (y == 0 or x in (0, 7)) else None
+                if y == 0 or x in (0, 7):
+                    return sh(hood, 0.8 if y == 0 else 0.7)
+                return None
             if f == 'bottom':
                 return None
-            return sh(hood, rnd() * (0.9 if y > 4 else 1))
+            return sh(hood, (1.08 if y < 2 else 0.95 if y < 6 else 0.82) * (0.92 if (x + y) % 4 == 0 else 1))
+        if spec.get('band') and y == 2 and f in ('front', 'right', 'left', 'back'):
+            return spec['band'] if f != 'front' or 1 <= x <= 6 else sh(spec['band'], 0.8)
         if f == 'back' and long_hair:
-            return sh(hair, rnd() * 0.95)
-        if f in ('right', 'left') and long_hair and y >= 3:
-            return sh(hair, rnd() * 0.9)
-        if spec.get('band') and y == 1 and f in ('front', 'right', 'left', 'back'):
-            return spec['band']
+            return hair_px(x, y)
+        if f in ('right', 'left') and long_hair and y >= 2:
+            return hair_px(x, y)
+        if f == 'front' and y <= 1 and x in (1, 4, 6):
+            return hair_px(x, y)  # mechones que sobresalen del flequillo
+        if f == 'top' and (x + y) % 3 == 0:
+            return hair_px(x, 1)
         return None
     s.fill('hat', hat)
 
@@ -132,15 +157,29 @@ def paint(spec):
         if y >= 10:
             return sh(pants, k)
         if y == 8 or y == 9:
-            return sh(belt, k * (1.2 if (f == 'front' and x in (3, 4) and y == 8) else 1))
+            if f == 'front' and x in (3, 4):
+                return (210, 180, 90) if y == 8 else (150, 120, 60)  # hebilla
+            return sh(belt, k * (1.0 if y == 8 else 0.75))
         c = shirt
+        edge = False
         if top and f in ('front', 'back') and (x <= 1 or x >= 6) and y <= 7:
             c = top  # chaleco abierto adelante
+            edge = f == 'front' and x in (1, 6)
         if top and f in ('right', 'left') and y <= 7:
             c = top
         if spec.get('crop') and f == 'front' and y in (6, 7):
             c = skin  # top corto
-        return sh(c, k * (0.88 if y == 0 and f == 'front' else 1))
+            return sh(c, 0.95 if y == 6 else 1)
+        shade = 1.0
+        if f == 'front':
+            shade = 1.08 - 0.03 * y + (0.06 if x in (3, 4) else 0) - (0.08 if x in (0, 7) else 0)
+        elif f == 'back':
+            shade = 0.9
+        if edge:
+            shade *= 0.72  # borde del chaleco
+        if f == 'front' and y == 7:
+            shade *= 0.85  # sombra arriba del cinturon
+        return sh(c, k * shade)
     s.fill('body', body)
     # cuello y detalles del frente
     B = lambda x, y, c: s.px('body', 'front', x, y, c)
@@ -161,6 +200,22 @@ def paint(spec):
     if female and spec.get('chest_shade', True):
         for x in (1, 2, 5, 6):
             B(x, 5, sh(shirt if not top or x in (2, 5) else top, 0.78))
+
+    if spec.get('pouch'):
+        for (x, y) in ((6, 9), (7, 9), (6, 10), (7, 10)):
+            B(x, y, sh(spec['pouch'], 1.1 if y == 9 else 0.85))
+    if spec.get('necklace'):
+        for x in (2, 3, 4, 5):
+            B(x, 1 if x in (2, 5) else 2, spec['necklace'])
+        B(3, 3, (240, 235, 220)); B(4, 3, (240, 235, 220))  # colmillo
+    if spec.get('dagger'):
+        s.px('body', 'front', 1, 9, (90, 90, 100)); s.px('body', 'front', 1, 10, (170, 170, 180)); s.px('body', 'front', 1, 11, (190, 190, 200))
+    # costados del torso un poco mas oscuros (volumen)
+    for y in range(8):
+        for f in ('right', 'left'):
+            u, v, w, h = s.parts['body'][f]
+            c = s.img.getpixel((u + (0 if f == 'right' else w - 1), v + y))
+            s.img.putpixel((u + (0 if f == 'right' else w - 1), v + y), sh(c, 0.85) + (255,))
 
     def jacket(f, x, y, w, h):
         if long_hair and f == 'back' and y <= 5 - (x % 2):
@@ -189,7 +244,12 @@ def paint(spec):
         if spec.get('bracer') and 6 <= y <= 9:
             return sh(spec['bracer'], k)
         c = top if (top and spec.get('vest_sleeves') and y <= 3) else sleeve
-        return sh(c, k * (0.9 if f == 'back' else 1))
+        if spec.get('pauldron') and y <= 2:
+            return sh(spec['pauldron'], k * (1.15 if y == 0 else 0.95 if y == 1 else 0.7))
+        shade = (0.9 if f == 'back' else 1) * (0.82 if y == 5 else 1) * (0.78 if y == 9 else 1)
+        if f in ('front',) and x == 0:
+            shade *= 0.9
+        return sh(c, k * shade)
     s.fill('rarm', arm)
     s.fill('larm', arm)
     if spec.get('fur'):
@@ -213,10 +273,15 @@ def paint(spec):
                 c = sh(boots, 0.7)
             return sh(c, k)
         if spec.get('skirt') and y <= 4:
-            return sh(spec['skirt'], k * (0.9 if y == 4 else 1))
-        return sh(pants, k * (0.9 if f in ('back',) else 1))
+            return sh(spec['skirt'], k * (0.75 if y == 4 else 1.05 if y == 0 else 1) * (0.88 if x % 2 else 1))
+        shade = (0.9 if f in ('back',) else 1) * (0.84 if y in (3, 6) and x in (1, 2) else 1)
+        return sh(pants, k * shade)
     s.fill('rleg', leg)
     s.fill('lleg', leg)
+    for part in ('rleg', 'lleg'):  # cordones de las botas
+        bt = spec.get('boot_h', 5)
+        for y in range(12 - bt + 1, 11, 2):
+            s.px(part, 'front', 1, y, sh(boots, 1.5)); s.px(part, 'front', 2, y + 1 if y + 1 < 11 else y, sh(boots, 1.5))
     if spec.get('wraps'):
         def wraps(f, x, y, w, h):
             return sh(spec['wraps'], rnd()) if (f != 'top' and f != 'bottom' and 12 - spec.get('boot_h', 5) - 3 <= y < 12 - spec.get('boot_h', 5) and (x + y) % 2 == 0) else None
@@ -230,35 +295,35 @@ SPECS = [
     # --- bandidos
     dict(name='outlaw_m_melee', female=False, slim=False, skin=SKIN_M, hair=(60, 40, 28), eye=(120, 80, 40),
          fringe=[2, 3, 3, 2, 2, 3, 3, 2], mask=(140, 28, 30), shirt=(120, 36, 36), top=(92, 62, 40), vest_sleeves=True,
-         belt=(50, 32, 20), pants=(70, 62, 52), boots=(54, 38, 26), bracer=(92, 62, 40), lace=(200, 180, 140)),
+         belt=(50, 32, 20), pants=(70, 62, 52), boots=(54, 38, 26), bracer=(92, 62, 40), lace=(200, 180, 140), pouch=(110, 76, 44), dagger=True, pauldron=(70, 50, 34), scar=True),
     dict(name='outlaw_m_archer', female=False, slim=False, skin=SKIN_L, hair=(150, 110, 60), eye=(70, 120, 60),
          fringe=[2, 2, 3, 2, 1, 2, 3, 2], hood=(64, 86, 48), shirt=(86, 110, 60), top=(110, 80, 50), vest_sleeves=True,
-         belt=(60, 40, 24), pants=(92, 80, 60), boots=(70, 48, 30), strap=(60, 40, 22), glove=(90, 60, 36), cape=(64, 86, 48)),
+         belt=(60, 40, 24), pants=(92, 80, 60), boots=(70, 48, 30), strap=(60, 40, 22), glove=(90, 60, 36), cape=(64, 86, 48), pouch=(96, 70, 40)),
     dict(name='outlaw_f_melee', female=True, slim=True, long=True, skin=SKIN_L, hair=(150, 30, 40), eye=(200, 60, 70),
          fringe=[3, 3, 2, 2, 3, 3, 2, 2], band=(30, 30, 34), shirt=(222, 214, 232), top=(60, 40, 34), crop=True, vneck=True,
-         belt=(40, 28, 20), pants=(48, 44, 50), boots=(40, 30, 26), boot_h=6, bracer=(60, 40, 34), lace=(150, 30, 40)),
+         belt=(40, 28, 20), pants=(48, 44, 50), boots=(40, 30, 26), boot_h=6, bracer=(60, 40, 34), lace=(150, 30, 40), dagger=True, pouch=(80, 50, 40)),
     dict(name='outlaw_f_archer', female=True, slim=True, long=True, skin=SKIN_M, hair=(40, 46, 60), eye=(90, 170, 120),
          fringe=[2, 3, 3, 2, 2, 3, 3, 2], hood=(70, 92, 56), shirt=(150, 170, 110), top=(96, 70, 46), vest_sleeves=True,
-         belt=(60, 40, 24), pants=(80, 70, 56), boots=(64, 44, 28), strap=(70, 46, 26), glove=(96, 66, 40), skirt=(96, 70, 46)),
+         belt=(60, 40, 24), pants=(80, 70, 56), boots=(64, 44, 28), strap=(70, 46, 26), glove=(96, 66, 40), skirt=(96, 70, 46), pouch=(110, 80, 50)),
     # --- bestias (oso, perro, gato)
     dict(name='beast_bear_m', female=False, slim=False, skin=SKIN_T, hair=(96, 62, 36), eye=(150, 100, 40),
          fringe=[2, 2, 3, 2, 2, 3, 2, 2], shirt=(128, 58, 40), top=(96, 66, 38), vest_sleeves=True, fur=(130, 96, 60),
-         belt=(70, 46, 26), pants=(96, 72, 48), boots=(70, 50, 34), wraps=(180, 160, 120), short_sleeve=True),
+         belt=(70, 46, 26), pants=(96, 72, 48), boots=(70, 50, 34), wraps=(180, 160, 120), short_sleeve=True, necklace=(90, 60, 30), pauldron=(130, 96, 60), scar=True),
     dict(name='beast_bear_f', female=True, slim=True, long=True, skin=SKIN_T, hair=(110, 70, 40), eye=(170, 110, 40),
          fringe=[3, 2, 3, 2, 3, 2, 3, 2], shirt=(92, 108, 66), top=(112, 76, 44), fur=(140, 104, 66), short_sleeve=True,
-         belt=(70, 46, 26), pants=(110, 84, 56), boots=(76, 54, 36), skirt=(120, 82, 48), wraps=(190, 170, 130)),
+         belt=(70, 46, 26), pants=(110, 84, 56), boots=(76, 54, 36), skirt=(120, 82, 48), wraps=(190, 170, 130), necklace=(90, 60, 30)),
     dict(name='beast_dog_m', female=False, slim=False, skin=SKIN_M, hair=(190, 190, 196), eye=(70, 110, 190),
          fringe=[2, 3, 2, 2, 3, 2, 3, 2], shirt=(60, 84, 130), top=(140, 140, 150), vest_sleeves=True, fur=(220, 220, 225),
-         belt=(50, 40, 34), pants=(70, 70, 80), boots=(46, 40, 40), bracer=(140, 140, 150)),
+         belt=(50, 40, 34), pants=(70, 70, 80), boots=(46, 40, 40), bracer=(140, 140, 150), pauldron=(150, 150, 160), pouch=(70, 60, 50)),
     dict(name='beast_dog_f', female=True, slim=True, long=True, skin=SKIN_L, hair=(216, 216, 222), eye=(90, 140, 210),
          fringe=[3, 3, 2, 3, 3, 2, 3, 3], shirt=(70, 96, 150), top=(160, 160, 170), fur=(235, 235, 240), crop=True,
-         belt=(50, 40, 34), pants=(80, 80, 92), boots=(50, 44, 44), boot_h=6, skirt=(70, 96, 150)),
+         belt=(50, 40, 34), pants=(80, 80, 92), boots=(50, 44, 44), boot_h=6, skirt=(70, 96, 150), necklace=(60, 60, 70)),
     dict(name='beast_cat_m', female=False, slim=False, skin=SKIN_L, hair=(220, 130, 50), eye=(90, 180, 70),
          fringe=[2, 3, 3, 2, 3, 3, 2, 2], shirt=(214, 176, 92), top=(170, 60, 40), vest_sleeves=True,
-         belt=(80, 50, 30), pants=(90, 70, 56), boots=(70, 48, 32), short_sleeve=True, wraps=(240, 220, 190)),
+         belt=(80, 50, 30), pants=(90, 70, 56), boots=(70, 48, 32), short_sleeve=True, wraps=(240, 220, 190), pouch=(120, 80, 40)),
     dict(name='beast_cat_f', female=True, slim=True, long=True, skin=SKIN_L, hair=(236, 150, 60), eye=(110, 200, 80),
          fringe=[3, 2, 3, 3, 2, 3, 2, 3], shirt=(70, 64, 80), top=(190, 70, 50), crop=True, vneck=True,
-         belt=(80, 50, 30), pants=(100, 80, 64), boots=(80, 54, 36), skirt=(190, 70, 50), short_sleeve=True),
+         belt=(80, 50, 30), pants=(100, 80, 64), boots=(80, 54, 36), skirt=(190, 70, 50), short_sleeve=True, necklace=(200, 170, 60)),
 ]
 
 
