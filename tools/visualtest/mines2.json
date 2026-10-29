@@ -1,0 +1,115 @@
+{
+ "skin": "remushoku:textures/entities/rudeus_greyrat.png",
+ "steps": [
+  {
+   "op": "setup",
+   "fov": 60
+  },
+  {
+   "op": "cmd",
+   "v": "difficulty easy"
+  },
+  {
+   "op": "cmd",
+   "v": "gamerule doMobSpawning false"
+  },
+  {
+   "op": "cam",
+   "pitch": 8,
+   "h": 0.2
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:outlaw_m_melee -4.5 120 5.0 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[180f,0f],Tags:[\"vt\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:outlaw_m_archer -2.3 120 5.0 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[180f,0f],Tags:[\"vt\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:outlaw_f_melee -0.1 120 5.0 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[180f,0f],Tags:[\"vt\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:outlaw_f_archer 2.1 120 5.0 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[180f,0f],Tags:[\"vt\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:beast_bear_m 4.3 120 5.0 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[180f,0f],Tags:[\"vt\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:beast_bear_f -4.5 120 8.0 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[180f,0f],Tags:[\"vt\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:beast_dog_m -2.3 120 8.0 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[180f,0f],Tags:[\"vt\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:beast_dog_f -0.1 120 8.0 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[180f,0f],Tags:[\"vt\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:beast_cat_m 2.1 120 8.0 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[180f,0f],Tags:[\"vt\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:beast_cat_f 4.3 120 8.0 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[180f,0f],Tags:[\"vt\"]}"
+  },
+  {
+   "op": "wait",
+   "t": 40
+  },
+  {
+   "op": "shot",
+   "v": "skins_front"
+  },
+  {
+   "op": "cmd",
+   "v": "tp @e[tag=vt] 0 300 0"
+  },
+  {
+   "op": "cmd",
+   "v": "kill @e[tag=vt]"
+  },
+  {
+   "op": "wait",
+   "t": 5
+  },
+  {
+   "op": "cam",
+   "pitch": 28,
+   "h": 3
+  },
+  {
+   "op": "cmd",
+   "v": "mushoku lanzar minefield"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "shot",
+   "v": "mines_a"
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "shot",
+   "v": "mines_b"
+  },
+  {
+   "op": "wait",
+   "t": 15
+  },
+  {
+   "op": "shot",
+   "v": "mines_c"
+  }
+ ]
+}
