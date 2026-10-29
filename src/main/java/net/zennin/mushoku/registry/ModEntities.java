@@ -113,7 +113,7 @@ public final class ModEntities {
             new Beast("treant_zombie", "treant", "treant_zombie", 1.2f, 4.0f, 1f, 70, 7, 0.22),
             new Beast("treant_stone", "treant", "treant_stone", 1.3f, 4.0f, 1f, 110, 8, 0.18),
             new Beast("red_wyrm", "red_wyrm", "red_wyrm", 9f, 8f, net.zennin.mushoku.entity.creature.WyrmEntity.SCALE, 500, 18, 0.32),
-            new Beast("manatite_hydra", "manatite_hydra", "manatite_hydra", 4.5f, 5.0f, 1.4f, 600, 16, 0.24));
+            new Beast("manatite_hydra", "manatite_hydra", "manatite_hydra", 4.0f, 6.0f, 1.4f, 600, 16, 0.24));
     public static final java.util.Map<String, EntityType<AnimatedMonster>> BEAST_TYPES = new java.util.LinkedHashMap<>();
     static {
         for (Beast b : BEASTS)

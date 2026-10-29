@@ -107,6 +107,24 @@ public final class MushokuCommands {
                             net.zennin.mushoku.magic.Spell sp = net.zennin.mushoku.magic.Spell.byId(StringArgumentType.getString(c, "hechizo"));
                             if (sp == null) { c.getSource().sendFailure(Component.literal("Hechizo desconocido")); return 0; }
                             return net.zennin.mushoku.magic.SpellEffects.cast(sp, c.getSource().getPlayerOrException()) ? 1 : 0;
-                        })))));
+                        })))
+                        // fijar el nivel de un hechizo (pruebas): /mushoku maestria nuclear_strike 20 (pide el mana maximo del nivel)
+                        .then(Commands.literal("maestria").then(Commands.argument("hechizo", StringArgumentType.word())
+                                .then(Commands.argument("nivel", IntegerArgumentType.integer(1, 20)).executes(c -> {
+                            net.zennin.mushoku.magic.Spell sp = net.zennin.mushoku.magic.Spell.byId(StringArgumentType.getString(c, "hechizo"));
+                            if (sp == null) { c.getSource().sendFailure(Component.literal("Hechizo desconocido")); return 0; }
+                            var pl = c.getSource().getPlayerOrException();
+                            int lvl = IntegerArgumentType.getInteger(c, "nivel");
+                            java.util.Map<String, Integer> m = new java.util.HashMap<>(net.zennin.mushoku.data.ModAttachments.spellXp(pl));
+                            m.put(sp.id, net.zennin.mushoku.magic.SpellMastery.usesFor(sp, lvl));
+                            net.zennin.mushoku.data.ModAttachments.setSpellXp(pl, m);
+                            int gate = net.zennin.mushoku.magic.SpellMastery.gate(sp, lvl);
+                            var md = net.zennin.mushoku.data.ModAttachments.get(pl);
+                            if (md.maxMana() < gate) net.zennin.mushoku.data.ModAttachments.set(pl, md.withMaxMana(gate));
+                            net.zennin.mushoku.network.ModNetworking.syncMana(pl);
+                            net.zennin.mushoku.magic.SpellMastery.sync(pl);
+                            c.getSource().sendSuccess(() -> Component.literal(sp.id + " -> nivel " + lvl), false);
+                            return 1;
+                        }))))));
     }
 }

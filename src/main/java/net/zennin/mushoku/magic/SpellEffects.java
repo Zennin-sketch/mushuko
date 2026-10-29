@@ -250,23 +250,44 @@ public final class SpellEffects {
     }
 
     /** Excavar: rompe un area de 3x3 en el bloque que mires (hasta 3 bloques de distancia). */
+    /**
+     * Excavar: rompe un 3x3 en la cara que miras. Cada 5 niveles cava una capa mas de profundidad (nivel 5 = 3x3x2,
+     * 10 = 3x3x3, 15 = 3x3x4, 20 = 3x3x5). Las capas se rompen una por una cada 0.25 s, con su sonido.
+     */
     private static void dig(ServerPlayer p, ServerLevel level) {
         BlockHitResult b = lookBlock(p, 3);
         if (b == null) return;
         BlockPos center = b.getBlockPos();
         Direction face = b.getDirection();
-        for (int i = -1; i <= 1; i++)
-            for (int j = -1; j <= 1; j++) {
-                BlockPos pos = switch (face.getAxis()) {
-                    case X -> center.offset(0, i, j);
-                    case Y -> center.offset(i, 0, j);
-                    case Z -> center.offset(i, j, 0);
-                };
-                BlockState st = level.getBlockState(pos);
-                float hardness = st.getDestroySpeed(level, pos);
-                if (!st.isAir() && hardness >= 0 && hardness < 50) level.destroyBlock(pos, true, p);
-            }
-        sound(level, p, SoundEvents.STONE_BREAK);
+        Direction in = face.getOpposite();
+        int depth = 1 + Math.min(4, SpellMastery.castLevel(p) / 5);
+        for (int layer = 0; layer < depth; layer++) {
+            final BlockPos c = center.relative(in, layer);
+            Tasks.later(layer * 5, () -> {
+                if (!p.isAlive()) return;
+                boolean any = false;
+                for (int i = -1; i <= 1; i++)
+                    for (int j = -1; j <= 1; j++) {
+                        BlockPos pos = switch (face.getAxis()) {
+                            case X -> c.offset(0, i, j);
+                            case Y -> c.offset(i, 0, j);
+                            case Z -> c.offset(i, j, 0);
+                        };
+                        BlockState st = level.getBlockState(pos);
+                        float hardness = st.getDestroySpeed(level, pos);
+                        if (!st.isAir() && hardness >= 0 && hardness < 50 && level.mayInteract(p, pos)) {
+                            level.destroyBlock(pos, true, p);
+                            any = true;
+                        }
+                    }
+                if (any) {
+                    Vec3 at = Vec3.atCenterOf(c);
+                    level.playSound(null, at.x, at.y, at.z, SoundEvents.STONE_BREAK, SoundSource.PLAYERS, 1f, 0.8f + level.random.nextFloat() * 0.15f);
+                    level.playSound(null, at.x, at.y, at.z, SoundEvents.ROOTED_DIRT_BREAK, SoundSource.PLAYERS, 0.8f, 0.7f);
+                    level.sendParticles(ParticleTypes.CLOUD, at.x, at.y, at.z, 6, 0.8, 0.8, 0.8, 0.01);
+                }
+            });
+        }
     }
 
     /** Crecimiento: aplica polvo de hueso a los cultivos y plantas en radio 3. */

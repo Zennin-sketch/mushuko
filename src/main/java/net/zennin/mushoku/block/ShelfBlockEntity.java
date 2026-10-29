@@ -38,6 +38,24 @@ public class ShelfBlockEntity extends BaseContainerBlockEntity {
     @Override
     public int getContainerSize() { return 9; }
 
+    /** Avisa a los clientes para que el estante muestre lo que tiene guardado. */
+    @Override
+    public void setChanged() {
+        super.setChanged();
+        if (level != null && !level.isClientSide) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider reg) { return saveWithoutMetadata(reg); }
+
+    @Override
+    public net.minecraft.network.protocol.Packet<net.minecraft.network.protocol.game.ClientGamePacketListener> getUpdatePacket() {
+        return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    /** Lo que se ve en el estante (solo lectura, para el renderer). */
+    public NonNullList<ItemStack> shown() { return items; }
+
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);

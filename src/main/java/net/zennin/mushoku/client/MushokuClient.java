@@ -133,6 +133,7 @@ public class MushokuClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.RefinePayloads.Spin.TYPE, (payload, context) -> RefineScreen.onSpin(payload));
         ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.RefinePayloads.Result.TYPE, (payload, context) -> RefineScreen.onResult(payload));
         net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(net.zennin.mushoku.registry.ModBlocks.REFINING_STONE_BE, RefiningStoneRenderer::new);
+        net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(net.zennin.mushoku.registry.ModBlocks.SHELF_BE, ShelfRenderer::new);
         ClientPlayNetworking.registerGlobalReceiver(ActionPayload.TYPE, (payload, context) -> {
             if (payload.action() == ActionPayload.OPEN_CLASS_SCREEN) context.client().setScreen(new ClassPickScreen());
             if (payload.action() == ActionPayload.ESCAPE && context.client().level != null)

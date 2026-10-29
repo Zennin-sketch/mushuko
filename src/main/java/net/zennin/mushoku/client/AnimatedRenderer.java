@@ -48,5 +48,17 @@ public class AnimatedRenderer<T extends net.minecraft.world.entity.Entity & soft
 
         @Override
         public ResourceLocation getAnimationResource(T animatable) { return anim; }
+
+        /** Ojos que se cierran (wyrm dormido o parpadeando): muestra los parpados y esconde los ojos que brillan. */
+        @Override
+        public void setCustomAnimations(T animatable, long instanceId, software.bernie.geckolib.animation.AnimationState<T> state) {
+            super.setCustomAnimations(animatable, instanceId, state);
+            if (!(animatable instanceof net.zennin.mushoku.entity.creature.WyrmEntity w)) return;
+            boolean closed = w.eyesClosed();
+            var open = getAnimationProcessor().getBone("eyes_open");
+            var shut = getAnimationProcessor().getBone("eyes_closed");
+            if (open != null) open.setHidden(closed);
+            if (shut != null) shut.setHidden(!closed);
+        }
     }
 }

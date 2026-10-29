@@ -111,6 +111,9 @@ public class WyrmEntity extends AnimatedMonster {
     public boolean isAsleep() { return entityData.get(SLEEPING); }
     public boolean isBreathing() { return entityData.get(BREATHING); }
 
+    /** Ojos cerrados: dormido, o un parpadeo corto cada tanto. */
+    public boolean eyesClosed() { return isAsleep() || (tickCount + getId() * 7) % 97 < 3; }
+
     @Override
     public boolean fireImmune() { return true; }
 

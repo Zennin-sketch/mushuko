@@ -13,6 +13,7 @@ import net.zennin.mushoku.network.ModNetworking;
 import net.zennin.mushoku.sword.SwordSystem;
 import net.zennin.mushoku.guild.GuildSystem;
 import net.zennin.mushoku.registry.ModBlocks;
+import net.zennin.mushoku.registry.ModSounds;
 import net.zennin.mushoku.world.ModWorldgen;
 import net.zennin.mushoku.registry.ModItems;
 import net.zennin.mushoku.registry.ModTabs;
@@ -29,6 +30,7 @@ public class MushokuMod implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        ModSounds.init();
         ModBlocks.init();
         ModWorldgen.init();
         ModItems.init();

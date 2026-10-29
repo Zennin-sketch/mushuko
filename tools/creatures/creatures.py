@@ -396,10 +396,18 @@ def red_wyrm():
         m.cube('head', (side * 3 - 0.8, y + 1.5, z - 2), (1.6, 1.6, 10), 'horn', rot=(-18, side * 14, 0), pivot=(side * 3, y + 2, z - 2))
         m.cube('head', (side * 4 - 0.6, y - 0.5, z - 2), (1.2, 1.2, 7), 'horn', rot=(-5, side * 32, 0), pivot=(side * 4, y, z - 2))
         m.cube('head', (side * 1.5 - 0.5, y + 2.5, z - 3), (1, 1, 6), 'horn', rot=(-30, side * 6, 0), pivot=(side * 1.5, y + 2.5, z - 3))
-        m.cube('head', (side * 4 - 0.4 + (0.2 if side > 0 else 0), y + 0.6, z - 6.5), (0.6, 1, 2), 'eye')
         for k in range(3):
             m.cube('head', (side * 2.4 - 0.3, y - 3.8, z - 13.5 + k * 2.2), (0.6, 1.1, 0.6), TEETH)
     m.cube('head', (-0.8, y + 1, z - 14.2), (1.6, 1, 1), 'spike')               # cuernito del hocico
+    # ojos abiertos (brillan) y parpados cerrados: el juego muestra unos u otros (dormido o parpadeando)
+    m.bone('eyes_open', 'head', (0, y, z))
+    m.bone('eyes_closed', 'head', (0, y, z))
+    for side in (-1, 1):
+        ex = side * 4 - 0.4 + (0.2 if side > 0 else 0)
+        m.cube('eyes_open', (ex, y + 0.6, z - 6.5), (0.6, 1, 2), 'eye')
+        m.cube('eyes_open', (ex + side * 0.05, y + 0.6, z - 4.6), (0.6, 0.4, 0.5), 'spike')   # rabillo oscuro
+        m.cube('eyes_closed', (ex - 0.05 + (0.1 if side > 0 else 0), y + 0.55, z - 6.6), (0.6, 1.1, 2.2), 'lid')
+        m.cube('eyes_closed', (ex + (0.12 if side > 0 else -0.12), y + 0.95, z - 6.7), (0.6, 0.3, 2.4), 'spike')  # linea del parpado
     m.bone('jaw', 'head', (0, y - 2.5, z - 5))
     m.cube('jaw', (-2.8, y - 4.8, z - 13.8), (5.6, 2.2, 9.5), 'plates')
     for side in (-1, 1):
@@ -583,7 +591,7 @@ def red_wyrm():
             out[w]['rotation'] = [x * (1 - 0.5 * r) for x in out[w]['rotation']]
         return out
 
-    pal = dict(scales=Striped('b02a1e', '3a0e0c', belly='e6d6be', plate='b8a68e', every=5), plates=Plates('ead9c0', 'b5a189'),
+    pal = dict(scales=Striped('b02a1e', '3a0e0c', belly='e6d6be', plate='b8a68e', every=5), plates=Plates('ead9c0', 'b5a189'), lid=Solid('8e2218', 0.05),
                spike=Solid('2a1210', 0.06), horn=Solid('3a2a24', 0.05, edge='1a100c'), eye=Solid('ffd040', 0.02, glow=True),
                membrane=Membrane('a8331f', '5a120c', edge='3a0a08', torn=0.0), membrane_tip=Membrane('9a2c1a', '520e0a', edge='2e0806', torn=0.35))
     m.save({'red_wyrm': pal}, {'idle': cycle(3.0, 12, idle), 'walk': cycle(1.4, 8, walk), 'sleep': cycle(4.0, 8, sleep),
@@ -599,48 +607,61 @@ def hydra():
     cubierto de racimos de cristal azul y una cola larga."""
     m = Model('manatite_hydra', 256)
     m.bone('root', None, (0, 0, 0))
-    m.bone('body', 'root', (0, 18, 0))
-    m.cube('body', (-15, 11, -16), (30, 17, 22), 'scales')                    # pecho (alto: de ahi salen los cuellos)
-    m.cube('body', (-13, 12, 6), (26, 14, 16), 'scales')                      # cadera
-    m.cube('body', (-12, 9.5, -14), (24, 2, 34), 'belly')
+    m.bone('body', 'root', (0, 26, 0), [-5, 0, 0])
+    # cuerpo esbelto y redondeado: pecho alto, cintura fina y cadera; cada tramo son tres cubos que le cortan las esquinas
+    def seg(z0, ln, w, h, yc, mat='scales'):
+        m.cube('body', (-w / 2 + 2, yc - h / 2, z0), (w - 4, h, ln), mat)
+        m.cube('body', (-w / 2, yc - h / 2 + 2, z0 + 0.5), (w, h - 4, ln - 1), mat)
+        m.cube('body', (-w / 2 + 1, yc - h / 2 + 1, z0 + 0.25), (w - 2, h - 2, ln - 0.5), mat)
+    seg(-17, 15, 22, 16, 31)       # pecho
+    seg(-3, 11, 17, 12, 30.5)      # cintura
+    seg(7, 13, 19, 13, 29.5)       # cadera
+    m.cube('body', (-8, 22.6, -15), (16, 1.2, 14), 'belly')
+    m.cube('body', (-6, 24.2, -3), (12, 1.2, 10), 'belly')
+    m.cube('body', (-7, 22.8, 8), (14, 1.2, 11), 'belly')
     rnd = __import__('random').Random(7)
-    # racimos de cristal azul por todo el lomo (cada racimo: uno grande y dos chicos inclinados)
-    for (x, z, h) in ((-9, -10, 11), (8, -8, 13), (0, -2, 15), (-11, 2, 9), (10, 4, 10), (-4, 10, 12), (6, 14, 9),
-                      (-8, 18, 7), (2, 20, 8), (12, -14, 7), (-13, -15, 6), (0, -13, 9)):
-        y0 = 26 if z < 6 else 24.5
-        for j, (dx, dz, hh, tilt) in enumerate(((0, 0, h, 0), (1.8, 1.2, h * 0.6, 28), (-1.6, -1, h * 0.5, -32))):
-            ang = rnd.uniform(-20, 20)
-            m.cube('body', (x + dx - 1.4 + j * 0.2, y0, z + dz - 1.4), (2.8 - j * 0.6, hh, 2.8 - j * 0.6), 'crystal',
-                   rot=(ang * 0.6 + (tilt if j else 0) * 0.5, 45, ang + tilt), pivot=(x + dx, y0 + 0.5, z + dz))
-    for n, (x, z) in {'fl': (-13, -10), 'fr': (13, -10), 'bl': (-12, 14), 'br': (12, 14)}.items():
-        m.bone('leg_' + n, 'body', (x, 15, z))
-        m.cube('leg_' + n, (x - 4.5, 2, z - 4.5), (9, 13, 9), 'scales')
-        m.cube('leg_' + n, (x - 5, 0, z - 6), (10, 2.5, 10), 'scales')
-        m.cube('leg_' + n, (x + (1 if x > 0 else -1) * 3.5 - 1, 9, z - 1), (2, 4, 2), 'crystal', rot=(0, 45, (1 if x > 0 else -1) * 30), pivot=(x, 10, z))
+    # racimos de cristal azul a lo largo del lomo (mas altos sobre el pecho, como una cresta)
+    def top(z):
+        return 38.6 if z < -3 else 36.2 if z < 7 else 35.6
+    for (x, z, h) in ((0, -12, 16), (-5, -9, 11), (5, -7, 12), (0, -4, 13), (-4, 0, 9), (4, 2, 9), (0, 5, 10),
+                      (-5, 10, 8), (5, 12, 8), (0, 15, 9), (-3, 18, 6), (3, 19, 6), (-8, -14, 7), (8, -13, 7)):
+        y0 = top(z) - 0.5
+        for j, (dx, dz, hh, tilt) in enumerate(((0, 0, h, 0), (1.6, 1.0, h * 0.55, 30), (-1.5, -0.9, h * 0.45, -34))):
+            ang = rnd.uniform(-14, 14) + (x * 2.5)
+            m.cube('body', (x + dx - 1.3 + j * 0.2, y0, z + dz - 1.3), (2.6 - j * 0.6, hh, 2.6 - j * 0.6), 'crystal',
+                   rot=(ang * 0.4 + (tilt if j else 0) * 0.5, 45, ang + tilt), pivot=(x + dx, y0 + 0.5, z + dz))
+    # patas largas: muslo, canilla fina y pie con garras (la hidra se para alta, no echada)
+    for n, (x, z, big) in {'fl': (-10, -10, 0), 'fr': (10, -10, 0), 'bl': (-10, 13, 1), 'br': (10, 13, 1)}.items():
+        sx = 1 if x > 0 else -1
+        m.bone('leg_' + n, 'body', (x, 28, z))
+        m.cube('leg_' + n, (x - 4 - big, 16, z - 4 - big), (8 + 2 * big, 13, 8 + 2 * big), 'scales')
+        m.cube('leg_' + n, (x - 2.6, 2, z - 2.6 + big), (5.2, 15, 5.2), 'scales')
+        m.cube('leg_' + n, (x - 3.6, 0, z - 5), (7.2, 2.4, 8), 'scales')
+        m.cube('leg_' + n, (x + sx * 3.8 - 1, 21, z - 1), (2, 5, 2), 'crystal', rot=(0, 45, sx * 30), pivot=(x + sx * 3.8, 22, z))
         for k in (-1, 0, 1):
-            m.cube('leg_' + n, (x + k * 3 - 0.7, 0, z - 7.5), (1.4, 1.4, 2.2), CLAW)
-    # cola larga y afinada con cristales
-    parent, z = 'body', 22
-    for i in range(7):
+            m.cube('leg_' + n, (x + k * 2.2 - 0.6, 0, z - 7), (1.2, 1.4, 2.2), CLAW)
+    # cola larga, fina y afilada con cristales
+    parent, z = 'body', 19
+    for i in range(9):
         b = 'tail%d' % i
-        th = 12 - i * 1.5
-        y = 20 - i * 1.2
-        m.bone(b, parent, (0, y, z), [5 if i == 0 else 2, 0, 0])
-        m.cube(b, (-th / 2, y - th / 2, z), (th, th, 8.5), 'scales')
-        m.cube(b, (-th / 2 + 1, y - th / 2 - 0.6, z + 0.3), (th - 2, 1, 8), 'belly')
-        if i < 5:
-            m.cube(b, (-1, y + th / 2 - 0.5, z + 3), (2, 5 - i * 0.7, 2), 'crystal', rot=(-25, 45, 0), pivot=(0, y + th / 2, z + 4))
-        parent, z = b, z + 8.5
+        th = 10 - i * 0.95
+        y = 29 - i * 1.3
+        m.bone(b, parent, (0, y, z), [6 if i == 0 else 3, 0, 0])
+        m.cube(b, (-th / 2, y - th / 2, z), (th, th, 8.2), 'scales')
+        m.cube(b, (-th / 2 + 1, y - th / 2 - 0.5, z + 0.3), (max(1, th - 2), 0.8, 7.6), 'belly')
+        if i < 7:
+            m.cube(b, (-0.9, y + th / 2 - 0.5, z + 3), (1.8, 4.5 - i * 0.5, 1.8), 'crystal', rot=(-25, 45, 0), pivot=(0, y + th / 2, z + 4))
+        parent, z = b, z + 8.2
     # nueve cuellos: cinco abajo y cuatro arriba, abiertos en abanico
-    heads = [(-12, 23, -55, 22), (-6, 23, -27, 16), (0, 23, 0, 12), (6, 23, 27, 16), (12, 23, 55, 22),
-             (-9, 26.5, -40, 42), (-3, 27.5, -13, 52), (3, 27.5, 13, 52), (9, 26.5, 40, 42)]
-    NSEG = 5
-    NBEND = [0, 2, 3, 3, 2]
+    heads = [(-8, 30, -55, 22), (-4, 30, -27, 16), (0, 30, 0, 12), (4, 30, 27, 16), (8, 30, 55, 22),
+             (-6, 34.5, -40, 42), (-2, 35.5, -13, 52), (2, 35.5, 13, 52), (6, 34.5, 40, 42)]
+    NSEG = 6
+    NBEND = [0, 2, 3, 3, 2, 1]
     for k, (x, ny, yaw, lift) in enumerate(heads):
-        parent, nz = 'body', -14 if ny < 25 else -10
+        parent, nz = 'body', -16 if ny < 33 else -13
         for i in range(NSEG):
             b = 'n%d_%d' % (k, i)
-            th = 5.6 - i * 0.45
+            th = 5.0 - i * 0.35
             rot = [-lift if i == 0 else NBEND[i], yaw if i == 0 else 0, 0]
             m.bone(b, parent, (x, ny, nz), rot)
             m.cube(b, (x - th / 2, ny - th / 2, nz - 6.6), (th, th, 7), 'scales')
@@ -679,7 +700,7 @@ def hydra():
     def idle(t):
         out = necks(t)
         out['body'] = {'position': [0, 0.4 * S(t), 0]}
-        for i in range(7):
+        for i in range(9):
             out['tail%d' % i] = {'rotation': [0, 5 * S(t, -i * 0.1), 0]}
         return out
 
@@ -688,7 +709,7 @@ def hydra():
         out['body'] = {'position': [0, 0.7 * abs(S(t)), 0], 'rotation': [0, 2 * S(t), 3 * S(t)]}
         for n, ph in (('fl', 0), ('br', 0), ('fr', 0.5), ('bl', 0.5)):
             out['leg_' + n] = {'rotation': [22 * S(t, ph), 0, 0]}
-        for i in range(7):
+        for i in range(9):
             out['tail%d' % i] = {'rotation': [0, 10 * S(t, -i * 0.12), 0]}
         return out
 

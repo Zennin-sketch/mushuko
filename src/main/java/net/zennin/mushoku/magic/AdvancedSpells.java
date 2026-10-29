@@ -180,29 +180,7 @@ public final class AdvancedSpells {
                 sound(level, p.position(), SoundEvents.FIRECHARGE_USE, 2f);
             }
             case MINEFIELD -> minefield(p, level);
-            case NUCLEAR_STRIKE -> {
-                // la explosion crece con el nivel del hechizo: 8, y +2 en los niveles 5, 10, 15 y 20
-                Vec3 c = targetPoint(p, 100);
-                int tier = SpellMastery.castLevel(p) / 5;
-                float power = 8f + 2f * tier;
-                double ringR = 6 + 1.5 * tier;
-                Tasks.repeat(0, 4, 60, t -> {
-                    level.sendParticles(ParticleTypes.END_ROD, c.x, c.y + 10 - t / 6.0, c.z, 6 + tier * 2, 0.3, 0.3, 0.3, 0.01);
-                    ring(level, c, ringR, ParticleTypes.FLAME);
-                    return true;
-                });
-                Tasks.later(60, () -> {
-                    level.explode(p, c.x, c.y, c.z, power, Level.ExplosionInteraction.MOB);
-                    level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, c.x, c.y + 1, c.z, 6 + tier * 3, 3 + tier, 2 + tier * 0.5, 3 + tier, 0);
-                    net.zennin.mushoku.entity.SpellFxEntity.spawn(level, "fire_burst", c, 0, 6f + tier * 2f, 20, null);
-                    // onda de calor que crece con el nivel
-                    for (int r = 2; r <= ringR * 2; r += 2) {
-                        final int rad = r;
-                        Tasks.later(r / 2, () -> ring(level, c, rad, ParticleTypes.FLAME));
-                    }
-                });
-                sound(level, c, SoundEvents.BEACON_ACTIVATE, 3f);
-            }
+            case NUCLEAR_STRIKE -> nuclear(p, level);
 
             // ================= TIERRA =================
             case STONE_CANNON -> shoot(p, proj(p, MagicProjectile.ROCK, 6f).size(1.6f).knockback(1f), 1.8f, 0f, SoundEvents.STONE_BREAK);
@@ -513,6 +491,82 @@ public final class AdvancedSpells {
      * por encima del punto marcado, caen en abanico y quedan armadas en el suelo: estallan cuando alguien las pisa o
      * cuando se les acaba el tiempo.
      */
+    /**
+     * Golpe Nuclear. Cada 5 niveles la explosion es mas grande (nivel 20 = 5 veces el tamano del nivel 1): el centro
+     * explota y, segun el nivel, anillos de explosiones mas afuera estallan uno detras de otro. Despues sale una onda
+     * expansiva a ras del piso que empuja todo y que tambien llega mas lejos cada 5 niveles. En el nivel 20, al
+     * terminar, queda un zumbido en los oidos.
+     */
+    private static void nuclear(ServerPlayer p, ServerLevel level) {
+        Vec3 c = targetPoint(p, 100);
+        int lvl = SpellMastery.castLevel(p);
+        int tier = Math.min(4, lvl / 5);
+        int scale = 1 + tier;                      // 1, 2, 3, 4, 5
+        double ringR = 6 * scale;
+        Tasks.repeat(0, 4, 60, t -> {
+            level.sendParticles(ParticleTypes.END_ROD, c.x, c.y + 10 * scale - t / 6.0 * scale, c.z, 6 + tier * 4, 0.3 * scale, 0.3, 0.3 * scale, 0.01);
+            ring(level, c, ringR, ParticleTypes.FLAME);
+            return true;
+        });
+        sound(level, c, SoundEvents.BEACON_ACTIVATE, 3f);
+        Tasks.later(60, () -> {
+            level.explode(p, c.x, c.y, c.z, 8f, Level.ExplosionInteraction.MOB);
+            level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, c.x, c.y + 1, c.z, 6 + tier * 6, 3 * scale, 2 * scale, 3 * scale, 0);
+            net.zennin.mushoku.entity.SpellFxEntity.spawn(level, "fire_burst", c, 0, 6f * scale, 20 + tier * 6, null);
+            // anillos de explosiones: el crater crece con el nivel sin una sola explosion gigante (que trabaria el juego)
+            for (int k = 1; k <= tier; k++) {
+                final int ring = k;
+                Tasks.later(k * 3, () -> {
+                    double r = ring * 7.5;
+                    int n = 6 * ring;
+                    for (int i = 0; i < n; i++) {
+                        double a = (i + (ring % 2) * 0.5) * Math.PI * 2 / n;
+                        double x = c.x + Math.cos(a) * r, z = c.z + Math.sin(a) * r;
+                        double y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, (int) Math.floor(x), (int) Math.floor(z));
+                        level.explode(p, x, Math.min(y, c.y + 6), z, 7f, Level.ExplosionInteraction.MOB);
+                    }
+                    level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, c.x, c.y + 1, c.z, 4 * ring, ring * 7.5, 2, ring * 7.5, 0);
+                });
+            }
+            // onda expansiva: un anillo de humo y polvo que sale a ras del piso y empuja lo que encuentra
+            double waveMax = 10 + 10 * tier;          // 10, 20, 30, 40, 50 bloques
+            int waveTicks = (int) (waveMax / 1.6);
+            java.util.Set<Integer> hit = new java.util.HashSet<>();
+            Tasks.repeat(tier * 3 + 2, 1, waveTicks, t -> {
+                double r = 3 + (waveMax - 3) * t / (double) waveTicks;
+                int pts = (int) (r * 5);
+                for (int i = 0; i < pts; i++) {
+                    double a = i * Math.PI * 2 / pts;
+                    double x = c.x + Math.cos(a) * r, z = c.z + Math.sin(a) * r;
+                    level.sendParticles(ParticleTypes.CLOUD, x, c.y + 0.3, z, 1, 0.1, 0.05, 0.1, 0.02);
+                    if (i % 3 == 0) level.sendParticles(ParticleTypes.POOF, x, c.y + 0.8, z, 1, 0.2, 0.3, 0.2, 0.02);
+                }
+                for (net.minecraft.world.entity.LivingEntity e : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
+                        new net.minecraft.world.phys.AABB(c, c).inflate(r + 2, 8, r + 2), e -> e.isAlive() && !hit.contains(e.getId()))) {
+                    double d = Math.sqrt(e.distanceToSqr(c.x, e.getY(), c.z));
+                    if (Math.abs(d - r) > 2) continue;
+                    hit.add(e.getId());
+                    Vec3 push = new Vec3(e.getX() - c.x, 0, e.getZ() - c.z).normalize().scale(1.0 + 0.35 * tier);
+                    e.push(push.x, 0.35 + 0.08 * tier, push.z);
+                    e.hurtMarked = true;
+                    if (e != p) e.hurt(level.damageSources().explosion(p, p), 2f + tier);
+                }
+                if (t % 4 == 0) sound(level, c.add((level.random.nextDouble() - 0.5) * r, 0, (level.random.nextDouble() - 0.5) * r),
+                        SoundEvents.GENERIC_EXPLODE.value(), 0.6f);
+                return true;
+            });
+            // nivel 20: zumbido en los oidos de todos los que estaban cerca, cuando termina todo
+            if (lvl >= 20)
+                Tasks.later(tier * 3 + 2 + waveTicks, () -> {
+                    for (ServerPlayer sp : level.players())
+                        if (sp.distanceToSqr(c) < (waveMax + 30) * (waveMax + 30))
+                            sp.connection.send(new net.minecraft.network.protocol.game.ClientboundSoundPacket(
+                                    net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.wrapAsHolder(net.zennin.mushoku.registry.ModSounds.NUCLEAR_RING),
+                                    net.minecraft.sounds.SoundSource.PLAYERS, sp.getX(), sp.getEyeY(), sp.getZ(), 0.55f, 1f, level.random.nextLong()));
+                });
+        });
+    }
+
     private static void minefield(ServerPlayer p, ServerLevel level) {
         Vec3 c = targetPoint(p, 40);
         int charge = 14;
