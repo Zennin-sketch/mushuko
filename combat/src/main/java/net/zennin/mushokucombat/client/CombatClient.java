@@ -27,6 +27,9 @@ public final class CombatClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        // Caminar/correr con rodillas y codos, y la armadura/ropa del mod doblandose igual
+        try { Locomotion.init(); } catch (Throwable t) { org.slf4j.LoggerFactory.getLogger("mushoku_combat").warn("Sin caminar propio: {}", t.toString()); }
+        net.zennin.mushokucombat.client.compat.LimbBender.install();
         // Golpes de Better Combat: si el Taller tiene una animacion de primera persona con ese nombre, se usa esa
         try {
             net.bettercombat.api.client.BetterCombatClientEvents.ATTACK_START.register((player, hand) -> {

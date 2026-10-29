@@ -83,21 +83,29 @@ public final class AddonSpells {
                 e.hurt(p.damageSources().freeze(), 2f);
             });
             case QUAGMIRE -> {
-                // Lodazal: el suelo bajo el que conjura se vuelve lodo en un cilindro de radio 7. En cada columna se usa
-                // el bloque de abajo de los pies; si ahi hay aire (o luz, pasto...) se baja, hasta 4 bloques.
-                BlockPos feet = p.blockPosition().below();
+                // Lodazal: un cilindro de lodo de radio 7 ADELANTE del que conjura (el queda en el borde, afuera). En cada
+                // columna se busca el suelo desde la altura de los pies hasta 4 bloques abajo (aire, luz o pasto se saltean).
+                Vec3 fwd = new Vec3(p.getLookAngle().x, 0, p.getLookAngle().z);
+                if (fwd.lengthSqr() < 1e-4) fwd = Vec3.directionFromRotation(0, p.getYRot());
+                fwd = fwd.normalize();
+                BlockPos feet = p.blockPosition();
+                double cx = p.getX() + fwd.x * 8, cz = p.getZ() + fwd.z * 8;
                 int made = 0;
-                for (int dx = -7; dx <= 7; dx++) for (int dz = -7; dz <= 7; dz++) {
-                    if (dx * dx + dz * dz > 49) continue;
-                    for (int dy = 0; dy < 4; dy++) {
-                        BlockPos bp = feet.offset(dx, -dy, dz);
+                for (int dx = -8; dx <= 8; dx++) for (int dz = -8; dz <= 8; dz++) {
+                    int bx = (int) Math.floor(cx) + dx, bz = (int) Math.floor(cz) + dz;
+                    double ox = bx + 0.5 - cx, oz = bz + 0.5 - cz;
+                    if (ox * ox + oz * oz > 49) continue;
+                    if (bx == feet.getX() && bz == feet.getZ()) continue; // nunca bajo los pies del que conjura
+                    for (int dy = 0; dy <= 4; dy++) {
+                        BlockPos bp = new BlockPos(bx, feet.getY() - dy, bz);
                         var st = level.getBlockState(bp);
                         if (st.getCollisionShape(level, bp).isEmpty() && st.getFluidState().isEmpty()) continue; // aire, luz, pasto: mas abajo
+                        if (dy == 0 && !level.getBlockState(bp.above()).getCollisionShape(level, bp.above()).isEmpty()) break; // pared: no se cubre
                         if (st.getFluidState().isEmpty() && TempBlocks.replace(level, bp, net.zennin.mushoku.registry.ModBlocks.QUAGMIRE_MUD.defaultBlockState(), 400)) made++;
                         break;
                     }
                 }
-                fx(level, p.position(), ParticleTypes.FALLING_DRIPSTONE_WATER, 60, 4);
+                fx(level, new Vec3(cx, p.getY(), cz), ParticleTypes.FALLING_DRIPSTONE_WATER, 60, 4);
                 sound(p, SoundEvents.MUD_BRICKS_BREAK, 0.6f);
                 if (made == 0) return false;
             }

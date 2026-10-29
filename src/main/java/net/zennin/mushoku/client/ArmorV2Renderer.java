@@ -146,6 +146,11 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
     private final Matrix4f[] toLeg = {new Matrix4f(), new Matrix4f()}, fromLeg = {new Matrix4f(), new Matrix4f()};
     /** Medio ancho de la pierna con la media/pantalon puesto, mas el grosor de la tela. */
     private static final float LEG_HALF = 2.85f;
+    /** Rodillas (Player Animator): giro rigido de la mitad de arriba y de abajo de cada pierna, en el marco de la pierna. */
+    private final Matrix4f[] kneeTop = {new Matrix4f(), new Matrix4f()}, kneeBot = {new Matrix4f(), new Matrix4f()};
+    private final Matrix4f[] kneeTopInv = {new Matrix4f(), new Matrix4f()}, kneeBotInv = {new Matrix4f(), new Matrix4f()};
+    private final boolean[] knee = new boolean[2];
+    private static final String[] LEGS = {"rightLeg", "leftLeg"};
     private final java.util.Map<Integer, float[]> springs = new java.util.HashMap<>();
     private String curBone;
 
@@ -185,6 +190,10 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
         for (int i = 0; i < 2; i++) {
             toLeg[i].set(partMatrix(legs[i])).invert().mul(body).mul(F);
             fromLeg[i].set(toLeg[i]).invert();
+            boolean b1 = kneeFit(LEGS[i], 1.5f, kneeTop[i]), b2 = kneeFit(LEGS[i], 10.5f, kneeBot[i]);
+            knee[i] = b1 || b2;
+            kneeTopInv[i].set(kneeTop[i]).invert();
+            kneeBotInv[i].set(kneeBot[i]).invert();
         }
         // copia atrasada (resorte) de las piernas para el ruedo
         float rx = base.rightLeg.xRot - base.body.xRot, lx = base.leftLeg.xRot - base.body.xRot;
@@ -222,6 +231,13 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
     @Override
     public void renderCube(com.mojang.blaze3d.vertex.PoseStack poseStack, software.bernie.geckolib.cache.object.GeoCube cube,
                            com.mojang.blaze3d.vertex.VertexConsumer buffer, int packedLight, int packedOverlay, int colour) {
+        if (curBone != null && !curBone.startsWith("ring_")) {
+            String limb = limbOf(curBone);
+            if (limb != null && currentEntity != null && net.zennin.mushoku.client.LimbBend.BENDER != null) {
+                renderLimbCube(poseStack, cube, buffer, packedLight, packedOverlay, colour, limb);
+                return;
+            }
+        }
         if (curBone == null || !curBone.startsWith("ring_")) {
             super.renderCube(poseStack, cube, buffer, packedLight, packedOverlay, colour);
             return;
@@ -249,6 +265,11 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
                 org.joml.Vector3f out = new org.joml.Vector3f(p).add(disp(p, skinR, skinL, w, a, b));
                 // ruedo: parte del movimiento viene de las piernas atrasadas
                 // (sin balanceo atrasado del ruedo: hacia que la tela fuera mas lenta que los pies y se atravesaran)
+                // rodillas: la tela de abajo sigue a la canilla
+                if (knee[0] || knee[1]) {
+                    float dr = Math.abs(p.x - 1.9f), dl = Math.abs(p.x + 1.9f);
+                    kneeSkin(out, w, Math.max(0, Math.min(1, 0.5f + (dl - dr) / 6.5f)), a);
+                }
                 // choque: si la tela quedo adentro de una pierna, sale por la cara mas cercana (adelante/atras o costado)
                 collide(out, a);
                 out.div(16f);
@@ -280,18 +301,107 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
         return d.mul(w);
     }
 
+    /** Giro rigido que le hace la rodilla a la altura y de la pierna (probando tres puntos con el doblez real). */
+    private boolean kneeFit(String part, float y, Matrix4f out) {
+        out.identity();
+        if (currentEntity == null) return false;
+        org.joml.Vector3f p0 = new org.joml.Vector3f(0, y, 0), px = new org.joml.Vector3f(1, y, 0), pz = new org.joml.Vector3f(0, y, 1);
+        if (!net.zennin.mushoku.client.LimbBend.bend(currentEntity, part, p0)) return false;
+        net.zennin.mushoku.client.LimbBend.bend(currentEntity, part, px);
+        net.zennin.mushoku.client.LimbBend.bend(currentEntity, part, pz);
+        org.joml.Vector3f cx = new org.joml.Vector3f(px).sub(p0).normalize(), cz = new org.joml.Vector3f(pz).sub(p0);
+        cz.sub(new org.joml.Vector3f(cx).mul(cz.dot(cx))).normalize();
+        org.joml.Vector3f cy = new org.joml.Vector3f(cz).cross(cx).normalize();
+        Matrix4f r = new Matrix4f(cx.x, cx.y, cx.z, 0, cy.x, cy.y, cy.z, 0, cz.x, cz.y, cz.z, 0, 0, 0, 0, 1);
+        org.joml.Vector3f t = new org.joml.Vector3f(p0).sub(r.transformPosition(new org.joml.Vector3f(0, y, 0)));
+        out.translation(t).mul(r);
+        return true;
+    }
+
+    /** La ropa de esa pierna tambien se dobla en la rodilla (arriba como el muslo, abajo como la canilla). */
+    private void kneeSkin(org.joml.Vector3f out, float w, float sR, org.joml.Vector3f q) {
+        for (int i = 0; i < 2; i++) {
+            if (!knee[i]) continue;
+            float wi = w * (i == 0 ? sR : 1 - sR);
+            if (wi < 1e-3f) continue;
+            toLeg[i].transformPosition(q.set(out));
+            float low = smoothstep((q.y - 4f) / 5f);
+            org.joml.Vector3f a = kneeTop[i].transformPosition(new org.joml.Vector3f(q)), b = kneeBot[i].transformPosition(new org.joml.Vector3f(q));
+            a.lerp(b, low);
+            fromLeg[i].transformPosition(a);
+            out.lerp(a, wi);
+        }
+    }
+
+    /** Piezas de la armadura de brazos y piernas: se doblan en codos y rodillas igual que la piel. */
+    private static String limbOf(String bone) {
+        return switch (bone) {
+            case "armorRightLeg", "armorRightBoot" -> "rightLeg";
+            case "armorLeftLeg", "armorLeftBoot" -> "leftLeg";
+            case "armorRightArm" -> "rightArm";
+            case "armorLeftArm" -> "leftArm";
+            default -> null;
+        };
+    }
+
+    private static final java.util.Map<String, float[]> REST = java.util.Map.of(
+            "rightLeg", new float[]{-1.9f, 12, 0}, "leftLeg", new float[]{1.9f, 12, 0},
+            "rightArm", new float[]{-5, 2, 0}, "leftArm", new float[]{5, 2, 0});
+
+    private void renderLimbCube(com.mojang.blaze3d.vertex.PoseStack poseStack, software.bernie.geckolib.cache.object.GeoCube cube,
+                                com.mojang.blaze3d.vertex.VertexConsumer buffer, int packedLight, int packedOverlay, int colour, String limb) {
+        Matrix4f bonePose = new Matrix4f(poseStack.last().pose());
+        software.bernie.geckolib.util.RenderUtil.translateToPivotPoint(poseStack, cube);
+        software.bernie.geckolib.util.RenderUtil.rotateMatrixAroundCube(poseStack, cube);
+        software.bernie.geckolib.util.RenderUtil.translateAwayFromPivotPoint(poseStack, cube);
+        Matrix4f cubeRot = new Matrix4f(bonePose).invert().mul(poseStack.last().pose());
+        org.joml.Matrix3f nrm = poseStack.last().normal();
+        float[] rest = REST.get(limb);
+        org.joml.Vector3f p = new org.joml.Vector3f(), q = new org.joml.Vector3f();
+        for (software.bernie.geckolib.cache.object.GeoQuad quad : cube.quads()) {
+            if (quad == null) continue;
+            org.joml.Vector3f normal = nrm.transform(new org.joml.Vector3f(quad.normal()));
+            for (software.bernie.geckolib.cache.object.GeoVertex v : quad.vertices()) {
+                p.set(v.position());
+                cubeRot.transformPosition(p);
+                p.mul(16f);
+                // al marco de la pieza vanilla (px, y hacia abajo), se dobla y se vuelve
+                q.set(-p.x - rest[0], 24f - p.y - rest[1], p.z - rest[2]);
+                if (net.zennin.mushoku.client.LimbBend.bend(currentEntity, limb, q))
+                    p.set(-(q.x + rest[0]), 24f - (q.y + rest[1]), q.z + rest[2]);
+                p.div(16f);
+                org.joml.Vector4f w4 = bonePose.transform(new org.joml.Vector4f(p, 1f));
+                buffer.addVertex(w4.x(), w4.y(), w4.z(), colour, v.texU(), v.texV(), packedOverlay, packedLight, normal.x(), normal.y(), normal.z());
+            }
+        }
+    }
+
     private void collide(org.joml.Vector3f p, org.joml.Vector3f q) {
         for (int i = 0; i < 2; i++) {
             toLeg[i].transformPosition(q.set(p));
-            if (q.y < -0.5f || q.y > 13f) continue;            // arriba de la cadera o abajo del pie
-            float ax = Math.abs(q.x), az = Math.abs(q.z);
-            if (ax >= LEG_HALF || az >= LEG_HALF) continue;
-            // adelante/atras se prefiere (asi la tela del medio no se va hacia la otra pierna)
-            if (LEG_HALF - az <= (LEG_HALF - ax) * 1.6f) q.z = q.z > 0 ? LEG_HALF : -LEG_HALF;
-            else q.x = q.x > 0 ? LEG_HALF : -LEG_HALF;
+            if (!knee[i]) {
+                if (pushOut(q, -0.5f, 13f)) { fromLeg[i].transformPosition(q); p.set(q); }
+                continue;
+            }
+            // pierna doblada: el muslo y la canilla son dos cajas, cada una con su giro
+            org.joml.Vector3f u = kneeTopInv[i].transformPosition(new org.joml.Vector3f(q));
+            if (pushOut(u, -0.5f, 6.5f)) { kneeTop[i].transformPosition(u); q.set(u); }
+            u = kneeBotInv[i].transformPosition(new org.joml.Vector3f(q));
+            if (pushOut(u, 5.5f, 13f)) { kneeBot[i].transformPosition(u); q.set(u); }
             fromLeg[i].transformPosition(q);
             p.set(q);
         }
+    }
+
+    /** Si el punto (marco de la pierna) esta dentro de la caja entre y0 e y1, sale por la cara mas cercana. */
+    private static boolean pushOut(org.joml.Vector3f q, float y0, float y1) {
+        if (q.y < y0 || q.y > y1) return false;
+        float ax = Math.abs(q.x), az = Math.abs(q.z);
+        if (ax >= LEG_HALF || az >= LEG_HALF) return false;
+        // adelante/atras se prefiere (asi la tela del medio no se va hacia la otra pierna)
+        if (LEG_HALF - az <= (LEG_HALF - ax) * 1.6f) q.z = q.z > 0 ? LEG_HALF : -LEG_HALF;
+        else q.x = q.x > 0 ? LEG_HALF : -LEG_HALF;
+        return true;
     }
 
     private static String f(float v) { return String.format(java.util.Locale.ROOT, "%.2f", v); }
