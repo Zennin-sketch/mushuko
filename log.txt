@@ -1,0 +1,180 @@
+	- skinlayers3d 1.11.4
+[03:12:45] [main/WARN]: Error loading class: net/raphimc/immediatelyfast/feature/core/BatchableBufferSource (java.lang.ClassNotFoundException: net/raphimc/immediatelyfast/feature/core/BatchableBufferSource)
+[03:12:45] [main/WARN]: Error loading class: net/irisshaders/batchedentityrendering/impl/FullyBufferedMultiBufferSource (java.lang.ClassNotFoundException: net/irisshaders/batchedentityrendering/impl/FullyBufferedMultiBufferSource)
+[03:12:45] [main/WARN]: Error loading class: net/irisshaders/iris/layer/InnerWrappedRenderType (java.lang.ClassNotFoundException: net/irisshaders/iris/layer/InnerWrappedRenderType)
+[03:12:45] [main/WARN]: Error loading class: net/irisshaders/iris/layer/OuterWrappedRenderType (java.lang.ClassNotFoundException: net/irisshaders/iris/layer/OuterWrappedRenderType)
+[03:12:54] [Render thread/ERROR]: No data fixer registered for magic_projectile
+[03:12:54] [Render thread/ERROR]: No data fixer registered for sg_bandit
+[03:12:54] [Render thread/ERROR]: No data fixer registered for wg_bandit
+[03:12:54] [Render thread/ERROR]: No data fixer registered for ng_bandit
+[03:12:54] [Render thread/ERROR]: No data fixer registered for m_bandit
+[03:12:54] [Render thread/ERROR]: No data fixer registered for kalman_3
+[03:12:54] [Render thread/ERROR]: No data fixer registered for guild_receptionist
+[03:12:54] [Render thread/ERROR]: No data fixer registered for black_smith_keep
+[03:12:54] [Render thread/ERROR]: No data fixer registered for general_store_keep
+[03:12:54] [Render thread/ERROR]: No data fixer registered for magic_shop_keeper
+[03:12:54] [Render thread/ERROR]: No data fixer registered for ent_assault_dog
+[03:12:54] [Render thread/ERROR]: No data fixer registered for ent_mucky_rat
+[03:12:54] [Render thread/ERROR]: No data fixer registered for deadly_wraith
+[03:12:54] [Render thread/ERROR]: No data fixer registered for snow_drake
+[03:12:54] [Render thread/ERROR]: No data fixer registered for giant_turtle
+[03:12:54] [Render thread/ERROR]: No data fixer registered for snow_drake_mom
+[03:12:54] [Render thread/ERROR]: No data fixer registered for thrown_item
+[03:12:54] [Render thread/ERROR]: No data fixer registered for ent_swap_totem
+[03:12:54] [Render thread/ERROR]: No data fixer registered for eris_greyrat
+[03:12:54] [Render thread/ERROR]: No data fixer registered for sylphiette_greyrat
+[03:12:54] [Render thread/ERROR]: No data fixer registered for sylphiette_joven
+[03:12:54] [Render thread/ERROR]: No data fixer registered for roxy_migurdia
+[03:12:54] [Render thread/ERROR]: No data fixer registered for rudeus_greyrat
+[03:12:54] [Render thread/ERROR]: No data fixer registered for ghislaine
+[03:12:54] [Render thread/ERROR]: No data fixer registered for ruijerd
+[03:12:54] [Render thread/ERROR]: No data fixer registered for kishirika
+[03:12:54] [Render thread/ERROR]: No data fixer registered for hitogami
+[03:12:54] [Render thread/ERROR]: No data fixer registered for villager_guard_entity
+[03:12:54] [Render thread/ERROR]: No data fixer registered for spirit_body
+[03:12:54] [Render thread/INFO]: Compatibilidad con 3D Skin Layers activada (la capa 3D se dobla con las animaciones)
+[03:12:57] [Render thread/ERROR]: Error while loading the narrator
+com.mojang.text2speech.Narrator$InitializeException: Failed to load library flite
+Caused by: java.lang.UnsatisfiedLinkError: Unable to load library 'flite':
+	Suppressed: java.io.IOException: Native library (linux-x86-64/libflite.so) not found in resource path (/home/runner/work/mushuko/mushuko/mc/libraries/org/ow2/asm/asm/9.6/asm-9.6.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/ow2/asm/asm-analysis/9.6/asm-analysis-9.6.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/ow2/asm/asm-commons/9.6/asm-commons-9.6.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/ow2/asm/asm-tree/9.6/asm-tree-9.6.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/ow2/asm/asm-util/9.6/asm-util-9.6.jar:/home/runner/work/mushuko/mushuko/mc/libraries/net/fabricmc/sponge-mixin/0.15.3+mixin.0.8.7/sponge-mixin-0.15.3+mixin.0.8.7.jar:/home/runner/work/mushuko/mushuko/mc/libraries/net/fabricmc/intermediary/1.21.1/intermediary-1.21.1.jar:/home/runner/work/mushuko/mushuko/mc/libraries/net/fabricmc/fabric-loader/0.16.5/fabric-loader-0.16.5.jar:/home/runner/work/mushuko/mushuko/mc/libraries/com/github/oshi/oshi-core/6.4.10/oshi-core-6.4.10.jar:/home/runner/work/mushuko/mushuko/mc/libraries/com/google/code/gson/gson/2.10.1/gson-2.10.1.jar:/home/runner/work/mushuko/mushuko/mc/libraries/com/google/guava/failureaccess/1.0.1/failureaccess-1.0.1.jar:/home/runner/work/mushuko/mushuko/mc/libraries/com/google/guava/guava/32.1.2-jre/guava-32.1.2-jre.jar:/home/runner/work/mushuko/mushuko/mc/libraries/com/ibm/icu/icu4j/73.2/icu4j-73.2.jar:/home/runner/work/mushuko/mushuko/mc/libraries/com/mojang/authlib/6.0.54/authlib-6.0.54.jar:/home/runner/work/mushuko/mushuko/mc/libraries/com/mojang/blocklist/1.0.10/blocklist-1.0.10.jar:/home/runner/work/mushuko/mushuko/mc/libraries/com/mojang/brigadier/1.3.10/brigadier-1.3.10.jar:/home/runner/work/mushuko/mushuko/mc/libraries/com/mojang/datafixerupper/8.0.16/datafixerupper-8.0.16.jar:/home/runner/work/mushuko/mushuko/mc/libraries/com/mojang/logging/1.2.7/logging-1.2.7.jar:/home/runner/work/mushuko/mushuko/mc/libraries/com/mojang/patchy/2.2.10/patchy-2.2.10.jar:/home/runner/work/mushuko/mushuko/mc/libraries/com/mojang/text2speech/1.17.9/text2speech-1.17.9.jar:/home/runner/work/mushuko/mushuko/mc/libraries/commons-codec/commons-codec/1.16.0/commons-codec-1.16.0.jar:/home/runner/work/mushuko/mushuko/mc/libraries/commons-io/commons-io/2.15.1/commons-io-2.15.1.jar:/home/runner/work/mushuko/mushuko/mc/libraries/commons-logging/commons-logging/1.2/commons-logging-1.2.jar:/home/runner/work/mushuko/mushuko/mc/libraries/io/netty/netty-buffer/4.1.97.Final/netty-buffer-4.1.97.Final.jar:/home/runner/work/mushuko/mushuko/mc/libraries/io/netty/netty-codec/4.1.97.Final/netty-codec-4.1.97.Final.jar:/home/runner/work/mushuko/mushuko/mc/libraries/io/netty/netty-common/4.1.97.Final/netty-common-4.1.97.Final.jar:/home/runner/work/mushuko/mushuko/mc/libraries/io/netty/netty-handler/4.1.97.Final/netty-handler-4.1.97.Final.jar:/home/runner/work/mushuko/mushuko/mc/libraries/io/netty/netty-resolver/4.1.97.Final/netty-resolver-4.1.97.Final.jar:/home/runner/work/mushuko/mushuko/mc/libraries/io/netty/netty-transport-classes-epoll/4.1.97.Final/netty-transport-classes-epoll-4.1.97.Final.jar:/home/runner/work/mushuko/mushuko/mc/libraries/io/netty/netty-transport-native-epoll/4.1.97.Final/netty-transport-native-epoll-4.1.97.Final-linux-aarch_64.jar:/home/runner/work/mushuko/mushuko/mc/libraries/io/netty/netty-transport-native-epoll/4.1.97.Final/netty-transport-native-epoll-4.1.97.Final-linux-x86_64.jar:/home/runner/work/mushuko/mushuko/mc/libraries/io/netty/netty-transport-native-unix-common/4.1.97.Final/netty-transport-native-unix-common-4.1.97.Final.jar:/home/runner/work/mushuko/mushuko/mc/libraries/io/netty/netty-transport/4.1.97.Final/netty-transport-4.1.97.Final.jar:/home/runner/work/mushuko/mushuko/mc/libraries/it/unimi/dsi/fastutil/8.5.12/fastutil-8.5.12.jar:/home/runner/work/mushuko/mushuko/mc/libraries/net/java/dev/jna/jna-platform/5.14.0/jna-platform-5.14.0.jar:/home/runner/work/mushuko/mushuko/mc/libraries/net/java/dev/jna/jna/5.14.0/jna-5.14.0.jar:/home/runner/work/mushuko/mushuko/mc/libraries/net/sf/jopt-simple/jopt-simple/5.0.4/jopt-simple-5.0.4.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/apache/commons/commons-compress/1.26.0/commons-compress-1.26.0.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/apache/httpcomponents/httpclient/4.5.13/httpclient-4.5.13.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/apache/logging/log4j/log4j-api/2.22.1/log4j-api-2.22.1.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/apache/logging/log4j/log4j-core/2.22.1/log4j-core-2.22.1.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/apache/logging/log4j/log4j-slf4j2-impl/2.22.1/log4j-slf4j2-impl-2.22.1.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/jcraft/jorbis/0.0.17/jorbis-0.0.17.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/joml/joml/1.10.5/joml-1.10.5.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/lwjgl/lwjgl-freetype/3.3.3/lwjgl-freetype-3.3.3.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/lwjgl/lwjgl-freetype/3.3.3/lwjgl-freetype-3.3.3-natives-linux.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/lwjgl/lwjgl-glfw/3.3.3/lwjgl-glfw-3.3.3.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/lwjgl/lwjgl-glfw/3.3.3/lwjgl-glfw-3.3.3-natives-linux.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/lwjgl/lwjgl-jemalloc/3.3.3/lwjgl-jemalloc-3.3.3.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/lwjgl/lwjgl-jemalloc/3.3.3/lwjgl-jemalloc-3.3.3-natives-linux.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/lwjgl/lwjgl-openal/3.3.3/lwjgl-openal-3.3.3.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/lwjgl/lwjgl-openal/3.3.3/lwjgl-openal-3.3.3-natives-linux.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/lwjgl/lwjgl-opengl/3.3.3/lwjgl-opengl-3.3.3.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/lwjgl/lwjgl-opengl/3.3.3/lwjgl-opengl-3.3.3-natives-linux.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/lwjgl/lwjgl-stb/3.3.3/lwjgl-stb-3.3.3.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/lwjgl/lwjgl-stb/3.3.3/lwjgl-stb-3.3.3-natives-linux.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/lwjgl/lwjgl-tinyfd/3.3.3/lwjgl-tinyfd-3.3.3.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/lwjgl/lwjgl-tinyfd/3.3.3/lwjgl-tinyfd-3.3.3-natives-linux.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/lwjgl/lwjgl/3.3.3/lwjgl-3.3.3.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/lwjgl/lwjgl/3.3.3/lwjgl-3.3.3-natives-linux.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/lz4/lz4-java/1.8.0/lz4-java-1.8.0.jar:/home/runner/work/mushuko/mushuko/mc/libraries/org/slf4j/slf4j-api/2.0.9/slf4j-api-2.0.9.jar:/home/runner/work/mushuko/mushuko/mc/versions/fabric-1.21.1-0.16.5/fabric-1.21.1-0.16.5.jar)
+[03:12:57] [Render thread/INFO]: Reloading ResourceManager: vanilla, fabric, bettercombat, cloth-config, entity_model_features, entity_texture_features, fabric-api, fabric-api-base, fabric-api-lookup-api-v1, fabric-biome-api-v1, fabric-block-api-v1, fabric-block-view-api-v2, fabric-blockrenderlayer-v1, fabric-client-tags-api-v1, fabric-command-api-v1, fabric-command-api-v2, fabric-commands-v0, fabric-content-registries-v0, fabric-convention-tags-v1, fabric-convention-tags-v2, fabric-crash-report-info-v1, fabric-data-attachment-api-v1, fabric-data-generation-api-v1, fabric-dimensions-v1, fabric-entity-events-v1, fabric-events-interaction-v0, fabric-game-rule-api-v1, fabric-item-api-v1, fabric-item-group-api-v1, fabric-key-binding-api-v1, fabric-keybindings-v0, fabric-lifecycle-events-v1, fabric-loot-api-v2, fabric-loot-api-v3, fabric-message-api-v1, fabric-model-loading-api-v1, fabric-networking-api-v1, fabric-object-builder-api-v1, fabric-particles-v1, fabric-recipe-api-v1, fabric-registry-sync-v0, fabric-renderer-api-v1, fabric-renderer-indigo, fabric-renderer-registries-v1, fabric-rendering-data-attachment-v1, fabric-rendering-fluids-v1, fabric-rendering-v0, fabric-rendering-v1, fabric-resource-conditions-api-v1, fabric-resource-loader-v0, fabric-screen-api-v1, fabric-screen-handler-api-v1, fabric-sound-api-v1, fabric-tag-api-v1, fabric-transfer-api-v1, fabric-transitive-access-wideners-v1, fabricloader, mushoku_combat, playeranimator, remushoku, skinlayers3d, trender, file/FreshAnimations_v1.11.1_1.20+.zip, file/FreshMovesSoloOjos.zip
+[03:12:58] [Worker-Main-2/ERROR]: Failed to load model remushoku:models/custom/2aquaher.json
+[03:12:58] [Worker-Main-2/ERROR]: Failed to load model remushoku:models/custom/aquaheartiabetter.json
+[03:12:58] [Worker-Main-2/ERROR]: Failed to load model remushoku:models/custom/aquaheartiamodel.json
+[03:12:58] [Worker-Main-2/ERROR]: Failed to load model remushoku:models/custom/aquaheartiawiwarlikeboys.json
+[03:12:59] [Worker-Main-2/WARN]: Unable to load model: 'minecraft:mossykey' referenced from: remushoku:item/ice_key: java.io.FileNotFoundException: minecraft:models/mossykey.json
+[03:12:59] [Worker-Main-2/WARN]: Unable to load model: 'minecraft:wand' referenced from: remushoku:item/wand: java.io.FileNotFoundException: minecraft:models/wand.json
+[03:13:00] [Render thread/ERROR]: Error starting SoundSystem. Turning off sounds & music
+java.lang.IllegalStateException: Failed to open OpenAL device
+[03:13:04] [Render thread/INFO]: Animaciones de primera persona: 5
+[03:13:04] [Render thread/INFO]: [visualtest] creando mundo
+[03:13:05] [Worker-Main-2/ERROR]: Couldn't load tag remushoku:utilityent as it is missing following references: remushoku:absolute_zero_ent (from remushoku), remushoku:clairvoyant_ent (from remushoku), remushoku:dust_storm_ent (from remushoku), remushoku:earth_drill_ent (from remushoku), remushoku:ent_eye_absolute_void (from remushoku), remushoku:minefield_ent (from remushoku), remushoku:mountian_ent (from remushoku), remushoku:sand_cloud_ent (from remushoku), remushoku:sand_storm_ent (from remushoku), remushoku:spice_bag_ent (from remushoku), remushoku:violent_storm_ent (from remushoku)
+[03:13:05] [Worker-Main-1/ERROR]: Couldn't load tag remushoku:chalk as it is missing following references: remushoku:chalk_north (from remushoku), remushoku:chalk_south (from remushoku), remushoku:chalk_east (from remushoku), remushoku:chalk_west (from remushoku), remushoku:chalk_center (from remushoku), remushoku:chalk_north_loop (from remushoku), remushoku:chalk_south_loop (from remushoku), remushoku:chalk_east_loop (from remushoku), remushoku:chalk_west_loop (from remushoku)
+[03:13:05] [Worker-Main-1/ERROR]: Couldn't load tag remushoku:chalk_loop as it is missing following references: remushoku:chalk_north_loop (from remushoku), remushoku:chalk_south_loop (from remushoku), remushoku:chalk_east_loop (from remushoku), remushoku:chalk_west_loop (from remushoku)
+[03:13:25] [Render thread/INFO]: [visualtest] paso 1: {"op":"setup","fov":50}
+[03:13:26] [Render thread/INFO]: [visualtest] paso 2: {"op":"cam","pitch":4,"h":0}
+[03:13:26] [Render thread/INFO]: [visualtest] paso 3: {"op":"dummy","yaw":90,"dist":3.6}
+[03:13:26] [Render thread/INFO]: [visualtest] paso 4: {"op":"equip","slot":"chest","v":""}
+[03:13:26] [Render thread/INFO]: [visualtest] paso 5: {"op":"equip","slot":"legs","v":""}
+[03:13:26] [Render thread/INFO]: [visualtest] paso 6: {"op":"equip","slot":"feet","v":""}
+[03:13:26] [Render thread/INFO]: [visualtest] paso 7: {"op":"dummy","yaw":90,"dist":3.6}
+[03:13:27] [Render thread/INFO]: [visualtest] paso 8: {"op":"walk","t":60,"speed":1.0,"sprint":true}
+[03:13:27] [Render thread/INFO]: [visualtest] paso 9: {"op":"wait","t":9}
+[03:13:27] [Render thread/INFO]: [visualtest] paso 10: {"op":"shot","v":"skin_run_side_a"}
+[03:13:27] [Render thread/INFO]: [visualtest] paso 11: {"op":"wait","t":4}
+[03:13:27] [IO-Worker-4/INFO]: [visualtest] captura skin_run_side_a
+[03:13:27] [Render thread/INFO]: [visualtest] paso 12: {"op":"shot","v":"skin_run_side_b"}
+[03:13:28] [Render thread/INFO]: [visualtest] paso 13: {"op":"wait","t":30}
+[03:13:28] [IO-Worker-4/INFO]: [visualtest] captura skin_run_side_b
+[03:13:29] [Render thread/INFO]: [visualtest] paso 14: {"op":"dummy","yaw":180,"dist":3.6}
+[03:13:29] [Render thread/INFO]: [visualtest] paso 15: {"op":"walk","t":60,"speed":1.0,"sprint":true}
+[03:13:29] [Render thread/INFO]: [visualtest] paso 16: {"op":"wait","t":9}
+[03:13:30] [Render thread/INFO]: [visualtest] paso 17: {"op":"shot","v":"skin_run_front_a"}
+[03:13:30] [Render thread/INFO]: [visualtest] paso 18: {"op":"wait","t":4}
+[03:13:30] [IO-Worker-5/INFO]: [visualtest] captura skin_run_front_a
+[03:13:30] [Render thread/INFO]: [visualtest] paso 19: {"op":"shot","v":"skin_run_front_b"}
+[03:13:30] [Render thread/INFO]: [visualtest] paso 20: {"op":"wait","t":30}
+[03:13:30] [IO-Worker-4/INFO]: [visualtest] captura skin_run_front_b
+[03:13:32] [Render thread/INFO]: [visualtest] paso 21: {"op":"dummy","yaw":-30,"dist":3.6}
+[03:13:32] [Render thread/INFO]: [visualtest] paso 22: {"op":"fall","t":40}
+[03:13:32] [Render thread/INFO]: [visualtest] paso 23: {"op":"wait","t":20}
+[03:13:33] [Render thread/INFO]: [visualtest] paso 24: {"op":"shot","v":"skin_run_fall"}
+[03:13:33] [Render thread/INFO]: [visualtest] paso 25: {"op":"wait","t":30}
+[03:13:33] [IO-Worker-7/INFO]: [visualtest] captura skin_run_fall
+[03:13:34] [Render thread/INFO]: [visualtest] paso 26: {"op":"dummy","yaw":90,"dist":3.6}
+[03:13:35] [Render thread/INFO]: [visualtest] paso 27: {"op":"equip","slot":"chest","v":""}
+[03:13:35] [Render thread/INFO]: [visualtest] paso 28: {"op":"equip","slot":"legs","v":""}
+[03:13:35] [Render thread/INFO]: [visualtest] paso 29: {"op":"equip","slot":"feet","v":""}
+[03:13:35] [Render thread/INFO]: [visualtest] paso 30: {"op":"equip","slot":"chest","v":"remushoku:roxy_robe"}
+[03:13:35] [Render thread/INFO]: [visualtest] paso 31: {"op":"equip","slot":"legs","v":"remushoku:roxy_stockings"}
+[03:13:35] [Render thread/INFO]: [visualtest] paso 32: {"op":"equip","slot":"feet","v":"remushoku:roxy_boots"}
+[03:13:35] [Render thread/INFO]: [visualtest] paso 33: {"op":"dummy","yaw":90,"dist":3.6}
+[03:13:35] [Render thread/INFO]: [visualtest] paso 34: {"op":"walk","t":60,"speed":1.0,"sprint":true}
+[03:13:35] [Render thread/INFO]: [visualtest] paso 35: {"op":"wait","t":9}
+[03:13:36] [Render thread/INFO]: [visualtest] paso 36: {"op":"shot","v":"roxy_run_side_a"}
+[03:13:36] [Render thread/INFO]: [visualtest] paso 37: {"op":"wait","t":4}
+[03:13:36] [IO-Worker-4/INFO]: [visualtest] captura roxy_run_side_a
+[03:13:36] [Render thread/INFO]: [visualtest] paso 38: {"op":"shot","v":"roxy_run_side_b"}
+[03:13:36] [Render thread/INFO]: [visualtest] paso 39: {"op":"wait","t":30}
+[03:13:36] [IO-Worker-7/INFO]: [visualtest] captura roxy_run_side_b
+[03:13:38] [Render thread/INFO]: [visualtest] paso 40: {"op":"dummy","yaw":180,"dist":3.6}
+[03:13:38] [Render thread/INFO]: [visualtest] paso 41: {"op":"walk","t":60,"speed":1.0,"sprint":true}
+[03:13:38] [Render thread/INFO]: [visualtest] paso 42: {"op":"wait","t":9}
+[03:13:38] [Render thread/INFO]: [visualtest] paso 43: {"op":"shot","v":"roxy_run_front_a"}
+[03:13:38] [Render thread/INFO]: [visualtest] paso 44: {"op":"wait","t":4}
+[03:13:38] [IO-Worker-4/INFO]: [visualtest] captura roxy_run_front_a
+[03:13:39] [Render thread/INFO]: [visualtest] paso 45: {"op":"shot","v":"roxy_run_front_b"}
+[03:13:39] [Render thread/INFO]: [visualtest] paso 46: {"op":"wait","t":30}
+[03:13:39] [IO-Worker-4/INFO]: [visualtest] captura roxy_run_front_b
+[03:13:40] [Render thread/INFO]: [visualtest] paso 47: {"op":"dummy","yaw":-30,"dist":3.6}
+[03:13:40] [Render thread/INFO]: [visualtest] paso 48: {"op":"fall","t":40}
+[03:13:40] [Render thread/INFO]: [visualtest] paso 49: {"op":"wait","t":20}
+[03:13:41] [Render thread/INFO]: [visualtest] paso 50: {"op":"shot","v":"roxy_run_fall"}
+[03:13:41] [Render thread/INFO]: [visualtest] paso 51: {"op":"wait","t":30}
+[03:13:41] [IO-Worker-4/INFO]: [visualtest] captura roxy_run_fall
+[03:13:43] [Render thread/INFO]: [visualtest] paso 52: {"op":"dummy","yaw":90,"dist":3.6}
+[03:13:43] [Render thread/INFO]: [visualtest] paso 53: {"op":"equip","slot":"chest","v":""}
+[03:13:43] [Render thread/INFO]: [visualtest] paso 54: {"op":"equip","slot":"legs","v":""}
+[03:13:43] [Render thread/INFO]: [visualtest] paso 55: {"op":"equip","slot":"feet","v":""}
+[03:13:43] [Render thread/INFO]: [visualtest] paso 56: {"op":"equip","slot":"chest","v":"remushoku:magic_armor_mk_2_v2_chestplate"}
+[03:13:43] [Render thread/INFO]: [visualtest] paso 57: {"op":"equip","slot":"legs","v":"remushoku:magic_armor_mk_2_v2_leggings"}
+[03:13:43] [Render thread/INFO]: [visualtest] paso 58: {"op":"equip","slot":"feet","v":"remushoku:magic_armor_mk_2_v2_boots"}
+[03:13:43] [Render thread/INFO]: [visualtest] paso 59: {"op":"dummy","yaw":90,"dist":3.6}
+[03:13:44] [Render thread/INFO]: [visualtest] paso 60: {"op":"walk","t":60,"speed":1.0,"sprint":true}
+[03:13:44] [Render thread/INFO]: [visualtest] paso 61: {"op":"wait","t":9}
+[03:13:44] [Render thread/INFO]: [visualtest] paso 62: {"op":"shot","v":"mk2_run_side_a"}
+[03:13:44] [Render thread/INFO]: [visualtest] paso 63: {"op":"wait","t":4}
+[03:13:44] [IO-Worker-7/INFO]: [visualtest] captura mk2_run_side_a
+[03:13:44] [Render thread/INFO]: [visualtest] paso 64: {"op":"shot","v":"mk2_run_side_b"}
+[03:13:44] [Render thread/INFO]: [visualtest] paso 65: {"op":"wait","t":30}
+[03:13:45] [IO-Worker-7/INFO]: [visualtest] captura mk2_run_side_b
+[03:13:46] [Render thread/INFO]: [visualtest] paso 66: {"op":"dummy","yaw":180,"dist":3.6}
+[03:13:46] [Render thread/INFO]: [visualtest] paso 67: {"op":"walk","t":60,"speed":1.0,"sprint":true}
+[03:13:46] [Render thread/INFO]: [visualtest] paso 68: {"op":"wait","t":9}
+[03:13:47] [Render thread/INFO]: [visualtest] paso 69: {"op":"shot","v":"mk2_run_front_a"}
+[03:13:47] [Render thread/INFO]: [visualtest] paso 70: {"op":"wait","t":4}
+[03:13:47] [IO-Worker-3/INFO]: [visualtest] captura mk2_run_front_a
+[03:13:47] [Render thread/INFO]: [visualtest] paso 71: {"op":"shot","v":"mk2_run_front_b"}
+[03:13:47] [Render thread/INFO]: [visualtest] paso 72: {"op":"wait","t":30}
+[03:13:47] [IO-Worker-3/INFO]: [visualtest] captura mk2_run_front_b
+[03:13:49] [Render thread/INFO]: [visualtest] paso 73: {"op":"dummy","yaw":-30,"dist":3.6}
+[03:13:49] [Render thread/INFO]: [visualtest] paso 74: {"op":"fall","t":40}
+[03:13:49] [Render thread/INFO]: [visualtest] paso 75: {"op":"wait","t":20}
+[03:13:50] [Render thread/INFO]: [visualtest] paso 76: {"op":"shot","v":"mk2_run_fall"}
+[03:13:50] [Render thread/INFO]: [visualtest] paso 77: {"op":"wait","t":30}
+[03:13:50] [IO-Worker-7/INFO]: [visualtest] captura mk2_run_fall
+[03:13:51] [Render thread/INFO]: [visualtest] paso 78: {"op":"dummy","yaw":90,"dist":3.6}
+[03:13:52] [Render thread/INFO]: [visualtest] paso 79: {"op":"equip","slot":"chest","v":""}
+[03:13:52] [Render thread/INFO]: [visualtest] paso 80: {"op":"equip","slot":"legs","v":""}
+[03:13:52] [Render thread/INFO]: [visualtest] paso 81: {"op":"equip","slot":"feet","v":""}
+[03:13:52] [Render thread/INFO]: [visualtest] paso 82: {"op":"equip","slot":"chest","v":"remushoku:flame_trapping_cloak_v2"}
+[03:13:52] [Render thread/INFO]: [visualtest] paso 83: {"op":"dummy","yaw":90,"dist":3.6}
+[03:13:52] [Render thread/INFO]: [visualtest] paso 84: {"op":"walk","t":60,"speed":0.55,"sprint":false}
+[03:13:52] [Render thread/INFO]: [visualtest] paso 85: {"op":"wait","t":9}
+[03:13:53] [Render thread/INFO]: [visualtest] paso 86: {"op":"shot","v":"cloak_walk_side_a"}
+[03:13:53] [Render thread/INFO]: [visualtest] paso 87: {"op":"wait","t":4}
+[03:13:53] [IO-Worker-1/INFO]: [visualtest] captura cloak_walk_side_a
+[03:13:53] [Render thread/INFO]: [visualtest] paso 88: {"op":"shot","v":"cloak_walk_side_b"}
+[03:13:53] [Render thread/INFO]: [visualtest] paso 89: {"op":"wait","t":30}
+[03:13:53] [IO-Worker-7/INFO]: [visualtest] captura cloak_walk_side_b
+[03:13:54] [Render thread/INFO]: [visualtest] paso 90: {"op":"dummy","yaw":180,"dist":3.6}
+[03:13:55] [Render thread/INFO]: [visualtest] paso 91: {"op":"walk","t":60,"speed":0.55,"sprint":false}
+[03:13:55] [Render thread/INFO]: [visualtest] paso 92: {"op":"wait","t":9}
+[03:13:55] [Render thread/INFO]: [visualtest] paso 93: {"op":"shot","v":"cloak_walk_front_a"}
+[03:13:55] [Render thread/INFO]: [visualtest] paso 94: {"op":"wait","t":4}
+[03:13:55] [IO-Worker-5/INFO]: [visualtest] captura cloak_walk_front_a
+[03:13:55] [Render thread/INFO]: [visualtest] paso 95: {"op":"shot","v":"cloak_walk_front_b"}
+[03:13:55] [Render thread/INFO]: [visualtest] paso 96: {"op":"wait","t":30}
+[03:13:56] [IO-Worker-5/INFO]: [visualtest] captura cloak_walk_front_b
+[03:13:57] [Render thread/INFO]: [visualtest] paso 97: {"op":"dummy","yaw":-30,"dist":3.6}
+[03:13:57] [Render thread/INFO]: [visualtest] paso 98: {"op":"fall","t":40}
+[03:13:57] [Render thread/INFO]: [visualtest] paso 99: {"op":"wait","t":20}
+[03:13:58] [Render thread/INFO]: [visualtest] paso 100: {"op":"shot","v":"cloak_walk_fall"}
+[03:13:58] [Render thread/INFO]: [visualtest] paso 101: {"op":"wait","t":30}
+[03:13:58] [IO-Worker-5/INFO]: [visualtest] captura cloak_walk_fall
+[03:14:00] [Render thread/INFO]: [visualtest] fin
+[03:14:01] [Server thread/INFO]: Saving chunks for level 'ServerLevel[visualtest]'/minecraft:overworld
+[03:14:01] [Server thread/INFO]: Saving chunks for level 'ServerLevel[visualtest]'/minecraft:the_end
+[03:14:01] [Server thread/INFO]: Saving chunks for level 'ServerLevel[visualtest]'/remushoku:void
+[03:14:01] [Server thread/INFO]: Saving chunks for level 'ServerLevel[visualtest]'/minecraft:the_nether
+[03:14:01] [Server thread/INFO]: ThreadedAnvilChunkStorage (visualtest): All chunks are saved
