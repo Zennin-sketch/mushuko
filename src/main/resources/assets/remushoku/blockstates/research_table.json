@@ -1,19 +1,33 @@
 {
  "variants": {
-  "facing=north": {
-   "model": "remushoku:block/research_table",
-   "y": 0
+  "facing=north,side=false": {
+   "model": "remushoku:block/research_table_main"
   },
-  "facing=east": {
-   "model": "remushoku:block/research_table",
+  "facing=north,side=true": {
+   "model": "remushoku:block/research_table_side"
+  },
+  "facing=east,side=false": {
+   "model": "remushoku:block/research_table_main",
    "y": 90
   },
-  "facing=south": {
-   "model": "remushoku:block/research_table",
+  "facing=east,side=true": {
+   "model": "remushoku:block/research_table_side",
+   "y": 90
+  },
+  "facing=south,side=false": {
+   "model": "remushoku:block/research_table_main",
    "y": 180
   },
-  "facing=west": {
-   "model": "remushoku:block/research_table",
+  "facing=south,side=true": {
+   "model": "remushoku:block/research_table_side",
+   "y": 180
+  },
+  "facing=west,side=false": {
+   "model": "remushoku:block/research_table_main",
+   "y": 270
+  },
+  "facing=west,side=true": {
+   "model": "remushoku:block/research_table_side",
    "y": 270
   }
  }

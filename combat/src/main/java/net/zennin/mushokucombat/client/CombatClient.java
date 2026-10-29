@@ -70,7 +70,11 @@ public final class CombatClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.PlayAnimPayload.TYPE, (payload, ctx) -> ctx.client().execute(() -> {
             if (ctx.client().level == null) return;
             Entity e = ctx.client().level.getEntity(payload.entityId());
-            if (e instanceof AbstractClientPlayer p) BowAnimClient.oneShot(p, payload.anim());
+            if (e instanceof AbstractClientPlayer p) {
+                // conjuros con animacion propia (Campo Minado...): van directo a la capa del addon
+                if (payload.anim().startsWith("magic_")) CombatAnimations.play(p, payload.anim(), 2);
+                else BowAnimClient.oneShot(p, payload.anim());
+            }
         }));
         ClientPlayNetworking.registerGlobalReceiver(PerfectDodgePayload.TYPE, (payload, ctx) ->
                 ctx.client().execute(() -> GoldenGlow.trigger(ctx.client(), payload.entity())));

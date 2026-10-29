@@ -2658,5 +2658,14 @@
   "item.remushoku.beast_dog_m_spawn_egg": "Dog Beastman Spawn Egg",
   "item.remushoku.beast_dog_f_spawn_egg": "Dog Beastwoman Spawn Egg",
   "item.remushoku.beast_cat_m_spawn_egg": "Cat Beastman Spawn Egg",
-  "item.remushoku.beast_cat_f_spawn_egg": "Cat Beastwoman Spawn Egg"
+  "item.remushoku.beast_cat_f_spawn_egg": "Cat Beastwoman Spawn Egg",
+  "gui.remushoku.research.engrave": "Engrave spell",
+  "gui.remushoku.research.engrave_hint": "Place the Ink and Quill and a blank scroll to engrave a spell you know. Costs mana.",
+  "msg.remushoku.engraved": "You engraved %s on a scroll",
+  "block.remushoku.alembic": "Copper Alembic",
+  "container.remushoku.alembic": "Copper Alembic",
+  "item.remushoku.mana_potion_small": "Small Mana Potion",
+  "item.remushoku.mana_potion": "Mana Potion",
+  "item.remushoku.mana_potion_large": "Large Mana Potion",
+  "tooltip.remushoku.mana_potion": "Restores %s mana"
 }

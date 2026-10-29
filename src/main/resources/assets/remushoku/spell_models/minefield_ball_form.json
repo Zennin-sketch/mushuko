@@ -1,0 +1,425 @@
+{
+ "name": "Campo Minado: la bolita se forma",
+ "spells": [],
+ "groups": [
+  {
+   "texture": "remushoku:textures/entity/spell/fire.png",
+   "render": "emissive",
+   "glow": true,
+   "tilt": [
+    0,
+    0,
+    0
+   ],
+   "spin": [
+    0,
+    0,
+    0
+   ],
+   "pulse": [
+    0,
+    1
+   ],
+   "flicker": 0.0,
+   "boxes": [],
+   "show": [
+    [
+     0,
+     14
+    ]
+   ],
+   "emit": {
+    "count": 26,
+    "life": 10,
+    "radius": [
+     10,
+     9,
+     10
+    ],
+    "size": [
+     1.2,
+     0.4
+    ],
+    "colors": [
+     "ffe07a",
+     "ff4a0e"
+    ],
+    "alpha": 1.0,
+    "rise": 0.0,
+    "drift": 0.0,
+    "outward": -0.9,
+    "center": [
+     0,
+     0,
+     0
+    ],
+    "shape": [
+     1,
+     1,
+     1
+    ],
+    "burst": false
+   }
+  },
+  {
+   "texture": "remushoku:textures/entity/spell/fire.png",
+   "render": "emissive",
+   "glow": true,
+   "tilt": [
+    0,
+    0,
+    0
+   ],
+   "spin": [
+    0,
+    0,
+    0
+   ],
+   "pulse": [
+    0.18,
+    4
+   ],
+   "flicker": 0.0,
+   "boxes": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      3,
+      3,
+      3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "fff6c8",
+     "alpha": 1.0
+    }
+   ],
+   "grow": [
+    2,
+    10
+   ]
+  },
+  {
+   "texture": "remushoku:textures/entity/spell/fire.png",
+   "render": "emissive",
+   "glow": true,
+   "tilt": [
+    0,
+    0,
+    0
+   ],
+   "spin": [
+    6,
+    9,
+    0
+   ],
+   "pulse": [
+    0.08,
+    6
+   ],
+   "flicker": 0.0,
+   "boxes": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      5,
+      5,
+      5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "ffa030",
+     "alpha": 0.85
+    }
+   ],
+   "grow": [
+    5,
+    13
+   ]
+  },
+  {
+   "texture": "remushoku:textures/entity/spell/fire.png",
+   "render": "emissive",
+   "glow": false,
+   "tilt": [
+    0,
+    0,
+    0
+   ],
+   "spin": [
+    -3,
+    5,
+    2
+   ],
+   "pulse": [
+    0,
+    1
+   ],
+   "flicker": 0.25,
+   "boxes": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      6.4,
+      6.4,
+      6.4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "3a1a10",
+     "alpha": 0.55
+    },
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      5.6,
+      5.6,
+      5.6
+     ],
+     "rot": [
+      45,
+      45,
+      0
+     ],
+     "color": "4a1f11",
+     "alpha": 0.55
+    },
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      5.6,
+      5.6,
+      5.6
+     ],
+     "rot": [
+      0,
+      45,
+      45
+     ],
+     "color": "5a2513",
+     "alpha": 0.55
+    },
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      5.6,
+      5.6,
+      5.6
+     ],
+     "rot": [
+      45,
+      0,
+      45
+     ],
+     "color": "6a2a14",
+     "alpha": 0.55
+    }
+   ],
+   "grow": [
+    9,
+    16
+   ]
+  },
+  {
+   "texture": "remushoku:textures/entity/spell/fire.png",
+   "render": "emissive",
+   "glow": true,
+   "tilt": [
+    0,
+    0,
+    0
+   ],
+   "spin": [
+    0,
+    24,
+    0
+   ],
+   "pulse": [
+    0.2,
+    3
+   ],
+   "flicker": 0.0,
+   "boxes": [
+    {
+     "at": [
+      4.6,
+      0.0,
+      0.0
+     ],
+     "size": [
+      1.2,
+      1.2,
+      1.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "ffd04a",
+     "alpha": 0.95
+    },
+    {
+     "at": [
+      0.0,
+      0.0,
+      4.6
+     ],
+     "size": [
+      1.2,
+      1.2,
+      1.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "ffd04a",
+     "alpha": 0.95
+    },
+    {
+     "at": [
+      -4.6,
+      -0.0,
+      0.0
+     ],
+     "size": [
+      1.2,
+      1.2,
+      1.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "ffd04a",
+     "alpha": 0.95
+    },
+    {
+     "at": [
+      -0.0,
+      0.0,
+      -4.6
+     ],
+     "size": [
+      1.2,
+      1.2,
+      1.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "ffd04a",
+     "alpha": 0.95
+    }
+   ],
+   "grow": [
+    11,
+    18
+   ]
+  },
+  {
+   "texture": "remushoku:textures/entity/spell/fire.png",
+   "render": "emissive",
+   "glow": true,
+   "tilt": [
+    0,
+    0,
+    0
+   ],
+   "spin": [
+    0,
+    0,
+    0
+   ],
+   "pulse": [
+    0,
+    1
+   ],
+   "flicker": 0.0,
+   "boxes": [],
+   "emit": {
+    "count": 14,
+    "life": 12,
+    "radius": [
+     3.5,
+     3,
+     3.5
+    ],
+    "size": [
+     1.0,
+     0.2
+    ],
+    "colors": [
+     "ffd84a",
+     "b8240a"
+    ],
+    "alpha": 0.95,
+    "rise": 0.5,
+    "drift": 0.0,
+    "outward": 0.0,
+    "center": [
+     0,
+     0,
+     0
+    ],
+    "shape": [
+     1,
+     1,
+     1
+    ],
+    "burst": false
+   },
+   "show": [
+    [
+     10,
+     40
+    ]
+   ]
+  }
+ ],
+ "preview": {
+  "kind": "fx",
+  "life": 22,
+  "scale": 1.0,
+  "height": 0.6,
+  "cam": 2.0
+ }
+}

@@ -126,7 +126,7 @@ EXTRA = [
     dict(group='Esquivas (mago)', items=['dash_forward', 'dash_backward', 'dash_left', 'dash_right'], weapon='aqua_heartia'),
     dict(group='Esquivas diagonales (mago)', items=['dash_forward_left', 'dash_forward_right', 'dash_backward_left', 'dash_backward_right'], weapon='aqua_heartia'),
     dict(group='Ideas para la magia', items=['magic_push', 'magic_gather_throw', 'magic_ground', 'magic_sweep', 'magic_snipe',
-                                            'magic_sky', 'magic_spiral', 'magic_barrier'], weapon='aqua_heartia'),
+                                            'magic_sky', 'magic_spiral', 'magic_barrier', 'magic_minefield'], weapon='aqua_heartia'),
     dict(group='Conjuro', items=['cast_pose', 'cast_release'], weapon='aqua_heartia'),
     dict(group='Desenvainar y guardar (cintura)', items=['hip_draw', 'hip_sheathe'], weapon='migurd_sword'),
     dict(group='Desenvainar y guardar (espalda)', items=['back_draw', 'back_sheathe'], weapon='kajakut'),

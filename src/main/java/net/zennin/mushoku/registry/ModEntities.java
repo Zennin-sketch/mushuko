@@ -31,6 +31,10 @@ public final class ModEntities {
             MushokuMod.id("magic_projectile"),
             EntityType.Builder.<MagicProjectile>of(MagicProjectile::new, MobCategory.MISC)
                     .sized(0.4f, 0.4f).clientTrackingRange(8).updateInterval(2).build("magic_projectile"));
+    public static final EntityType<net.zennin.mushoku.entity.MineEntity> MINE = Registry.register(BuiltInRegistries.ENTITY_TYPE,
+            MushokuMod.id("minefield_mine"),
+            EntityType.Builder.<net.zennin.mushoku.entity.MineEntity>of(net.zennin.mushoku.entity.MineEntity::new, MobCategory.MISC)
+                    .sized(0.5f, 0.4f).clientTrackingRange(8).updateInterval(5).noSave().build("minefield_mine"));
     public static final EntityType<net.zennin.mushoku.entity.SpellFxEntity> SPELL_FX = Registry.register(BuiltInRegistries.ENTITY_TYPE,
             MushokuMod.id("spell_fx"),
             EntityType.Builder.<net.zennin.mushoku.entity.SpellFxEntity>of(net.zennin.mushoku.entity.SpellFxEntity::new, MobCategory.MISC)

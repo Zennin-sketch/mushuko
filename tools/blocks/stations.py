@@ -93,27 +93,62 @@ def el(f, t, tex, rot=None, uv=None):
 
 
 def research_table():
+    """Escritorio de dos bloques. Coordenadas del escritorio: x 0..32 (0..16 = mitad de al lado, 16..32 = la principal),
+    el frente (donde se para el jugador) es -Z. Cada elemento va a la mitad que lo contiene."""
     tex = dict(plank='minecraft:block/dark_oak_planks', log='minecraft:block/dark_oak_log', book='remushoku:block/research_book',
                gem='minecraft:block/amethyst_block', wax='minecraft:block/white_wool', ink='minecraft:block/black_concrete',
-               flame='minecraft:block/shroomlight', particle='minecraft:block/dark_oak_planks')
-    els = [
-        el((0, 12, 0), (16, 15, 16), '#plank'),
-        el((1, 0, 1), (3, 12, 3), '#log'), el((13, 0, 1), (15, 12, 3), '#log'),
-        el((1, 0, 13), (3, 12, 15), '#log'), el((13, 0, 13), (15, 12, 15), '#log'),
-        el((2, 4, 2), (14, 5, 14), '#plank'),
-        el((3, 15, 5), (8, 15.6, 11), '#book', ('z', 22.5, (8, 15, 8))),
-        el((8, 15, 5), (13, 15.6, 11), '#book', ('z', -22.5, (8, 15, 8))),
-        el((11.5, 15, 11.5), (14, 19, 14), '#gem', ('y', 45, (12.75, 15, 12.75))),
-        el((10.5, 15, 12.5), (12, 17, 14), '#gem', ('x', 22.5, (11, 15, 13))),
-        el((2, 15, 12), (3.5, 18, 13.5), '#wax'),
-        el((2.5, 18, 12.5), (3, 19, 13), '#flame'),
-        el((2.5, 15, 2.5), (4.5, 16.5, 4.5), '#ink'),
-        el((5, 5, 3), (11, 9, 6), '#plank'),  # cajon con libros
+               flame='minecraft:block/shroomlight', drawer='remushoku:block/research_drawer', paper='minecraft:block/birch_planks',
+               glass='minecraft:block/light_blue_stained_glass', red='minecraft:block/red_wool', particle='minecraft:block/dark_oak_planks')
+    desk = [
+        ((0, 12, 1), (32, 15, 15), '#plank', None),          # tablero
+        ((1, 0, 2), (3, 12, 4), '#log', None), ((1, 0, 12), (3, 12, 14), '#log', None),
+        ((29, 0, 2), (31, 12, 4), '#log', None), ((29, 0, 12), (31, 12, 14), '#log', None),
+        ((2, 3, 3), (16, 4, 13), '#plank', None),            # estante bajo (lado)
+        ((17, 2, 2), (31, 11, 14), '#drawer', None),         # cajonera (principal)
+        # libro abierto
+        ((5, 15, 4), (10, 15.6, 11), '#book', ('z', 22.5, (10, 15, 8))),
+        ((10, 15, 4), (15, 15.6, 11), '#book', ('z', -22.5, (10, 15, 8))),
+        # tintero y pluma
+        ((2.5, 15, 11), (4.5, 16.8, 13), '#ink', None),
+        ((3.2, 15.5, 11.6), (3.8, 21, 12.2), '#wax', ('z', 22.5, (3.5, 16, 12))),
+        # cristal de amatista
+        ((26.5, 15, 10.5), (29, 19.5, 13), '#gem', ('y', 45, (27.75, 15, 11.75))),
+        ((25, 15, 12), (26.5, 17.5, 13.5), '#gem', ('x', 22.5, (25.75, 15, 12.75))),
+        # vela
+        ((29, 15, 3), (30.5, 18, 4.5), '#wax', None), ((29.5, 18, 3.5), (30, 19, 4), '#flame', None),
+        # pergamino enrollado y frascos
+        ((18, 15, 3), (24, 16.2, 4.4), '#paper', None),
+        ((20.5, 15, 9), (22.5, 17.5, 11), '#glass', None), ((23, 15, 10), (24.5, 16.8, 11.5), '#red', None),
     ]
-    jdump(dict(parent='block/block', textures=tex, elements=els), A, 'models', 'block', 'research_table.json')
-    jdump(dict(variants={'facing=%s' % f: dict(model='remushoku:block/research_table', y=y) for f, y in
-                         (('north', 0), ('east', 90), ('south', 180), ('west', 270))}), A, 'blockstates', 'research_table.json')
-    jdump(dict(parent='remushoku:block/research_table'), A, 'models', 'item', 'research_table.json')
+    for part, x0 in (('side', 0), ('main', 16)):
+        els = []
+        for f, t, tx, rot in desk:
+            lo, hi = max(f[0], x0), min(t[0], x0 + 16)
+            if hi <= lo:
+                continue
+            ff, tt = (lo - x0, f[1], f[2]), (hi - x0, t[1], t[2])
+            r = None
+            if rot:
+                r = (rot[0], rot[1], (rot[2][0] - x0, rot[2][1], rot[2][2]))
+            els.append(el(ff, tt, tx, r))
+        jdump(dict(parent='block/block', textures=tex, elements=els), A, 'models', 'block', 'research_table_' + part + '.json')
+    v = {}
+    for f, y in (('north', 0), ('east', 90), ('south', 180), ('west', 270)):
+        for side in ('false', 'true'):
+            d = dict(model='remushoku:block/research_table_' + ('side' if side == 'true' else 'main'))
+            if y: d['y'] = y
+            v['facing=%s,side=%s' % (f, side)] = d
+    jdump(dict(variants=v), A, 'blockstates', 'research_table.json')
+    jdump(dict(parent='remushoku:block/research_table_main'), A, 'models', 'item', 'research_table.json')
+    # frente de los cajones
+    img = Image.new('RGBA', (16, 16), (66, 44, 26, 255))
+    for y in range(16):
+        for x in range(16):
+            c = (86, 58, 34) if (y % 5 in (1, 2, 3) and 1 <= x <= 14) else (52, 34, 20)
+            if y % 5 == 2 and x in (7, 8):
+                c = (200, 170, 90)
+            img.putpixel((x, y), c + (255,))
+    save(img, 'block', 'research_drawer.png')
 
 
 def dispenser_models():
@@ -150,6 +185,70 @@ def data():
            'result': {'count': 1, 'id': 'remushoku:research_table'}}, D, 'recipe', 'research_table.json')
 
 
+def alembic():
+    tex = dict(brick='minecraft:block/bricks', copper='minecraft:block/copper_block', cut='minecraft:block/cut_copper',
+               patina='minecraft:block/exposed_copper', glass='minecraft:block/glass', liquid='minecraft:block/light_blue_concrete',
+               dark='minecraft:block/black_concrete', particle='minecraft:block/copper_block')
+    els = [
+        el((2, 0, 2), (14, 5, 14), '#brick'),
+        el((5, 1, 1.9), (10, 4, 2.1), '#fire'),
+        el((2.5, 5, 4), (10.5, 12, 12), '#copper'),
+        el((2, 7.5, 3.5), (11, 8.5, 12.5), '#cut'),
+        el((4, 12, 5.5), (9, 14, 10.5), '#copper'),
+        el((5.5, 14, 7), (7.5, 15.5, 9), '#patina'),
+        el((6.5, 14.5, 7.5), (12.5, 15.5, 8.5), '#patina'),
+        el((11.5, 9, 7.5), (12.5, 15.5, 8.5), '#patina'),
+        el((10.5, 5, 5.5), (14, 9, 9), '#glass'),
+        el((11, 5, 6), (13.5, 7.2, 8.5), '#liquid'),
+        el((11.5, 9, 6.5), (13, 10, 8), '#glass'),
+    ]
+    for name, fire in (('alembic', '#dark'), ('alembic_lit', 'minecraft:block/magma')):
+        t = dict(tex)
+        t['fire'] = 'minecraft:block/black_concrete' if fire == '#dark' else 'minecraft:block/magma'
+        jdump(dict(parent='block/block', textures=t, elements=els), A, 'models', 'block', name + '.json')
+    v = {}
+    for f, y in (('north', 0), ('east', 90), ('south', 180), ('west', 270)):
+        for lit in ('false', 'true'):
+            d = dict(model='remushoku:block/alembic' + ('_lit' if lit == 'true' else ''))
+            if y: d['y'] = y
+            v['facing=%s,lit=%s' % (f, lit)] = d
+    jdump(dict(variants=v), A, 'blockstates', 'alembic.json')
+    jdump(dict(parent='remushoku:block/alembic'), A, 'models', 'item', 'alembic.json')
+    jdump({'type': 'minecraft:block', 'random_sequence': 'remushoku:blocks/alembic', 'pools': [{'rolls': 1.0,
+           'conditions': [{'condition': 'minecraft:survives_explosion'}], 'entries': [{'type': 'minecraft:item', 'name': 'remushoku:alembic'}]}]},
+          D, 'loot_table', 'blocks', 'alembic.json')
+    jdump({'type': 'minecraft:crafting_shaped', 'category': 'misc', 'pattern': [' G ', 'CBC', 'KKK'],
+           'key': {'G': {'item': 'minecraft:glass_bottle'}, 'C': {'item': 'minecraft:copper_ingot'}, 'B': {'item': 'minecraft:copper_block'},
+                   'K': {'item': 'minecraft:bricks'}},
+           'result': {'count': 1, 'id': 'remushoku:alembic'}}, D, 'recipe', 'alembic.json')
+    # pociones de mana: botella con liquido azul que brilla (chica / normal / grande)
+    for name, size, liq in (('mana_potion_small', 0, (90, 150, 255)), ('mana_potion', 1, (60, 110, 240)), ('mana_potion_large', 2, (110, 70, 230))):
+        img = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
+        w = (4, 6, 8)[size]
+        x0, top = 8 - w // 2, (7, 6, 5)[size]
+        glass, edge, cork = (210, 230, 255, 255), (120, 140, 170, 255), (150, 100, 60, 255)
+        for y in range(top, 15):
+            for x in range(x0 - 1, x0 + w + 1):
+                inside = x0 <= x < x0 + w and y < 14
+                if not inside:
+                    img.putpixel((x, y), edge)
+                elif y >= top + 2:
+                    k = 1.0 - (y - top) * 0.04
+                    c = tuple(max(0, min(255, int(v * k))) for v in liq)
+                    img.putpixel((x, y), c + (255,))
+                else:
+                    img.putpixel((x, y), glass)
+        for y in range(top - 3, top):
+            img.putpixel((7, y), edge); img.putpixel((8, y), glass if y > top - 3 else cork); img.putpixel((9, y), edge)
+        img.putpixel((8, top - 4), cork); img.putpixel((7, top - 4), cork)
+        img.putpixel((x0, top + 3), (255, 255, 255, 255)); img.putpixel((x0, top + 4), (230, 240, 255, 255))
+        for (sx, sy) in ((x0 + w - 2, 12), (x0 + 1, 11)):
+            img.putpixel((sx, sy), (200, 240, 255, 255))
+        save(img, 'item', name + '.png')
+        jdump({'parent': 'minecraft:item/generated', 'textures': {'layer0': 'remushoku:item/' + name}}, A, 'models', 'item', name + '.json')
+
+
+alembic()
 dispenser_textures()
 book_texture()
 dispenser_models()

@@ -75,6 +75,47 @@ public class ResearchMenu extends AbstractContainerMenu {
         addDataSlots(data);
     }
 
+    public boolean engraving() { return ResearchRecipes.engraving(input); }
+
+    /** El jugador sabe este hechizo (nivel del elemento suficiente; los combinados no se graban). */
+    public static boolean knows(Player p, net.zennin.mushoku.magic.Spell s) {
+        if (s.combined() || !s.implemented) return false;
+        if (p.getAbilities().instabuild) return true;
+        int lvl = p.level().isClientSide ? clientLevel(s.element) : ModAttachments.magic(p).level(s.element);
+        return lvl >= s.level.tier;
+    }
+
+    private static int clientLevel(net.zennin.mushoku.magic.Element e) {
+        int w = net.zennin.mushoku.client.ClientManaState.water, f = net.zennin.mushoku.client.ClientManaState.fire,
+                ea = net.zennin.mushoku.client.ClientManaState.earth, wi = net.zennin.mushoku.client.ClientManaState.wind;
+        return new net.zennin.mushoku.data.MagicData("", false, w, f, ea, wi).level(e);
+    }
+
+    /** Graba el hechizo en un pergamino en blanco (la pluma no se gasta; el pergamino si, y el mana). */
+    public void engrave(ServerPlayer p, net.zennin.mushoku.magic.Spell s) {
+        if (s == null || !engraving() || !knows(p, s)) return;
+        int cost = ResearchRecipes.engraveCost(s);
+        ManaData m = ModAttachments.get(p);
+        if (!p.getAbilities().instabuild && m.mana() < cost) {
+            p.displayClientMessage(net.minecraft.network.chat.Component.translatable("msg.remushoku.no_mana").withStyle(net.minecraft.ChatFormatting.RED), true);
+            return;
+        }
+        for (int i = 0; i < input.getContainerSize(); i++) {
+            ItemStack st = input.getItem(i);
+            if (st.is(net.zennin.mushoku.registry.ModItems.SCROLL) && net.zennin.mushoku.item.SpellData.get(st) == null) { st.shrink(1); break; }
+        }
+        input.setChanged();
+        if (!p.getAbilities().instabuild) { ModAttachments.set(p, m.withMana(m.mana() - cost)); ModNetworking.syncMana(p); }
+        ItemStack out = net.zennin.mushoku.item.SpellData.with(new ItemStack(net.zennin.mushoku.registry.ModItems.SCROLL), s);
+        if (!p.getInventory().add(out)) p.drop(out, false);
+        access.execute((level, pos) -> {
+            level.playSound(null, pos, SoundEvents.BOOK_PAGE_TURN, SoundSource.BLOCKS, 1f, 1f);
+            level.playSound(null, pos, SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.BLOCKS, 0.7f, 1.4f);
+        });
+        p.displayClientMessage(net.minecraft.network.chat.Component.translatable("msg.remushoku.engraved",
+                net.minecraft.network.chat.Component.translatable(s.translationKey())).withStyle(net.minecraft.ChatFormatting.AQUA), true);
+    }
+
     /** Mana que pide la investigacion armada (0 = ninguna). */
     public int manaCost() { return data.get(0); }
 

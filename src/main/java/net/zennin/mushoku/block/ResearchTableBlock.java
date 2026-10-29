@@ -22,25 +22,64 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.zennin.mushoku.menu.ResearchMenu;
 
-/** Mesa de Investigacion: abre el menu donde se fabrican y mejoran las piedras de mana. */
+/**
+ * Mesa de Investigacion: escritorio de dos bloques (como una cama: se pone la mitad principal y la otra a su
+ * derecha). Abre el menu donde se fabrican piedras de mana y pergaminos, y se graban hechizos.
+ */
 public class ResearchTableBlock extends HorizontalDirectionalBlock {
     public static final MapCodec<ResearchTableBlock> CODEC = simpleCodec(ResearchTableBlock::new);
+    /** MAIN = la mitad que se coloco (suelta el item); SIDE = la otra. */
+    public static final net.minecraft.world.level.block.state.properties.BooleanProperty SIDE =
+            net.minecraft.world.level.block.state.properties.BooleanProperty.create("side");
     private static final VoxelShape SHAPE = Shapes.or(Block.box(0, 12, 0, 16, 15, 16), Block.box(1, 0, 1, 15, 12, 15));
 
     public ResearchTableBlock(Properties props) {
         super(props);
-        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
+        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(SIDE, false));
     }
 
     @Override
     protected MapCodec<? extends HorizontalDirectionalBlock> codec() { return CODEC; }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> b) { b.add(FACING); }
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> b) { b.add(FACING, SIDE); }
+
+    /** Hacia donde esta la otra mitad, vista desde esta. */
+    private static Direction toPartner(BlockState s) {
+        Direction side = s.getValue(FACING).getCounterClockWise();
+        return s.getValue(SIDE) ? side.getOpposite() : side;
+    }
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
-        return defaultBlockState().setValue(FACING, ctx.getHorizontalDirection().getOpposite());
+        Direction facing = ctx.getHorizontalDirection().getOpposite();
+        BlockPos other = ctx.getClickedPos().relative(facing.getCounterClockWise());
+        if (!ctx.getLevel().getBlockState(other).canBeReplaced(ctx) || !ctx.getLevel().getWorldBorder().isWithinBounds(other)) return null;
+        return defaultBlockState().setValue(FACING, facing);
+    }
+
+    @Override
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, net.minecraft.world.entity.LivingEntity placer, net.minecraft.world.item.ItemStack stack) {
+        super.setPlacedBy(level, pos, state, placer, stack);
+        if (!level.isClientSide)
+            level.setBlock(pos.relative(toPartner(state)), state.setValue(SIDE, true), 3);
+    }
+
+    @Override
+    protected BlockState updateShape(BlockState state, Direction dir, BlockState neighbor, net.minecraft.world.level.LevelAccessor level, BlockPos pos, BlockPos npos) {
+        if (dir == toPartner(state) && !(neighbor.is(this) && neighbor.getValue(SIDE) != state.getValue(SIDE)))
+            return net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
+        return super.updateShape(state, dir, neighbor, level, pos, npos);
+    }
+
+    @Override
+    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+        // romper la mitad de al lado en creativo no suelta nada (como la cama)
+        if (!level.isClientSide && player.isCreative() && state.getValue(SIDE)) {
+            BlockPos other = pos.relative(toPartner(state));
+            if (level.getBlockState(other).is(this)) level.setBlock(other, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 35);
+        }
+        return super.playerWillDestroy(level, pos, state, player);
     }
 
     @Override

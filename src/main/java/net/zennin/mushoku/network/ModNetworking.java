@@ -26,6 +26,7 @@ public final class ModNetworking {
         PayloadTypeRegistry.playS2C().register(RefinePayloads.Spin.TYPE, RefinePayloads.Spin.CODEC);
         PayloadTypeRegistry.playS2C().register(RefinePayloads.Result.TYPE, RefinePayloads.Result.CODEC);
         PayloadTypeRegistry.playC2S().register(RefinePayloads.Action.TYPE, RefinePayloads.Action.CODEC);
+        PayloadTypeRegistry.playC2S().register(EngravePayload.TYPE, EngravePayload.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(RefinePayloads.Action.TYPE, (payload, ctx) -> {
             ServerPlayer p = ctx.player();
             p.server.execute(() -> net.zennin.mushoku.refine.Refining.action(p, payload.pos(), payload.action()));
@@ -71,6 +72,13 @@ public final class ModNetworking {
                     case SwordActionPayload.USE_SILENT -> net.zennin.mushoku.extra.SilentCasting.useSlot(p, payload.slot());
                     default -> {}
                 }
+            });
+        });
+        ServerPlayNetworking.registerGlobalReceiver(EngravePayload.TYPE, (payload, ctx) -> {
+            ServerPlayer p = ctx.player();
+            p.server.execute(() -> {
+                if (p.containerMenu instanceof net.zennin.mushoku.menu.ResearchMenu menu)
+                    menu.engrave(p, net.zennin.mushoku.magic.Spell.byId(payload.spell()));
             });
         });
         ServerPlayNetworking.registerGlobalReceiver(GuildActionPayload.TYPE, (payload, ctx) -> {
@@ -134,7 +142,7 @@ public final class ModNetworking {
     private static final java.util.Map<java.util.UUID, String> LAST_READY = new java.util.concurrent.ConcurrentHashMap<>();
 
     /** Avisa a el y a los que lo ven que tiene un hechizo listo (para la pose y el hechizo flotando en la mano). */
-    private static void broadcastReady(ServerPlayer player, String spell) {
+    public static void broadcastReady(ServerPlayer player, String spell) {
         String prev = LAST_READY.put(player.getUUID(), spell);
         if (spell.equals(prev)) return;
         ReadySpellPayload pl = new ReadySpellPayload(player.getId(), spell);

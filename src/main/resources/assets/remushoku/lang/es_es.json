@@ -2658,5 +2658,14 @@
   "item.remushoku.beast_dog_m_spawn_egg": "Huevo de hombre bestia perro",
   "item.remushoku.beast_dog_f_spawn_egg": "Huevo de mujer bestia perra",
   "item.remushoku.beast_cat_m_spawn_egg": "Huevo de hombre bestia gato",
-  "item.remushoku.beast_cat_f_spawn_egg": "Huevo de mujer bestia gata"
+  "item.remushoku.beast_cat_f_spawn_egg": "Huevo de mujer bestia gata",
+  "gui.remushoku.research.engrave": "Grabar hechizo",
+  "gui.remushoku.research.engrave_hint": "Poné la Tinta y Pluma y un pergamino en blanco para grabar un hechizo que conozcas. Cuesta maná.",
+  "msg.remushoku.engraved": "Grabaste %s en un pergamino",
+  "block.remushoku.alembic": "Alambique de Cobre",
+  "container.remushoku.alembic": "Alambique de Cobre",
+  "item.remushoku.mana_potion_small": "Poción de Maná Pequeña",
+  "item.remushoku.mana_potion": "Poción de Maná",
+  "item.remushoku.mana_potion_large": "Poción de Maná Grande",
+  "tooltip.remushoku.mana_potion": "Devuelve %s de maná"
 }

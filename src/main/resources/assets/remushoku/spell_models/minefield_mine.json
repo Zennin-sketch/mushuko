@@ -1,0 +1,422 @@
+{
+ "name": "Campo Minado: mina",
+ "spells": [
+  "minefield"
+ ],
+ "groups": [
+  {
+   "texture": "remushoku:textures/entity/spell/stone.png",
+   "render": "solid",
+   "glow": false,
+   "tilt": [
+    0,
+    0,
+    0
+   ],
+   "spin": [
+    0,
+    3,
+    0
+   ],
+   "pulse": [
+    0,
+    1
+   ],
+   "flicker": 0.0,
+   "boxes": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      6,
+      6,
+      6
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "2a1a14",
+     "alpha": 0.92
+    },
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      6,
+      6,
+      6
+     ],
+     "rot": [
+      45,
+      0,
+      0
+     ],
+     "color": "2e1c15",
+     "alpha": 0.92
+    },
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      6,
+      6,
+      6
+     ],
+     "rot": [
+      0,
+      45,
+      0
+     ],
+     "color": "372016",
+     "alpha": 0.92
+    },
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      6,
+      6,
+      6
+     ],
+     "rot": [
+      0,
+      0,
+      45
+     ],
+     "color": "402518",
+     "alpha": 0.92
+    }
+   ]
+  },
+  {
+   "texture": "remushoku:textures/entity/spell/fire.png",
+   "render": "emissive",
+   "glow": true,
+   "tilt": [
+    0,
+    0,
+    0
+   ],
+   "spin": [
+    0,
+    0,
+    0
+   ],
+   "pulse": [
+    0.25,
+    6
+   ],
+   "flicker": 0.0,
+   "boxes": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      3.4,
+      3.4,
+      3.4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "fff0b0",
+     "alpha": 1.0
+    }
+   ]
+  },
+  {
+   "texture": "remushoku:textures/entity/spell/fire.png",
+   "render": "emissive",
+   "glow": true,
+   "tilt": [
+    0,
+    0,
+    0
+   ],
+   "spin": [
+    0,
+    0,
+    0
+   ],
+   "pulse": [
+    0.15,
+    6
+   ],
+   "flicker": 0.3,
+   "boxes": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      5.2,
+      5.2,
+      5.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "color": "ff8a20",
+     "alpha": 0.6
+    }
+   ]
+  },
+  {
+   "texture": "remushoku:textures/entity/spell/fire.png",
+   "render": "emissive",
+   "glow": true,
+   "tilt": [
+    0,
+    0,
+    0
+   ],
+   "spin": [
+    0,
+    3,
+    0
+   ],
+   "pulse": [
+    0.12,
+    5
+   ],
+   "flicker": 0.2,
+   "boxes": [
+    {
+     "at": [
+      4.2,
+      1.6,
+      0.0
+     ],
+     "size": [
+      1.4,
+      1.4,
+      1.4
+     ],
+     "rot": [
+      6.24,
+      0.0,
+      45
+     ],
+     "color": "ff5a10",
+     "alpha": 0.95
+    },
+    {
+     "at": [
+      2.97,
+      -1.6,
+      2.97
+     ],
+     "size": [
+      1.4,
+      1.4,
+      1.4
+     ],
+     "rot": [
+      5.06,
+      45.0,
+      45
+     ],
+     "color": "ff5a10",
+     "alpha": 0.95
+    },
+    {
+     "at": [
+      0.0,
+      1.6,
+      4.2
+     ],
+     "size": [
+      1.4,
+      1.4,
+      1.4
+     ],
+     "rot": [
+      10.43,
+      90.0,
+      45
+     ],
+     "color": "ff5a10",
+     "alpha": 0.95
+    },
+    {
+     "at": [
+      -2.97,
+      -1.6,
+      2.97
+     ],
+     "size": [
+      1.4,
+      1.4,
+      1.4
+     ],
+     "rot": [
+      34.09,
+      135.0,
+      45
+     ],
+     "color": "ff5a10",
+     "alpha": 0.95
+    },
+    {
+     "at": [
+      -4.2,
+      1.6,
+      0.0
+     ],
+     "size": [
+      1.4,
+      1.4,
+      1.4
+     ],
+     "rot": [
+      6.63,
+      180.0,
+      45
+     ],
+     "color": "ff5a10",
+     "alpha": 0.95
+    },
+    {
+     "at": [
+      -2.97,
+      -1.6,
+      -2.97
+     ],
+     "size": [
+      1.4,
+      1.4,
+      1.4
+     ],
+     "rot": [
+      33.33,
+      225.0,
+      45
+     ],
+     "color": "ff5a10",
+     "alpha": 0.95
+    },
+    {
+     "at": [
+      -0.0,
+      1.6,
+      -4.2
+     ],
+     "size": [
+      1.4,
+      1.4,
+      1.4
+     ],
+     "rot": [
+      29.8,
+      270.0,
+      45
+     ],
+     "color": "ff5a10",
+     "alpha": 0.95
+    },
+    {
+     "at": [
+      2.97,
+      -1.6,
+      -2.97
+     ],
+     "size": [
+      1.4,
+      1.4,
+      1.4
+     ],
+     "rot": [
+      6.15,
+      315.0,
+      45
+     ],
+     "color": "ff5a10",
+     "alpha": 0.95
+    }
+   ]
+  },
+  {
+   "texture": "remushoku:textures/entity/spell/fire.png",
+   "render": "emissive",
+   "glow": true,
+   "tilt": [
+    0,
+    0,
+    0
+   ],
+   "spin": [
+    0,
+    0,
+    0
+   ],
+   "pulse": [
+    0,
+    1
+   ],
+   "flicker": 0.0,
+   "boxes": [],
+   "emit": {
+    "count": 10,
+    "life": 14,
+    "radius": [
+     3,
+     2,
+     3
+    ],
+    "size": [
+     1.0,
+     0.2
+    ],
+    "colors": [
+     "ffd84a",
+     "c03008"
+    ],
+    "alpha": 0.95,
+    "rise": 0.7,
+    "drift": 0.0,
+    "outward": 0.0,
+    "center": [
+     0,
+     0,
+     0
+    ],
+    "shape": [
+     1,
+     1,
+     1
+    ],
+    "burst": false
+   }
+  }
+ ],
+ "preview": {
+  "kind": "fx",
+  "life": 200,
+  "scale": 1.0,
+  "height": 0.3,
+  "cam": 2.0
+ }
+}

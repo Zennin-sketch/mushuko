@@ -515,64 +515,28 @@ public final class AdvancedSpells {
      */
     private static void minefield(ServerPlayer p, ServerLevel level) {
         Vec3 c = targetPoint(p, 40);
-        int charge = 12;
-        // 1) bolita de fuego en la mano (sigue la mano mientras se carga)
-        Tasks.repeat(0, 1, charge, t -> {
+        int charge = 14;
+        // 1) animacion propia: la mano se cierra sobre la bolita de fuego (sigue viendose en la mano) y la tira al cielo
+        net.zennin.mushoku.network.ModNetworking.playAnim(p, "magic_minefield");
+        Tasks.later(1, () -> net.zennin.mushoku.network.ModNetworking.broadcastReady(p, "minefield"));
+        Tasks.repeat(0, 3, charge, t -> {
             Vec3 hand = hand(p);
-            float s = 0.04f + t * 0.012f;
-            level.sendParticles(ParticleTypes.FLAME, hand.x, hand.y, hand.z, 3, s, s, s, 0.005);
-            if (t % 3 == 0) level.sendParticles(ParticleTypes.SMALL_FLAME, hand.x, hand.y, hand.z, 2, s * 1.5, s * 1.5, s * 1.5, 0.01);
-            if (t == 0) level.playSound(null, hand.x, hand.y, hand.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.5f, 1.6f);
+            level.sendParticles(ParticleTypes.SMALL_FLAME, hand.x, hand.y, hand.z, 1, 0.05, 0.05, 0.05, 0.005);
+            if (t == 0) level.playSound(null, hand.x, hand.y, hand.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.4f, 1.7f);
             return p.isAlive();
         });
         int n = 8;
+        float power = 2f + 0.25f * (SpellMastery.castLevel(p) / 5);
         Tasks.later(charge, () -> {
-            p.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);
-            Vec3 from = hand(p);
+            net.zennin.mushoku.network.ModNetworking.broadcastReady(p, net.zennin.mushoku.data.ModAttachments.magic(p).queued());
+            Vec3 from = p.getEyePosition().add(0, 0.5, 0).add(p.getLookAngle().scale(0.4));
             level.playSound(null, from.x, from.y, from.z, SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1f, 1.3f);
             for (int i = 0; i < n; i++) {
                 double ox = (p.getRandom().nextDouble() - 0.5) * 12, oz = (p.getRandom().nextDouble() - 0.5) * 12;
                 Vec3 land = ground(level, c.add(ox, 0, oz));
                 Vec3 apex = c.add(ox * 0.35, 14 + p.getRandom().nextDouble() * 3, oz * 0.35);
-                int up = 18 + i, down = 12;
-                final int idx = i;
-                // 2) sube desde la mano hasta arriba del objetivo y 3) cae a su lugar
-                Tasks.repeat(i, 1, up + down, t -> {
-                    Vec3 at;
-                    if (t < up) {
-                        double u = (t + 1) / (double) up, k = 1 - u;
-                        Vec3 ctrl = from.add(apex).scale(0.5).add(0, 10, 0);
-                        at = from.scale(k * k).add(ctrl.scale(2 * k * u)).add(apex.scale(u * u));
-                    } else {
-                        double u = (t - up + 1) / (double) down;
-                        at = apex.add(land.subtract(apex).scale(u * u));
-                    }
-                    level.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 4, 0.08, 0.08, 0.08, 0.01);
-                    level.sendParticles(ParticleTypes.SMOKE, at.x, at.y, at.z, 1, 0.05, 0.05, 0.05, 0.0);
-                    if (t == up) level.playSound(null, at.x, at.y, at.z, SoundEvents.FIREWORK_ROCKET_TWINKLE_FAR, SoundSource.PLAYERS, 0.4f, 1.6f);
-                    if (t == up + down - 1) arm(p, level, land, 40 + idx * 6);
-                    return true;
-                });
+                net.zennin.mushoku.entity.MineEntity.launch(level, p, from, apex, land, 18 + i, 12, 40 + i * 6, power);
             }
-        });
-    }
-
-    /** Mina armada en el suelo: humea y brilla; estalla si alguien la pisa o al acabarse el tiempo. */
-    private static void arm(ServerPlayer p, ServerLevel level, Vec3 at, int fuse) {
-        level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.5f, 0.8f);
-        boolean[] done = {false};
-        float power = 2f + 0.25f * (SpellMastery.castLevel(p) / 5);
-        Tasks.repeat(0, 2, fuse, t -> {
-            if (done[0]) return false;
-            level.sendParticles(ParticleTypes.SMALL_FLAME, at.x, at.y + 0.1, at.z, 2, 0.12, 0.02, 0.12, 0.0);
-            if (t % 6 == 0) level.sendParticles(ParticleTypes.SMOKE, at.x, at.y + 0.2, at.z, 2, 0.1, 0.05, 0.1, 0.01);
-            boolean stepped = !around(level, at, 1.3, p).isEmpty();
-            if (stepped || t >= fuse - 2) {
-                done[0] = true;
-                level.explode(p, at.x, at.y, at.z, power, Level.ExplosionInteraction.MOB);
-                return false;
-            }
-            return true;
         });
     }
 

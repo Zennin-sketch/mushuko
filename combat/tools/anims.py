@@ -745,6 +745,21 @@ a.key(26, 'smooth', **P(root(up=-0.05, fwd=0.1, lean=8), torso(lean=6), head(dow
 a.key(29, 'stop', **P(root(up=-0.05, fwd=0.12, lean=9)))
 a.key(36, 'stop', **NEUTRAL_P)
 
+# Campo Minado: la bolita de fuego se forma sobre la palma, la cubre con la otra mano, toma impulso y la tira al cielo
+a = spell_anim('magic_minefield', 'Magia: Campo Minado (bolita en la palma y la tira al cielo)', 32)
+a.key(0, 'stop', **NEUTRAL_P)
+a.key(5, 'smooth', **P(root(up=-0.02, lean=3), torso(lean=3), head(down=14),
+                       dict(rarm=R((2.5, -6, 6.5), (0, 1, 0.15)), larm=L((-6, -11, 1))), legs('guard', 6)))
+a.key(10, 'stop', **P(root(up=-0.03, lean=4), torso(turn=-4, lean=4), head(down=16),
+                      dict(rarm=R((2, -6.5, 6.5), (0, 1, 0.15)), larm=L((0, -3.5, 6.5), (0, -1, 0.2)))))
+a.key(12, 'smooth', **P(root(up=-0.07, lean=-2, turn=12), torso(turn=22, lean=-3), head(down=-6),
+                        dict(rarm=R((7, -10, -2.5), (0, 1, -0.3)), larm=L((-5, -7, 6), (0, 0.4, 1))), legs('guard', 16)))
+a.key(14, 'smooth', **P(root(up=0.04, lean=-6, turn=-6), torso(turn=-12, lean=-8), head(down=-35),
+                        dict(rarm=R((3.5, 8.5, 4), (0, 1, 0.35)), larm=L((-7, -9, 2))), legs('wide')))
+a.key(19, 'stop', **P(root(up=0.02, lean=-5, turn=-4), torso(turn=-8, lean=-6), head(down=-38),
+                      dict(rarm=R((3.5, 8.8, 2.5), (0, 1, 0.2)))))
+a.key(32, 'stop', **NEUTRAL_P)
+
 # 7) Giro: vuelta completa con el baston extendido y remate adelante (Tornado, Tornado Impact)
 a = spell_anim('magic_spiral', 'Magia: giro completo con el baston extendido', 30)
 a.key(0, 'stop', **NEUTRAL_P)
@@ -793,15 +808,19 @@ r.key(10, 'smooth', **_run_pose('l'))
 r.key(15, 'smooth', **_run_pass('l'))
 r.key(20, 'smooth', **_run_pose('r'))
 
-i = anim('loco_idle', 'Quieto (respira y se acomoda, se repite)', end=60, loop=True, ret=0, stop=100000, lag=(), ground=False)
+i = anim('loco_idle', 'Quieto (respira, el peso en una pierna, se repite)', end=80, loop=True, ret=0, stop=100000, lag=(), ground=False)
 i.only = LOCO_PARTS
-IDLE_A = P(root(up=0.0), torso(lean=0.5), dict(rarm=R((5.3, -11.8, 0.4), (0, 0.1, 1)), larm=L((-5.3, -11.8, 0.4), (0, 0.1, 1))),
-           dict(rleg=((0.03, -1, 0.01), 3), lleg=((-0.03, -1, -0.01), 2)))
-IDLE_B = P(root(up=0.012), torso(lean=-1.2), dict(rarm=R((5.5, -11.6, 0.0), (0, 0.1, 1)), larm=L((-5.5, -11.6, 0.0), (0, 0.1, 1))),
-           dict(rleg=((0.03, -1, 0.01), 2), lleg=((-0.03, -1, -0.01), 1)))
+# peso sobre la pierna derecha (recta), la izquierda suelta con la rodilla apenas doblada; brazos relajados con el
+# codo un poco flojo y las manos al costado del muslo; respira despacio (el pecho sube y los hombros se abren)
+IDLE_A = P(root(up=-0.004, tilt=1.5), torso(lean=0.6, tilt=-1.2),
+           dict(rarm=R((5.595, -11.912, 0.892), (0, 0, 1)), larm=L((-5.695, -11.922, 0.695), (0, 0, 1))),
+           dict(rleg=((0.03, -1, 0.0), 0), lleg=((-0.07, -1, 0.07), 9)))
+IDLE_B = P(root(up=0.004, tilt=1.2), torso(lean=-0.9, tilt=-0.9),
+           dict(rarm=R((5.842, -11.91, 0.694), (0, 0, 1)), larm=L((-5.941, -11.91, 0.545), (0, 0, 1))),
+           dict(rleg=((0.03, -1, 0.0), 0), lleg=((-0.07, -1, 0.06), 8)))
 i.key(0, 'smooth', **IDLE_A)
-i.key(30, 'smooth', **IDLE_B)
-i.key(60, 'smooth', **IDLE_A)
+i.key(40, 'smooth', **IDLE_B)
+i.key(80, 'smooth', **IDLE_A)
 
 # =============================================================== PRUEBA (solo para la prueba visual: pose fija con codos, rodillas y cintura doblados)
 _t = anim('vt_bend', 'Prueba: pose fija con dobleces grandes', end=20, loop=True, ret=10, stop=100000)

@@ -37,13 +37,14 @@ public class MushokuClient implements ClientModInitializer {
             if (context.client().level.getEntity(payload.entityId()) instanceof net.minecraft.world.entity.player.Player pl)
                 net.zennin.mushoku.data.ModAttachments.setQuiver(pl, payload.quiver());
         }));
-        BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.cutout(), ModBlocks.EARTH_PILLAR, ModBlocks.RESEARCH_TABLE, ModBlocks.MAGIC_CIRCLE, ModBlocks.GLOW, ModBlocks.SHELF);
+        BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.cutout(), ModBlocks.EARTH_PILLAR, ModBlocks.RESEARCH_TABLE, ModBlocks.ALEMBIC, ModBlocks.MAGIC_CIRCLE, ModBlocks.GLOW, ModBlocks.SHELF);
         BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.translucent(), ModBlocks.ICE_PILLAR, ModBlocks.CLIMB_BLOCK, ModBlocks.ABSOLUTE_BARRIER, ModBlocks.BLOCK_SAND_CLOUD);
         ModKeys.init();
         CastingClient.init();
         SwordClient.init();
         EntityRendererRegistry.register(ModEntities.MAGIC_PROJECTILE, MagicProjectileRenderer::new);
         EntityRendererRegistry.register(ModEntities.SPELL_FX, SpellFxRenderer::new);
+        EntityRendererRegistry.register(ModEntities.MINE, MineRenderer::new);
         // --- Hitogami, dimension del vacio y rasgos de raza ---
         HumanoidNpcRenderer.register(ModEntities.HITOGAMI, "hitogami");
         EntityRendererRegistry.register(ModEntities.SPIRIT_BODY, SpiritBodyRenderer::new);
@@ -116,6 +117,7 @@ public class MushokuClient implements ClientModInitializer {
         });
         ManaSightRenderer.init();
         net.minecraft.client.gui.screens.MenuScreens.register(net.zennin.mushoku.menu.ModMenus.RESEARCH, ResearchScreen::new);
+        net.minecraft.client.gui.screens.MenuScreens.register(net.zennin.mushoku.menu.ModMenus.ALEMBIC, AlembicScreen::new);
         ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.SpellXpPayload.TYPE, (payload, context) -> ClientSpellXp.set(payload.uses()));
         ClientPlayNetworking.registerGlobalReceiver(MagicSyncPayload.TYPE, (payload, context) -> {
             ClientManaState.queued = payload.queued();

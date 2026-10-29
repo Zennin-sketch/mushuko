@@ -13,7 +13,8 @@ import static net.zennin.mushoku.client.MedievalUi.*;
 
 /** Mesa de Investigacion: pergamino con los tres huecos, la flecha rúnica, la piedra que sale y el recetario al costado. */
 public class ResearchScreen extends AbstractContainerScreen<ResearchMenu> {
-    private static final int BOOK_W = 118;
+    private static final int BOOK_W = 118, ENG_W = 132, ROW = 13, ROWS = 11;
+    private int scroll;
 
     public ResearchScreen(ResearchMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
@@ -25,7 +26,7 @@ public class ResearchScreen extends AbstractContainerScreen<ResearchMenu> {
     @Override
     protected void init() {
         super.init();
-        leftPos = (width - imageWidth - BOOK_W - 4) / 2 + BOOK_W + 4;
+        leftPos = (width - imageWidth - BOOK_W - ENG_W - 8) / 2 + BOOK_W + 4;
     }
 
     @Override
@@ -78,8 +79,65 @@ public class ResearchScreen extends AbstractContainerScreen<ResearchMenu> {
             g.drawString(font, ">", rx + 1, ry + 3, INK_SOFT, false);
             icon(g, ResearchRecipes.result(r), rx + 9, ry, 0.75f);
             g.drawString(font, r.mana() + "✦", bx + BOOK_W - 6 - font.width(r.mana() + "✦"), ry + 3, 0xFF2A5FA0, false);
-            ry += 23;
+            ry += 20;
         }
+        // grabado: lista de hechizos que conoce (con la pluma y un pergamino en blanco en los huecos)
+        int ex = leftPos + imageWidth + 4, ey = topPos;
+        g.blitSprite(WOOD, ex - 4, ey - 4, ENG_W + 8, imageHeight + 8);
+        g.blitSprite(PARCHMENT, ex, ey, ENG_W, imageHeight);
+        g.drawString(font, Component.translatable("gui.remushoku.research.engrave"), ex + 6, ey + 6, INK, false);
+        if (!menu.engraving()) {
+            int yy = ey + 22;
+            for (var line : font.split(Component.translatable("gui.remushoku.research.engrave_hint"), ENG_W - 12)) {
+                g.drawString(font, line, ex + 6, yy, INK_SOFT, false);
+                yy += 10;
+            }
+            return;
+        }
+        java.util.List<net.zennin.mushoku.magic.Spell> list = known();
+        scroll = Math.max(0, Math.min(scroll, Math.max(0, list.size() - ROWS)));
+        for (int i = 0; i < ROWS && i + scroll < list.size(); i++) {
+            var s = list.get(i + scroll);
+            int ry2 = ey + 20 + i * ROW;
+            int cost = net.zennin.mushoku.menu.ResearchRecipes.engraveCost(s);
+            boolean ok = ClientManaState.mana >= cost || minecraft.player.getAbilities().instabuild;
+            boolean hover = mx >= ex + 3 && mx < ex + ENG_W - 3 && my >= ry2 - 1 && my < ry2 + ROW - 1;
+            if (hover) g.fill(ex + 3, ry2 - 2, ex + ENG_W - 3, ry2 + ROW - 2, 0x40FFE8A0);
+            String c = String.valueOf(cost);
+            String name = font.plainSubstrByWidth(Component.translatable(s.translationKey()).getString(), ENG_W - 14 - font.width(c));
+            g.drawString(font, name, ex + 6, ry2, ok ? INK : INK_SOFT, false);
+            g.drawString(font, c, ex + ENG_W - 6 - font.width(c), ry2, ok ? 0xFF2A5FA0 : INK_RED, false);
+        }
+        if (list.size() > ROWS)
+            g.drawString(font, (scroll + 1) + "-" + Math.min(list.size(), scroll + ROWS) + "/" + list.size(), ex + 6, ey + imageHeight - 12, INK_SOFT, false);
+    }
+
+    private java.util.List<net.zennin.mushoku.magic.Spell> known() {
+        java.util.List<net.zennin.mushoku.magic.Spell> out = new java.util.ArrayList<>();
+        for (var s : net.zennin.mushoku.magic.Spell.values())
+            if (ResearchMenu.knows(minecraft.player, s)) out.add(s);
+        return out;
+    }
+
+    @Override
+    public boolean mouseClicked(double mx, double my, int button) {
+        int ex = leftPos + imageWidth + 4, ey = topPos;
+        if (menu.engraving() && mx >= ex + 3 && mx < ex + ENG_W - 3 && my >= ey + 18) {
+            int i = (int) ((my - ey - 18) / ROW);
+            var list = known();
+            if (i >= 0 && i < ROWS && i + scroll < list.size()) {
+                net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new net.zennin.mushoku.network.EngravePayload(list.get(i + scroll).id));
+                minecraft.getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK, 1f));
+                return true;
+            }
+        }
+        return super.mouseClicked(mx, my, button);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mx, double my, double dx, double dy) {
+        if (mx >= leftPos + imageWidth) { scroll -= (int) Math.signum(dy); return true; }
+        return super.mouseScrolled(mx, my, dx, dy);
     }
 
     private static void slot(GuiGraphics g, int x, int y) { slot(g, x, y, 18); }

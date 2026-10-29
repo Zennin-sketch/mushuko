@@ -20,7 +20,10 @@ import java.util.List;
  */
 public final class ResearchRecipes {
     public record Need(Item item, int count) {}
-    public record Recipe(List<Need> needs, int stoneTier, int stones, int mana, int resultTier) {}
+    public record Recipe(List<Need> needs, int stoneTier, int stones, int mana, int resultTier,
+                         java.util.function.Supplier<ItemStack> other) {
+        Recipe(List<Need> needs, int stoneTier, int stones, int mana, int resultTier) { this(needs, stoneTier, stones, mana, resultTier, null); }
+    }
 
     public static final List<Recipe> ALL = List.of(
             new Recipe(List.of(new Need(Items.AMETHYST_SHARD, 2), new Need(Items.LAPIS_LAZULI, 1)), 0, 0, 20, 1),
@@ -28,7 +31,10 @@ public final class ResearchRecipes {
             new Recipe(List.of(new Need(Items.DIAMOND, 1)), 2, 3, 150, 3),
             new Recipe(List.of(new Need(Items.EMERALD, 1)), 3, 3, 350, 4),
             new Recipe(List.of(new Need(Items.ECHO_SHARD, 1)), 4, 3, 650, 5),
-            new Recipe(List.of(new Need(Items.NETHERITE_SCRAP, 1)), 5, 3, 900, 6));
+            new Recipe(List.of(new Need(Items.NETHERITE_SCRAP, 1)), 5, 3, 900, 6),
+            // pergaminos en blanco: 3 papeles y un frasco de tinta
+            new Recipe(List.of(new Need(Items.PAPER, 3), new Need(net.zennin.mushoku.registry.ModItems.INK_VIAL, 1)), 0, 0, 10, 0,
+                    () -> new ItemStack(net.zennin.mushoku.registry.ModItems.SCROLL, 3)));
 
     private ResearchRecipes() {}
 
@@ -79,5 +85,21 @@ public final class ResearchRecipes {
         in.setChanged();
     }
 
-    public static ItemStack result(Recipe r) { return new ItemStack(SpellData.stoneFor(r.resultTier())); }
+    public static ItemStack result(Recipe r) { return r.other() != null ? r.other().get() : new ItemStack(SpellData.stoneFor(r.resultTier())); }
+
+    /** Grabar: pluma con tinta + pergamino en blanco (y nada mas) en los huecos. */
+    public static boolean engraving(Container in) {
+        boolean quill = false, scroll = false;
+        for (int i = 0; i < in.getContainerSize(); i++) {
+            ItemStack s = in.getItem(i);
+            if (s.isEmpty()) continue;
+            if (s.is(net.zennin.mushoku.registry.ModItems.INKAND_QUILL)) quill = true;
+            else if (s.is(net.zennin.mushoku.registry.ModItems.SCROLL) && SpellData.get(s) == null) scroll = true;
+            else return false;
+        }
+        return quill && scroll;
+    }
+
+    /** Mana para grabar un hechizo en un pergamino: una vez y media lo que cuesta lanzarlo. */
+    public static int engraveCost(net.zennin.mushoku.magic.Spell s) { return (int) Math.round(s.level.cost * 1.5); }
 }

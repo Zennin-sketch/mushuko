@@ -23,7 +23,7 @@ public final class ClientReadySpell {
 
     private static final Map<Integer, Ready> READY = new HashMap<>();
     /** Proyectiles que pueden ir en la mano (los efectos grandes como nubes o muros no). */
-    private static final String[] HAND_MODELS = {"fire_crescent", "water_arrow", "wind_drill", "icicle", "stone_bullet", "wind_blade",
+    private static final String[] HAND_MODELS = {"minefield_ball", "fire_crescent", "water_arrow", "wind_drill", "icicle", "stone_bullet", "wind_blade",
             "fireball", "water_ball"};
     private static Map<String, String> bySpell;
 

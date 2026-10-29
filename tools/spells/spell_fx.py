@@ -545,9 +545,63 @@ def glow_wind(): return _glow('Brillo de viento (hechizos de estructura)', 'wind
 def glow_none(): return _glow('Brillo de mana (sin elemento)', 'water', 'translucent', 'fffbe0', 'ffd86a', 'ffffff')
 
 
+
+# ================================================================ Campo Minado: bolita de fuego en la mano y las minas
+def minefield_ball():
+    """Bolita de fuego chica y apretada: nucleo blanco, brasas que la orbitan y costra oscura que se agrieta."""
+    core = group('fire', 'emissive', [box((0, 0, 0), (3, 3, 3), 'fff6c8')], glow=True, pulse=(0.18, 4))
+    mid = group('fire', 'emissive', [box((0, 0, 0), (5, 5, 5), 'ffa030', 0.85)], glow=True, spin=(6, 9, 0), pulse=(0.08, 6))
+    crust = []
+    for i, (rx, ry, rz) in enumerate([(0, 0, 0), (45, 45, 0), (0, 45, 45), (45, 0, 45)]):
+        crust.append(box((0, 0, 0), (6.4, 6.4, 6.4) if i == 0 else (5.6, 5.6, 5.6), lerp_hex('3a1a10', '6a2a14', i / 3), 0.55, rot=(rx, ry, rz)))
+    shell = group('fire', 'emissive', crust, glow=False, spin=(-3, 5, 2), flicker=0.25)
+    orbit = []
+    for k in range(4):
+        a = k * math.pi / 2
+        orbit.append(box((4.6 * math.cos(a), 0.8 * math.sin(2 * a), 4.6 * math.sin(a)), (1.2, 1.2, 1.2), 'ffd04a', 0.95))
+    embers_orbit = group('fire', 'emissive', orbit, glow=True, spin=(0, 24, 0), pulse=(0.2, 3))
+    embers = group('fire', 'emissive', [], glow=True,
+                   emit=emitter(14, 12, (3.5, 3, 3.5), (1.0, 0.2), ('ffd84a', 'b8240a'), alpha=0.95, rise=0.5))
+    return projectile('Campo Minado: bolita de fuego en la mano', ['minefield'], [core, mid, shell, embers_orbit, embers])
+
+
+def minefield_ball_form():
+    core, mid, shell, orbit, embers = minefield_ball()['groups']
+    core['grow'] = [2, 10]
+    mid['grow'] = [5, 13]
+    shell['grow'] = [9, 16]
+    orbit['grow'] = [11, 18]
+    embers['show'] = [[10, 40]]
+    gather = group('fire', 'emissive', [], glow=True, show=[[0, 14]],
+                   emit=emitter(26, 10, (10, 9, 10), (1.2, 0.4), ('ffe07a', 'ff4a0e'), alpha=1.0, outward=-0.9))
+    return fx('Campo Minado: la bolita se forma', [], [gather, core, mid, shell, orbit, embers], life=FORM, scale=1.0, height=0.6, cam=2.0)
+
+
+def minefield_mine():
+    """Mina de fuego: piedra volcanica agrietada con el nucleo encendido, pinchos de brasa y chispas que suben."""
+    rnd = random.Random(31)
+    core = group('fire', 'emissive', [box((0, 0, 0), (3.4, 3.4, 3.4), 'fff0b0')], glow=True, pulse=(0.25, 6))
+    glow = group('fire', 'emissive', [box((0, 0, 0), (5.2, 5.2, 5.2), 'ff8a20', 0.6)], glow=True, pulse=(0.15, 6), flicker=0.3)
+    rock = []
+    for i, (rx, ry, rz) in enumerate([(0, 0, 0), (45, 0, 0), (0, 45, 0), (0, 0, 45)]):
+        rock.append(box((0, 0, 0), (6, 6, 6), lerp_hex('2a1a14', '4a2a1a', rnd.random()), 0.92, rot=(rx, ry, rz)))
+    spikes = []
+    for k in range(8):
+        a = k / 8 * 2 * math.pi
+        up = 1.6 if k % 2 == 0 else -1.6
+        spikes.append(box((4.2 * math.cos(a), up, 4.2 * math.sin(a)), (1.4, 1.4, 1.4), 'ff5a10', 0.95,
+                          rot=(rnd.uniform(0, 45), math.degrees(a), 45)))
+    shell = group('stone', 'solid', rock, spin=(0, 3, 0))
+    hot = group('fire', 'emissive', spikes, glow=True, spin=(0, 3, 0), pulse=(0.12, 5), flicker=0.2)
+    sparks = group('fire', 'emissive', [], glow=True,
+                   emit=emitter(10, 14, (3, 2, 3), (1.0, 0.2), ('ffd84a', 'c03008'), alpha=0.95, rise=0.7))
+    return fx('Campo Minado: mina', ['minefield'], [shell, core, glow, hot, sparks], life=200, scale=1.0, height=0.3, cam=2.0)
+
+
 FX_MODELS = dict(fireball_form=fireball_form, water_ball_form=water_ball_form, stone_bullet_form=stone_bullet_form,
                  icicle_form=icicle_form, wind_blade_form=wind_blade_form, wind_drill_form=wind_drill_form,
                  water_arrow_form=water_arrow_form, fire_crescent_form=fire_crescent_form,
                  glow_fire=glow_fire, glow_water=glow_water, glow_earth=glow_earth, glow_wind=glow_wind, glow_none=glow_none, water_arrow=water_arrow, fire_crescent=fire_crescent, storm_cloud=storm_cloud_small, cumulonimbus=cumulonimbus,
                  earth_spike=earth_spike, earth_pillar_burst=earth_pillar_burst, ice_crystals=ice_crystals, fire_burst=fire_burst, water_wall=water_wall,
-                 magic_shield=magic_shield)
+                 magic_shield=magic_shield, minefield_ball=minefield_ball, minefield_ball_form=minefield_ball_form,
+                 minefield_mine=minefield_mine)

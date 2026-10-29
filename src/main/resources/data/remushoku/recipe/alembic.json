@@ -1,0 +1,27 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "misc",
+ "pattern": [
+  " G ",
+  "CBC",
+  "KKK"
+ ],
+ "key": {
+  "G": {
+   "item": "minecraft:glass_bottle"
+  },
+  "C": {
+   "item": "minecraft:copper_ingot"
+  },
+  "B": {
+   "item": "minecraft:copper_block"
+  },
+  "K": {
+   "item": "minecraft:bricks"
+  }
+ },
+ "result": {
+  "count": 1,
+  "id": "remushoku:alembic"
+ }
+}

@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "remushoku:magic_ore",
-    "remushoku:stone_dispenser"
+    "remushoku:stone_dispenser",
+    "remushoku:alembic"
   ]
 }

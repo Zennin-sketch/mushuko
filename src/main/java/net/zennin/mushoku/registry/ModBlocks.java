@@ -108,6 +108,14 @@ public final class ModBlocks {
     public static final Block RESEARCH_TABLE = withItem("research_table", new net.zennin.mushoku.block.ResearchTableBlock(
             BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.CRAFTING_TABLE).noOcclusion().lightLevel(s -> 5)));
 
+    /** Alambique de Cobre: destila pociones de mana. */
+    public static final Block ALEMBIC = withItem("alembic", new net.zennin.mushoku.block.AlembicBlock(
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.COPPER_BLOCK).noOcclusion().strength(2f)
+                    .lightLevel(s -> s.getValue(net.zennin.mushoku.block.AlembicBlock.LIT) ? 9 : 0)));
+    public static final BlockEntityType<net.zennin.mushoku.block.AlembicBlockEntity> ALEMBIC_BE = Registry.register(
+            BuiltInRegistries.BLOCK_ENTITY_TYPE, MushokuMod.id("alembic"),
+            BlockEntityType.Builder.of(net.zennin.mushoku.block.AlembicBlockEntity::new, ALEMBIC).build(null));
+
     private static Block withItem(String name, Block block) {
         Registry.register(BuiltInRegistries.BLOCK, MushokuMod.id(name), block);
         Item item = Registry.register(BuiltInRegistries.ITEM, MushokuMod.id(name), new BlockItem(block, new Item.Properties()));
