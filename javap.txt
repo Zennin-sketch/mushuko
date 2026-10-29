@@ -1,0 +1,35 @@
+Compiled from "BetterCombatClientEvents.java"
+public interface net.bettercombat.api.client.BetterCombatClientEvents$PlayerAttackStart {
+  public abstract void onPlayerAttackStart(net.minecraft.class_746, net.bettercombat.api.AttackHand);
+}
+Compiled from "WeaponAttributes.java"
+public final class net.bettercombat.api.WeaponAttributes$Attack {
+  private net.bettercombat.api.WeaponAttributes$Condition[] conditions;
+  private net.bettercombat.api.WeaponAttributes$HitBoxShape hitbox;
+  private double damage_multiplier;
+  private float movement_speed_multiplier;
+  private float range_multiplier;
+  private double angle;
+  private double upswing;
+  private java.lang.String animation;
+  private net.bettercombat.api.WeaponAttributes$Sound swing_sound;
+  private net.bettercombat.api.WeaponAttributes$Sound impact_sound;
+  private java.util.List<net.bettercombat.api.fx.ParticlePlacement> trail_particles;
+  public net.bettercombat.api.WeaponAttributes$Attack();
+  public net.bettercombat.api.WeaponAttributes$Attack(net.bettercombat.api.WeaponAttributes$Condition[], net.bettercombat.api.WeaponAttributes$HitBoxShape, double, float, float, double, double, java.lang.String, net.bettercombat.api.WeaponAttributes$Sound, net.bettercombat.api.WeaponAttributes$Sound, java.util.List<net.bettercombat.api.fx.ParticlePlacement>);
+  public static net.bettercombat.api.WeaponAttributes$Attack empty();
+  public net.bettercombat.api.WeaponAttributes$Condition[] conditions();
+  public net.bettercombat.api.WeaponAttributes$HitBoxShape hitbox();
+  public double damageMultiplier();
+  public float movementSpeedMultiplier();
+  public float rangeMultiplier();
+  public double angle();
+  public double upswing();
+  public java.lang.String animation();
+  public net.bettercombat.api.WeaponAttributes$Sound swingSound();
+  public java.util.List<net.bettercombat.api.fx.ParticlePlacement> trailParticles();
+  public net.bettercombat.api.WeaponAttributes$Sound impactSound();
+  public boolean equals(java.lang.Object);
+  public int hashCode();
+  public java.lang.String toString();
+}
