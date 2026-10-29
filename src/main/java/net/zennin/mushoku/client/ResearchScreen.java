@@ -99,14 +99,14 @@ public class ResearchScreen extends AbstractContainerScreen<ResearchMenu> {
         for (int i = 0; i < ROWS && i + scroll < list.size(); i++) {
             var s = list.get(i + scroll);
             int ry2 = ey + 20 + i * ROW;
-            int cost = net.zennin.mushoku.menu.ResearchRecipes.engraveCost(s);
-            boolean ok = ClientManaState.mana >= cost || minecraft.player.getAbilities().instabuild;
+            int ecost = net.zennin.mushoku.menu.ResearchRecipes.engraveCost(s);
+            boolean eok = ClientManaState.mana >= ecost || minecraft.player.getAbilities().instabuild;
             boolean hover = mx >= ex + 3 && mx < ex + ENG_W - 3 && my >= ry2 - 1 && my < ry2 + ROW - 1;
             if (hover) g.fill(ex + 3, ry2 - 2, ex + ENG_W - 3, ry2 + ROW - 2, 0x40FFE8A0);
-            String c = String.valueOf(cost);
+            String c = String.valueOf(ecost);
             String name = font.plainSubstrByWidth(Component.translatable(s.translationKey()).getString(), ENG_W - 14 - font.width(c));
-            g.drawString(font, name, ex + 6, ry2, ok ? INK : INK_SOFT, false);
-            g.drawString(font, c, ex + ENG_W - 6 - font.width(c), ry2, ok ? 0xFF2A5FA0 : INK_RED, false);
+            g.drawString(font, name, ex + 6, ry2, eok ? INK : INK_SOFT, false);
+            g.drawString(font, c, ex + ENG_W - 6 - font.width(c), ry2, eok ? 0xFF2A5FA0 : INK_RED, false);
         }
         if (list.size() > ROWS)
             g.drawString(font, (scroll + 1) + "-" + Math.min(list.size(), scroll + ROWS) + "/" + list.size(), ex + 6, ey + imageHeight - 12, INK_SOFT, false);
