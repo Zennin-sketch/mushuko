@@ -322,7 +322,8 @@ public class ArmorV2Renderer extends GeoArmorRenderer<ArmorV2Item> {
     private void kneeSkin(org.joml.Vector3f out, float w, float sR, org.joml.Vector3f q) {
         for (int i = 0; i < 2; i++) {
             if (!knee[i]) continue;
-            float wi = w * (i == 0 ? sR : 1 - sR);
+            // a medias: la canilla que patea para atras no levanta la tela (la empuja el choque si hace falta)
+            float wi = w * (i == 0 ? sR : 1 - sR) * 0.4f;
             if (wi < 1e-3f) continue;
             toLeg[i].transformPosition(q.set(out));
             float low = smoothstep((q.y - 4f) / 5f);

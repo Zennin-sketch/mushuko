@@ -56,11 +56,13 @@ public final class Locomotion extends PlayerAnimationFrame {
                 && !p.isSwimming() && !p.isSleeping() && !p.isShiftKeyDown() && !p.isUsingItem();
         if (!active) return;
         boolean run = p.isSprinting();
+        // Capa Atrapallamas: brazos quietos bajo la capa y pasos a la mitad (como pidio el diseno de la capa)
+        boolean cloak = p.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST).is(net.zennin.mushoku.item.ArmorV2.FLAME_CLOAK);
         float phase = p.walkAnimation.position(partial) * 0.6662f;
         float a = amount;
         // ---- piernas: el muslo va y viene (menos que vanilla) y la rodilla se dobla al pasar hacia adelante
-        float thigh = run ? 1.05f : 0.72f;
-        float kneeMax = run ? 1.45f : 0.75f, kneeBase = run ? 0.22f : 0.06f;
+        float thigh = (run ? 0.85f : 0.72f) * (cloak ? 0.5f : 1f);
+        float kneeMax = (run ? 1.35f : 0.75f) * (cloak ? 0.6f : 1f), kneeBase = run ? 0.22f : 0.06f;
         float rx = Mth.cos(phase) * thigh * a, lx = Mth.cos(phase + Mth.PI) * thigh * a;
         float rSwing = Math.max(0, Mth.sin(phase)), lSwing = Math.max(0, -Mth.sin(phase));
         float rKnee = a * (kneeBase + kneeMax * rSwing * rSwing), lKnee = a * (kneeBase + kneeMax * lSwing * lSwing);
@@ -71,6 +73,7 @@ public final class Locomotion extends PlayerAnimationFrame {
         leftLeg.rot = new Vec3f(lx, 0, 0.0f);
         rightLeg.bend = new Pair<>(0f, rKnee);
         leftLeg.bend = new Pair<>(0f, lKnee);
+        if (cloak) return;
         // ---- brazos: opuestos a las piernas, con el codo flexionado
         float arm = run ? 0.95f : 0.55f;
         float ra = Mth.cos(phase + Mth.PI) * arm * a, la = Mth.cos(phase) * arm * a;
