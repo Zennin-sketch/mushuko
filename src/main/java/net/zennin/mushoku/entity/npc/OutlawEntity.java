@@ -96,6 +96,7 @@ public class OutlawEntity extends Monster implements RangedAttackMob {
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, SpawnGroupData data) {
         SpawnGroupData d = super.finalizeSpawn(level, difficulty, reason, data);
         populateDefaultEquipmentSlots(getRandom(), difficulty);
+        equipped = true;
         reassessWeaponGoal();
         return d;
     }
@@ -103,8 +104,27 @@ public class OutlawEntity extends Monster implements RangedAttackMob {
     @Override
     public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
         super.readAdditionalSaveData(tag);
+        equipped = tag.getBoolean("Equipped");
         reassessWeaponGoal();
     }
+    /** Si aparecio sin pasar por finalizeSpawn (comando con datos, estructuras), se arma en su primer tick. */
+    private boolean equipped;
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+        if (!equipped && !level().isClientSide) {
+            equipped = true;
+            if (getMainHandItem().isEmpty()) populateDefaultEquipmentSlots(getRandom(), level().getCurrentDifficultyAt(blockPosition()));
+        }
+    }
+
+    @Override
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putBoolean("Equipped", equipped);
+    }
+
 
     @Override
     public void performRangedAttack(LivingEntity target, float power) {
