@@ -22,12 +22,12 @@ import java.util.UUID;
  * Roll (espadachin) y dash (mago). El movimiento lo hace el cliente; aca se cobra la estamina, se avisa a los demas
  * jugadores para que vean la animacion y se resuelve la esquiva perfecta: si un golpe llega en los primeros
  * 6 ticks (0.3 s) de la esquiva, se anula todo el dano, suena un golpe metalico, el personaje brilla dorado y queda
- * invulnerable 3 segundos.
+ * invulnerable 1.2 segundos.
  */
 public final class Dodge {
     public static final int PERFECT_WINDOW = 6;
-    /** Invulnerabilidad despues de una esquiva perfecta: 3 s (no la atraviesa ningun dano salvo el vacio o /kill). */
-    public static final int INVULNERABLE_TICKS = 60;
+    /** Invulnerabilidad despues de una esquiva perfecta: 1.2 s (no la atraviesa ningun dano salvo el vacio o /kill). */
+    public static final int INVULNERABLE_TICKS = 24;
     private static final Map<UUID, Long> STARTED = new HashMap<>();
     private static final Set<String> RELAYED = Set.of("cast_pose", "cast_release",
             "hip_draw", "hip_sheathe", "back_draw", "back_sheathe",

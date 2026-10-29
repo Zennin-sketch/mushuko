@@ -36,6 +36,11 @@ body { background: var(--night); color: var(--parchment); font-family: var(--bod
 .hit.on { opacity: 1; }
 .cams { position: absolute; right: 12px; top: 12px; display: flex; gap: 4px; }
 .cams button { font: 500 12px var(--body); }
+.cams button.on { background: var(--gold); color: #17130b; }
+.xhair { position: absolute; left: 50%; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; pointer-events: none; display: none; }
+.xhair::before, .xhair::after { content: ""; position: absolute; background: rgba(255,255,255,.85); mix-blend-mode: difference; }
+.xhair::before { left: 8px; top: 0; width: 2px; height: 18px; } .xhair::after { top: 8px; left: 0; height: 2px; width: 18px; }
+.fpnote { position: absolute; left: 12px; bottom: 10px; font: 500 12px var(--body); color: #ece3cf; background: rgba(14,17,23,.7); padding: 4px 8px; border-radius: 6px; display: none; }
 .bar { display: grid; gap: 8px; padding-block: 10px 14px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: 16px;
   border-top: 1px solid var(--line); background: var(--slate); }
 .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
@@ -113,8 +118,10 @@ aside h2:first-child { margin-top: 0; }
     </div>
     <div id="view">
       <div class="hit" id="hit">IMPACTO</div>
+      <div class="xhair" id="xhair"></div>
+      <div class="fpnote" id="fpnote">Vista del jugador: camara en los ojos, mirando al frente (como en el juego)</div>
       <div class="cams" role="group" aria-label="Camara">
-        <button id="cam-34">3/4 izq.</button><button id="cam-r34">3/4 der.</button><button id="cam-front">Frente</button><button id="cam-side">Lado</button><button id="cam-back">Atras</button><button id="cam-top">Arriba</button>
+        <button id="cam-34">3/4 izq.</button><button id="cam-r34">3/4 der.</button><button id="cam-front">Frente</button><button id="cam-side">Lado</button><button id="cam-back">Atras</button><button id="cam-top">Arriba</button><button id="cam-fp" title="Lo que ve el jugador en el juego">1a persona</button>
       </div>
     </div>
     <div class="bar">
@@ -266,9 +273,28 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 0.95, 0); controls.enableDamping = true; controls.minDistance = 1.5; controls.maxDistance = 12;
 const CAMS = { '34': [-2.6, 1.7, -3.4], r34: [2.6, 1.5, -3.4], front: [0, 1.3, -4.2], side: [-4.2, 1.3, 0], back: [0, 1.6, 4.2], top: [0.01, 5.5, -0.6] };
 let camKey = '34';
-function cam(k) { camKey = k; const f = camera.aspect < 0.9 ? 1.6 : 1; camera.position.set(...CAMS[k].map((v, i) => i === 1 ? v : v * f)); controls.target.set(0, 0.95, 0); controls.update(); }
+/* Primera persona: la camara queda en los ojos (1.62 bloques), mirando al frente, con el FOV del juego (70).
+   Se ocultan cabeza, torso y piernas, como cuando Player Animator dibuja los brazos en primera persona. */
+let fp = false;
+function fpVisible() {
+  if (!rig.parts) return;
+  for (const n of ['head', 'torso', 'rightLeg', 'leftLeg']) if (rig.parts[n]) rig.parts[n].g.visible = !fp;
+}
+function fpCamera() { camera.position.set(0, 1.62, 0); camera.lookAt(0, 1.62, -1); }
+function setFP(on) {
+  fp = on;
+  document.getElementById('cam-fp').classList.toggle('on', on);
+  document.getElementById('xhair').style.display = on ? 'block' : 'none';
+  document.getElementById('fpnote').style.display = on ? 'block' : 'none';
+  camera.fov = on ? 70 : 38; camera.updateProjectionMatrix();
+  controls.enabled = !on;
+  fpVisible();
+  if (on) fpCamera();
+}
+function cam(k) { if (fp) setFP(false); camKey = k; const f = camera.aspect < 0.9 ? 1.6 : 1; camera.position.set(...CAMS[k].map((v, i) => i === 1 ? v : v * f)); controls.target.set(0, 0.95, 0); controls.update(); }
 cam('34');
 for (const k of Object.keys(CAMS)) document.getElementById('cam-' + k).onclick = () => cam(k);
+document.getElementById('cam-fp').onclick = () => { if (fp) cam(camKey); else setFP(true); };
 
 scene.add(new THREE.HemisphereLight(0xfff2dc, 0x223044, 1.15));
 const sun = new THREE.DirectionalLight(0xffffff, 1.5); sun.position.set(-3, 6, -4); scene.add(sun);
@@ -846,7 +872,8 @@ function frame(now) {
   apply(player);
   updateModBow();
   drawTimeline();
-  controls.update(); renderer.render(scene, camera);
+  if (fp) { controls.enabled = false; fpVisible(); fpCamera(); } else controls.update();
+  renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }
 let wasCombo = false;
@@ -1235,9 +1262,10 @@ edPanel.innerHTML = `
     <div class="r"><button id="ed-new">Empezar de cero</button></div>
   </div>
   <div class="grp"><b>Enviar a Claude</b>
-    <div class="r"><button class="gold" id="ed-export">Copiar texto</button><button id="ed-import">Cargar texto</button></div>
+    <p class="hint"><b>Importante:</b> lo que guardas aca queda solo en este navegador; el juego no lo lee solo. Para verlo en el juego, copia el texto y pegamelo en el chat: yo lo meto en el mod y te paso el .jar nuevo.</p>
+    <div class="r"><button class="gold" id="ed-exportall">Copiar todo lo editado</button></div>
+    <div class="r"><button id="ed-export">Copiar solo este golpe</button><button id="ed-import">Cargar texto</button></div>
     <textarea id="ed-json" spellcheck="false" aria-label="Keyframes en texto"></textarea>
-    <p class="hint">Pegame el texto en el chat y genero la animacion final (piso, choques del arma, giros suaves).</p>
   </div>`;
 const $ = id => document.getElementById(id);
 for (const [k, label] of SEGS) { const b = document.createElement('button'); b.textContent = label; b.dataset.seg = k; b.onclick = () => edSelect(k); $('ed-parts').appendChild(b); }
@@ -1330,7 +1358,27 @@ $('ed-export').onclick = () => {
   const out = { formato: 'mushoku-keyframes-3', nombre: ED.name, duracion: ED.length, arma: ED.weapon, golpe: ED.hit,
     keyframes: edSorted().map(k => ({ tick: k.tick, frenar: k.stop, pose: k.pose })), animacion: ED.keys.length >= 2 ? edEmotecraft() : null };
   const txt = JSON.stringify(out); $('ed-json').value = txt;
-  const done = () => { $('ed-export').textContent = 'Copiado'; setTimeout(() => $('ed-export').textContent = 'Copiar texto', 1500); };
+  const done = () => { $('ed-export').textContent = 'Copiado'; setTimeout(() => $('ed-export').textContent = 'Copiar solo este golpe', 1500); };
+  try { navigator.clipboard.writeText(txt).then(done, () => $('ed-json').select()); } catch (e) { $('ed-json').select(); }
+};
+/** Todos los golpes que tienen keyframes guardados (de todas las armas), con su animacion final, en un solo texto. */
+$('ed-exportall').onclick = () => {
+  const keep = [ED.weapon, ED.hit, currentWeapon], slots = [], all = [];
+  try { for (let i = 0; i < localStorage.length; i++) { const m = (localStorage.key(i) || '').match(/^mushoku-ed3-(.+)-(\d+)$/); if (m && DATA.weapons[m[1]]) slots.push([m[1], +m[2]]); } } catch (e) {}
+  slots.sort((a, b) => a[0] === b[0] ? a[1] - b[1] : a[0] < b[0] ? -1 : 1);
+  for (const [w, h] of slots) {
+    ED.weapon = w; ED.hit = h; edLoadSlot();
+    if (ED.keys.length < 2) continue;
+    equip(w);
+    all.push({ nombre: ED.name, duracion: ED.length, arma: w, golpe: h,
+      keyframes: edSorted().map(k => ({ tick: k.tick, frenar: k.stop, pose: k.pose })), animacion: edEmotecraft() });
+  }
+  ED.weapon = keep[0]; ED.hit = keep[1]; equip(keep[2]); edLoadSlot(); edSync();
+  const txt = all.length ? JSON.stringify({ formato: 'mushoku-keyframes-3-todo', animaciones: all })
+    : 'Todavia no hay golpes con 2 o mas keyframes guardados.';
+  $('ed-json').value = txt;
+  if (!all.length) return;
+  const b = $('ed-exportall'), done = () => { b.textContent = `Copiado (${all.length} golpes)`; setTimeout(() => b.textContent = 'Copiar todo lo editado', 2000); };
   try { navigator.clipboard.writeText(txt).then(done, () => $('ed-json').select()); } catch (e) { $('ed-json').select(); }
 };
 $('ed-import').onclick = () => {

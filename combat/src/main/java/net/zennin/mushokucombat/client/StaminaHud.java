@@ -23,7 +23,7 @@ public final class StaminaHud {
 
     static void render(GuiGraphics g, DeltaTracker delta) {
         Minecraft mc = Minecraft.getInstance();
-        if (GoldenGlow.selfFlash > 0 && !mc.options.hideGui) flash(g, GoldenGlow.selfFlash / (float) GoldenGlow.DURATION);
+        if (GoldenGlow.selfFlash > 0 && !mc.options.hideGui) flash(g, GoldenGlow.selfFlash / (float) GoldenGlow.FLASH);
         if (!visible()) return;
         shown += (ClientStamina.value - shown) * 0.3f;
         int x = g.guiWidth() / 2 - 91, y = g.guiHeight() - 29 - SHIFT;
