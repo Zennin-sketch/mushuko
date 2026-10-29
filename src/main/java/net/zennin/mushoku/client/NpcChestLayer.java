@@ -138,9 +138,4 @@ public class NpcChestLayer<T extends Mob> extends RenderLayer<T, PlayerModel<T>>
         return s;
     }
 
-    /** Si este personaje lleva pecho, lo agrega al renderer. */
-    public static <T extends Mob> void attach(LivingEntityRenderer<T, PlayerModel<T>> renderer, String texture, ResourceLocation tex) {
-        Shape sh = SHAPES.get(texture);
-        if (sh != null) renderer.addLayer(new NpcChestLayer<>(renderer, tex, sh));
-    }
 }

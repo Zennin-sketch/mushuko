@@ -27,7 +27,8 @@ public class HumanoidNpcRenderer<T extends Mob> extends HumanoidMobRenderer<T, P
         super(ctx, new PlayerModel<>(ctx.bakeLayer(slim ? ModelLayers.PLAYER_SLIM : ModelLayers.PLAYER), slim), 0.5f);
         this.texture = MushokuMod.id("textures/entities/" + texture + ".png");
         this.slim = slim;
-        NpcChestLayer.attach(this, texture, this.texture);
+        NpcChestLayer.Shape chest = NpcChestLayer.SHAPES.get(texture);
+        if (chest != null) addLayer(new NpcChestLayer<>(this, this.texture, chest));
         addLayer(new HumanoidArmorLayer<>(this,
                 new HumanoidModel<>(ctx.bakeLayer(slim ? ModelLayers.PLAYER_SLIM_INNER_ARMOR : ModelLayers.PLAYER_INNER_ARMOR)),
                 new HumanoidModel<>(ctx.bakeLayer(slim ? ModelLayers.PLAYER_SLIM_OUTER_ARMOR : ModelLayers.PLAYER_OUTER_ARMOR)),
