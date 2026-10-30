@@ -35,7 +35,7 @@ public final class SpellKnowledge {
         l.add(s.id);
         ModAttachments.setKnownSpells(p, l);
         p.displayClientMessage(Component.translatable("msg.remushoku.spell_learned", Component.translatable(s.translationKey())
-                .withStyle(color(s.level))).withStyle(ChatFormatting.GOLD), false);
+                .withStyle(st -> st.withColor(color(s.level)))).withStyle(ChatFormatting.GOLD), false);
         p.level().playSound(null, p.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.7f, 1.2f);
         p.level().playSound(null, p.blockPosition(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8f, 1.1f);
         SpellMastery.sync(p);
