@@ -1,0 +1,94 @@
+{
+ "skin": "remushoku:textures/entities/rudeus_greyrat.png",
+ "steps": [
+  {
+   "op": "setup",
+   "fov": 50
+  },
+  {
+   "op": "cmd",
+   "v": "give @s remushoku:bandit_dagger"
+  },
+  {
+   "op": "cmd",
+   "v": "give @s remushoku:hunter_bow"
+  },
+  {
+   "op": "cmd",
+   "v": "give @s remushoku:mana_bloom_seeds 5"
+  },
+  {
+   "op": "cmd",
+   "v": "give @s remushoku:mana_petal 5"
+  },
+  {
+   "op": "cam",
+   "pitch": 5,
+   "h": 0
+  },
+  {
+   "op": "dummy",
+   "yaw": 150,
+   "dist": 2.2
+  },
+  {
+   "op": "equip",
+   "slot": "mainhand",
+   "v": "remushoku:bandit_dagger"
+  },
+  {
+   "op": "wait",
+   "t": 10
+  },
+  {
+   "op": "shot",
+   "v": "dagger_3p"
+  },
+  {
+   "op": "dummy",
+   "yaw": 220,
+   "dist": 2.2
+  },
+  {
+   "op": "wait",
+   "t": 5
+  },
+  {
+   "op": "shot",
+   "v": "dagger_3p_b"
+  },
+  {
+   "op": "fp",
+   "v": true,
+   "fov": 70
+  },
+  {
+   "op": "wait",
+   "t": 10
+  },
+  {
+   "op": "shot",
+   "v": "dagger_fp"
+  },
+  {
+   "op": "fp",
+   "v": false
+  },
+  {
+   "op": "inv",
+   "v": true
+  },
+  {
+   "op": "wait",
+   "t": 10
+  },
+  {
+   "op": "shot",
+   "v": "dagger_inv"
+  },
+  {
+   "op": "inv",
+   "v": false
+  }
+ ]
+}
