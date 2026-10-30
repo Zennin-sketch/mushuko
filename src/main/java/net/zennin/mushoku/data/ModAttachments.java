@@ -129,6 +129,20 @@ public final class ModAttachments {
     @SuppressWarnings("UnstableApiUsage")
     public static void setSpellXp(Player player, java.util.Map<String, Integer> m) { player.setAttached(SPELL_XP, java.util.Map.copyOf(m)); }
 
+    /** Hechizos que el jugador conoce (al empezar, ninguno): se aprenden entrenando o con pergaminos de hechizo. */
+    @SuppressWarnings("UnstableApiUsage")
+    public static final AttachmentType<java.util.List<String>> KNOWN_SPELLS = AttachmentRegistry.<java.util.List<String>>builder()
+            .persistent(com.mojang.serialization.Codec.STRING.listOf())
+            .copyOnDeath()
+            .initializer(java.util.List::of)
+            .buildAndRegister(MushokuMod.id("known_spells"));
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static java.util.List<String> knownSpells(Player player) { return player.getAttachedOrCreate(KNOWN_SPELLS); }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static void setKnownSpells(Player player, java.util.List<String> l) { player.setAttached(KNOWN_SPELLS, java.util.List.copyOf(l)); }
+
     private ModAttachments() {}
 
     @SuppressWarnings("UnstableApiUsage")

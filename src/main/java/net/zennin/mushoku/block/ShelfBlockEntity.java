@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.zennin.mushoku.registry.ModBlocks;
 
-/** Estante con 9 espacios, como el original. */
+/** Estante con 8 espacios (4 de cada lado), que se ven sobre las repisas. El menu es de 9 pero el ultimo esta trabado. */
 public class ShelfBlockEntity extends BaseContainerBlockEntity {
     private NonNullList<ItemStack> items = NonNullList.withSize(9, ItemStack.EMPTY);
 
@@ -37,6 +37,10 @@ public class ShelfBlockEntity extends BaseContainerBlockEntity {
 
     @Override
     public int getContainerSize() { return 9; }
+
+    /** Solo se usan 8 espacios: el noveno no acepta nada. */
+    @Override
+    public boolean canPlaceItem(int slot, ItemStack stack) { return slot < 8; }
 
     /** Avisa a los clientes para que el estante muestre lo que tiene guardado. */
     @Override

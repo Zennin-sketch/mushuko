@@ -47,6 +47,7 @@ public final class SpellCasting {
             Spell[] split = Spell.splitCombined(combo, m.noElement());
             if (split != null) {
                 for (int i = 0; i < 2; i++) {
+                    if (!SpellKnowledge.tryKnow(p, split[i], m.level(split[i].element))) return;
                     if (!creative && m.level(split[i].element) < split[i].level.tier) {
                         msg(p, Component.translatable("msg.remushoku.not_learned").withStyle(ChatFormatting.RED));
                         return;
@@ -63,6 +64,8 @@ public final class SpellCasting {
             msg(p, Component.translatable("msg.remushoku.swordsman_spell_limit").withStyle(ChatFormatting.RED));
             return;
         }
+        // hechizo nuevo: se descubre entrenando (hasta Avanzado) o avisa "casi dominas un nuevo hechizo"
+        if (!SpellKnowledge.tryKnow(p, spell, m.level(spell.element))) return;
         if (!creative && m.level(spell.element) < spell.level.tier) {
             msg(p, Component.translatable("msg.remushoku.not_learned").withStyle(ChatFormatting.RED));
             return;
@@ -147,6 +150,11 @@ public final class SpellCasting {
         }
         if (!p.getAbilities().instabuild && ModAttachments.get(p).playerClass() == CLASS_SWORDSMAN && result.level.tier > 2) {
             msg(p, Component.translatable("msg.remushoku.swordsman_spell_limit").withStyle(ChatFormatting.RED));
+            return;
+        }
+        if (!SpellKnowledge.tryKnow(p, result, m.level(result.element))) {
+            ModAttachments.setMagic(p, m.withQueued(""));
+            ModNetworking.syncMagic(p);
             return;
         }
         ModAttachments.setMagic(p, m.withQueued(result.id));

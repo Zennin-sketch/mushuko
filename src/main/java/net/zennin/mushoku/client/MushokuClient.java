@@ -37,7 +37,7 @@ public class MushokuClient implements ClientModInitializer {
             if (context.client().level.getEntity(payload.entityId()) instanceof net.minecraft.world.entity.player.Player pl)
                 net.zennin.mushoku.data.ModAttachments.setQuiver(pl, payload.quiver());
         }));
-        BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.cutout(), ModBlocks.EARTH_PILLAR, ModBlocks.RESEARCH_TABLE, ModBlocks.ALEMBIC, ModBlocks.MAGIC_CIRCLE, ModBlocks.GLOW, ModBlocks.SHELF);
+        BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.cutout(), ModBlocks.EARTH_PILLAR, ModBlocks.RESEARCH_TABLE, ModBlocks.ALEMBIC, ModBlocks.MAGIC_CIRCLE, ModBlocks.GLOW, ModBlocks.SHELF, ModBlocks.MANA_BLOOM);
         BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.translucent(), ModBlocks.ICE_PILLAR, ModBlocks.CLIMB_BLOCK, ModBlocks.ABSOLUTE_BARRIER, ModBlocks.BLOCK_SAND_CLOUD);
         ModKeys.init();
         CastingClient.init();
@@ -120,7 +120,10 @@ public class MushokuClient implements ClientModInitializer {
         ManaSightRenderer.init();
         net.minecraft.client.gui.screens.MenuScreens.register(net.zennin.mushoku.menu.ModMenus.RESEARCH, ResearchScreen::new);
         net.minecraft.client.gui.screens.MenuScreens.register(net.zennin.mushoku.menu.ModMenus.ALEMBIC, AlembicScreen::new);
-        ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.SpellXpPayload.TYPE, (payload, context) -> ClientSpellXp.set(payload.uses()));
+        ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.ResearchRollPayload.TYPE, (payload, context) -> {
+            if (net.minecraft.client.Minecraft.getInstance().screen instanceof ResearchScreen rs) rs.startRoll(payload.spell());
+        });
+        ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.SpellXpPayload.TYPE, (payload, context) -> { ClientSpellXp.set(payload.uses()); ClientSpellXp.setKnown(payload.known()); });
         ClientPlayNetworking.registerGlobalReceiver(MagicSyncPayload.TYPE, (payload, context) -> {
             ClientManaState.queued = payload.queued();
             ClientManaState.noElement = payload.noElement();
@@ -134,6 +137,8 @@ public class MushokuClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.RefinePayloads.Result.TYPE, (payload, context) -> RefineScreen.onResult(payload));
         net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(net.zennin.mushoku.registry.ModBlocks.REFINING_STONE_BE, RefiningStoneRenderer::new);
         net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(net.zennin.mushoku.registry.ModBlocks.SHELF_BE, ShelfRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry.ITEM.register((stack, layer) -> layer == 1
+                ? net.zennin.mushoku.item.SpellLessonScrollItem.inkColor(stack) : -1, net.zennin.mushoku.registry.ModItems.SPELL_LESSON_SCROLL);
         ClientPlayNetworking.registerGlobalReceiver(ActionPayload.TYPE, (payload, context) -> {
             if (payload.action() == ActionPayload.OPEN_CLASS_SCREEN) context.client().setScreen(new ClassPickScreen());
             if (payload.action() == ActionPayload.ESCAPE && context.client().level != null)

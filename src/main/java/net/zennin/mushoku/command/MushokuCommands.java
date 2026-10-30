@@ -17,6 +17,11 @@ import net.zennin.mushoku.network.ModNetworking;
  * /mushoku mana <n>, /mushoku puntos <n> (espadachin), /mushoku puntosarquero <n>, /mushoku maxmana <n>, /mushoku elemento <agua|fuego|tierra|viento> <1-6>, /mushoku clase
  */
 public final class MushokuCommands {
+    /** Autocompletar con TAB los nombres de los hechizos. */
+    private static final com.mojang.brigadier.suggestion.SuggestionProvider<net.minecraft.commands.CommandSourceStack> SPELLS =
+            (c, b) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
+                    java.util.Arrays.stream(net.zennin.mushoku.magic.Spell.values()).map(sp -> sp.id), b);
+
     private MushokuCommands() {}
 
     public static void init() {
@@ -103,13 +108,36 @@ public final class MushokuCommands {
                             return 1;
                         }))
                         // lanzar un hechizo por su nombre (pruebas): /mushoku lanzar quagmire
-                        .then(Commands.literal("lanzar").then(Commands.argument("hechizo", StringArgumentType.word()).executes(c -> {
+                        .then(Commands.literal("lanzar").then(Commands.argument("hechizo", StringArgumentType.word()).suggests(SPELLS).executes(c -> {
                             net.zennin.mushoku.magic.Spell sp = net.zennin.mushoku.magic.Spell.byId(StringArgumentType.getString(c, "hechizo"));
                             if (sp == null) { c.getSource().sendFailure(Component.literal("Hechizo desconocido")); return 0; }
                             return net.zennin.mushoku.magic.SpellEffects.cast(sp, c.getSource().getPlayerOrException()) ? 1 : 0;
                         })))
+                        // aprender u olvidar hechizos (pruebas): /mushoku aprender fireball | /mushoku aprender todos
+                        .then(Commands.literal("aprender").then(Commands.argument("hechizo", StringArgumentType.word())
+                                .suggests((c, b) -> net.minecraft.commands.SharedSuggestionProvider.suggest(java.util.stream.Stream.concat(
+                                        java.util.stream.Stream.of("todos"), java.util.Arrays.stream(net.zennin.mushoku.magic.Spell.values()).map(sp -> sp.id)), b))
+                                .executes(c -> {
+                            var pl = c.getSource().getPlayerOrException();
+                            String id = StringArgumentType.getString(c, "hechizo");
+                            if (id.equals("todos")) {
+                                net.zennin.mushoku.data.ModAttachments.setKnownSpells(pl, java.util.Arrays.stream(net.zennin.mushoku.magic.Spell.values()).map(sp -> sp.id).toList());
+                                net.zennin.mushoku.magic.SpellMastery.sync(pl);
+                                c.getSource().sendSuccess(() -> Component.literal("Todos los hechizos aprendidos"), false);
+                                return 1;
+                            }
+                            net.zennin.mushoku.magic.Spell sp = net.zennin.mushoku.magic.Spell.byId(id);
+                            if (sp == null) { c.getSource().sendFailure(Component.literal("Hechizo desconocido")); return 0; }
+                            return net.zennin.mushoku.magic.SpellKnowledge.learn(pl, sp) ? 1 : 0;
+                        })))
+                        .then(Commands.literal("olvidar").then(Commands.argument("hechizo", StringArgumentType.word()).suggests(SPELLS).executes(c -> {
+                            net.zennin.mushoku.magic.Spell sp = net.zennin.mushoku.magic.Spell.byId(StringArgumentType.getString(c, "hechizo"));
+                            if (sp == null) { c.getSource().sendFailure(Component.literal("Hechizo desconocido")); return 0; }
+                            net.zennin.mushoku.magic.SpellKnowledge.forget(c.getSource().getPlayerOrException(), sp);
+                            return 1;
+                        })))
                         // fijar el nivel de un hechizo (pruebas): /mushoku maestria nuclear_strike 20 (pide el mana maximo del nivel)
-                        .then(Commands.literal("maestria").then(Commands.argument("hechizo", StringArgumentType.word())
+                        .then(Commands.literal("maestria").then(Commands.argument("hechizo", StringArgumentType.word()).suggests(SPELLS)
                                 .then(Commands.argument("nivel", IntegerArgumentType.integer(1, 20)).executes(c -> {
                             net.zennin.mushoku.magic.Spell sp = net.zennin.mushoku.magic.Spell.byId(StringArgumentType.getString(c, "hechizo"));
                             if (sp == null) { c.getSource().sendFailure(Component.literal("Hechizo desconocido")); return 0; }
@@ -118,6 +146,7 @@ public final class MushokuCommands {
                             java.util.Map<String, Integer> m = new java.util.HashMap<>(net.zennin.mushoku.data.ModAttachments.spellXp(pl));
                             m.put(sp.id, net.zennin.mushoku.magic.SpellMastery.usesFor(sp, lvl));
                             net.zennin.mushoku.data.ModAttachments.setSpellXp(pl, m);
+                            net.zennin.mushoku.magic.SpellKnowledge.learn(pl, sp);
                             int gate = net.zennin.mushoku.magic.SpellMastery.gate(sp, lvl);
                             var md = net.zennin.mushoku.data.ModAttachments.get(pl);
                             if (md.maxMana() < gate) net.zennin.mushoku.data.ModAttachments.set(pl, md.withMaxMana(gate));

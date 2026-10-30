@@ -1,0 +1,348 @@
+{
+ "skin": "remushoku:textures/entities/rudeus_greyrat.png",
+ "steps": [
+  {
+   "op": "setup",
+   "fov": 70
+  },
+  {
+   "op": "cmd",
+   "v": "difficulty easy"
+  },
+  {
+   "op": "cmd",
+   "v": "gamerule doMobSpawning false"
+  },
+  {
+   "op": "cmd",
+   "v": "fill -12 119 -6 12 119 20 minecraft:grass_block"
+  },
+  {
+   "op": "cmd",
+   "v": "fill -12 120 -6 12 130 20 minecraft:air"
+  },
+  {
+   "op": "book"
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "shot",
+   "v": "book_empty"
+  },
+  {
+   "op": "closescreen"
+  },
+  {
+   "op": "cmd",
+   "v": "mushoku aprender fireball"
+  },
+  {
+   "op": "cmd",
+   "v": "mushoku aprender water_ball"
+  },
+  {
+   "op": "cmd",
+   "v": "mushoku aprender ice_smash"
+  },
+  {
+   "op": "book"
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "shot",
+   "v": "book_some"
+  },
+  {
+   "op": "closescreen"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 0 120 3 remushoku:shelf[facing=north]"
+  },
+  {
+   "op": "cmd",
+   "v": "item replace block 0 120 3 container.0 with minecraft:diamond"
+  },
+  {
+   "op": "cmd",
+   "v": "item replace block 0 120 3 container.1 with minecraft:book"
+  },
+  {
+   "op": "cmd",
+   "v": "item replace block 0 120 3 container.2 with remushoku:mana_potion"
+  },
+  {
+   "op": "cmd",
+   "v": "item replace block 0 120 3 container.3 with minecraft:apple"
+  },
+  {
+   "op": "cmd",
+   "v": "item replace block 0 120 3 container.4 with minecraft:oak_log"
+  },
+  {
+   "op": "cmd",
+   "v": "item replace block 0 120 3 container.5 with remushoku:mana_potion_large"
+  },
+  {
+   "op": "cmd",
+   "v": "item replace block 0 120 3 container.6 with minecraft:iron_sword"
+  },
+  {
+   "op": "cmd",
+   "v": "item replace block 0 120 3 container.7 with remushoku:spell_lesson_scroll"
+  },
+  {
+   "op": "cam",
+   "pitch": 15,
+   "h": 0.4,
+   "x": -1.6,
+   "z": 3.5,
+   "yaw": -90
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "shot",
+   "v": "shelf_west"
+  },
+  {
+   "op": "cam",
+   "pitch": 15,
+   "h": 0.4,
+   "x": 2.6,
+   "z": 3.5,
+   "yaw": 90
+  },
+  {
+   "op": "wait",
+   "t": 10
+  },
+  {
+   "op": "shot",
+   "v": "shelf_east"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 0 120 3 minecraft:air"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 0 120 3 remushoku:research_table[facing=north]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -1 120 3 remushoku:research_table[facing=north,side=true]"
+  },
+  {
+   "op": "cam",
+   "pitch": 20,
+   "h": 0.2,
+   "x": 1.8,
+   "z": 0.6,
+   "yaw": 35
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "shot",
+   "v": "table_corner"
+  },
+  {
+   "op": "cam",
+   "pitch": -10,
+   "h": -0.4,
+   "x": -0.5,
+   "z": 1.0,
+   "yaw": 0
+  },
+  {
+   "op": "wait",
+   "t": 10
+  },
+  {
+   "op": "shot",
+   "v": "table_under"
+  },
+  {
+   "op": "cam",
+   "pitch": 10,
+   "h": 0.2,
+   "x": 3.0,
+   "z": 3.5,
+   "yaw": 90
+  },
+  {
+   "op": "wait",
+   "t": 10
+  },
+  {
+   "op": "shot",
+   "v": "table_side"
+  },
+  {
+   "op": "cam",
+   "pitch": 40,
+   "h": 0,
+   "x": 0.5,
+   "z": 0.8
+  },
+  {
+   "op": "useblock",
+   "x": 0,
+   "y": 120,
+   "z": 3,
+   "scale": 2
+  },
+  {
+   "op": "wait",
+   "t": 10
+  },
+  {
+   "op": "menuslot",
+   "slot": 0,
+   "v": "remushoku:inkand_quill"
+  },
+  {
+   "op": "menuslot",
+   "slot": 1,
+   "v": "remushoku:scroll",
+   "n": 8
+  },
+  {
+   "op": "menuslot",
+   "slot": 2,
+   "v": "remushoku:king_stone",
+   "n": 4
+  },
+  {
+   "op": "wait",
+   "t": 10
+  },
+  {
+   "op": "shot",
+   "v": "research_ready"
+  },
+  {
+   "op": "research"
+  },
+  {
+   "op": "wait",
+   "t": 15
+  },
+  {
+   "op": "shot",
+   "v": "research_rolling"
+  },
+  {
+   "op": "wait",
+   "t": 45
+  },
+  {
+   "op": "shot",
+   "v": "research_result"
+  },
+  {
+   "op": "closescreen"
+  },
+  {
+   "op": "cmd",
+   "v": "fill -2 120 2 2 122 4 minecraft:air"
+  },
+  {
+   "op": "cmd",
+   "v": "give @s remushoku:spell_lesson_scroll{}"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -2 119 4 minecraft:farmland"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -2 120 4 remushoku:mana_bloom[age=0]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -1 119 4 minecraft:farmland"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -1 120 4 remushoku:mana_bloom[age=1]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 0 119 4 minecraft:farmland"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 0 120 4 remushoku:mana_bloom[age=2]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 1 119 4 minecraft:farmland"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 1 120 4 remushoku:mana_bloom[age=3]"
+  },
+  {
+   "op": "cam",
+   "pitch": 30,
+   "h": 0.6,
+   "x": -0.5,
+   "z": 2.2
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "shot",
+   "v": "bloom"
+  },
+  {
+   "op": "cmd",
+   "v": "fill -2 120 4 1 120 4 minecraft:air"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:outlaw_m_melee -2.4 120 5 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[150f,0f],Tags:[\"vt\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:outlaw_m_archer -0.8 120 5 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[150f,0f],Tags:[\"vt\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:outlaw_f_melee 0.8 120 5 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[150f,0f],Tags:[\"vt\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:outlaw_f_archer 2.4 120 5 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[150f,0f],Tags:[\"vt\"]}"
+  },
+  {
+   "op": "cam",
+   "pitch": 5,
+   "h": 0.2,
+   "x": 0.5,
+   "z": 1.0
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "shot",
+   "v": "outlaw_weapons"
+  }
+ ]
+}

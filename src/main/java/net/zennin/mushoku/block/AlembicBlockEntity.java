@@ -24,7 +24,7 @@ import net.zennin.mushoku.registry.ModBlocks;
 import net.zennin.mushoku.registry.ModItems;
 
 /**
- * Huecos: 0 botella de agua, 1 ingrediente, 2 combustible, 3 pocion. Ingredientes: lapislazuli = pocion chica,
+ * Huecos: 0 botella de agua, 1 ingrediente, 2 combustible, 3 pocion. Ingredientes: petalo de Flor de Mana = pocion chica,
  * fragmento de amatista = pocion, piedra elemental = pocion grande. Cada destilado tarda 10 s.
  */
 public class AlembicBlockEntity extends BaseContainerBlockEntity {
@@ -44,7 +44,7 @@ public class AlembicBlockEntity extends BaseContainerBlockEntity {
     }
 
     public static Item resultFor(ItemStack ingredient) {
-        if (ingredient.is(Items.LAPIS_LAZULI)) return ModItems.MANA_POTION_SMALL;
+        if (ingredient.is(ModItems.MANA_PETAL)) return ModItems.MANA_POTION_SMALL;
         if (ingredient.is(Items.AMETHYST_SHARD)) return ModItems.MANA_POTION;
         if (ingredient.is(ModItems.ELEMENTARY_STONE)) return ModItems.MANA_POTION_LARGE;
         return null;

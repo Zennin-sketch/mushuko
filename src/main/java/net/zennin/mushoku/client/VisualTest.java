@@ -214,6 +214,18 @@ public final class VisualTest {
                 mc.gameMode.useItemOn(mc.player, net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.phys.BlockHitResult(
                         net.minecraft.world.phys.Vec3.atCenterOf(bp), net.minecraft.core.Direction.UP, bp, false));
             }
+            case "menuslot" -> {
+                // pone un item en un hueco del menu abierto (en el servidor, para que se sincronice)
+                int slot = s.get("slot").getAsInt();
+                ItemStack st = new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(s.get("v").getAsString())), s.has("n") ? s.get("n").getAsInt() : 1);
+                var srv = mc.getSingleplayerServer();
+                srv.execute(() -> {
+                    var sp = srv.getPlayerList().getPlayer(mc.player.getUUID());
+                    if (sp != null && slot < sp.containerMenu.slots.size()) { sp.containerMenu.getSlot(slot).set(st); sp.containerMenu.broadcastChanges(); }
+                });
+            }
+            case "research" -> net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(
+                    new net.zennin.mushoku.network.EngravePayload(net.zennin.mushoku.menu.ResearchMenu.RESEARCH));
             case "mobwalk" -> mobWalk = s.get("t").getAsInt();
             case "book" -> {
                 keepScreen = true;

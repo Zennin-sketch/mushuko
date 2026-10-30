@@ -16,15 +16,15 @@ import net.zennin.mushoku.block.ShelfBlock;
 import net.zennin.mushoku.block.ShelfBlockEntity;
 
 /**
- * Muestra lo guardado en el estante: dos objetos en cada uno de los cuatro huecos (arriba/abajo, izquierda/derecha
- * del separador) y el noveno acostado arriba del estante. Los bloques se ven como bloquecitos y los items parados.
+ * Muestra lo guardado en el estante. El estante se mira de costado (con la tabla del medio de fondo): de cada lado hay
+ * dos objetos en la repisa de arriba y dos en la de abajo (8 en total). Los bloques se ven como bloquecitos y los
+ * items parados mirando hacia afuera.
  */
 public class ShelfRenderer implements BlockEntityRenderer<ShelfBlockEntity> {
-    /** Posicion (en px del bloque mirando al norte) de cada espacio: x, y del piso del hueco. */
+    /** x, y del piso de la repisa, z (px del modelo mirando al norte) y hacia que lado mira (-1 = oeste, 1 = este). */
     private static final float[][] SPOTS = {
-            {2.2f, 10}, {5.0f, 10}, {11.0f, 10}, {13.8f, 10},
-            {2.2f, 2}, {5.0f, 2}, {11.0f, 2}, {13.8f, 2},
-            {8f, 16}};
+            {3.6f, 10, 4.2f, -1}, {3.6f, 10, 11.8f, -1}, {3.6f, 2, 4.2f, -1}, {3.6f, 2, 11.8f, -1},
+            {12.4f, 10, 4.2f, 1}, {12.4f, 10, 11.8f, 1}, {12.4f, 2, 4.2f, 1}, {12.4f, 2, 11.8f, 1}};
 
     public ShelfRenderer(BlockEntityRendererProvider.Context ctx) {}
 
@@ -32,31 +32,25 @@ public class ShelfRenderer implements BlockEntityRenderer<ShelfBlockEntity> {
     public void render(ShelfBlockEntity be, float partial, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         if (be.getLevel() == null) return;
         Direction facing = be.getBlockState().hasProperty(ShelfBlock.FACING) ? be.getBlockState().getValue(ShelfBlock.FACING) : Direction.NORTH;
-        int lightHere = LevelRenderer.getLightColor(be.getLevel(), be.getBlockPos().above());
+        int lightHere = Math.max(light, LevelRenderer.getLightColor(be.getLevel(), be.getBlockPos().above()));
         var items = be.shown();
         for (int i = 0; i < Math.min(items.size(), SPOTS.length); i++) {
             ItemStack st = items.get(i);
             if (st.isEmpty()) continue;
             boolean block = st.getItem() instanceof BlockItem;
+            float[] sp = SPOTS[i];
             pose.pushPose();
             pose.translate(0.5, 0, 0.5);
             pose.mulPose(Axis.YP.rotationDegrees(-facing.toYRot() + 180));
             pose.translate(-0.5, 0, -0.5);
-            float x = SPOTS[i][0] / 16f, y = SPOTS[i][1] / 16f;
-            if (i == 8) {
-                // acostado arriba del estante
-                pose.translate(x, y + 0.01, 0.5);
-                pose.mulPose(Axis.XP.rotationDegrees(90));
-                pose.mulPose(Axis.ZP.rotationDegrees(15));
-                pose.scale(0.42f, 0.42f, 0.42f);
-            } else if (block) {
-                pose.translate(x, y + 0.11, 0.5);
-                pose.mulPose(Axis.YP.rotationDegrees(i % 2 == 0 ? 8 : -6));
-                pose.scale(0.26f, 0.26f, 0.26f);
+            pose.translate(sp[0] / 16f, sp[1] / 16f, sp[2] / 16f);
+            pose.mulPose(Axis.YP.rotationDegrees(sp[3] * 90 + (i % 2 == 0 ? 8 : -8)));
+            if (block) {
+                pose.translate(0, 0.14, 0);
+                pose.scale(0.3f, 0.3f, 0.3f);
             } else {
-                pose.translate(x, y + 0.17, 0.5);
-                pose.mulPose(Axis.YP.rotationDegrees(i % 2 == 0 ? 10 : -10));
-                pose.scale(0.34f, 0.34f, 0.34f);
+                pose.translate(0, 0.19, 0);
+                pose.scale(0.38f, 0.38f, 0.38f);
             }
             Minecraft.getInstance().getItemRenderer().renderStatic(st, ItemDisplayContext.FIXED, lightHere, OverlayTexture.NO_OVERLAY,
                     pose, buffers, be.getLevel(), (int) be.getBlockPos().asLong() + i);

@@ -13,7 +13,7 @@ import static net.zennin.mushoku.client.MedievalUi.*;
 
 /** Mesa de Investigacion: pergamino con los tres huecos, la flecha rúnica, la piedra que sale y el recetario al costado. */
 public class ResearchScreen extends AbstractContainerScreen<ResearchMenu> {
-    private static final int BOOK_W = 140, ENG_W = 132, ROW = 13, ROWS = 11;
+    private static final int BOOK_W = 140, ENG_W = 132, ROW = 13, ROWS = 8;
     private int scroll;
 
     public ResearchScreen(ResearchMenu menu, Inventory inv, Component title) {
@@ -92,6 +92,7 @@ public class ResearchScreen extends AbstractContainerScreen<ResearchMenu> {
                 g.drawString(font, line, ex + 6, yy, INK_SOFT, false);
                 yy += 10;
             }
+            if (rollTick >= 0) drawRoll(g, ex, ey);
             return;
         }
         java.util.List<net.zennin.mushoku.magic.Spell> list = known();
@@ -109,10 +110,80 @@ public class ResearchScreen extends AbstractContainerScreen<ResearchMenu> {
             g.drawString(font, c, ex + ENG_W - 6 - font.width(c), ry2, eok ? 0xFF2A5FA0 : INK_RED, false);
         }
         if (list.size() > ROWS)
-            g.drawString(font, (scroll + 1) + "-" + Math.min(list.size(), scroll + ROWS) + "/" + list.size(), ex + 6, ey + imageHeight - 12, INK_SOFT, false);
+            g.drawString(font, (scroll + 1) + "-" + Math.min(list.size(), scroll + ROWS) + "/" + list.size(), ex + 6, ey + 20 + ROWS * ROW, INK_SOFT, false);
+        if (list.isEmpty()) g.drawString(font, Component.translatable("gui.remushoku.research.no_known"), ex + 6, ey + 22, INK_SOFT, false);
+        // investigar un hechizo nuevo (ruleta): boton abajo
+        int bx2 = ex + 5, by2 = ey + imageHeight - 30, bw2 = ENG_W - 10, bh2 = 24;
+        boolean rhover = rollTick < 0 && mx >= bx2 && mx < bx2 + bw2 && my >= by2 && my < by2 + bh2;
+        boolean rok = ClientManaState.mana >= ResearchMenu.RESEARCH_COST || minecraft.player.getAbilities().instabuild;
+        g.fill(bx2, by2, bx2 + bw2, by2 + bh2, 0xFF5A3A22);
+        g.fill(bx2 + 1, by2 + 1, bx2 + bw2 - 1, by2 + bh2 - 1, rhover ? 0xFF8A5A30 : 0xFF6E4628);
+        g.fill(bx2 + 1, by2 + 1, bx2 + bw2 - 1, by2 + 2, 0xFFC9A227);
+        Component rt = Component.translatable("gui.remushoku.research.roll");
+        g.drawString(font, rt, bx2 + bw2 / 2 - font.width(rt) / 2, by2 + 3, rok ? 0xFFFFE6A0 : 0xFFB08070, false);
+        String info = ResearchMenu.RESEARCH_COST + "✦  ·  " + String.format(java.util.Locale.ROOT, "%.1f", ResearchMenu.researchChance(menu.offeredStone()) * 100) + "%";
+        g.drawString(font, info, bx2 + bw2 / 2 - font.width(info) / 2, by2 + 13, 0xFF9FC8FF, false);
+        if (rollTick >= 0) drawRoll(g, ex, ey);
     }
 
     private ItemStack bookHover = ItemStack.EMPTY;
+
+    // ------------------------------------------------------------------ ruleta de investigacion
+    private static final int ROLL = 50, SHOW = 70;
+    private int rollTick = -1;
+    private String rollResult = "", rollShown = "";
+    private int lastSwap = -99;
+
+    /** Llega el resultado del servidor: arranca la ruleta (el resultado se ve al final). */
+    public void startRoll(String result) { rollResult = result; rollTick = 0; lastSwap = -99; }
+
+    @Override
+    protected void containerTick() {
+        super.containerTick();
+        if (rollTick < 0) return;
+        rollTick++;
+        // los nombres pasan rapido y despues cada vez mas lento, con un "tic"
+        int gap = 1 + rollTick / 7;
+        if (rollTick < ROLL && rollTick - lastSwap >= gap) {
+            lastSwap = rollTick;
+            var all = net.zennin.mushoku.magic.Spell.values();
+            rollShown = all[minecraft.level.random.nextInt(all.length)].id;
+            minecraft.getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
+                    net.minecraft.sounds.SoundEvents.NOTE_BLOCK_HAT.value(), 1.4f + minecraft.level.random.nextFloat() * 0.3f, 0.5f));
+        }
+        if (rollTick == ROLL) {
+            rollShown = rollResult;
+            minecraft.getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(rollResult.isEmpty()
+                    ? net.minecraft.sounds.SoundEvents.NOTE_BLOCK_BASS.value() : net.minecraft.sounds.SoundEvents.NOTE_BLOCK_CHIME.value(), rollResult.isEmpty() ? 0.6f : 1.2f, 1f));
+        }
+        if (rollTick > ROLL + SHOW) rollTick = -1;
+    }
+
+    private void drawRoll(GuiGraphics g, int ex, int ey) {
+        int x0 = ex + 4, y0 = ey + 44, x1 = ex + ENG_W - 4, y1 = ey + 96;
+        g.pose().pushPose();
+        g.pose().translate(0, 0, 300);
+        g.fill(x0, y0, x1, y1, 0xF0241812);
+        g.fill(x0 + 1, y0 + 1, x1 - 1, y0 + 2, 0xFFC9A227);
+        g.fill(x0 + 1, y1 - 2, x1 - 1, y1 - 1, 0xFFC9A227);
+        boolean done = rollTick >= ROLL;
+        Component head = Component.translatable(done ? (rollResult.isEmpty() ? "gui.remushoku.research.fail" : "gui.remushoku.research.win") : "gui.remushoku.research.rolling");
+        g.drawString(font, head, (x0 + x1) / 2 - font.width(head) / 2, y0 + 7, done && !rollResult.isEmpty() ? 0xFFFFD84A : 0xFFD8C8A8, false);
+        var sp = rollShown.isEmpty() ? null : net.zennin.mushoku.magic.Spell.byId(rollShown);
+        if (sp != null) {
+            String name = font.plainSubstrByWidth(Component.translatable(sp.translationKey()).getString(), x1 - x0 - 8);
+            int col = 0xFF000000 | net.zennin.mushoku.magic.SpellKnowledge.rgb(sp.level);
+            g.drawString(font, name, (x0 + x1) / 2 - font.width(name) / 2, y0 + 25, done ? col : (col & 0x00FFFFFF) | 0xB0000000, true);
+            if (done) {
+                Component lv = Component.translatable("level.remushoku." + sp.level.tier);
+                g.drawString(font, lv, (x0 + x1) / 2 - font.width(lv) / 2, y0 + 37, col, false);
+            }
+        } else if (done) {
+            Component f = Component.translatable("gui.remushoku.research.burnt");
+            g.drawString(font, f, (x0 + x1) / 2 - font.width(f) / 2, y0 + 27, 0xFFB08070, false);
+        }
+        g.pose().popPose();
+    }
 
     /** Item del recetario en tamano real con su cantidad; devuelve donde termina. */
     private int item(GuiGraphics g, ItemStack st, int x, int y, int mx, int my) {
@@ -139,7 +210,12 @@ public class ResearchScreen extends AbstractContainerScreen<ResearchMenu> {
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
         int ex = leftPos + imageWidth + 4, ey = topPos;
-        if (menu.engraving() && mx >= ex + 3 && mx < ex + ENG_W - 3 && my >= ey + 18) {
+        if (menu.engraving() && rollTick < 0 && mx >= ex + 5 && mx < ex + ENG_W - 5 && my >= ey + imageHeight - 30 && my < ey + imageHeight - 6) {
+            net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new net.zennin.mushoku.network.EngravePayload(ResearchMenu.RESEARCH));
+            minecraft.getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK, 1f));
+            return true;
+        }
+        if (menu.engraving() && rollTick < 0 && mx >= ex + 3 && mx < ex + ENG_W - 3 && my >= ey + 18 && my < ey + 18 + ROWS * ROW) {
             int i = (int) ((my - ey - 18) / ROW);
             var list = known();
             if (i >= 0 && i < ROWS && i + scroll < list.size()) {

@@ -95,9 +95,14 @@ public final class ResearchRecipes {
             if (s.isEmpty()) continue;
             if (s.is(net.zennin.mushoku.registry.ModItems.INKAND_QUILL)) quill = true;
             else if (s.is(net.zennin.mushoku.registry.ModItems.SCROLL) && SpellData.get(s) == null) scroll = true;
-            else return false;
+            else if (!isStone(s)) return false; // una piedra de mana se puede ofrecer para investigar
         }
         return quill && scroll;
+    }
+
+    private static boolean isStone(ItemStack s) {
+        for (int t = 1; t <= 6; t++) if (s.is(SpellData.stoneFor(t))) return true;
+        return false;
     }
 
     /** Mana para grabar un hechizo en un pergamino: una vez y media lo que cuesta lanzarlo. */

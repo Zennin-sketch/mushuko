@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "age=0": {
+      "model": "remushoku:block/mana_bloom_stage0"
+    },
+    "age=1": {
+      "model": "remushoku:block/mana_bloom_stage1"
+    },
+    "age=2": {
+      "model": "remushoku:block/mana_bloom_stage2"
+    },
+    "age=3": {
+      "model": "remushoku:block/mana_bloom_stage3"
+    }
+  }
+}

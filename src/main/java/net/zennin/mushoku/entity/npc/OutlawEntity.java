@@ -86,9 +86,9 @@ public class OutlawEntity extends Monster implements RangedAttackMob {
 
     @Override
     protected void populateDefaultEquipmentSlots(RandomSource random, DifficultyInstance difficulty) {
-        if (archer) setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
-        else setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(random.nextFloat() < 0.35f ? Items.IRON_AXE
-                : random.nextFloat() < 0.5f ? Items.IRON_SWORD : Items.STONE_SWORD));
+        // arqueros: arco de cazador; el resto: daga de bandido
+        if (archer) setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(net.zennin.mushoku.registry.ModItems.HUNTER_BOW));
+        else setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(net.zennin.mushoku.registry.ModItems.BANDIT_DAGGER));
         // los arqueros llevan su bandana roja a la vista: sin casco
         if (!archer && random.nextFloat() < 0.25f) setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
     }
@@ -129,7 +129,7 @@ public class OutlawEntity extends Monster implements RangedAttackMob {
 
     @Override
     public void performRangedAttack(LivingEntity target, float power) {
-        ItemStack bow = getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW));
+        ItemStack bow = getMainHandItem();
         ItemStack ammo = new ItemStack(Items.ARROW);
         AbstractArrow arrow = ProjectileUtil.getMobArrow(this, ammo, power, bow);
         double dx = target.getX() - getX(), dz = target.getZ() - getZ();
@@ -142,5 +142,20 @@ public class OutlawEntity extends Monster implements RangedAttackMob {
     }
 
     @Override
-    public boolean canFireProjectileWeapon(net.minecraft.world.item.ProjectileWeaponItem weapon) { return weapon == Items.BOW; }
+    public boolean canFireProjectileWeapon(net.minecraft.world.item.ProjectileWeaponItem weapon) { return weapon instanceof BowItem; }
+
+    /** El objetivo de arco de vanilla solo reconoce el arco comun: el arco de cazador cuenta igual. */
+    @Override
+    public boolean isHolding(net.minecraft.world.item.Item item) {
+        if (item == Items.BOW && getMainHandItem().getItem() instanceof BowItem) return true;
+        return super.isHolding(item);
+    }
+
+    /** ...y vanilla tensa con la otra mano si el arco no es el comun: se usa la mano del arco. */
+    @Override
+    public void startUsingItem(net.minecraft.world.InteractionHand hand) {
+        if (hand == net.minecraft.world.InteractionHand.OFF_HAND && getOffhandItem().isEmpty() && getMainHandItem().getItem() instanceof BowItem)
+            hand = net.minecraft.world.InteractionHand.MAIN_HAND;
+        super.startUsingItem(hand);
+    }
 }

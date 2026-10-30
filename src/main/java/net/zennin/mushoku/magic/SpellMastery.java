@@ -144,7 +144,7 @@ public final class SpellMastery {
     public static void sync(ServerPlayer p) {
         if (net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.canSend(p, net.zennin.mushoku.network.SpellXpPayload.TYPE))
             net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(p, new net.zennin.mushoku.network.SpellXpPayload(
-                    new java.util.HashMap<>(ModAttachments.spellXp(p))));
+                    new java.util.HashMap<>(ModAttachments.spellXp(p)), new java.util.ArrayList<>(ModAttachments.knownSpells(p))));
     }
 
     // ------------------------------------------------------------------ potencia del hechizo en curso

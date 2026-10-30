@@ -22,7 +22,10 @@ public class SpellBookScreen extends BookScreen {
 
     public SpellBookScreen() { super(Component.translatable("item.remushoku.spell_book")); }
 
-    private List<Spell> spells() { return Arrays.stream(Spell.values()).filter(s -> s.element == tab).toList(); }
+    /** Solo los hechizos que conoce el jugador. */
+    private List<Spell> spells() { return Arrays.stream(Spell.values()).filter(s -> s.element == tab && ClientSpellXp.knows(s.id)).toList(); }
+
+    private static boolean knowsAny() { return Arrays.stream(Spell.values()).anyMatch(s -> ClientSpellXp.knows(s.id)); }
 
     @Override
     protected void init() {
@@ -101,6 +104,16 @@ public class SpellBookScreen extends BookScreen {
         super.renderBackground(g, mx, my, pt);
         hovered = null;
         List<Spell> list = spells();
+        if (list.isEmpty()) {
+            // todavia no conoce ninguno (o ninguno de este elemento)
+            Component a = Component.translatable(knowsAny() ? "book.remushoku.none_element" : "book.remushoku.none_known");
+            Component b = Component.translatable("book.remushoku.none_hint");
+            int y = top + 60;
+            for (var line : font.split(a, PAGE_W - 6)) { g.drawString(font, line, leftPageX() + 2, y, INK, false); y += 10; }
+            y += 6;
+            for (var line : font.split(b, PAGE_W - 6)) { g.drawString(font, line, leftPageX() + 2, y, INK_SOFT, false); y += 10; }
+            return;
+        }
         int perPage = 7;
         for (int i = 0; i < list.size() && i < perPage * 2; i++) {
             Spell s = list.get(i);

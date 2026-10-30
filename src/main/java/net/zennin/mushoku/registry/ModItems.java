@@ -46,11 +46,17 @@ public final class ModItems {
     public static final Item GUIDE_BOOK = register("guide_book", new ExtraItems.ScreenItem("guide", "tooltip.remushoku.guide_book", new Item.Properties().stacksTo(1)));
     public static final Item SILENT_TOME = register("silent_tome", new ExtraItems.SilentTomeItem(new Item.Properties().stacksTo(1)));
     public static final Item SCROLL = register("scroll", new SpellScrollItem(new Item.Properties().stacksTo(16)));
+    /** Pergamino de hechizo: ensena un hechizo (sale de la Mesa de Investigacion y, mas adelante, de exploraciones). */
+    public static final Item SPELL_LESSON_SCROLL = register("spell_lesson_scroll", new net.zennin.mushoku.item.SpellLessonScrollItem(new Item.Properties().stacksTo(1)));
     public static final Item CHALK = register("chalk", new ChalkItem(new Item.Properties().durability(32)));
     /** Tiza rojiza (tiza rodeada de redstone): dibuja lineas que, imbuidas con Infusion de Mana, conducen redstone. */
     public static final Item REDSTONE_CHALK = register("redstone_chalk", new net.zennin.mushoku.item.RedstoneChalkItem(new Item.Properties().durability(64)));
     public static final Item INKAND_QUILL = register("inkand_quill", new Item(new Item.Properties().durability(8)));  // 8 grabados
     public static final Item INK_VIAL = simple("ink_vial");
+    /** Flor de Mana: semillas (se plantan en tierra arada) y petalos (ingrediente de las pociones). */
+    public static final Item MANA_BLOOM_SEEDS = register("mana_bloom_seeds", new net.minecraft.world.item.ItemNameBlockItem(
+            net.zennin.mushoku.registry.ModBlocks.MANA_BLOOM, new Item.Properties()));
+    public static final Item MANA_PETAL = register("mana_petal", new Item(new Item.Properties()));
     public static final Item MANA_POTION_SMALL = register("mana_potion_small", new net.zennin.mushoku.item.ManaPotionItem(150, new Item.Properties().stacksTo(16)));
     public static final Item MANA_POTION = register("mana_potion", new net.zennin.mushoku.item.ManaPotionItem(400, new Item.Properties().stacksTo(16)));
     public static final Item MANA_POTION_LARGE = register("mana_potion_large", new net.zennin.mushoku.item.ManaPotionItem(1000, new Item.Properties().stacksTo(16)));
@@ -105,6 +111,8 @@ public final class ModItems {
     public static final Item ICE_BLADE = sword("ice_blade", ModTiers.ICE_BLADE, 3, -3.0f);
     public static final Item KAJAKUT = sword("kajakut", ModTiers.KAJAKUT, 3, -2.2f);
     public static final Item KATANA = sword("katana", ModTiers.KATANA, 3, -2.0f);
+    /** Daga de bandido: rapida y corta (la llevan los bandidos y bandidas que no son arqueros). */
+    public static final Item BANDIT_DAGGER = sword("bandit_dagger", net.minecraft.world.item.Tiers.IRON, 1, -1.6f);
     public static final Item MIGURD_SWORD = sword("migurd_sword", ModTiers.MIGURD_SWORD, 3, -2.5f);
     public static final Item PAULS_SWORD = sword("pauls_sword", ModTiers.PAULS_SWORD, 3, -2.2f);
     public static final Item PHOENIX_DRAGON_SWORD = sword("phoenix_dragon_sword", ModTiers.PHOENIX_DRAGON, 3, -2.0f);

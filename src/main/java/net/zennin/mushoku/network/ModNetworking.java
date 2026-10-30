@@ -27,6 +27,7 @@ public final class ModNetworking {
         PayloadTypeRegistry.playS2C().register(RefinePayloads.Result.TYPE, RefinePayloads.Result.CODEC);
         PayloadTypeRegistry.playC2S().register(RefinePayloads.Action.TYPE, RefinePayloads.Action.CODEC);
         PayloadTypeRegistry.playC2S().register(EngravePayload.TYPE, EngravePayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(ResearchRollPayload.TYPE, ResearchRollPayload.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(RefinePayloads.Action.TYPE, (payload, ctx) -> {
             ServerPlayer p = ctx.player();
             p.server.execute(() -> net.zennin.mushoku.refine.Refining.action(p, payload.pos(), payload.action()));
@@ -77,8 +78,10 @@ public final class ModNetworking {
         ServerPlayNetworking.registerGlobalReceiver(EngravePayload.TYPE, (payload, ctx) -> {
             ServerPlayer p = ctx.player();
             p.server.execute(() -> {
-                if (p.containerMenu instanceof net.zennin.mushoku.menu.ResearchMenu menu)
-                    menu.engrave(p, net.zennin.mushoku.magic.Spell.byId(payload.spell()));
+                if (p.containerMenu instanceof net.zennin.mushoku.menu.ResearchMenu menu) {
+                    if (payload.spell().equals(net.zennin.mushoku.menu.ResearchMenu.RESEARCH)) menu.research(p);
+                    else menu.engrave(p, net.zennin.mushoku.magic.Spell.byId(payload.spell()));
+                }
             });
         });
         ServerPlayNetworking.registerGlobalReceiver(GuildActionPayload.TYPE, (payload, ctx) -> {

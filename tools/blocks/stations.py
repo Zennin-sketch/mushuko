@@ -177,8 +177,14 @@ def research_table():
         ((0, 12, 1), (32, 15, 15), '#plank', None),          # tablero
         ((1, 0, 2), (3, 12, 4), '#log', None), ((1, 0, 12), (3, 12, 14), '#log', None),
         ((29, 0, 2), (31, 12, 4), '#log', None), ((29, 0, 12), (31, 12, 14), '#log', None),
-        ((2, 3, 3), (16, 4, 13), '#plank', None),            # estante bajo (lado)
-        ((17, 2, 2), (31, 11, 14), '#drawer', None),         # cajonera (principal)
+        # travesanos que unen las patas (atras y a los costados), pegados abajo del tablero
+        ((3, 10, 12.5), (17, 12, 13.5), '#plank', None),
+        ((1.5, 10, 4), (2.5, 12, 12), '#plank', None), ((29.5, 10, 4), (30.5, 12, 12), '#plank', None),
+        # estante bajo (del lado), entre la pata y la cajonera, apoyado en un travesano
+        ((3, 3, 4.5), (17, 4, 12.5), '#plank', None),
+        ((3, 2, 11.5), (17, 3, 12.5), '#plank', None),
+        # cajonera: caja pegada al tablero y al piso, entre las patas; los cajones solo al frente
+        ((17, 1, 3), (29, 12, 13), 'drawer', None),
         # libros parados en el estante de abajo
         ((4, 4, 5), (5.5, 9, 11), P('spines'), None), ((5.5, 4, 5), (7, 8.5, 11), P('spines'), None),
         ((7, 4, 5), (8.5, 9.5, 11), P('spines'), None), ((9, 4, 5.5), (14, 5.5, 10.5), P('lilac', 'cover'), None),
@@ -204,6 +210,10 @@ def research_table():
         ((24, 15, 9.8), (25.2, 16.6, 11), P('red'), None), ((24.25, 16.6, 10.05), (24.95, 17.1, 10.75), P('cork'), None),
     ]
     def mk(ff, tt, tx, r):
+        if tx == 'drawer':
+            e = el(ff, tt, '#plank', r)
+            e['faces']['north'] = dict(texture='#drawer')
+            return e
         if isinstance(tx, tuple):
             _, reg, top = tx
             e = el(ff, tt, '#p', r)

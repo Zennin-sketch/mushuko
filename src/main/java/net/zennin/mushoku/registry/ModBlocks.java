@@ -58,6 +58,12 @@ public final class ModBlocks {
                     .lightLevel(s -> s.getValue(net.zennin.mushoku.block.ChalkLineBlock.CHARGED)
                             ? (s.getValue(net.zennin.mushoku.block.ChalkLineBlock.POWER) > 0 ? 7 : 4) : 0)));
 
+    /** Flor de Mana (cultivo para las pociones de mana). Brilla un poco cuando esta madura. */
+    public static final Block MANA_BLOOM = Registry.register(BuiltInRegistries.BLOCK, MushokuMod.id("mana_bloom"),
+            new net.zennin.mushoku.block.ManaBloomBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .noCollission().randomTicks().instabreak().sound(SoundType.CROP).pushReaction(PushReaction.DESTROY)
+                    .lightLevel(s -> net.zennin.mushoku.block.ManaBloomBlock.mature(s) ? 6 : 0)));
+
     // --- Mundo (mismas durezas que el original; -1 = irrompible) ---
     public static final Block MAGIC_ORE = withItem("magic_ore", new DropExperienceBlock(UniformInt.of(2, 5),
             BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(10f, 15f).requiresCorrectToolForDrops().sound(SoundType.STONE)));

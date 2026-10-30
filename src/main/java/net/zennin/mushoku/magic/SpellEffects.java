@@ -222,14 +222,15 @@ public final class SpellEffects {
         sound(level, p, SoundEvents.FIRECHARGE_USE);
     }
 
-    /** Rafaga: te impulsa hacia donde miras. */
+    /** Rafaga: te impulsa hacia donde miras; cada 5 niveles te lanza mas lejos (x1.5 de velocidad en el nivel 20). */
     private static void blast(ServerPlayer p, ServerLevel level) {
-        Vec3 look = p.getLookAngle().scale(1.5);
+        int tier = Math.min(4, SpellMastery.castLevel(p) / 5);
+        Vec3 look = p.getLookAngle().scale(1.5 + 0.2 * tier);
         Escape.grant(p); // no te agarran telaranas ni lodo mientras dura el impulso
         p.setDeltaMovement(look);
         p.hurtMarked = true;
         p.resetFallDistance();
-        particles(level, ParticleTypes.CLOUD, p.position(), 20, 0.5);
+        particles(level, ParticleTypes.CLOUD, p.position(), 20 + 8 * tier, 0.5 + 0.15 * tier);
         sound(level, p, SoundEvents.PHANTOM_FLAP);
     }
 
@@ -249,7 +250,6 @@ public final class SpellEffects {
         sound(level, p, SoundEvents.SAND_BREAK);
     }
 
-    /** Excavar: rompe un area de 3x3 en el bloque que mires (hasta 3 bloques de distancia). */
     /**
      * Excavar: rompe un 3x3 en la cara que miras. Cada 5 niveles cava una capa mas de profundidad (nivel 5 = 3x3x2,
      * 10 = 3x3x3, 15 = 3x3x4, 20 = 3x3x5). Las capas se rompen una por una cada 0.25 s, con su sonido.

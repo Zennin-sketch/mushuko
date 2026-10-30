@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/crop",
+  "textures": {
+    "crop": "remushoku:block/mana_bloom_stage3"
+  }
+}

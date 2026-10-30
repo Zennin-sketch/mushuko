@@ -34,6 +34,14 @@ public class MushokuMod implements ModInitializer {
         ModBlocks.init();
         ModWorldgen.init();
         ModItems.init();
+        // semillas de Flor de Mana: a veces salen al romper pasto (como las de trigo)
+        net.fabricmc.fabric.api.loot.v3.LootTableEvents.MODIFY.register((key, table, source, registries) -> {
+            if (source.isBuiltin() && (key.equals(net.minecraft.world.level.block.Blocks.SHORT_GRASS.getLootTable())
+                    || key.equals(net.minecraft.world.level.block.Blocks.TALL_GRASS.getLootTable())))
+                table.withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool()
+                        .when(net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition.randomChance(0.04f))
+                        .add(net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(ModItems.MANA_BLOOM_SEEDS)));
+        });
         net.zennin.mushoku.menu.ModMenus.init();
         ModEntities.init();
         ModTabs.init();
