@@ -102,6 +102,9 @@ public class WyrmEntity extends AnimatedMonster {
         targetSelector.addGoal(1, new HurtByTargetGoal(this));
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, e -> !isAsleep()));
         // caza: a veces va por un animal grande de la zona
+        // ataca aldeas: aldeanos, golems de hierro y los aldeanos de Minecraft Comes Alive (y las NPC de los pueblos del mod)
+        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.LivingEntity.class, 40, false, false,
+                e -> !isAsleep() && isVillageFolk(e)));
         targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Animal.class, 200, true, false,
                 e -> !isAsleep() && e.getBbWidth() > 0.8f));
     }
@@ -123,8 +126,18 @@ public class WyrmEntity extends AnimatedMonster {
     @Override
     public boolean removeWhenFarAway(double d) { return false; }
 
+    /** Aldeanos, golems de hierro, aldeanos de MCA y las NPC de los pueblos del mod. */
+    public static boolean isVillageFolk(net.minecraft.world.entity.Entity e) {
+        if (e instanceof net.minecraft.world.entity.npc.AbstractVillager || e instanceof net.minecraft.world.entity.animal.IronGolem) return true;
+        if (e instanceof net.zennin.mushoku.entity.npc.TownNpcEntity || e instanceof net.zennin.mushoku.entity.npc.VillagerGuardEntity) return true;
+        var key = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(e.getType());
+        return key.getNamespace().equals("mca");
+    }
+
     @Override
     public boolean hurt(DamageSource src, float amount) {
+        // los golems de hierro no le hacen nada
+        if (src.getEntity() instanceof net.minecraft.world.entity.animal.IronGolem) return false;
         if (src.is(net.minecraft.tags.DamageTypeTags.IS_FIRE)) return false;
         boolean hit = super.hurt(src, amount);
         if (hit && isAsleep()) wake();
@@ -194,7 +207,7 @@ public class WyrmEntity extends AnimatedMonster {
             if (d < reach && isBehind(target)) { start(TAIL, 18); return; }
             if (d < reach * 0.8 && random.nextInt(3) == 0) { start(WING, 24); wingHits = 0; return; }
             if (d < reach) { start(BITE, 16); return; }
-            if (d < 30 && random.nextInt(25) == 0) { start(BREATH, 50); return; }
+            if (d < 30 && random.nextInt(isVillageFolk(target) ? 8 : 25) == 0) { start(BREATH, 50); return; } // a las aldeas las quema
             if (d > 30 || random.nextInt(260) == 0) { takeOff(240 + random.nextInt(240)); return; }
         }
         if (d > reach * 0.7) {
@@ -217,7 +230,7 @@ public class WyrmEntity extends AnimatedMonster {
                 int roll = random.nextInt(100);
                 if (roll < 3) { start(DIVE, 60); return; }
                 if (roll < 5) { start(HOVER_BLAST, 70); entityData.set(FLIGHT, 2); return; }
-                if (roll < 7 && distanceTo(target) < 34) { start(BREATH, 40); return; }
+                if (roll < (isVillageFolk(target) ? 14 : 7) && distanceTo(target) < 34) { start(BREATH, 40); return; }
             }
         } else if (flyGoal == null || position().distanceToSqr(flyGoal) < 64 || random.nextInt(200) == 0) {
             // vuelo libre: elige puntos lejanos y altos

@@ -64,6 +64,11 @@ public final class ModBlocks {
                     .noCollission().randomTicks().instabreak().sound(SoundType.CROP).pushReaction(PushReaction.DESTROY)
                     .lightLevel(s -> net.zennin.mushoku.block.ManaBloomBlock.mature(s) ? 6 : 0)));
 
+    /** Flor de Mana silvestre (aparece en praderas y bosques). */
+    public static final Block WILD_MANA_BLOOM = withItem("wild_mana_bloom", new net.zennin.mushoku.block.WildManaBloomBlock(
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE).noCollission().instabreak().sound(SoundType.GRASS)
+                    .offsetType(BlockBehaviour.OffsetType.XZ).pushReaction(PushReaction.DESTROY).lightLevel(s -> 5)));
+
     // --- Mundo (mismas durezas que el original; -1 = irrompible) ---
     public static final Block MAGIC_ORE = withItem("magic_ore", new DropExperienceBlock(UniformInt.of(2, 5),
             BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(10f, 15f).requiresCorrectToolForDrops().sound(SoundType.STONE)));

@@ -23,30 +23,39 @@ PET = [(70, 120, 235), (96, 160, 250), (140, 200, 255), (200, 236, 255)]
 
 
 def stage(age):
-    rnd = random.Random(age * 13 + 5)
+    """Estilo plantorcha: un solo tallo recto con hojas anchas abajo y, madura, una flor en forma de llama azul arriba."""
     img = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
     P = lambda x, y, c: 0 <= x < 16 and 0 <= y < 16 and img.putpixel((x, y), tuple(c) + (255,))
-    h = [5, 8, 10, 11][age]
-    stems = [(5, 0), (10, 1)] if age < 2 else [(3, 0), (7, 1), (11, 0), (13, 2)]
-    for sx, off in stems:
-        top = 15 - h + off + rnd.randint(0, 1)
-        x = sx
-        for y in range(15, top - 1, -1):
-            P(x, y, STEM[(y + sx) % 3])
-            if y % 3 == 0 and rnd.random() < 0.5: x += rnd.choice((-1, 1)); x = max(1, min(14, x))
-            # hojas a los costados
-            if y < 14 and (y + sx) % 3 == 0:
-                d = 1 if (y // 3) % 2 else -1
-                P(x + d, y, LEAF[1]); P(x + 2 * d, y - 1, LEAF[2]); P(x + d, y - 1, LEAF[0])
-                if age >= 2: P(x + 3 * d, y - 2, LEAF[3])
-        if age == 2:  # capullos cerrados
-            P(x, top - 1, PET[0]); P(x, top - 2, PET[1])
-        if age == 3:  # flor abierta: cinco petalos y centro claro que brilla
-            cx, cy = x, top - 2
-            for dx, dy in ((0, -2), (-2, 0), (2, 0), (-1, 2), (1, 2), (0, -1), (-1, 0), (1, 0), (0, 1), (-1, -1), (1, -1), (-1, 1), (1, 1)):
-                P(cx + dx, cy + dy, PET[1] if abs(dx) + abs(dy) > 1 else PET[2])
-            P(cx, cy, PET[3])
-            P(cx - 2, cy - 1, PET[0]); P(cx + 2, cy + 1, PET[0])
+    # hojas de la base (como las de la plantorcha, abiertas hacia los costados)
+    leaves = {0: [(6, 15), (9, 15), (5, 14), (10, 14)],
+              1: [(6, 15), (9, 15), (5, 14), (10, 14), (4, 13), (11, 13), (6, 13), (9, 13)],
+              2: [(6, 15), (9, 15), (5, 14), (10, 14), (4, 13), (11, 13), (3, 12), (12, 12), (6, 12), (9, 12), (5, 11), (10, 11)],
+              3: [(6, 15), (9, 15), (5, 14), (10, 14), (4, 13), (11, 13), (3, 12), (12, 12), (6, 12), (9, 12), (5, 11), (10, 11),
+                  (2, 11), (13, 11), (6, 9), (9, 9), (5, 8), (10, 8)]}[age]
+    for i, (x, y) in enumerate(leaves):
+        P(x, y, LEAF[(i + y) % 3])
+    top = [13, 10, 6, 7][age]
+    for y in range(15, top - 1, -1):          # tallo
+        P(7, y, STEM[y % 3]); P(8, y, STEM[(y + 1) % 3])
+    if age == 1:
+        P(7, top - 1, LEAF[2]); P(8, top - 1, LEAF[1])
+    if age == 2:                               # capullo cerrado (gota azul)
+        for (x, y, c) in ((7, 5, PET[0]), (8, 5, PET[1]), (7, 4, PET[1]), (8, 4, PET[0]), (7, 3, PET[2]), (8, 3, PET[1]),
+                          (6, 5, LEAF[1]), (9, 5, LEAF[1]), (7, 2, PET[2])):
+            P(x, y, c)
+    if age == 3:                               # flor como llama: petalos que suben y se abren, centro claro
+        flame = ['...b..c...',
+                 '..bc.bcb..',
+                 '..bccdcb..',
+                 '.abcddcba.',
+                 '.abcddcba.',
+                 '..abccba..',
+                 '...abba...',
+                 '....ll....']
+        pal = {'a': PET[0], 'b': PET[1], 'c': PET[2], 'd': PET[3], 'l': LEAF[1]}
+        for yy, row in enumerate(flame):
+            for xx, ch in enumerate(row):
+                if ch in pal: P(xx + 3, yy, pal[ch])
     return img
 
 
@@ -102,4 +111,22 @@ jdump({'type': 'minecraft:block', 'random_sequence': 'remushoku:blocks/mana_bloo
 # 3 petalos = 1 polvo? no: los petalos van directo al alambique. Semillas: tambien desde 1 petalo en la mesa de crafteo
 jdump({'type': 'minecraft:crafting_shapeless', 'category': 'misc', 'ingredients': [{'item': 'remushoku:mana_petal'}],
        'result': {'count': 2, 'id': 'remushoku:mana_bloom_seeds'}}, D, 'recipe', 'mana_bloom_seeds.json')
+# flor silvestre (se genera en el mundo): misma imagen que la madura, modelo en cruz
+jdump({'parent': 'minecraft:block/cross', 'textures': {'cross': 'remushoku:block/mana_bloom_stage3'}}, A, 'models', 'block', 'wild_mana_bloom.json')
+jdump({'variants': {'': {'model': 'remushoku:block/wild_mana_bloom'}}}, A, 'blockstates', 'wild_mana_bloom.json')
+jdump({'parent': 'minecraft:item/generated', 'textures': {'layer0': 'remushoku:block/mana_bloom_stage3'}}, A, 'models', 'item', 'wild_mana_bloom.json')
+jdump({'type': 'minecraft:block', 'random_sequence': 'remushoku:blocks/wild_mana_bloom', 'pools': [
+    {'rolls': 1, 'entries': [{'type': 'minecraft:item', 'name': 'remushoku:mana_petal',
+        'functions': [{'function': 'minecraft:set_count', 'count': {'type': 'minecraft:uniform', 'min': 1, 'max': 2}}]}]},
+    {'rolls': 1, 'entries': [{'type': 'minecraft:item', 'name': 'remushoku:mana_bloom_seeds',
+        'functions': [{'function': 'minecraft:set_count', 'count': {'type': 'minecraft:uniform', 'min': 1, 'max': 2}}]}]}],
+       'functions': [{'function': 'minecraft:explosion_decay'}]}, D, 'loot_table', 'blocks', 'wild_mana_bloom.json')
+jdump({'type': 'minecraft:flower', 'config': {'tries': 20, 'xz_spread': 5, 'y_spread': 2, 'feature': {
+    'feature': {'type': 'minecraft:simple_block', 'config': {'to_place': {'type': 'minecraft:simple_state_provider',
+                                                                         'state': {'Name': 'remushoku:wild_mana_bloom'}}}},
+    'placement': [{'type': 'minecraft:block_predicate_filter', 'predicate': {'type': 'minecraft:matching_blocks', 'blocks': 'minecraft:air'}}]}}},
+      D, 'worldgen', 'configured_feature', 'wild_mana_bloom.json')
+jdump({'feature': 'remushoku:wild_mana_bloom', 'placement': [{'type': 'minecraft:rarity_filter', 'chance': 10}, {'type': 'minecraft:in_square'},
+       {'type': 'minecraft:heightmap', 'heightmap': 'MOTION_BLOCKING'}, {'type': 'minecraft:biome'}]},
+      D, 'worldgen', 'placed_feature', 'wild_mana_bloom.json')
 print('flor de mana lista')

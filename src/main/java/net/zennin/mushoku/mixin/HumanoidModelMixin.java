@@ -47,6 +47,14 @@ public abstract class HumanoidModelMixin {
         leftArm.y += s * bob + Math.abs(c) * bob * 0.35f;
     }
 
+    /** Rafaga: brazos y piernas en la pose de vuelo con elitros mientras va impulsado. */
+    @com.llamalad7.mixinextras.injector.ModifyExpressionValue(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getFallFlyingTicks()I"), require = 0)
+    private int remushoku$gustPose(int original, @com.llamalad7.mixinextras.sugar.Local(argsOnly = true) LivingEntity entity) {
+        int g = net.zennin.mushoku.client.GustGlide.ticks(entity);
+        return g > 0 ? Math.max(original, g) : original;
+    }
+
     @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At("TAIL"))
     private void remushoku$aimSpell(LivingEntity entity, float limbSwing, float limbAmount, float age, float yaw, float pitch, CallbackInfo ci) {
         if (!(entity instanceof Player p) || p.isSwimming() || p.isSleeping() || p.isFallFlying() || p.isPassenger()) return;

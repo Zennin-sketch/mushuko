@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "remushoku:block/mana_bloom_stage3"
+  }
+}

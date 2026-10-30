@@ -227,6 +227,7 @@ public final class SpellEffects {
         int tier = Math.min(4, SpellMastery.castLevel(p) / 5);
         Vec3 look = p.getLookAngle().scale(1.5 + 0.2 * tier);
         Escape.grant(p); // no te agarran telaranas ni lodo mientras dura el impulso
+        net.zennin.mushoku.network.ModNetworking.gustGlide(p); // pose de planeo (como con elitros) hasta aterrizar
         p.setDeltaMovement(look);
         p.hurtMarked = true;
         p.resetFallDistance();

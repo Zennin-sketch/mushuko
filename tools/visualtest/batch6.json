@@ -1,0 +1,235 @@
+{
+ "skin": "remushoku:textures/entities/rudeus_greyrat.png",
+ "steps": [
+  {
+   "op": "setup",
+   "fov": 70
+  },
+  {
+   "op": "cmd",
+   "v": "difficulty easy"
+  },
+  {
+   "op": "cmd",
+   "v": "gamerule doMobSpawning false"
+  },
+  {
+   "op": "cmd",
+   "v": "fill -12 119 -6 12 119 20 minecraft:grass_block"
+  },
+  {
+   "op": "cmd",
+   "v": "fill -12 120 -6 12 130 20 minecraft:air"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 0 120 3 remushoku:research_table[facing=north]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -1 120 3 remushoku:research_table[facing=north,side=true]"
+  },
+  {
+   "op": "cam",
+   "pitch": 15,
+   "h": 0.2,
+   "x": 1.6,
+   "z": 0.6,
+   "yaw": 30
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "shot",
+   "v": "table_drawers"
+  },
+  {
+   "op": "cam",
+   "pitch": 55,
+   "h": 1.2,
+   "x": 0.9,
+   "z": 2.2,
+   "yaw": 0
+  },
+  {
+   "op": "wait",
+   "t": 10
+  },
+  {
+   "op": "shot",
+   "v": "table_crystal"
+  },
+  {
+   "op": "cmd",
+   "v": "fill -2 120 2 2 122 4 minecraft:air"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -2 119 4 minecraft:farmland"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -2 120 4 remushoku:mana_bloom[age=0]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -1 119 4 minecraft:farmland"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock -1 120 4 remushoku:mana_bloom[age=1]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 0 119 4 minecraft:farmland"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 0 120 4 remushoku:mana_bloom[age=2]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 1 119 4 minecraft:farmland"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 1 120 4 remushoku:mana_bloom[age=3]"
+  },
+  {
+   "op": "cmd",
+   "v": "setblock 3 120 4 remushoku:wild_mana_bloom"
+  },
+  {
+   "op": "cam",
+   "pitch": 25,
+   "h": 0.5,
+   "x": 0.5,
+   "z": 1.6
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "shot",
+   "v": "bloom2"
+  },
+  {
+   "op": "cmd",
+   "v": "fill -2 120 4 3 120 4 minecraft:air"
+  },
+  {
+   "op": "cam",
+   "pitch": 5,
+   "h": 0,
+   "x": 0.5,
+   "z": 0.5
+  },
+  {
+   "op": "dummy",
+   "yaw": 110,
+   "dist": 2.0
+  },
+  {
+   "op": "equip",
+   "slot": "mainhand",
+   "v": "remushoku:bandit_dagger"
+  },
+  {
+   "op": "wait",
+   "t": 10
+  },
+  {
+   "op": "shot",
+   "v": "dagger_hand"
+  },
+  {
+   "op": "dummy",
+   "yaw": 250,
+   "dist": 2.0
+  },
+  {
+   "op": "wait",
+   "t": 5
+  },
+  {
+   "op": "shot",
+   "v": "dagger_hand2"
+  },
+  {
+   "op": "equip",
+   "slot": "mainhand",
+   "v": ""
+  },
+  {
+   "op": "dummy",
+   "yaw": 180,
+   "dist": 40
+  },
+  {
+   "op": "cmd",
+   "v": "summon remushoku:outlaw_f_melee 1 120 3 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[100f,0f],Tags:[\"vt\"]}"
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "shot",
+   "v": "bandit_dagger"
+  },
+  {
+   "op": "cmd",
+   "v": "tp @e[tag=vt] 0 300 0"
+  },
+  {
+   "op": "cmd",
+   "v": "kill @e[tag=vt]"
+  },
+  {
+   "op": "cmd",
+   "v": "mushoku aprender blast"
+  },
+  {
+   "op": "thirdperson"
+  },
+  {
+   "op": "cam",
+   "pitch": -20,
+   "h": 0,
+   "x": 0.5,
+   "z": 0.5,
+   "yaw": 0
+  },
+  {
+   "op": "cmd",
+   "v": "mushoku lanzar blast"
+  },
+  {
+   "op": "wait",
+   "t": 6
+  },
+  {
+   "op": "shot",
+   "v": "gust_a"
+  },
+  {
+   "op": "wait",
+   "t": 8
+  },
+  {
+   "op": "shot",
+   "v": "gust_b"
+  },
+  {
+   "op": "wait",
+   "t": 30
+  },
+  {
+   "op": "shot",
+   "v": "gust_land"
+  }
+ ]
+}

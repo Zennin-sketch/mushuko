@@ -2715,5 +2715,6 @@
   "block.remushoku.mana_bloom": "Mana Bloom",
   "item.remushoku.mana_bloom_seeds": "Mana Bloom Seeds",
   "item.remushoku.mana_petal": "Mana Petal",
-  "item.remushoku.bandit_dagger": "Bandit Dagger"
+  "item.remushoku.bandit_dagger": "Bandit Dagger",
+  "block.remushoku.wild_mana_bloom": "Wild Mana Bloom"
 }

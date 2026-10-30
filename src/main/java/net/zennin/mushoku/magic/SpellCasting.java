@@ -70,6 +70,7 @@ public final class SpellCasting {
             msg(p, Component.translatable("msg.remushoku.not_learned").withStyle(ChatFormatting.RED));
             return;
         }
+        net.zennin.mushoku.extra.SilentCasting.consumeSilent(p); // un hechizo armado con flechas no es silencioso
         ModAttachments.setMagic(p, m.withQueued(spell.id));
         msg(p, Component.translatable("msg.remushoku.queued", Component.translatable(spell.translationKey())).withStyle(ChatFormatting.AQUA));
         ModNetworking.syncMagic(p);
@@ -85,6 +86,14 @@ public final class SpellCasting {
             ModAttachments.setMagic(p, m.withNoElement(now));
             msg(p, Component.translatable(now ? "msg.remushoku.no_element_on" : "msg.remushoku.no_element_off").withStyle(ChatFormatting.LIGHT_PURPLE));
             ModNetworking.syncMagic(p);
+            return;
+        }
+        // conjuro silencioso: hasta que no termina de formarse en la mano no se puede lanzar; formado, lo lanza igual
+        if (net.zennin.mushoku.extra.SilentCasting.stillForming(p)) return;
+        if (net.zennin.mushoku.extra.SilentCasting.consumeSilent(p)) {
+            ModAttachments.setMagic(p, m.withQueued(""));
+            ModNetworking.syncMagic(p);
+            net.zennin.mushoku.extra.SilentCasting.castSilent(p, spell);
             return;
         }
         ManaData mana = ModAttachments.get(p);

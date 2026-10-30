@@ -157,6 +157,16 @@ def research_props():
     # lomos de libros (u12-16 v12-16): verde, azul y marron con lineas doradas
     cols = [(46, 90, 52), (40, 60, 120), (110, 70, 40), (120, 30, 40)]
     rect(12, 12, 16, 16, lambda x, y, w, h: (210, 170, 80) if y in (1, h - 2) else tuple(int(v * (0.9 if x % 2 else 1)) for v in cols[x // 2]))
+    # frente de cajon (u10-16 v3-7): madera con veta, borde mas oscuro y tirador de bronce
+    def drawer(x, y, w, h):
+        if x in (0, w - 1) or y in (0, h - 1):
+            return (58, 38, 22)
+        if w // 2 - 2 <= x <= w // 2 + 1 and h // 2 - 1 <= y <= h // 2:
+            return (212, 176, 92) if y == h // 2 - 1 else (160, 124, 58)
+        return (98, 66, 38) if (y + (x // 5)) % 3 else (86, 58, 34)
+    rect(10, 3, 16, 7, drawer)
+    # cristal de amatista (u13-16 v7-9): violeta con brillo
+    rect(13, 7, 16, 9, lambda x, y, w, h: (236, 200, 255) if x == 1 else (170, 110, 230) if (x + y) % 3 else (120, 70, 190))
     save(img, 'block', 'research_props.png')
 
 
@@ -169,7 +179,7 @@ def research_table():
     R = dict(page_l=(0, 0, 5, 7), page_r=(5, 0, 10, 7), cover=(10, 0, 16, 2), edge=(10, 2, 16, 3), sheet=(0, 7, 6, 12),
              roll=(6, 7, 12, 9), ribbon=(12, 7, 13, 9), ink=(12, 9, 16, 12), blue=(0, 12, 3, 16), red=(3, 12, 6, 16),
              cork=(6, 12, 7, 13), feather=(7, 12, 9, 16), candle=(9, 12, 11, 16), wick=(11, 12, 12, 13), spines=(12, 12, 16, 16),
-             lilac=(6, 13, 7, 16))
+             lilac=(6, 13, 7, 16), dfront=(10, 3, 16, 7), crystal=(13, 7, 16, 9))
     def P(name, top=None):
         """Objeto con textura del atlas: todas las caras con la misma region (y otra arriba si se pide)."""
         return ('#p', R[name], R[top] if top else None)
@@ -183,8 +193,10 @@ def research_table():
         # estante bajo (del lado), entre la pata y la cajonera, apoyado en un travesano
         ((3, 3, 4.5), (17, 4, 12.5), '#plank', None),
         ((3, 2, 11.5), (17, 3, 12.5), '#plank', None),
-        # cajonera: caja pegada al tablero y al piso, entre las patas; los cajones solo al frente
-        ((17, 1, 3), (29, 12, 13), 'drawer', None),
+        # cajonera: caja oscura pegada al tablero y al piso, entre las patas, con dos cajones que sobresalen al frente
+        ((17, 1, 3), (29, 12, 13), '#plank', None),
+        ((18, 6.6, 2.2), (28, 11, 3), P('dfront'), None),
+        ((18, 2, 2.2), (28, 6.1, 3), P('dfront'), None),
         # libros parados en el estante de abajo
         ((4, 4, 5), (5.5, 9, 11), P('spines'), None), ((5.5, 4, 5), (7, 8.5, 11), P('spines'), None),
         ((7, 4, 5), (8.5, 9.5, 11), P('spines'), None), ((9, 4, 5.5), (14, 5.5, 10.5), P('lilac', 'cover'), None),
@@ -198,9 +210,10 @@ def research_table():
         ((1.5, 15, 10.5), (4, 17, 13), P('ink'), None), ((2.25, 17, 11.25), (3.25, 17.6, 12.25), P('cork'), None),
         ((2.5, 16.5, 11.7), (3, 23, 11.8), P('feather'), ('z', 22.5, (2.75, 17, 11.75))),
         ((2.4, 16.5, 11.75), (3.1, 23, 11.75), P('feather'), ('z', 22.5, (2.75, 17, 11.75))),
-        # cristal de amatista
-        ((26.5, 15, 10.5), (28.5, 19, 12.5), '#gem', ('y', 45, (27.5, 15, 11.5))),
-        ((25, 15, 12), (26.5, 17, 13.5), '#gem', ('x', 22.5, (25.75, 15, 12.75))),
+        # cristales de amatista (tres puntas)
+        ((26.75, 15, 10.75), (28.25, 19, 12.25), P('crystal'), None),
+        ((25.4, 15, 11.6), (26.4, 17.5, 12.6), P('crystal'), ('z', 22.5, (25.9, 15, 12.1))),
+        ((28.4, 15, 10.4), (29.2, 16.8, 11.2), P('crystal'), ('z', -22.5, (28.8, 15, 10.8))),
         # vela con mecha (la llama son particulas)
         ((29, 15, 3), (30.5, 19, 4.5), P('candle'), None), ((29.6, 19, 3.6), (29.9, 19.8, 3.9), P('wick'), None),
         # pergamino enrollado con cinta

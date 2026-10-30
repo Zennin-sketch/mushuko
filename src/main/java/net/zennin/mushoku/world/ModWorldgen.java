@@ -41,5 +41,9 @@ public final class ModWorldgen {
                 Biomes.SAVANNA, Biomes.SAVANNA_PLATEAU);
         add("water_book_ice", GenerationStep.Decoration.SURFACE_STRUCTURES, Biomes.SNOWY_PLAINS, Biomes.SNOWY_TAIGA,
                 Biomes.SNOWY_SLOPES, Biomes.ICE_SPIKES);
+        // Flor de Mana silvestre
+        add("wild_mana_bloom", GenerationStep.Decoration.VEGETAL_DECORATION, Biomes.PLAINS, Biomes.SUNFLOWER_PLAINS, Biomes.MEADOW,
+                Biomes.FOREST, Biomes.FLOWER_FOREST, Biomes.BIRCH_FOREST, Biomes.OLD_GROWTH_BIRCH_FOREST, Biomes.DARK_FOREST,
+                Biomes.CHERRY_GROVE);
     }
 }

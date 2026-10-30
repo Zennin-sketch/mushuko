@@ -33,7 +33,11 @@ os.makedirs(os.path.join(A, 'textures', 'item'), exist_ok=True)
 img.save(os.path.join(A, 'textures', 'item', 'bandit_dagger.png'))
 
 
+SHIFT = -4.0  # baja todo por el eje de la hoja: la mano agarra el mango y la guarda queda justo al borde de la mano
+
+
 def el(f, t, uv, rot=True):
+    f = [f[0], f[1] + SHIFT, f[2]]; t = [t[0], t[1] + SHIFT, t[2]]
     faces = {k: {'texture': '#0', 'uv': uv} for k in ('north', 'south', 'east', 'west', 'up', 'down')}
     e = {'from': f, 'to': t, 'faces': faces}
     if rot:
@@ -60,9 +64,9 @@ model = {'textures': {'0': 'remushoku:item/bandit_dagger', 'particle': 'remushok
                      'firstperson_righthand': {'rotation': [0, -90, 25], 'translation': [1.13, 3.2, 1.13], 'scale': [0.68, 0.68, 0.68]},
                      'firstperson_lefthand': {'rotation': [0, 90, -25], 'translation': [1.13, 3.2, 1.13], 'scale': [0.68, 0.68, 0.68]},
                      'head': {'rotation': [0, 180, 0], 'translation': [0, 13, 7], 'scale': [1, 1, 1]},
-                     'gui': {'rotation': [0, 0, 0], 'translation': [0, 0, 0], 'scale': [1, 1, 1]},
-                     'ground': {'rotation': [0, 0, 0], 'translation': [0, 2, 0], 'scale': [0.5, 0.5, 0.5]},
-                     'fixed': {'rotation': [0, 180, 0], 'scale': [1, 1, 1]}}}
+                     'gui': {'rotation': [0, 0, 0], 'translation': [2.8, 2.8, 0], 'scale': [1, 1, 1]},
+                     'ground': {'rotation': [0, 0, 0], 'translation': [1.4, 3.4, 0], 'scale': [0.5, 0.5, 0.5]},
+                     'fixed': {'rotation': [0, 180, 0], 'translation': [-2.8, 2.8, 0], 'scale': [1, 1, 1]}}}
 with open(os.path.join(A, 'models', 'item', 'bandit_dagger.json'), 'w') as f:
     json.dump(model, f, indent=2)
 print('daga lista')

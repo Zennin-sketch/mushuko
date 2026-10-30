@@ -2715,5 +2715,6 @@
   "block.remushoku.mana_bloom": "Flor de Maná",
   "item.remushoku.mana_bloom_seeds": "Semillas de Flor de Maná",
   "item.remushoku.mana_petal": "Pétalo de Maná",
-  "item.remushoku.bandit_dagger": "Daga de bandido"
+  "item.remushoku.bandit_dagger": "Daga de bandido",
+  "block.remushoku.wild_mana_bloom": "Flor de Maná silvestre"
 }

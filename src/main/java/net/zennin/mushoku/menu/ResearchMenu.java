@@ -77,6 +77,21 @@ public class ResearchMenu extends AbstractContainerMenu {
 
     public boolean engraving() { return ResearchRecipes.engraving(input); }
 
+    /** Gasta un uso de la Tinta y Pluma de los huecos (con su barra de desgaste); al terminarse se rompe. */
+    private void wearQuill(ServerPlayer p) {
+        for (int i = 0; i < input.getContainerSize(); i++) {
+            ItemStack st = input.getItem(i);
+            if (!st.is(net.zennin.mushoku.registry.ModItems.INKAND_QUILL)) continue;
+            st.setDamageValue(st.getDamageValue() + 1);
+            if (st.getDamageValue() >= st.getMaxDamage()) {
+                input.setItem(i, ItemStack.EMPTY);
+                access.execute((level, pos) -> level.playSound(null, pos, SoundEvents.ITEM_BREAK, SoundSource.BLOCKS, 0.8f, 1.3f));
+            }
+            input.setChanged();
+            return;
+        }
+    }
+
     // ------------------------------------------------------------------ investigar hechizos (ruleta)
 
     /** Id especial del EngravePayload que pide investigar en vez de grabar. */
@@ -123,10 +138,8 @@ public class ResearchMenu extends AbstractContainerMenu {
             ItemStack st = input.getItem(i);
             if (!scroll && st.is(net.zennin.mushoku.registry.ModItems.SCROLL) && net.zennin.mushoku.item.SpellData.get(st) == null) { st.shrink(1); scroll = true; }
             else if (!gem && stone > 0 && st.is(net.zennin.mushoku.item.SpellData.stoneFor(stone))) { st.shrink(1); gem = true; }
-            else if (st.is(net.zennin.mushoku.registry.ModItems.INKAND_QUILL) && !creative) {
-                st.hurtAndBreak(1, (net.minecraft.server.level.ServerLevel) p.level(), p, it -> {});
-            }
         }
+        wearQuill(p);
         input.setChanged();
         if (!creative) { ModAttachments.set(p, m.withMana(m.mana() - RESEARCH_COST)); ModNetworking.syncMana(p); }
         // tirada
@@ -192,16 +205,7 @@ public class ResearchMenu extends AbstractContainerMenu {
             ItemStack st = input.getItem(i);
             if (st.is(net.zennin.mushoku.registry.ModItems.SCROLL) && net.zennin.mushoku.item.SpellData.get(st) == null) { st.shrink(1); break; }
         }
-        // la tinta y pluma se gasta: 8 grabados y se termina
-        if (!p.getAbilities().instabuild)
-            for (int i = 0; i < input.getContainerSize(); i++) {
-                ItemStack st = input.getItem(i);
-                if (st.is(net.zennin.mushoku.registry.ModItems.INKAND_QUILL)) {
-                    st.hurtAndBreak(1, (net.minecraft.server.level.ServerLevel) p.level(), p, it -> {});
-                    if (st.getDamageValue() >= st.getMaxDamage()) input.setItem(i, ItemStack.EMPTY);
-                    break;
-                }
-            }
+        wearQuill(p); // la tinta y pluma se gasta (8 usos), tambien en creativo
         input.setChanged();
         if (!p.getAbilities().instabuild) { ModAttachments.set(p, m.withMana(m.mana() - cost)); ModNetworking.syncMana(p); }
         ItemStack out = net.zennin.mushoku.item.SpellData.with(new ItemStack(net.zennin.mushoku.registry.ModItems.SCROLL), s);

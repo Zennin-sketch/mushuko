@@ -28,6 +28,7 @@ public final class ModNetworking {
         PayloadTypeRegistry.playC2S().register(RefinePayloads.Action.TYPE, RefinePayloads.Action.CODEC);
         PayloadTypeRegistry.playC2S().register(EngravePayload.TYPE, EngravePayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ResearchRollPayload.TYPE, ResearchRollPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(GustGlidePayload.TYPE, GustGlidePayload.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(RefinePayloads.Action.TYPE, (payload, ctx) -> {
             ServerPlayer p = ctx.player();
             p.server.execute(() -> net.zennin.mushoku.refine.Refining.action(p, payload.pos(), payload.action()));
@@ -167,6 +168,14 @@ public final class ModNetworking {
     }
 
     /** Animacion del addon en este jugador, para el y para los que lo ven. */
+    /** Rafaga: avisa a el y a los que lo ven que va impulsado (pose de planeo). */
+    public static void gustGlide(ServerPlayer p) {
+        GustGlidePayload msg = new GustGlidePayload(p.getId());
+        if (ServerPlayNetworking.canSend(p, GustGlidePayload.TYPE)) ServerPlayNetworking.send(p, msg);
+        for (ServerPlayer o : net.fabricmc.fabric.api.networking.v1.PlayerLookup.tracking(p))
+            if (o != p && ServerPlayNetworking.canSend(o, GustGlidePayload.TYPE)) ServerPlayNetworking.send(o, msg);
+    }
+
     public static void playAnim(ServerPlayer p, String anim) {
         PlayAnimPayload msg = new PlayAnimPayload(p.getId(), anim);
         if (ServerPlayNetworking.canSend(p, PlayAnimPayload.TYPE)) ServerPlayNetworking.send(p, msg);

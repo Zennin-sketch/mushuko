@@ -10,7 +10,8 @@
     "InventoryScreenMixin",
     "CreativeScreenMixin",
     "ItemInHandLayerMixin",
-    "FirstPersonBowMixin"
+    "FirstPersonBowMixin",
+    "PlayerRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

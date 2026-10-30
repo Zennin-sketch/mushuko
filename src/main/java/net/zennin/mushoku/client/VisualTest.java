@@ -226,6 +226,10 @@ public final class VisualTest {
             }
             case "research" -> net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(
                     new net.zennin.mushoku.network.EngravePayload(net.zennin.mushoku.menu.ResearchMenu.RESEARCH));
+            case "thirdperson" -> {
+                mc.options.setCameraType(CameraType.THIRD_PERSON_BACK);
+                mc.player.getAbilities().flying = false;
+            }
             case "mobwalk" -> mobWalk = s.get("t").getAsInt();
             case "book" -> {
                 keepScreen = true;
