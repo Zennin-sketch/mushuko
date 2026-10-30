@@ -57,7 +57,7 @@ public final class Locomotion extends PlayerAnimationFrame {
     @SuppressWarnings("unchecked")
     private static void cycles(AbstractClientPlayer p) {
         String want = "";
-        if (!packAnimates() && p.getPose() == Pose.STANDING && !p.isPassenger() && !p.isFallFlying() && !p.isSwimming() && !p.isSleeping()
+        if (!packAnimates() && p.getPose() == Pose.STANDING && !p.isPassenger() && !p.isFallFlying() && !net.zennin.mushoku.client.GustGlide.active(p) && !p.isSwimming() && !p.isSleeping()
                 && !p.isShiftKeyDown() && !p.isUsingItem() && p.onGround()) {
             float amount = Math.min(1f, p.walkAnimation.speed());
             boolean cloak = p.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST).is(net.zennin.mushoku.item.ArmorV2.FLAME_CLOAK);
@@ -113,7 +113,7 @@ public final class Locomotion extends PlayerAnimationFrame {
         lean = 0; twist = 0;
         AbstractClientPlayer p = player;
         float amount = Math.min(1f, p.walkAnimation.speed(partial));
-        active = amount > 0.02f && !packAnimates() && p.getPose() == Pose.STANDING && !p.isPassenger() && !p.isFallFlying()
+        active = amount > 0.02f && !packAnimates() && p.getPose() == Pose.STANDING && !p.isPassenger() && !p.isFallFlying() && !net.zennin.mushoku.client.GustGlide.active(p)
                 && !p.isSwimming() && !p.isSleeping() && !p.isShiftKeyDown() && !p.isUsingItem();
         if (!active) return;
         boolean run = false; // correr: lo hace el ciclo del taller (loco_run)

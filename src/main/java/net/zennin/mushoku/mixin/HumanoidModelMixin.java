@@ -32,7 +32,7 @@ public abstract class HumanoidModelMixin {
      */
     @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At("TAIL"))
     private void remushoku$cloakWalk(LivingEntity entity, float limbSwing, float limbAmount, float age, float yaw, float pitch, CallbackInfo ci) {
-        if (!(entity instanceof Player p) || p.isSwimming() || p.isSleeping() || p.isFallFlying() || p.isPassenger()) return;
+        if (!(entity instanceof Player p) || p.isSwimming() || p.isSleeping() || p.isFallFlying() || p.isPassenger() || net.zennin.mushoku.client.GustGlide.active(p)) return;
         if (!p.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST).is(net.zennin.mushoku.item.ArmorV2.FLAME_CLOAK)) return;
         float c = net.minecraft.util.Mth.cos(limbSwing * 0.6662f), s = net.minecraft.util.Mth.sin(limbSwing * 0.6662f);
         // quitar el balanceo de los brazos que suma vanilla (cos(f*0.6662 [+pi]) * 2 * g * 0.5)
@@ -57,7 +57,7 @@ public abstract class HumanoidModelMixin {
 
     @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At("TAIL"))
     private void remushoku$aimSpell(LivingEntity entity, float limbSwing, float limbAmount, float age, float yaw, float pitch, CallbackInfo ci) {
-        if (!(entity instanceof Player p) || p.isSwimming() || p.isSleeping() || p.isFallFlying() || p.isPassenger()) return;
+        if (!(entity instanceof Player p) || p.isSwimming() || p.isSleeping() || p.isFallFlying() || p.isPassenger() || net.zennin.mushoku.client.GustGlide.active(p)) return;
         if (ClientReadySpell.get(p) == null) return;
         boolean right = p.getMainArm() == HumanoidArm.RIGHT;
         ModelPart arm = right ? rightArm : leftArm;

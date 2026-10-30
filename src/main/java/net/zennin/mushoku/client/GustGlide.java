@@ -23,7 +23,6 @@ public final class GustGlide {
     private GustGlide() {}
 
     public static void start(int entityId) {
-        net.zennin.mushoku.MushokuMod.LOG.info("[visualtest] gust start " + entityId);
         Minecraft mc = Minecraft.getInstance();
         if (mc.level != null) START.put(entityId, mc.level.getGameTime());
     }
