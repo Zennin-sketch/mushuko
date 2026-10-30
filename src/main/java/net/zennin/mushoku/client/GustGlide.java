@@ -17,15 +17,20 @@ public final class GustGlide {
     /** Jugador -> tick (del mundo) en que salio impulsado. */
     private static final Map<Integer, Long> START = new HashMap<>();
 
+    /** Contador de veces que los mixins de pose preguntaron (para la prueba visual). */
+    public static int HITS;
+
     private GustGlide() {}
 
     public static void start(int entityId) {
+        net.zennin.mushoku.MushokuMod.LOG.info("[visualtest] gust start " + entityId);
         Minecraft mc = Minecraft.getInstance();
         if (mc.level != null) START.put(entityId, mc.level.getGameTime());
     }
 
     /** Ticks de "vuelo" para la pose (0 = no esta planeando por Rafaga). */
     public static int ticks(LivingEntity e) {
+        HITS++;
         Long s = START.get(e.getId());
         if (s == null || e.isFallFlying() || e.getItemBySlot(EquipmentSlot.CHEST).is(Items.ELYTRA)) return 0;
         Minecraft mc = Minecraft.getInstance();
