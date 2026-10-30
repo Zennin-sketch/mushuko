@@ -52,9 +52,15 @@ els = [
     el([7.35, 12.5, 7.65], [8.65, 14.5, 8.35], R['steel']),
     el([7.7, 14.5, 7.7], [8.3, 15.75, 8.3], R['tip']),
 ]
-model = {'parent': 'minecraft:item/handheld', 'textures': {'0': 'remushoku:item/bandit_dagger', 'particle': 'remushoku:item/bandit_dagger'},
+# sin 'parent': si hereda de item/generated, el juego arma el item con la textura plana y se pierden los cubos
+model = {'textures': {'0': 'remushoku:item/bandit_dagger', 'particle': 'remushoku:item/bandit_dagger'},
          'elements': els,
-         'display': {'gui': {'rotation': [0, 0, 0], 'translation': [0, 0, 0], 'scale': [1, 1, 1]},
+         'display': {'thirdperson_righthand': {'rotation': [0, -90, 55], 'translation': [0, 4, 0.5], 'scale': [0.85, 0.85, 0.85]},
+                     'thirdperson_lefthand': {'rotation': [0, 90, -55], 'translation': [0, 4, 0.5], 'scale': [0.85, 0.85, 0.85]},
+                     'firstperson_righthand': {'rotation': [0, -90, 25], 'translation': [1.13, 3.2, 1.13], 'scale': [0.68, 0.68, 0.68]},
+                     'firstperson_lefthand': {'rotation': [0, 90, -25], 'translation': [1.13, 3.2, 1.13], 'scale': [0.68, 0.68, 0.68]},
+                     'head': {'rotation': [0, 180, 0], 'translation': [0, 13, 7], 'scale': [1, 1, 1]},
+                     'gui': {'rotation': [0, 0, 0], 'translation': [0, 0, 0], 'scale': [1, 1, 1]},
                      'ground': {'rotation': [0, 0, 0], 'translation': [0, 2, 0], 'scale': [0.5, 0.5, 0.5]},
                      'fixed': {'rotation': [0, 180, 0], 'scale': [1, 1, 1]}}}
 with open(os.path.join(A, 'models', 'item', 'bandit_dagger.json'), 'w') as f:
