@@ -959,6 +959,13 @@ function fromRaw(get) {
   return P;
 }
 
+/* Ademas de los golpes de cada arma, el editor anima cualquier otra animacion del mod (esquivas, caminar, correr,
+   quieto, conjuros, arco, habilidades, desenvainar...): se elige como "@nombre" en la misma lista. */
+const isAnimSlot = (w = ED.weapon) => typeof w === 'string' && w.startsWith('@');
+const slotAnim = (w = ED.weapon) => w.slice(1);
+function extraGroupOf(name) { return DATA.extra.find(g => g.items.includes(name)); }
+/** Arma que se muestra en la mano mientras se edita (la del grupo de esa animacion, o ninguna). */
+function edWeapon() { return isAnimSlot() ? ((extraGroupOf(slotAnim()) || {}).weapon || null) : ED.weapon; }
 const ED = { on: false, name: 'mi_animacion', length: 20, tick: 0, keys: [], pose: null, seg: 'rArmU', playing: false, t: 0, undo: [], weapon: null, hit: 1, baked: null };
 ED.pose = edBlankPose();
 const clone = o => JSON.parse(JSON.stringify(o));
@@ -995,6 +1002,7 @@ class EditorPlayer {
   get tick() { return ED.playing ? Math.floor(ED.t) : ED.tick; }
   rate() {
     if (!ED.baked) return 1;
+    if (isAnimSlot()) return 1;
     const cd = DATA.families[DATA.weapons[ED.weapon].family].cooldown || 0;
     if (!cd) return 1;
     const S = ED.length / cd;
@@ -1027,7 +1035,7 @@ function writeSlot(w, h, o) { try { localStorage.setItem(slotKey(w, h), JSON.str
 const lastKey = keys => keys.slice().sort((a, b) => a.tick - b.tick).pop();
 /** El golpe que sigue arranca exactamente donde termina este (y al reves). */
 function linkKeys() {
-  if (ED.hit > 1) {
+  if (ED.hit > 1 && !isAnimSlot()) {
     const prev = readSlot(ED.weapon, ED.hit - 1);
     if (prev && prev.keys && prev.keys.length) {
       const lk = lastKey(prev.keys);
@@ -1037,6 +1045,7 @@ function linkKeys() {
   }
 }
 function pushLinks() {
+  if (isAnimSlot()) return;
   const lk = ED.keys.length ? lastKey(ED.keys) : null;
   const next = readSlot(ED.weapon, ED.hit + 1);
   if (lk && next && next.keys && next.keys.length) {
@@ -1055,17 +1064,17 @@ function pushLinks() {
 }
 function edStore() { ED.baked = null; try { localStorage.setItem(slotKey(), JSON.stringify({ name: ED.name, length: ED.length, keys: ED.keys })); localStorage.setItem('mushoku-ed3-last', JSON.stringify([ED.weapon, ED.hit])); } catch (e) {} pushLinks(); }
 function edLoadSlot() {
-  ED.keys = []; ED.length = 20; ED.name = `${ED.weapon}_golpe${ED.hit}`; ED.baked = null; ED.tick = 0;
+  ED.keys = []; ED.length = isAnimSlot() ? ((parsed[slotAnim()] || {}).end || 20) : 20; ED.name = isAnimSlot() ? slotAnim() : `${ED.weapon}_golpe${ED.hit}`; ED.baked = null; ED.tick = 0;
   try { const j = JSON.parse(localStorage.getItem(slotKey()) || 'null'); if (j && j.keys) { ED.name = j.name || ED.name; ED.length = j.length || 20; ED.keys = j.keys; } } catch (e) {}
   linkKeys();
 }
 function edLoadStore() {
   try { const l = JSON.parse(localStorage.getItem('mushoku-ed3-last') || 'null'); if (l) { ED.weapon = l[0]; ED.hit = l[1]; } } catch (e) {}
-  if (!ED.weapon || !DATA.weapons[ED.weapon]) ED.weapon = Object.keys(DATA.weapons)[0];
+  if (!ED.weapon || !(DATA.weapons[ED.weapon] || (isAnimSlot() && parsed[slotAnim()]))) ED.weapon = Object.keys(DATA.weapons)[0];
   edLoadSlot();
 }
 /** Animacion del mod que usa hoy ese golpe de esa arma (punto de partida). */
-function edCurrentAnim() { const f = DATA.families[DATA.weapons[ED.weapon].family]; const a = f.attacks[ED.hit - 1]; return a ? a.anim : null; }
+function edCurrentAnim() { if (isAnimSlot()) return slotAnim(); const f = DATA.families[DATA.weapons[ED.weapon].family]; const a = f.attacks[ED.hit - 1]; return a ? a.anim : null; }
 function edSync() { for (const k of ED.keys) normPose(k.pose); const k = ED.keys.find(k => k.tick === ED.tick); ED.pose = normPose(k ? clone(k.pose) : edEval(ED.tick)); edRender(); }
 function edPush() { ED.undo.push(clone(ED.pose)); if (ED.undo.length > 60) ED.undo.shift(); }
 
@@ -1206,7 +1215,7 @@ function edToggle(on) {
     edSaved = { selected };
     queue = []; fade = null; selected = '__editor'; ED.playing = false;
     edPlayer = new EditorPlayer(); player = edPlayer; setPlaying(false);
-    equip(ED.weapon);
+    equip(edWeapon());
     document.getElementById('now').innerHTML = 'Editor de keyframes<small>clic en una parte · R rotar · G mover · X/Y/Z eje · Ctrl+Z deshacer</small>';
     edSync();
   } else {
@@ -1254,7 +1263,7 @@ edPanel.innerHTML = `
   <div class="grp"><b>Enviar a Claude</b>
     <p class="hint"><b>Importante:</b> lo que guardas aca queda solo en este navegador; el juego no lo lee solo. Para verlo en el juego, copia el texto y pegamelo en el chat: yo lo meto en el mod y te paso el .jar nuevo.</p>
     <div class="r"><button class="gold" id="ed-exportall">Copiar todo lo editado</button></div>
-    <div class="r"><button id="ed-export">Copiar solo este golpe</button><button id="ed-import">Cargar texto</button></div>
+    <div class="r"><button id="ed-export">Copiar solo esta animacion</button><button id="ed-import">Cargar texto</button></div>
     <textarea id="ed-json" spellcheck="false" aria-label="Keyframes en texto"></textarea>
   </div>`;
 const $ = id => document.getElementById(id);
@@ -1279,13 +1288,25 @@ function edSetField(id, val, undo = true) {
 }
 function edRender() {
   const wsel = $('ed-weapon');
-  if (!wsel.options.length) for (const [k, w] of Object.entries(DATA.weapons)) wsel.insertAdjacentHTML('beforeend', `<option value="${k}">${w.label} (${w.family && DATA.families[w.family] ? DATA.families[w.family].label : "arco"})</option>`);
+  if (!wsel.options.length) {
+    let html = '<optgroup label="Golpes de cada arma">';
+    for (const [k, w] of Object.entries(DATA.weapons)) if (w.family && DATA.families[w.family]) html += `<option value="${k}">${w.label} (${DATA.families[w.family].label})</option>`;
+    html += '</optgroup>';
+    for (const g of DATA.extra) {
+      html += `<optgroup label="${g.group}">`;
+      for (const k of g.items) if (parsed[k]) html += `<option value="@${k}">${desc(k)}</option>`;
+      html += '</optgroup>';
+    }
+    wsel.innerHTML = html;
+  }
   wsel.value = ED.weapon;
-  const fam = DATA.families[DATA.weapons[ED.weapon].family], n = Math.max(3, fam.attacks.length);
+  const fam = isAnimSlot() ? null : DATA.families[DATA.weapons[ED.weapon].family], n = fam ? Math.max(3, fam.attacks.length) : 0;
   $('ed-hits').innerHTML = Array.from({ length: n }, (_, i) => `<button data-h="${i + 1}" class="${ED.hit === i + 1 ? 'gold' : ''}">Golpe ${i + 1}</button>`).join('');
   $('ed-hits').querySelectorAll('button').forEach(b => b.onclick = () => { edStore(); ED.hit = +b.dataset.h; edLoadSlot(); edSync(); });
   const cur = edCurrentAnim();
-  $('ed-slotinfo').textContent = `${DATA.weapons[ED.weapon].label}, golpe ${ED.hit}. Hoy usa: ${cur || 'ninguna'}. Cada arma y golpe se guarda aparte; el tick 0 de cada golpe es el ultimo keyframe del anterior (⛓).`;
+  $('ed-slotinfo').textContent = isAnimSlot()
+    ? `${desc(cur)} (${cur}${parsed[cur] && parsed[cur].loop ? ', en loop: el ultimo keyframe tiene que ser igual al primero' : ''}). Toca "Partir de la animacion actual" para empezar desde como esta hoy en el juego.`
+    : `${DATA.weapons[ED.weapon].label}, golpe ${ED.hit}. Hoy usa: ${cur || 'ninguna'}. Cada arma y golpe se guarda aparte; el tick 0 de cada golpe es el ultimo keyframe del anterior (⛓).`;
   $('ed-anim-info').textContent = ED.baked ? 'Animada: Reproducir muestra la version final a la velocidad del juego.' : (ED.keys.length < 2 ? 'Necesita al menos 2 keyframes.' : '');
   $('ed-name').value = ED.name; $('ed-len').value = ED.length; $('ed-tick').value = ED.tick; $('ed-tick').max = ED.length;
   const k = ED.keys.find(k => k.tick === ED.tick); $('ed-stop').checked = !!(k && k.stop);
@@ -1298,15 +1319,18 @@ function edRender() {
   for (const [, , id] of edFields()) $('f-' + id).onchange = e => { edSetField(id, +e.target.value); ED.baked = null; edRender(); };
   edHighlight();
 }
-$('ed-weapon').onchange = () => { edStore(); ED.weapon = $('ed-weapon').value; ED.hit = 1; equip(ED.weapon); edLoadSlot(); edSync(); };
+$('ed-weapon').onchange = () => { edStore(); ED.weapon = $('ed-weapon').value; ED.hit = 1; equip(edWeapon()); edLoadSlot(); edSync(); };
 $('ed-start').onclick = () => { // keyframes sacados de la animacion actual en sus momentos clave
   const name = edCurrentAnim(); if (!name) return;
   const a = parsed[name];
-  const ticks = [0, 3, 5, 8, 10, 14, a.end].filter((t, i, arr) => t <= a.end && arr.indexOf(t) === i);
+  // golpes: momentos clave fijos; otras animaciones: una pose cada pocos ticks a lo largo de toda la animacion
+  const step = Math.max(2, Math.round(a.end / 6));
+  const ticks = (isAnimSlot() ? Array.from({ length: Math.floor(a.end / step) + 1 }, (_, i) => i * step).concat([a.end]) : [0, 3, 5, 8, 10, 14, a.end])
+    .filter((t, i, arr) => t <= a.end && arr.indexOf(t) === i);
   ED.keys = ticks.map(t => {
     const pl = new Player(a); for (let i = 0; i < t; i++) pl.step();
     const pose = fromRaw((part, ax, d) => pl.value(part, ax, (ax === 'x' || ax === 'y' || ax === 'z') && part !== 'body' && part !== 'rightItem' ? defaultOf(part, ax) : d));
-    return { tick: t, stop: t === 0 || t === 14 || t === a.end, pose };
+    return { tick: t, stop: isAnimSlot() ? (t === 0 || t === a.end) && !a.loop : (t === 0 || t === 14 || t === a.end), pose };
   });
   ED.length = a.end; ED.tick = 0; linkKeys(); edStore(); edSync();
 };
@@ -1345,23 +1369,25 @@ $('ed-copy').onclick = () => {
   edRender();
 };
 $('ed-export').onclick = () => {
-  const out = { formato: 'mushoku-keyframes-3', nombre: ED.name, duracion: ED.length, arma: ED.weapon, golpe: ED.hit,
+  const out = { formato: 'mushoku-keyframes-3', nombre: ED.name, duracion: ED.length, arma: isAnimSlot() ? null : ED.weapon, golpe: isAnimSlot() ? null : ED.hit,
+    reemplaza: isAnimSlot() ? slotAnim() : null, loop: isAnimSlot() ? !!(parsed[slotAnim()] || {}).loop : false,
     keyframes: edSorted().map(k => ({ tick: k.tick, frenar: k.stop, pose: k.pose })), animacion: ED.keys.length >= 2 ? edEmotecraft() : null };
   const txt = JSON.stringify(out); $('ed-json').value = txt;
-  const done = () => { $('ed-export').textContent = 'Copiado'; setTimeout(() => $('ed-export').textContent = 'Copiar solo este golpe', 1500); };
+  const done = () => { $('ed-export').textContent = 'Copiado'; setTimeout(() => $('ed-export').textContent = 'Copiar solo esta animacion', 1500); };
   try { navigator.clipboard.writeText(txt).then(done, () => $('ed-json').select()); } catch (e) { $('ed-json').select(); }
 };
 /** Todos los golpes que tienen keyframes guardados (de todas las armas), con su animacion final, en un solo texto. */
 /** Todo lo editado (tercera persona: golpes con su animacion final; primera persona: sus keyframes) en un solo texto. */
 function exportAllText() {
   const keep = [ED.weapon, ED.hit, currentWeapon], slots = [], all = [], fpAll = [];
-  try { for (let i = 0; i < localStorage.length; i++) { const m = (localStorage.key(i) || '').match(/^mushoku-ed3-(.+)-(\d+)$/); if (m && DATA.weapons[m[1]]) slots.push([m[1], +m[2]]); } } catch (e) {}
+  try { for (let i = 0; i < localStorage.length; i++) { const m = (localStorage.key(i) || '').match(/^mushoku-ed3-(.+)-(\d+)$/); if (m && (DATA.weapons[m[1]] || (isAnimSlot(m[1]) && parsed[slotAnim(m[1])]))) slots.push([m[1], +m[2]]); } } catch (e) {}
   slots.sort((a, b) => a[0] === b[0] ? a[1] - b[1] : a[0] < b[0] ? -1 : 1);
   for (const [w, h] of slots) {
     ED.weapon = w; ED.hit = h; edLoadSlot();
     if (ED.keys.length < 2) continue;
-    equip(w);
-    all.push({ nombre: ED.name, duracion: ED.length, arma: w, golpe: h,
+    equip(edWeapon());
+    all.push({ nombre: ED.name, duracion: ED.length, arma: isAnimSlot(w) ? null : w, golpe: isAnimSlot(w) ? null : h,
+      reemplaza: isAnimSlot(w) ? slotAnim(w) : null, loop: isAnimSlot(w) ? !!(parsed[slotAnim(w)] || {}).loop : false,
       keyframes: edSorted().map(k => ({ tick: k.tick, frenar: k.stop, pose: k.pose })), animacion: edEmotecraft() });
   }
   ED.weapon = keep[0]; ED.hit = keep[1]; equip(keep[2]); edLoadSlot(); if (ED.on) edSync();
@@ -1382,8 +1408,9 @@ $('ed-import').onclick = () => {
     const j = JSON.parse($('ed-json').value); if (!j.keyframes) throw new Error();
     ED.name = j.nombre || ED.name; ED.length = j.duracion || ED.length;
     ED.keys = j.keyframes.map(k => ({ tick: k.tick, stop: !!(k.frenar ?? k.stop), pose: k.pose }));
-    if (j.arma && DATA.weapons[j.arma]) { ED.weapon = j.arma; equip(j.arma); }
-    if (j.golpe) ED.hit = j.golpe;
+    if (j.reemplaza && parsed[j.reemplaza]) { ED.weapon = '@' + j.reemplaza; ED.hit = 1; equip(edWeapon()); }
+    else if (j.arma && DATA.weapons[j.arma]) { ED.weapon = j.arma; equip(j.arma); }
+    if (j.golpe && !isAnimSlot()) ED.hit = j.golpe;
     ED.tick = 0; edStore(); edSync();
   } catch (e) { $('ed-json').value = 'No pude leer ese texto: pega el que copiaste con "Copiar texto".'; }
 };
@@ -1418,8 +1445,10 @@ function edEmotecraft() {
   if (!ED.baked) edBake();
   const moves = ED.baked.map((f, t) => Object.assign({ tick: t, easing: t === ED.baked.length - 1 ? 'EASEINOUTSINE' : 'LINEAR' },
     Object.fromEntries(Object.entries(f).map(([p, v]) => [p, Object.fromEntries(Object.entries(v).map(([k, x]) => [k, +x.toFixed(4)]))]))));
-  return { version: 3, name: ED.name, author: 'Zennin (editor)', description: `${DATA.weapons[ED.weapon].label} golpe ${ED.hit}`,
-    emote: { beginTick: 3, endTick: ED.length, stopTick: ED.length + 6, isLoop: 'false', returnTick: 0, degrees: false, moves } };
+  return { version: 3, name: ED.name, author: 'Zennin (editor)', description: isAnimSlot() ? desc(slotAnim()) : `${DATA.weapons[ED.weapon].label} golpe ${ED.hit}`,
+    emote: isAnimSlot() && (parsed[slotAnim()] || {}).loop
+      ? { beginTick: 0, endTick: ED.length, stopTick: ED.length, isLoop: 'true', returnTick: 0, degrees: false, moves }
+      : { beginTick: 3, endTick: ED.length, stopTick: ED.length + 6, isLoop: 'false', returnTick: 0, degrees: false, moves } };
 }
 edLoadStore();
 

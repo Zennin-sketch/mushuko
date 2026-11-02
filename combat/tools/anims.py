@@ -808,6 +808,29 @@ r.key(10, 'smooth', **_run_pose('l'))
 r.key(15, 'smooth', **_run_pass('l'))
 r.key(20, 'smooth', **_run_pose('r'))
 
+def _walk_pose(side):
+    s = 1 if side == 'r' else -1
+    fwd_leg, back_leg = ((0.02 * s, -0.95, 0.3), 8), ((0.02 * s, -0.96, -0.27), 18)
+    fwd_hand, back_hand = (-5.3 * s, -11.0, 3.2), (5.5 * s, -11.3, -2.5)
+    legs_ = dict(rleg=fwd_leg, lleg=back_leg) if side == 'r' else dict(lleg=fwd_leg, rleg=back_leg)
+    arms_ = dict(larm=L(fwd_hand, (0, 0.2, 1)), rarm=R(back_hand, (0, 0.1, -1))) if side == 'r' else \
+        dict(rarm=R(fwd_hand, (0, 0.2, 1)), larm=L(back_hand, (0, 0.1, -1)))
+    return P(root(lean=2, up=-0.012), torso(turn=4 * s, lean=1), legs_, arms_)
+
+def _walk_pass(side):
+    support, swing = ((0, -1, 0.02), 4), ((0, -0.93, 0.12), 38)
+    legs_ = dict(rleg=support, lleg=swing) if side == 'r' else dict(lleg=support, rleg=swing)
+    return P(root(lean=2, up=0.014), torso(turn=0, lean=1), legs_,
+             dict(rarm=R((5.6, -11.9, 0.6), (0, 0, 1)), larm=L((-5.6, -11.9, 0.6), (0, 0, 1))))
+
+w = anim('loco_walk', 'Caminar (ciclo de un paso doble, se repite)', end=24, loop=True, ret=0, stop=100000, lag=(), ground=False)
+w.only = LOCO_PARTS
+w.key(0, 'smooth', **_walk_pose('r'))
+w.key(6, 'smooth', **_walk_pass('r'))
+w.key(12, 'smooth', **_walk_pose('l'))
+w.key(18, 'smooth', **_walk_pass('l'))
+w.key(24, 'smooth', **_walk_pose('r'))
+
 i = anim('loco_idle', 'Quieto (respira, el peso en una pierna, se repite)', end=80, loop=True, ret=0, stop=100000, lag=(), ground=False)
 i.only = LOCO_PARTS
 # peso sobre la pierna derecha (recta), la izquierda suelta con la rodilla apenas doblada; brazos relajados con el

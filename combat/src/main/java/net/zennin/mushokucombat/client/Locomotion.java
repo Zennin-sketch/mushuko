@@ -63,9 +63,11 @@ public final class Locomotion extends PlayerAnimationFrame {
             boolean cloak = p.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST).is(net.zennin.mushoku.item.ArmorV2.FLAME_CLOAK);
             if (amount <= 0.02f) want = "loco_idle";
             else if (p.isSprinting() && !cloak) want = "loco_run";
+            else if (!cloak && hasWalk()) want = "loco_walk"; // caminar del taller (editable); sin el, el caminar por codigo
         }
         var sp = SPEED.get(p);
-        if (sp != null) sp.speed = "loco_run".equals(want) ? Math.max(0.55f, Math.min(1.6f, p.walkAnimation.speed() * 1.25f)) : 1f;
+        if (sp != null) sp.speed = "loco_run".equals(want) ? Math.max(0.55f, Math.min(1.6f, p.walkAnimation.speed() * 1.25f))
+                : "loco_walk".equals(want) ? Math.max(0.45f, Math.min(1.5f, p.walkAnimation.speed() * 1.35f)) : 1f;
         if (want.equals(STATE.getOrDefault(p, ""))) return;
         STATE.put(p, want);
         Object data = PlayerAnimationAccess.getPlayerAssociatedData(p).get(CYCLES);
@@ -76,6 +78,11 @@ public final class Locomotion extends PlayerAnimationFrame {
         if (want.isEmpty()) { layer.replaceAnimationWithFade(fade, null); return; }
         var anim = dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry.getAnimation(net.zennin.mushokucombat.MushokuCombat.id(want));
         layer.replaceAnimationWithFade(fade, anim == null ? null : anim.playAnimation());
+    }
+
+    /** Hay ciclo de caminar del taller (loco_walk). */
+    private static boolean hasWalk() {
+        return dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry.getAnimation(net.zennin.mushokucombat.MushokuCombat.id("loco_walk")) != null;
     }
 
     /** Un pack de recursos ya anima al jugador (se revisa cada tanto: el jugador puede cambiar los packs). */
@@ -122,6 +129,7 @@ public final class Locomotion extends PlayerAnimationFrame {
         float phase = p.walkAnimation.position(partial) * 0.6662f;
         float a = amount;
         if (p.isSprinting() && !cloak) { active = false; return; }
+        if (!cloak && hasWalk()) { active = false; return; } // camina con el ciclo del taller (loco_walk)
         // ---- caminar: el muslo va y viene (menos que vanilla) y la rodilla se dobla al pasar hacia adelante
         float thigh = (run ? 0.85f : 0.72f) * (cloak ? 0.5f : 1f);
         float kneeMax = (run ? 1.2f : 0.75f) * (cloak ? 0.6f : 1f), kneeBase = run ? 0.2f : 0.06f;
