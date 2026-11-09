@@ -28,6 +28,7 @@ public final class ManaBarHud {
     public static void render(GuiGraphics g, DeltaTracker tick) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.options.hideGui) return;
+        if (SuperdClient.isSuperd()) { renderSuperd(g, mc); return; } // sin mana: su panel de guerrero
         double mana = ClientManaState.mana, max = ClientManaState.maxMana;
         double frac = max > 0 ? Math.max(0, Math.min(1, mana / max)) : 0;
 
@@ -156,5 +157,27 @@ public final class ManaBarHud {
             if (what != null) g.drawCenteredString(mc.font, what, g.guiWidth() / 2, g.guiHeight() / 2 + 12, 0xFFD58CFF);
         }
         return line;
+    }
+
+    /** Panel del guerrero Superd: sus habilidades de lanza con la espera y el tercer ojo. */
+    private static void renderSuperd(GuiGraphics g, Minecraft mc) {
+        int line = Y + 2;
+        g.drawString(mc.font, Component.translatable("hud.remushoku.superd_title"), X + 2, line, 0xFF7FD08A, true);
+        line += 11;
+        boolean spear = net.zennin.mushoku.superd.SuperdSystem.isSpear(mc.player.getMainHandItem());
+        KeyMapping[] keys = {ModKeys.SKILL_1, ModKeys.SKILL_2, ModKeys.SKILL_3, ModKeys.RACE_SKILL};
+        for (int i = 0; i < 4; i++) {
+            int left = SuperdClient.secondsLeft(i);
+            Component name = Component.translatable("superd.remushoku.skill" + i);
+            Component txt = left > 0 ? Component.translatable("hud.remushoku.superd_wait", keys[i].getTranslatedKeyMessage(), name, left)
+                    : Component.translatable("hud.remushoku.slot", keys[i].getTranslatedKeyMessage(), name);
+            int col = left > 0 ? 0xFF8A8A8A : (i < 3 && !spear) ? 0xFFB0A080 : 0xFFE0E0E0;
+            g.drawString(mc.font, txt, X + 2, line, col, true);
+            line += 10;
+        }
+        g.drawString(mc.font, Component.translatable(SuperdClient.eye ? "hud.remushoku.superd_eye_on" : "hud.remushoku.superd_eye_off",
+                ModKeys.EYE_1.getTranslatedKeyMessage()), X + 2, line, SuperdClient.eye ? 0xFFFF6A6A : 0xFFB07070, true);
+        line += 10;
+        if (!spear) g.drawString(mc.font, Component.translatable("hud.remushoku.superd_need_spear"), X + 2, line, 0xFFB0A080, true);
     }
 }

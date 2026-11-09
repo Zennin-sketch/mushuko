@@ -29,6 +29,7 @@ public final class ModNetworking {
         PayloadTypeRegistry.playC2S().register(EngravePayload.TYPE, EngravePayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ResearchRollPayload.TYPE, ResearchRollPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(GustGlidePayload.TYPE, GustGlidePayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(SuperdSyncPayload.TYPE, SuperdSyncPayload.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(RefinePayloads.Action.TYPE, (payload, ctx) -> {
             ServerPlayer p = ctx.player();
             p.server.execute(() -> net.zennin.mushoku.refine.Refining.action(p, payload.pos(), payload.action()));
@@ -118,6 +119,8 @@ public final class ModNetworking {
                     case ActionPayload.CHOOSE_MAGE -> PlayerClasses.choose(p, SpellCasting.CLASS_MAGE);
                     case ActionPayload.CHOOSE_SWORDSMAN -> PlayerClasses.choose(p, SpellCasting.CLASS_SWORDSMAN);
                     case ActionPayload.CHOOSE_ARCHER -> PlayerClasses.choose(p, SpellCasting.CLASS_ARCHER);
+                    case ActionPayload.SUPERD_LUNGE, ActionPayload.SUPERD_WHIRL, ActionPayload.SUPERD_THROW, ActionPayload.SUPERD_FURY ->
+                            net.zennin.mushoku.superd.SuperdSystem.use(p, payload.action() - ActionPayload.SUPERD_LUNGE);
                     case ActionPayload.EYE_ONE -> net.zennin.mushoku.extra.DemonEyes.toggle(p, 0);
                     case ActionPayload.EYE_TWO -> net.zennin.mushoku.extra.DemonEyes.toggle(p, 1);
                     case ActionPayload.BOW_RELOAD -> net.zennin.mushoku.archer.BowSystem.reload(p);

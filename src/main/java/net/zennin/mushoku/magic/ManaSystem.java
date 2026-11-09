@@ -26,6 +26,12 @@ public final class ManaSystem {
             boolean syncTick = server.getTickCount() % 5 == 0;
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 ManaData d = ModAttachments.get(player);
+                // Los Superd no tienen mana (ni se les llena)
+                if (d.playerClass() == SpellCasting.CLASS_SUPERD) {
+                    if (d.mana() > 0) ModAttachments.set(player, d.withMana(0));
+                    if (syncTick) ModNetworking.syncMana(player);
+                    continue;
+                }
                 // En creativo el mana es infinito: siempre lleno
                 if (player.getAbilities().instabuild && d.mana() < d.maxMana()) {
                     ModAttachments.set(player, d.withMana(d.maxMana()));

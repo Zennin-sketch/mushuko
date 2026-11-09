@@ -850,3 +850,18 @@ _t = anim('vt_bend', 'Prueba: pose fija con dobleces grandes', end=20, loop=True
 _t.key(0, 'smooth', **NEUTRAL_P)
 _t.key(10, 'stop', **P(root(lean=25), dict(rarm=R((7, -4, 6)), larm=L((-7, -4, 6))), legs('crouch', 0)))
 _t.key(20, 'stop', **P(root(lean=25), dict(rarm=R((7, -4, 6)), larm=L((-7, -4, 6))), legs('crouch', 0)))
+
+# =============================================================== GUERRERO SUPERD (habilidades de lanza, sin magia)
+# Arrancan como copias de golpes de lanza y conjuros que ya existian; se pueden rehacer en el Taller.
+import copy as _copy
+def _clone(src, name, desc):
+    a0 = next(x for x in _G.ANIMS if x.name == src)
+    c = _copy.deepcopy(a0)
+    c.name, c.desc = name, desc
+    _G.ANIMS.append(c)
+    return c
+
+_clone('spear_dragon_pierce', 'superd_lunge', 'Superd: Embestida (se lanza adelante con la lanza)')
+_clone('scythe_cyclone', 'superd_whirl', 'Superd: Lanza giratoria (giro completo)')
+_clone('magic_gather_throw', 'superd_throw', 'Superd: Lanzamiento (arroja la lanza)')
+_clone('magic_sky', 'superd_roar', 'Superd: Furia (grito de guerra)')

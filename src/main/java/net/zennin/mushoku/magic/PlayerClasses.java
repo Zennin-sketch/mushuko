@@ -23,6 +23,7 @@ public final class PlayerClasses {
     public static void choose(ServerPlayer p, int cls) {
         ManaData d = ModAttachments.get(p);
         if (d.playerClass() != 0) return; // ya eligio
+        if (net.zennin.mushoku.superd.SuperdSystem.isSuperd(p)) return; // los Superd no tienen clase
         ModAttachments.set(p, d.withClass(cls));
         p.displayClientMessage(Component.translatable(cls == SpellCasting.CLASS_MAGE ? "msg.remushoku.class_mage"
                         : cls == SpellCasting.CLASS_ARCHER ? "msg.remushoku.class_archer" : "msg.remushoku.class_swordsman")
@@ -51,6 +52,7 @@ public final class PlayerClasses {
 
     /** Vuelve la clase a "sin elegir" y abre el menu (orbe de cambio de clase). */
     public static void reset(ServerPlayer p) {
+        if (net.zennin.mushoku.superd.SuperdSystem.isSuperd(p)) { net.zennin.mushoku.superd.SuperdSystem.denyMagic(p); return; }
         ModAttachments.set(p, ModAttachments.get(p).withClass(0));
         SwordSystem.reset(p);
         net.zennin.mushoku.archer.ArcherSystem.reset(p);

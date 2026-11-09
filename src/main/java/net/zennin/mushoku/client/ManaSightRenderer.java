@@ -36,6 +36,9 @@ public final class ManaSightRenderer {
         return ClientExtraState.data.active("magic_power");
     }
 
+    /** Tercer ojo Superd: solo los seres vivos (sin tiza ni circulos), mas lejos. */
+    private static boolean superdEye() { return SuperdClient.eye; }
+
     public static void init() {
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
             if (mc.level == null || mc.player == null) return;
@@ -67,14 +70,16 @@ public final class ManaSightRenderer {
 
     private static void render(WorldRenderContext ctx) {
         Minecraft mc = Minecraft.getInstance();
-        if (!active() || mc.level == null || mc.player == null) return;
+        boolean mana = active(), third = superdEye();
+        if ((!mana && !third) || mc.level == null || mc.player == null) return;
         PoseStack pose = ctx.matrixStack();
         Vec3 cam = ctx.camera().getPosition();
         float partial = ctx.tickCounter().getGameTimeDeltaPartialTick(false);
         float t = (tick + partial) / 20f;
         float pulse = 0.55f + 0.45f * (float) Math.sin(t * 3.2f);
         // seres vivos y minas cercanas (tambien detras de las paredes)
-        List<net.minecraft.world.entity.Entity> ents = mc.level.getEntities(mc.player, mc.player.getBoundingBox().inflate(R, H, R),
+        double rr = third ? 32 : R, hh = third ? 16 : H;
+        List<net.minecraft.world.entity.Entity> ents = mc.level.getEntities(mc.player, mc.player.getBoundingBox().inflate(rr, hh, rr),
                 e -> (e instanceof net.minecraft.world.entity.LivingEntity l && l.isAlive() && !l.isInvisible())
                         || e instanceof net.zennin.mushoku.entity.MineEntity);
         if (chalk.isEmpty() && circles.isEmpty() && ents.isEmpty()) return;

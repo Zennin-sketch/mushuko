@@ -33,9 +33,13 @@ public final class SwordClient {
         }
         boolean silentMage = net.zennin.mushoku.magic.SpellCasting.isMageClass(ClientManaState.playerClass) && ClientExtraState.data.silent();
         KeyMapping[] keys = {ModKeys.SKILL_1, ModKeys.SKILL_2, ModKeys.SKILL_3};
+        boolean superd = SuperdClient.isSuperd();
+        SuperdClient.tick(mc);
         for (int i = 0; i < 3; i++) {
             while (keys[i].consumeClick()) {
                 if (mc.screen != null) continue;
+                // Superd: Z embestida, X lanza giratoria, C lanzamiento (con lanza en la mano)
+                if (superd) { ClientPlayNetworking.send(new net.zennin.mushoku.network.ActionPayload(net.zennin.mushoku.network.ActionPayload.SUPERD_LUNGE + i)); continue; }
                 // segun lo que tenga en la mano: arco = arquero, espada = espadachin, si no = mago (conjuro silencioso)
                 switch (mode) {
                     case ARCHER -> ClientPlayNetworking.send(new net.zennin.mushoku.network.ArcherActionPayload(net.zennin.mushoku.network.ArcherActionPayload.USE_SLOT, i, ""));
@@ -60,6 +64,8 @@ public final class SwordClient {
             ClientPlayNetworking.send(new net.zennin.mushoku.network.GuildActionPayload(net.zennin.mushoku.network.GuildActionPayload.RACE_SKILL, 0, ""));
         racePrev = raceNow;
 
+        // Superd: G enciende el tercer ojo (la joya de la frente); no usa los ojos demoniacos de mana
+        if (superd) while (ModKeys.EYE_1.consumeClick()) if (mc.screen == null) SuperdClient.toggleEye(mc);
         while (ModKeys.EYE_1.consumeClick()) if (mc.screen == null) ClientPlayNetworking.send(new net.zennin.mushoku.network.ActionPayload(net.zennin.mushoku.network.ActionPayload.EYE_ONE));
         while (ModKeys.EYE_2.consumeClick()) if (mc.screen == null) ClientPlayNetworking.send(new net.zennin.mushoku.network.ActionPayload(net.zennin.mushoku.network.ActionPayload.EYE_TWO));
 

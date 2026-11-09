@@ -113,6 +113,13 @@ public final class ModItems {
     public static final Item KATANA = sword("katana", ModTiers.KATANA, 3, -2.0f);
     /** Daga de bandido: rapida y corta (la llevan los bandidos y bandidas que no son arqueros). */
     public static final Item BANDIT_DAGGER = sword("bandit_dagger", net.minecraft.world.item.Tiers.IRON, 1, -1.6f);
+    /** Lanzas de la tribu Superd (con modelo 3D propio). */
+    public static final Item SUPERD_WARRIOR_SPEAR = register("superd_warrior_spear", new net.zennin.mushoku.superd.SuperdLanceItem(
+            net.minecraft.world.item.Tiers.DIAMOND, 5, -2.6f, "superd_warrior_spear", false));
+    public static final Item SUPERD_TAIL_SPEAR = register("superd_tail_spear", new net.zennin.mushoku.superd.SuperdLanceItem(
+            net.minecraft.world.item.Tiers.IRON, 4, -2.4f, "superd_tail_spear", false));
+    public static final Item LAPLACE_SPEAR = register("laplace_spear", new net.zennin.mushoku.superd.SuperdLanceItem(
+            net.minecraft.world.item.Tiers.NETHERITE, 6, -2.7f, "laplace_spear", true));
     public static final Item MIGURD_SWORD = sword("migurd_sword", ModTiers.MIGURD_SWORD, 3, -2.5f);
     public static final Item PAULS_SWORD = sword("pauls_sword", ModTiers.PAULS_SWORD, 3, -2.2f);
     public static final Item PHOENIX_DRAGON_SWORD = sword("phoenix_dragon_sword", ModTiers.PHOENIX_DRAGON, 3, -2.0f);

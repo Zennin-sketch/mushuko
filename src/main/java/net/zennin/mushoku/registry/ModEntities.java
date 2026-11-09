@@ -35,6 +35,11 @@ public final class ModEntities {
             MushokuMod.id("minefield_mine"),
             EntityType.Builder.<net.zennin.mushoku.entity.MineEntity>of(net.zennin.mushoku.entity.MineEntity::new, MobCategory.MISC)
                     .sized(0.5f, 0.4f).clientTrackingRange(8).updateInterval(5).noSave().build("minefield_mine"));
+    /** Lanza arrojada por un Superd (vuelve sola). */
+    public static final EntityType<net.zennin.mushoku.superd.ThrownSpearEntity> THROWN_SPEAR = Registry.register(BuiltInRegistries.ENTITY_TYPE,
+            MushokuMod.id("thrown_spear"),
+            EntityType.Builder.<net.zennin.mushoku.superd.ThrownSpearEntity>of(net.zennin.mushoku.superd.ThrownSpearEntity::new, MobCategory.MISC)
+                    .sized(0.5f, 0.5f).clientTrackingRange(6).updateInterval(1).noSave().build("thrown_spear"));
     public static final EntityType<net.zennin.mushoku.entity.SpellFxEntity> SPELL_FX = Registry.register(BuiltInRegistries.ENTITY_TYPE,
             MushokuMod.id("spell_fx"),
             EntityType.Builder.<net.zennin.mushoku.entity.SpellFxEntity>of(net.zennin.mushoku.entity.SpellFxEntity::new, MobCategory.MISC)

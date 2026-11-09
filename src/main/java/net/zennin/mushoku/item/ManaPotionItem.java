@@ -30,6 +30,10 @@ public class ManaPotionItem extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
+        if (net.zennin.mushoku.superd.SuperdSystem.isSuperd(player)) {
+            if (player instanceof ServerPlayer sp) net.zennin.mushoku.superd.SuperdSystem.denyMagic(sp);
+            return InteractionResultHolder.fail(stack);
+        }
         level.playSound(null, player.getX(), player.getY(), player.getZ(), net.minecraft.sounds.SoundEvents.GENERIC_DRINK,
                 net.minecraft.sounds.SoundSource.PLAYERS, 0.9f, 1.35f + level.random.nextFloat() * 0.1f);
         if (player instanceof ServerPlayer p) {

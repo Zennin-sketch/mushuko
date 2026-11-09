@@ -46,6 +46,8 @@ for _wid, _spec in catalog.COMBOS.items():
 for _a in G.ANIMS:
     if _a.name.startswith('magic_'):
         _a.weapon = longest('staff')
+    if _a.name in ('superd_lunge', 'superd_whirl', 'superd_throw', 'superd_roar'):
+        _a.weapon = longest('spear')
 
 if __name__ == '__main__':
     G.write(os.path.join(RES, 'assets', 'mushoku_combat', 'player_animations'))

@@ -72,7 +72,7 @@ public final class CombatClient implements ClientModInitializer {
             Entity e = ctx.client().level.getEntity(payload.entityId());
             if (e instanceof AbstractClientPlayer p) {
                 // conjuros con animacion propia (Campo Minado...): van directo a la capa del addon
-                if (payload.anim().startsWith("magic_")) CombatAnimations.play(p, payload.anim(), 2);
+                if (payload.anim().startsWith("magic_") || payload.anim().startsWith("superd_")) CombatAnimations.play(p, payload.anim(), 2);
                 else BowAnimClient.oneShot(p, payload.anim());
             }
         }));

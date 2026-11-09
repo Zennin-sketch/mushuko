@@ -37,6 +37,10 @@ public final class SpellEffects {
     private SpellEffects() {}
 
     public static boolean cast(Spell spell, ServerPlayer p) {
+        if (!(p instanceof net.fabricmc.fabric.api.entity.FakePlayer) && net.zennin.mushoku.superd.SuperdSystem.isSuperd(p)) {
+            net.zennin.mushoku.superd.SuperdSystem.denyMagic(p);
+            return false;
+        }
         ServerLevel level = p.serverLevel();
         SpellMastery.begin(p, spell);
         switch (spell) {

@@ -112,6 +112,10 @@ public class ResearchTableBlock extends HorizontalDirectionalBlock {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (net.zennin.mushoku.superd.SuperdSystem.isSuperd(player)) {
+            if (player instanceof net.minecraft.server.level.ServerPlayer sp) net.zennin.mushoku.superd.SuperdSystem.denyMagic(sp);
+            return InteractionResult.sidedSuccess(level.isClientSide);
+        }
         player.openMenu(getMenuProvider(state, level, pos));
         return InteractionResult.CONSUME;
     }

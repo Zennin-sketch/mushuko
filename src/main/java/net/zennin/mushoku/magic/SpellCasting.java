@@ -14,6 +14,8 @@ public final class SpellCasting {
     public static final int CLASS_MAGE = 1, CLASS_SWORDSMAN = 2, CLASS_ARCHER = 3;
     /** Todas las clases a la vez (item de creativo para probar). */
     public static final int CLASS_ALL = 4;
+    /** Guerrero Superd: sin clase ni mana (lo pone la raza). */
+    public static final int CLASS_SUPERD = 5;
 
     public static boolean isMageClass(int c) { return c == CLASS_MAGE || c == CLASS_ALL; }
     public static boolean isSwordsmanClass(int c) { return c == CLASS_SWORDSMAN || c == CLASS_ALL; }
@@ -34,6 +36,7 @@ public final class SpellCasting {
     public static final int MAX_COMBO = 16;
 
     public static void onCombo(ServerPlayer p, String combo) {
+        if (net.zennin.mushoku.superd.SuperdSystem.isSuperd(p)) { net.zennin.mushoku.superd.SuperdSystem.denyMagic(p); return; } // los Superd no usan magia
         if (!canCast(p)) return;
         if (combo == null || combo.length() < 3 || combo.length() > MAX_COMBO || !combo.matches("[udlr]+")) {
             msg(p, Component.translatable("msg.remushoku.no_spell").withStyle(ChatFormatting.GRAY));
@@ -78,6 +81,7 @@ public final class SpellCasting {
 
     /** Tecla de activacion: lanza el hechizo en cola, o alterna el modo sin elemento si no hay ninguno. */
     public static void onActivate(ServerPlayer p) {
+        if (net.zennin.mushoku.superd.SuperdSystem.isSuperd(p)) return;
         if (!canCast(p)) return;
         MagicData m = ModAttachments.magic(p);
         Spell spell = m.queued().isEmpty() ? null : Spell.byId(m.queued());

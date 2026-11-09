@@ -1,0 +1,226 @@
+{
+ "skin": "remushoku:textures/entities/rudeus_greyrat.png",
+ "steps": [
+  {
+   "op": "setup",
+   "fov": 70
+  },
+  {
+   "op": "cmd",
+   "v": "difficulty easy"
+  },
+  {
+   "op": "cmd",
+   "v": "gamerule doMobSpawning false"
+  },
+  {
+   "op": "cmd",
+   "v": "fill -15 119 -10 15 119 30 minecraft:grass_block"
+  },
+  {
+   "op": "cmd",
+   "v": "fill -15 120 -10 15 130 30 minecraft:air"
+  },
+  {
+   "op": "cmd",
+   "v": "mushoku raza superd"
+  },
+  {
+   "op": "wait",
+   "t": 40
+  },
+  {
+   "op": "cmd",
+   "v": "item replace entity @s weapon.mainhand with remushoku:superd_warrior_spear"
+  },
+  {
+   "op": "cmd",
+   "v": "give @s remushoku:superd_tail_spear"
+  },
+  {
+   "op": "cmd",
+   "v": "give @s remushoku:laplace_spear"
+  },
+  {
+   "op": "cmd",
+   "v": "give @s remushoku:mana_potion"
+  },
+  {
+   "op": "cam",
+   "pitch": 5,
+   "h": 0
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "shot",
+   "v": "superd_hud"
+  },
+  {
+   "op": "dummy",
+   "yaw": 120,
+   "dist": 2.4
+  },
+  {
+   "op": "equip",
+   "slot": "mainhand",
+   "v": "remushoku:superd_warrior_spear"
+  },
+  {
+   "op": "wait",
+   "t": 8
+  },
+  {
+   "op": "shot",
+   "v": "held_superd_warrior_spear"
+  },
+  {
+   "op": "equip",
+   "slot": "mainhand",
+   "v": "remushoku:superd_tail_spear"
+  },
+  {
+   "op": "wait",
+   "t": 8
+  },
+  {
+   "op": "shot",
+   "v": "held_superd_tail_spear"
+  },
+  {
+   "op": "equip",
+   "slot": "mainhand",
+   "v": "remushoku:laplace_spear"
+  },
+  {
+   "op": "wait",
+   "t": 8
+  },
+  {
+   "op": "shot",
+   "v": "held_laplace_spear"
+  },
+  {
+   "op": "dummy",
+   "yaw": 180,
+   "dist": 40
+  },
+  {
+   "op": "cmd",
+   "v": "summon minecraft:zombie -3 120 7 {NoAI:1b,PersistenceRequired:1b,Tags:[\"vt\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon minecraft:zombie -1 120 7 {NoAI:1b,PersistenceRequired:1b,Tags:[\"vt\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon minecraft:zombie 1 120 7 {NoAI:1b,PersistenceRequired:1b,Tags:[\"vt\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "summon minecraft:zombie 3 120 7 {NoAI:1b,PersistenceRequired:1b,Tags:[\"vt\"]}"
+  },
+  {
+   "op": "cmd",
+   "v": "mushoku lanzar fireball"
+  },
+  {
+   "op": "wait",
+   "t": 5
+  },
+  {
+   "op": "shot",
+   "v": "superd_no_magic"
+  },
+  {
+   "op": "thirdperson"
+  },
+  {
+   "op": "cam",
+   "pitch": 5,
+   "h": 0
+  },
+  {
+   "op": "superd",
+   "v": 2
+  },
+  {
+   "op": "wait",
+   "t": 10
+  },
+  {
+   "op": "shot",
+   "v": "superd_throw_a"
+  },
+  {
+   "op": "wait",
+   "t": 10
+  },
+  {
+   "op": "shot",
+   "v": "superd_throw_b"
+  },
+  {
+   "op": "wait",
+   "t": 25
+  },
+  {
+   "op": "shot",
+   "v": "superd_throw_c"
+  },
+  {
+   "op": "superd",
+   "v": 1
+  },
+  {
+   "op": "wait",
+   "t": 6
+  },
+  {
+   "op": "shot",
+   "v": "superd_whirl"
+  },
+  {
+   "op": "superd",
+   "v": 0
+  },
+  {
+   "op": "wait",
+   "t": 4
+  },
+  {
+   "op": "shot",
+   "v": "superd_lunge"
+  },
+  {
+   "op": "superd",
+   "v": 3
+  },
+  {
+   "op": "wait",
+   "t": 10
+  },
+  {
+   "op": "shot",
+   "v": "superd_fury"
+  },
+  {
+   "op": "superdeye"
+  },
+  {
+   "op": "cmd",
+   "v": "fill -6 120 4 6 124 4 minecraft:stone"
+  },
+  {
+   "op": "wait",
+   "t": 10
+  },
+  {
+   "op": "shot",
+   "v": "superd_eye"
+  }
+ ]
+}

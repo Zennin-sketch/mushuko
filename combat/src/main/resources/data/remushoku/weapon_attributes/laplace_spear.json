@@ -1,0 +1,40 @@
+{
+  "attributes": {
+    "category": "spear",
+    "two_handed": true,
+    "range_bonus": 1.0,
+    "attacks": [
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.05,
+        "angle": 160,
+        "upswing": 0.5,
+        "animation": "mushoku_combat:laplace_spear_1",
+        "swing_sound": {
+          "id": "bettercombat:glaive_slash_quick"
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1.0,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "mushoku_combat:laplace_spear_2",
+        "swing_sound": {
+          "id": "bettercombat:spear_stab"
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1.65,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "mushoku_combat:laplace_spear_3",
+        "swing_sound": {
+          "id": "bettercombat:spear_stab"
+        }
+      }
+    ],
+    "pose": "mushoku_combat:pose_spear"
+  }
+}

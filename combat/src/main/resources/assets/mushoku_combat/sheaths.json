@@ -71,6 +71,9 @@
   "remushoku:staff_of_areos": "back",
   "remushoku:migurd_staff": "back",
   "remushoku:wand": "hip",
-  "remushoku:metal_rod": "hip"
+  "remushoku:metal_rod": "hip",
+  "remushoku:superd_warrior_spear": "back",
+  "remushoku:superd_tail_spear": "back",
+  "remushoku:laplace_spear": "back"
  }
 }

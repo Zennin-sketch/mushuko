@@ -54,6 +54,7 @@ public final class RaceSystem {
         refresh(p);
         p.setHealth(p.getMaxHealth());
         if (r == Race.SUPERD) {
+            forceSuperd(p);
             ItemStack spear = new ItemStack(net.zennin.mushoku.addon.AddonItems.SUPERD_SPEAR);
             if (!p.getInventory().add(spear)) p.drop(spear, false);
         }
@@ -61,6 +62,19 @@ public final class RaceSystem {
         p.displayClientMessage(Component.translatable("msg.remushoku.race_chosen", Component.translatable("race.remushoku." + r.key))
                 .withStyle(ChatFormatting.GOLD), false);
         sync(p);
+    }
+
+    /** Superd: sin clase (ni mago, ni espadachin, ni arquero) y sin mana; su combate es la lanza. */
+    public static void forceSuperd(ServerPlayer p) {
+        var m = ModAttachments.get(p);
+        if (m.playerClass() == SpellCasting.CLASS_SUPERD && m.mana() == 0) return;
+        ModAttachments.set(p, new net.zennin.mushoku.data.ManaData(0, m.maxMana(), SpellCasting.CLASS_SUPERD));
+        var mg = ModAttachments.magic(p);
+        if (!mg.queued().isEmpty()) { ModAttachments.setMagic(p, mg.withQueued("")); net.zennin.mushoku.network.ModNetworking.syncMagic(p); }
+        net.zennin.mushoku.network.ModNetworking.syncMana(p);
+        net.zennin.mushoku.sword.SwordSystem.refresh(p);
+        net.zennin.mushoku.archer.ArcherSystem.refresh(p);
+        net.zennin.mushoku.superd.SuperdSystem.sync(p);
     }
 
     public static void toggle(ServerPlayer p, String what) {
@@ -122,6 +136,7 @@ public final class RaceSystem {
     public static void raceSkill(ServerPlayer p) {
         RaceData d = data(p);
         Race r = d.raceOrNull();
+        if (r == Race.SUPERD) { net.zennin.mushoku.superd.SuperdSystem.use(p, net.zennin.mushoku.superd.SuperdSystem.FURY); return; }
         if (r != Race.ELF) {
             p.displayClientMessage(Component.translatable("msg.remushoku.race_no_skill").withStyle(ChatFormatting.GRAY), true);
             return;
@@ -145,6 +160,7 @@ public final class RaceSystem {
             if (server.getTickCount() % 20 != 0) return;
             for (ServerPlayer p : server.getPlayerList().getPlayers()) {
                 refresh(p);
+                if (data(p).raceOrNull() == Race.SUPERD) forceSuperd(p);
                 // Los elfos ven en la oscuridad
                 if (data(p).raceOrNull() == Race.ELF && server.getTickCount() % 100 == 0)
                     p.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 300, 0, true, false, true));

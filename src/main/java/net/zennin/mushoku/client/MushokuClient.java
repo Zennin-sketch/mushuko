@@ -45,6 +45,7 @@ public class MushokuClient implements ClientModInitializer {
         EntityRendererRegistry.register(ModEntities.MAGIC_PROJECTILE, MagicProjectileRenderer::new);
         EntityRendererRegistry.register(ModEntities.SPELL_FX, SpellFxRenderer::new);
         EntityRendererRegistry.register(ModEntities.MINE, MineRenderer::new);
+        EntityRendererRegistry.register(ModEntities.THROWN_SPEAR, ThrownSpearRenderer::new);
         // --- Hitogami, dimension del vacio y rasgos de raza ---
         HumanoidNpcRenderer.register(ModEntities.HITOGAMI, "hitogami");
         EntityRendererRegistry.register(ModEntities.SPIRIT_BODY, SpiritBodyRenderer::new);
@@ -120,6 +121,7 @@ public class MushokuClient implements ClientModInitializer {
         ManaSightRenderer.init();
         net.minecraft.client.gui.screens.MenuScreens.register(net.zennin.mushoku.menu.ModMenus.RESEARCH, ResearchScreen::new);
         net.minecraft.client.gui.screens.MenuScreens.register(net.zennin.mushoku.menu.ModMenus.ALEMBIC, AlembicScreen::new);
+        ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.SuperdSyncPayload.TYPE, (payload, context) -> SuperdClient.receive(payload));
         ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.GustGlidePayload.TYPE, (payload, context) -> GustGlide.start(payload.entityId()));
         net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(GustGlide::tick);
         ClientPlayNetworking.registerGlobalReceiver(net.zennin.mushoku.network.ResearchRollPayload.TYPE, (payload, context) -> {
@@ -142,7 +144,7 @@ public class MushokuClient implements ClientModInitializer {
         net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry.ITEM.register((stack, layer) -> layer == 1
                 ? net.zennin.mushoku.item.SpellLessonScrollItem.inkColor(stack) : -1, net.zennin.mushoku.registry.ModItems.SPELL_LESSON_SCROLL);
         ClientPlayNetworking.registerGlobalReceiver(ActionPayload.TYPE, (payload, context) -> {
-            if (payload.action() == ActionPayload.OPEN_CLASS_SCREEN) context.client().setScreen(new ClassPickScreen());
+            if (payload.action() == ActionPayload.OPEN_CLASS_SCREEN && !"superd".equals(ClientRaceState.data.race())) context.client().setScreen(new ClassPickScreen());
             if (payload.action() == ActionPayload.ESCAPE && context.client().level != null)
                 net.zennin.mushoku.magic.Escape.clientUntil = context.client().level.getGameTime() + net.zennin.mushoku.magic.Escape.TICKS;
         });
