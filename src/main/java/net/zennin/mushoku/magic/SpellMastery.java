@@ -37,10 +37,39 @@ public final class SpellMastery {
     }
 
     /** Lanzamientos acumulados para llegar a un nivel. */
-    public static int usesFor(Spell s, int level) {
+    public static int usesFor(Spell s, int level) { return usesFor(s, level, 1f); }
+
+    /** Igual, con la penalizacion de raza (un elemento sin talento pide muchos mas lanzamientos). */
+    public static int usesFor(Spell s, int level, float pen) {
         int t = 0;
-        for (int n = 1; n < level; n++) t += step(s, n);
+        for (int n = 1; n < level; n++) t += (int) Math.ceil(step(s, n) * pen);
         return t;
+    }
+
+    // ------------------------------------------------------------------ talento de la raza
+
+    /**
+     * Penalizacion de aprendizaje de la raza para un elemento: 1 si la raza tiene afinidad 1 o mas (sin desventaja);
+     * si no, 1 / afinidad^4 (tope x10). Afinidad 0.9 -> x1.5, 0.8 -> x2.4, 0.7 -> x4.2, 0.6 -> x7.7.
+     * Todo lo que se aprende de ese elemento cuesta eso de mas: lanzamientos para subir el dominio, mana maximo
+     * para pasar las barreras y piedras para subir de rango en el libro; y da menos mana maximo al usarlo.
+     */
+    public static float penalty(double affinity) {
+        if (affinity >= 1) return 1f;
+        return (float) Math.min(10, 1 / Math.pow(Math.max(0.1, affinity), 4));
+    }
+
+    public static float penalty(Player p, Element e) {
+        if (p == null || e == null || e == Element.NONE) return 1f;
+        net.zennin.mushoku.race.Race r = p.level().isClientSide
+                ? net.zennin.mushoku.client.ClientRaceState.data.raceOrNull()
+                : ModAttachments.race(p).raceOrNull();
+        return r == null ? 1f : penalty(r.affinity(e));
+    }
+
+    /** Mana maximo que te da lanzarlo (menos en un elemento sin talento). */
+    public static double manaGain(Player p, Spell s) {
+        return s.level.maxManaGain / Math.sqrt(penalty(p, s.element));
     }
 
     /** Mana maximo minimo para lanzar el hechizo (0 = sin requisito). */
@@ -49,7 +78,13 @@ public final class SpellMastery {
     }
 
     /** Mana maximo para pasar del 10 al 11 y del 15 al 16. */
-    public static int gate(Spell s, int level) {
+    public static int gate(Spell s, int level) { return gate(s, level, 1f); }
+
+    public static int gate(Spell s, int level, float pen) {
+        return (int) Math.round(gateBase(s, level) * Math.sqrt(pen) / 50.0) * 50;
+    }
+
+    private static int gateBase(Spell s, int level) {
         int g1 = 1500 + 500 * s.level.tier + useRequirement(s);
         if (level > 15) return g1 * 2;
         if (level > FREE_MAX) return g1;
@@ -57,9 +92,11 @@ public final class SpellMastery {
     }
 
     /** Nivel con estos lanzamientos y este mana maximo. */
-    public static int level(Spell s, int uses, double maxMana) {
+    public static int level(Spell s, int uses, double maxMana) { return level(s, uses, maxMana, 1f); }
+
+    public static int level(Spell s, int uses, double maxMana, float pen) {
         int lvl = 1;
-        while (lvl < MAX && uses >= usesFor(s, lvl + 1) && maxMana >= gate(s, lvl + 1)) lvl++;
+        while (lvl < MAX && uses >= usesFor(s, lvl + 1, pen) && maxMana >= gate(s, lvl + 1, pen)) lvl++;
         return lvl;
     }
 
@@ -105,11 +142,15 @@ public final class SpellMastery {
 
     public static int level(Player p, Spell s) {
         double max = p.level().isClientSide ? net.zennin.mushoku.client.ClientManaState.maxMana : ModAttachments.get(p).maxMana();
-        return level(s, uses(p, s), max);
+        return level(s, uses(p, s), max, penalty(p, s.element));
     }
 
+    /** Mana que cuesta: sin talento para el elemento cuesta mas (x1.08 con afinidad 0.9 ... x1.33 con 0.7, x1.5 con 0.6). */
     public static double cost(Player p, Spell s) {
-        return cost(s, level(p, s), p.level().dimension() == Level.NETHER);
+        double c = cost(s, level(p, s), p.level().dimension() == Level.NETHER);
+        float pen = penalty(p, s.element);
+        if (pen > 1) c = Math.round(c * (1 + 0.1 * Math.min(5, pen - 1)) * 10) / 10.0;
+        return c;
     }
 
     /** Puede lanzarlo (mana maximo suficiente para los Santo / Rey / Imperial). Avisa si no. */
@@ -134,8 +175,8 @@ public final class SpellMastery {
                     .withStyle(after % 5 == 0 ? ChatFormatting.GOLD : ChatFormatting.AQUA), false);
             p.level().playSound(null, p.blockPosition(), net.minecraft.sounds.SoundEvents.PLAYER_LEVELUP,
                     net.minecraft.sounds.SoundSource.PLAYERS, 0.6f, after % 5 == 0 ? 1.4f : 1.9f);
-        } else if (after < MAX && after >= FREE_MAX && m.get(s.id) >= usesFor(s, after + 1) && m.get(s.id) == usesFor(s, after + 1)) {
-            p.displayClientMessage(Component.translatable("msg.remushoku.mastery_gate", Component.translatable(s.translationKey()), gate(s, after + 1))
+        } else if (after < MAX && after >= FREE_MAX && m.get(s.id) == usesFor(s, after + 1, penalty(p, s.element))) {
+            p.displayClientMessage(Component.translatable("msg.remushoku.mastery_gate", Component.translatable(s.translationKey()), gate(s, after + 1, penalty(p, s.element)))
                     .withStyle(ChatFormatting.YELLOW), false);
         }
         sync(p);

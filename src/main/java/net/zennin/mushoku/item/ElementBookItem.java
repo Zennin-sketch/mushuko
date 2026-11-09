@@ -58,8 +58,15 @@ public class ElementBookItem extends Item {
             sp.displayClientMessage(Component.translatable("msg.remushoku.already_known").withStyle(ChatFormatting.GRAY), true);
             return InteractionResultHolder.consume(book);
         }
+        // raza sin talento para este elemento: subir de rango gasta varias piedras
+        int stones = Math.max(1, Math.round((float) Math.sqrt(net.zennin.mushoku.magic.SpellMastery.penalty(sp, element))));
+        if (!sp.getAbilities().instabuild && stone.getCount() < stones) {
+            sp.displayClientMessage(Component.translatable("msg.remushoku.race_stones", stones,
+                    Component.translatable("element.remushoku." + element.key)).withStyle(ChatFormatting.RED), true);
+            return InteractionResultHolder.consume(book);
+        }
         ModAttachments.setMagic(sp, m.withLevel(element, lvl));
-        if (!sp.getAbilities().instabuild) stone.shrink(1);
+        if (!sp.getAbilities().instabuild) stone.shrink(stones);
         level.playSound(null, sp.getX(), sp.getY(), sp.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 1f, 1f);
         sp.displayClientMessage(Component.translatable("msg.remushoku.learned",
                 Component.translatable("level.remushoku." + lvl),

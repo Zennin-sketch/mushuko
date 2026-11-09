@@ -71,13 +71,16 @@ public class SpellBookScreen extends BookScreen {
         boolean nether = mc.level != null && mc.level.dimension() == net.minecraft.world.level.Level.NETHER;
         out.add(Component.translatable("book.remushoku.mastery", lvl, SpellMastery.MAX).withStyle(net.minecraft.ChatFormatting.AQUA));
         if (lvl < SpellMastery.MAX) {
-            int need = SpellMastery.usesFor(s, lvl + 1);
+            float pen = SpellMastery.penalty(mc.player, s.element);
+            int need = SpellMastery.usesFor(s, lvl + 1, pen);
             out.add(Component.translatable("book.remushoku.uses", uses, need).withStyle(net.minecraft.ChatFormatting.GRAY));
-            int gate = SpellMastery.gate(s, lvl + 1);
+            int gate = SpellMastery.gate(s, lvl + 1, pen);
+            if (pen > 1) out.add(Component.translatable("book.remushoku.race_penalty", String.format(java.util.Locale.ROOT, "%.1f", pen))
+                    .withStyle(net.minecraft.ChatFormatting.DARK_RED));
             if (gate > 0) out.add(Component.translatable("book.remushoku.gate", gate)
                     .withStyle(ClientManaState.maxMana >= gate ? net.minecraft.ChatFormatting.GREEN : net.minecraft.ChatFormatting.RED));
         }
-        double cost = SpellMastery.cost(s, lvl, nether);
+        double cost = mc.player != null ? SpellMastery.cost(mc.player, s) : SpellMastery.cost(s, lvl, nether);
         out.add(Component.translatable("book.remushoku.cost", fmt(cost), fmt(s.level.cost)).withStyle(net.minecraft.ChatFormatting.BLUE));
         if (s.element == Element.WATER)
             out.add(Component.translatable("book.remushoku.nether_water").withStyle(nether ? net.minecraft.ChatFormatting.RED : net.minecraft.ChatFormatting.DARK_GRAY));

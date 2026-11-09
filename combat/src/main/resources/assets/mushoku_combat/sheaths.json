@@ -74,6 +74,12 @@
   "remushoku:metal_rod": "hip",
   "remushoku:superd_warrior_spear": "back",
   "remushoku:superd_tail_spear": "back",
-  "remushoku:laplace_spear": "back"
+  "remushoku:laplace_spear": "back",
+  "remushoku:sanctuary_blade": "hip",
+  "remushoku:north_god_greatsword": "back",
+  "remushoku:water_god_blade": "hip",
+  "remushoku:millis_holy_spear": "back",
+  "remushoku:red_wyrm_spear": "back",
+  "remushoku:great_forest_spear": "back"
  }
 }

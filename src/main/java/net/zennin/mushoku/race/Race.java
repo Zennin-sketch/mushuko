@@ -33,6 +33,17 @@ public enum Race {
         this.scale = scale;
     }
 
+    /** Afinidad con un elemento (1 = normal, menos de 1 = sin talento para ese elemento). */
+    public double affinity(net.zennin.mushoku.magic.Element e) {
+        return switch (e) {
+            case FIRE -> fire;
+            case WATER -> water;
+            case EARTH -> earth;
+            case WIND -> wind;
+            case NONE -> 1.0;
+        };
+    }
+
     public static Race byKey(String key) {
         for (Race r : values()) if (r.key.equals(key)) return r;
         return null;

@@ -1,0 +1,27 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "equipment",
+ "pattern": [
+  "II ",
+  "IN ",
+  "FS "
+ ],
+ "key": {
+  "I": {
+   "item": "minecraft:iron_block"
+  },
+  "N": {
+   "item": "minecraft:netherite_ingot"
+  },
+  "F": {
+   "item": "minecraft:rabbit_hide"
+  },
+  "S": {
+   "item": "minecraft:stick"
+  }
+ },
+ "result": {
+  "id": "remushoku:north_god_greatsword",
+  "count": 1
+ }
+}

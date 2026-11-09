@@ -1,0 +1,24 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "equipment",
+ "pattern": [
+  "  G",
+  " D ",
+  "S  "
+ ],
+ "key": {
+  "G": {
+   "item": "minecraft:gold_ingot"
+  },
+  "D": {
+   "item": "minecraft:diamond"
+  },
+  "S": {
+   "item": "minecraft:stick"
+  }
+ },
+ "result": {
+  "id": "remushoku:millis_holy_spear",
+  "count": 1
+ }
+}

@@ -1,0 +1,24 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "equipment",
+ "pattern": [
+  "  B",
+  " N ",
+  "S  "
+ ],
+ "key": {
+  "B": {
+   "item": "minecraft:blaze_rod"
+  },
+  "N": {
+   "item": "minecraft:netherite_ingot"
+  },
+  "S": {
+   "item": "minecraft:stick"
+  }
+ },
+ "result": {
+  "id": "remushoku:red_wyrm_spear",
+  "count": 1
+ }
+}

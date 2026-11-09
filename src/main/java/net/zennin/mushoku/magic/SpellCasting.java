@@ -122,7 +122,7 @@ public final class SpellCasting {
             SpellMastery.gain(p, spell);
             if (!creative) {
                 ManaData after = mana.withMana(mana.mana() - cost);
-                after = after.withMaxMana(after.maxMana() + spell.level.maxManaGain);
+                after = after.withMaxMana(after.maxMana() + SpellMastery.manaGain(p, spell));
                 ModAttachments.set(p, after);
             }
         }

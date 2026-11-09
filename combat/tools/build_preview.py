@@ -77,7 +77,9 @@ def main(anim_dir, out):
         weapons[wid]['family'] = wid
     # Arcos del mod: se dibujan en la pagina con el mismo codigo que BowRender.java (en la mano izquierda)
     for bid, label in (('hunter_bow', 'Arco de cazador'), ('elven_bow', 'Arco elfico'), ('beast_bow', 'Arco de bestia'),
-                       ('mana_bow', 'Arco de mana'), ('demon_bow', 'Arco demoniaco')):
+                       ('mana_bow', 'Arco de mana'), ('demon_bow', 'Arco demoniaco'),
+                       ('wyrm_bow', 'Arco de escamas de Wyrm'), ('asura_bow', 'Arco real de Asura'),
+                       ('behemoth_bow', 'Arco de hueso de Behemoth'), ('millis_bow', 'Arco sagrado de Millis')):
         weapons[bid] = dict(kind='modbow', label=label, family=None, style=bid)
     sheaths = json.load(open(os.path.join(REPO, 'combat', 'src', 'main', 'resources', 'assets', 'mushoku_combat', 'sheaths.json')))
     # Animaciones de primera persona del juego (src/main/resources/assets/remushoku/fp_animations): punto de partida del editor

@@ -93,7 +93,7 @@ public final class SilentCasting {
         if (SpellEffects.cast(s, p)) {
             net.zennin.mushoku.magic.SpellMastery.gain(p, s);
             ManaData after = p.getAbilities().instabuild ? mana : mana.withMana(mana.mana() - cost);
-            ModAttachments.set(p, after.withMaxMana(after.maxMana() + s.level.maxManaGain));
+            ModAttachments.set(p, after.withMaxMana(after.maxMana() + net.zennin.mushoku.magic.SpellMastery.manaGain(p, s)));
             p.getCooldowns().addCooldown(net.zennin.mushoku.registry.ModItems.SILENT_TOME, 10);
             ModNetworking.syncMana(p);
         }

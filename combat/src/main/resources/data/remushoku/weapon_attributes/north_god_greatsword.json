@@ -1,0 +1,40 @@
+{
+  "attributes": {
+    "category": "heavy",
+    "two_handed": true,
+    "range_bonus": 0.5,
+    "attacks": [
+      {
+        "hitbox": "VERTICAL_PLANE",
+        "damage_multiplier": 1.05,
+        "angle": 120,
+        "upswing": 0.5,
+        "animation": "mushoku_combat:north_god_greatsword_1",
+        "swing_sound": {
+          "id": "bettercombat:claymore_swing"
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.05,
+        "angle": 160,
+        "upswing": 0.5,
+        "animation": "mushoku_combat:north_god_greatsword_2",
+        "swing_sound": {
+          "id": "bettercombat:claymore_swing"
+        }
+      },
+      {
+        "hitbox": "VERTICAL_PLANE",
+        "damage_multiplier": 1.6,
+        "angle": 120,
+        "upswing": 0.5,
+        "animation": "mushoku_combat:north_god_greatsword_3",
+        "swing_sound": {
+          "id": "bettercombat:claymore_slam"
+        }
+      }
+    ],
+    "pose": "bettercombat:pose_two_handed_heavy"
+  }
+}

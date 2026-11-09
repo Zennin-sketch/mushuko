@@ -1,0 +1,218 @@
+{
+ "skin": "remushoku:textures/entities/rudeus_greyrat.png",
+ "steps": [
+  {
+   "op": "setup",
+   "fov": 70
+  },
+  {
+   "op": "cmd",
+   "v": "fill -15 119 -10 15 119 30 minecraft:grass_block"
+  },
+  {
+   "op": "cmd",
+   "v": "fill -15 120 -10 15 130 30 minecraft:air"
+  },
+  {
+   "op": "cmd",
+   "v": "time set noon"
+  },
+  {
+   "op": "cam",
+   "pitch": 5,
+   "h": 0
+  },
+  {
+   "op": "wait",
+   "t": 20
+  },
+  {
+   "op": "dummy",
+   "yaw": 120,
+   "dist": 2.4
+  },
+  {
+   "op": "equip",
+   "slot": "mainhand",
+   "v": "remushoku:sanctuary_blade"
+  },
+  {
+   "op": "wait",
+   "t": 8
+  },
+  {
+   "op": "shot",
+   "v": "held_sanctuary_blade"
+  },
+  {
+   "op": "equip",
+   "slot": "mainhand",
+   "v": "remushoku:north_god_greatsword"
+  },
+  {
+   "op": "wait",
+   "t": 8
+  },
+  {
+   "op": "shot",
+   "v": "held_north_god_greatsword"
+  },
+  {
+   "op": "equip",
+   "slot": "mainhand",
+   "v": "remushoku:water_god_blade"
+  },
+  {
+   "op": "wait",
+   "t": 8
+  },
+  {
+   "op": "shot",
+   "v": "held_water_god_blade"
+  },
+  {
+   "op": "equip",
+   "slot": "mainhand",
+   "v": "remushoku:millis_holy_spear"
+  },
+  {
+   "op": "wait",
+   "t": 8
+  },
+  {
+   "op": "shot",
+   "v": "held_millis_holy_spear"
+  },
+  {
+   "op": "equip",
+   "slot": "mainhand",
+   "v": "remushoku:red_wyrm_spear"
+  },
+  {
+   "op": "wait",
+   "t": 8
+  },
+  {
+   "op": "shot",
+   "v": "held_red_wyrm_spear"
+  },
+  {
+   "op": "equip",
+   "slot": "mainhand",
+   "v": "remushoku:great_forest_spear"
+  },
+  {
+   "op": "wait",
+   "t": 8
+  },
+  {
+   "op": "shot",
+   "v": "held_great_forest_spear"
+  },
+  {
+   "op": "equip",
+   "slot": "mainhand",
+   "v": "remushoku:wyrm_bow"
+  },
+  {
+   "op": "wait",
+   "t": 8
+  },
+  {
+   "op": "shot",
+   "v": "held_wyrm_bow"
+  },
+  {
+   "op": "equip",
+   "slot": "mainhand",
+   "v": "remushoku:asura_bow"
+  },
+  {
+   "op": "wait",
+   "t": 8
+  },
+  {
+   "op": "shot",
+   "v": "held_asura_bow"
+  },
+  {
+   "op": "equip",
+   "slot": "mainhand",
+   "v": "remushoku:behemoth_bow"
+  },
+  {
+   "op": "wait",
+   "t": 8
+  },
+  {
+   "op": "shot",
+   "v": "held_behemoth_bow"
+  },
+  {
+   "op": "equip",
+   "slot": "mainhand",
+   "v": "remushoku:millis_bow"
+  },
+  {
+   "op": "wait",
+   "t": 8
+  },
+  {
+   "op": "shot",
+   "v": "held_millis_bow"
+  },
+  {
+   "op": "dummy",
+   "yaw": 180,
+   "dist": 40
+  },
+  {
+   "op": "cmd",
+   "v": "clear @s"
+  },
+  {
+   "op": "cmd",
+   "v": "item replace entity @s hotbar.0 with remushoku:sanctuary_blade"
+  },
+  {
+   "op": "cmd",
+   "v": "item replace entity @s hotbar.1 with remushoku:north_god_greatsword"
+  },
+  {
+   "op": "cmd",
+   "v": "item replace entity @s hotbar.2 with remushoku:water_god_blade"
+  },
+  {
+   "op": "cmd",
+   "v": "item replace entity @s hotbar.3 with remushoku:millis_holy_spear"
+  },
+  {
+   "op": "cmd",
+   "v": "item replace entity @s hotbar.4 with remushoku:red_wyrm_spear"
+  },
+  {
+   "op": "cmd",
+   "v": "item replace entity @s hotbar.5 with remushoku:great_forest_spear"
+  },
+  {
+   "op": "cmd",
+   "v": "item replace entity @s hotbar.6 with remushoku:wyrm_bow"
+  },
+  {
+   "op": "cmd",
+   "v": "item replace entity @s hotbar.7 with remushoku:asura_bow"
+  },
+  {
+   "op": "cmd",
+   "v": "item replace entity @s hotbar.8 with remushoku:behemoth_bow"
+  },
+  {
+   "op": "wait",
+   "t": 10
+  },
+  {
+   "op": "shot",
+   "v": "hotbar"
+  }
+ ]
+}

@@ -120,6 +120,13 @@ public final class ModItems {
             net.minecraft.world.item.Tiers.IRON, 4, -2.4f, "superd_tail_spear", false));
     public static final Item LAPLACE_SPEAR = register("laplace_spear", new net.zennin.mushoku.superd.SuperdLanceItem(
             net.minecraft.world.item.Tiers.NETHERITE, 6, -2.7f, "laplace_spear", true));
+    /** Espadas y lanzas nuevas (modelos de tools/blocks/weapons2.py): una por cada estilo de espada y tres lanzas. */
+    public static final Item SANCTUARY_BLADE = register("sanctuary_blade", new net.zennin.mushoku.item.LoreWeaponItem(net.minecraft.world.item.Tiers.DIAMOND, 4, -2.2f, "sanctuary_blade", net.minecraft.world.item.Rarity.RARE));
+    public static final Item NORTH_GOD_GREATSWORD = register("north_god_greatsword", new net.zennin.mushoku.item.LoreWeaponItem(net.minecraft.world.item.Tiers.NETHERITE, 6, -3.0f, "north_god_greatsword", net.minecraft.world.item.Rarity.RARE));
+    public static final Item WATER_GOD_BLADE = register("water_god_blade", new net.zennin.mushoku.item.LoreWeaponItem(net.minecraft.world.item.Tiers.DIAMOND, 3, -1.8f, "water_god_blade", net.minecraft.world.item.Rarity.RARE));
+    public static final Item MILLIS_HOLY_SPEAR = register("millis_holy_spear", new net.zennin.mushoku.item.LoreWeaponItem(net.minecraft.world.item.Tiers.DIAMOND, 5, -2.7f, "millis_holy_spear", net.minecraft.world.item.Rarity.RARE));
+    public static final Item RED_WYRM_SPEAR = register("red_wyrm_spear", new net.zennin.mushoku.item.LoreWeaponItem(net.minecraft.world.item.Tiers.NETHERITE, 5, -2.6f, "red_wyrm_spear", net.minecraft.world.item.Rarity.EPIC));
+    public static final Item GREAT_FOREST_SPEAR = register("great_forest_spear", new net.zennin.mushoku.item.LoreWeaponItem(net.minecraft.world.item.Tiers.IRON, 4, -2.3f, "great_forest_spear", net.minecraft.world.item.Rarity.UNCOMMON));
     public static final Item MIGURD_SWORD = sword("migurd_sword", ModTiers.MIGURD_SWORD, 3, -2.5f);
     public static final Item PAULS_SWORD = sword("pauls_sword", ModTiers.PAULS_SWORD, 3, -2.2f);
     public static final Item PHOENIX_DRAGON_SWORD = sword("phoenix_dragon_sword", ModTiers.PHOENIX_DRAGON, 3, -2.0f);
@@ -141,6 +148,10 @@ public final class ModItems {
     public static final Item BEAST_BOW = register("beast_bow", new net.zennin.mushoku.item.MushokuBowItem(new Item.Properties().durability(900), 0.85f, 1.35f));
     public static final Item MANA_BOW = register("mana_bow", new net.zennin.mushoku.item.MushokuBowItem(new Item.Properties().durability(800), 1.1f, 1.2f));
     public static final Item DEMON_BOW = register("demon_bow", new net.zennin.mushoku.item.MushokuBowItem(new Item.Properties().durability(1200), 0.9f, 1.5f));
+    public static final Item WYRM_BOW = register("wyrm_bow", new net.zennin.mushoku.item.MushokuBowItem(new Item.Properties().durability(1100), 0.95f, 1.4f));
+    public static final Item ASURA_BOW = register("asura_bow", new net.zennin.mushoku.item.MushokuBowItem(new Item.Properties().durability(900), 1.15f, 1.15f));
+    public static final Item BEHEMOTH_BOW = register("behemoth_bow", new net.zennin.mushoku.item.MushokuBowItem(new Item.Properties().durability(1300), 0.75f, 1.6f));
+    public static final Item MILLIS_BOW = register("millis_bow", new net.zennin.mushoku.item.MushokuBowItem(new Item.Properties().durability(1000), 1.2f, 1.25f));
 
     /** Creativo: todas las clases a la vez. */
     public static final Item ALL_CLASSES = register("all_classes_scroll", new net.zennin.mushoku.item.AllClassesItem(new Item.Properties().stacksTo(1)

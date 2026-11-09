@@ -144,10 +144,10 @@ public final class MushokuCommands {
                             var pl = c.getSource().getPlayerOrException();
                             int lvl = IntegerArgumentType.getInteger(c, "nivel");
                             java.util.Map<String, Integer> m = new java.util.HashMap<>(net.zennin.mushoku.data.ModAttachments.spellXp(pl));
-                            m.put(sp.id, net.zennin.mushoku.magic.SpellMastery.usesFor(sp, lvl));
+                            m.put(sp.id, net.zennin.mushoku.magic.SpellMastery.usesFor(sp, lvl, net.zennin.mushoku.magic.SpellMastery.penalty(pl, sp.element)));
                             net.zennin.mushoku.data.ModAttachments.setSpellXp(pl, m);
                             net.zennin.mushoku.magic.SpellKnowledge.learn(pl, sp);
-                            int gate = net.zennin.mushoku.magic.SpellMastery.gate(sp, lvl);
+                            int gate = net.zennin.mushoku.magic.SpellMastery.gate(sp, lvl, net.zennin.mushoku.magic.SpellMastery.penalty(pl, sp.element));
                             var md = net.zennin.mushoku.data.ModAttachments.get(pl);
                             if (md.maxMana() < gate) net.zennin.mushoku.data.ModAttachments.set(pl, md.withMaxMana(gate));
                             net.zennin.mushoku.network.ModNetworking.syncMana(pl);

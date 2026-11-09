@@ -51,6 +51,14 @@ public final class BowRender {
                     0xFF2B3550, 0xFF5CB2F6, 0xFFB8E4FF, 0xFF1C2338, 0xFF9FE6FF, true, 0xFF7FD8FF, "mana");
             case "demon_bow" -> new Style(3.6f, 10.5f, 1.6f, 0.6f, 1.15f, 0.55f, 0.16f, 0.35f, 1.05f, 0.55f,
                     0xFF241A1E, 0xFF1E1418, 0xFF8E1B1B, 0xFF3A1414, 0xFFB02A2A, true, 0xFFD23A2A, "demon");
+            case "wyrm_bow" -> new Style(3.5f, 10.8f, 1.7f, 0.6f, 1.2f, 0.55f, 0.14f, 0.32f, 1.1f, 0.5f,
+                    0xFF3A1E1A, 0xFFB0302A, 0xFFE8C9A0, 0xFF2A1612, 0xFFE0D6C4, false, 0xFFE07A2A, "wyrm");
+            case "asura_bow" -> new Style(3.3f, 11.0f, 1.35f, 0.55f, 1.0f, 0.5f, 0.08f, 0.26f, 0.85f, 0.55f,
+                    0xFFF2EEE4, 0xFFE9E4D6, 0xFFD8B04A, 0xFF2A3A7A, 0xFFF6F2E8, false, 0xFFD8B04A, "royal");
+            case "behemoth_bow" -> new Style(3.9f, 9.4f, 2.1f, 0.9f, 1.6f, 0.8f, 0.22f, 0.45f, 0.6f, 0.42f,
+                    0xFF5A4636, 0xFFE4DAC2, 0xFFBDAF92, 0xFF4A3424, 0xFFBFAE8E, false, 0xFF8A7A5E, "bone");
+            case "millis_bow" -> new Style(3.4f, 11.2f, 1.3f, 0.5f, 0.95f, 0.45f, 0.06f, 0.24f, 0.9f, 0.55f,
+                    0xFFDCE2EA, 0xFFC7D0DC, 0xFFF0D47A, 0xFF4A5A8A, 0xFFFFE9A0, true, 0xFFF0D47A, "holy");
             default -> new Style(3.2f, 9.6f, 1.55f, 0.7f, 1.15f, 0.6f, 0.16f, 0.36f, 0.0f, 0.55f,
                     0xFF6B4A2B, 0xFF8C6239, 0xFF5E3F22, 0xFF3E2A1C, 0xFFE8E0C8, false, 0xFF2C1E14, "hunter");
         };
@@ -165,6 +173,23 @@ public final class BowRender {
             Mesh3D.bar(pose, vc, new Vector3f(1.0f, 0.6f, 0), new Vector3f(2.6f, 1.6f, 0), side, 0.6f, 0.5f, st.accent(), light, overlay);
             Mesh3D.bar(pose, vc, new Vector3f(1.0f, -0.6f, 0), new Vector3f(2.6f, -1.6f, 0), side, 0.6f, 0.5f, st.accent(), light, overlay);
             Mesh3D.box(pose, vc, 1.0f, -0.4f, -0.5f, 1.6f, 0.4f, 0.5f, 0xFFFF5A3A, glow, overlay);
+        } else if (st.deco().equals("royal")) {
+            // bandas de oro y la gema azul de la casa real
+            Mesh3D.box(pose, vc, -0.9f, 2.0f, -0.85f, 1.1f, 2.4f, 0.85f, st.accent(), light, overlay);
+            Mesh3D.box(pose, vc, -0.9f, -2.4f, -0.85f, 1.1f, -2.0f, 0.85f, st.accent(), light, overlay);
+            pose.pushPose();
+            pose.translate(1.3f / 16f, 0, 0);
+            pose.mulPose(com.mojang.math.Axis.XP.rotationDegrees(45));
+            Mesh3D.cbox(pose, vc, 0.9f, 1.1f, 1.1f, 0xFF3A6AFF, light, overlay);
+            pose.popPose();
+        } else if (st.deco().equals("holy")) {
+            // cruz de Millis en el cuerpo, que brilla
+            Mesh3D.box(pose, vc, 1.0f, -1.4f, -0.3f, 1.5f, 1.4f, 0.3f, st.accent(), glow, overlay);
+            Mesh3D.box(pose, vc, 1.0f, 0.2f, -1.0f, 1.5f, 0.7f, 1.0f, st.accent(), glow, overlay);
+        } else if (st.deco().equals("wyrm")) {
+            // cuernos del wyrm a los lados del agarre
+            Mesh3D.bar(pose, vc, new Vector3f(0.6f, 2.6f, 0), new Vector3f(2.4f, 3.6f, 0), side, 0.7f, 0.6f, 0xFFE8D8B8, light, overlay);
+            Mesh3D.bar(pose, vc, new Vector3f(0.6f, -2.6f, 0), new Vector3f(2.4f, -3.6f, 0), side, 0.7f, 0.6f, 0xFFE8D8B8, light, overlay);
         } else if (st.deco().equals("elven")) {
             Mesh3D.box(pose, vc, -0.9f, 2.0f, -0.85f, 1.1f, 2.3f, 0.85f, st.accent(), light, overlay);
             Mesh3D.box(pose, vc, -0.9f, -2.3f, -0.85f, 1.1f, -2.0f, 0.85f, st.accent(), light, overlay);
@@ -234,6 +259,40 @@ public final class BowRender {
                 }
                 for (int k = 1; k < n - 1; k++)
                     Mesh3D.bar(pose, vc, pts.get(k), pts.get(k + 1), side, 0.22f, st.t0() * 0.7f + 0.12f, st.accent(), glow, overlay);
+            }
+            case "wyrm" -> {
+                // escamas: placas que sobresalen hacia atras a lo largo de la pala
+                for (int k = 2; k < n; k += 2) {
+                    Vector3f a = pts.get(k), b = pts.get(k + 1);
+                    Vector3f dd = new Vector3f(b).sub(a).normalize();
+                    Vector3f nrm = new Vector3f(dd.y, -dd.x, 0);
+                    if (nrm.x > 0) nrm.mul(-1);
+                    Mesh3D.bar(pose, vc, a, new Vector3f(a).add(new Vector3f(nrm).mul(0.9f)).add(new Vector3f(dd).mul(0.9f)), side,
+                            0.6f, 0.7f, Mesh3D.shade(st.limbC(), 0.7f), light, overlay);
+                }
+                // punta de colmillo
+                Mesh3D.bar(pose, vc, tip, new Vector3f(tip).add(new Vector3f(d).mul(1.6f)), side, 0.5f, 0.5f, st.tipC(), light, overlay);
+            }
+            case "royal" -> {
+                // puntas de oro con un adorno curvo
+                float sg = Math.signum(tip.y);
+                Mesh3D.bar(pose, vc, tip, new Vector3f(tip).add(1.2f, 0.4f * sg, 0), side, 0.5f, 0.3f, st.accent(), light, overlay);
+                Mesh3D.bar(pose, vc, pts.get(n / 2), pts.get(n / 2 + 1), side, st.w0() + 0.2f, st.t0() + 0.2f, st.accent(), light, overlay);
+            }
+            case "bone" -> {
+                // nudos de hueso cada pocos tramos
+                for (int k = 2; k < n; k += 3)
+                    Mesh3D.bar(pose, vc, pts.get(k), pts.get(k + 1), side, st.w0() * 1.15f, st.t0() * 1.25f, 0xFFF2EAD6, light, overlay);
+                Mesh3D.bar(pose, vc, tip, new Vector3f(tip).add(new Vector3f(d).mul(1.2f)), side, 1.1f, 1.1f, 0xFFF2EAD6, light, overlay);
+            }
+            case "holy" -> {
+                // alas de plata en las puntas y una linea dorada que brilla
+                float sg = Math.signum(tip.y);
+                Mesh3D.bar(pose, vc, tip, new Vector3f(tip).add(1.6f, 0.6f * sg, 0), side, 0.9f, 0.16f, 0xFFEFF3F8, light, overlay);
+                Mesh3D.bar(pose, vc, new Vector3f(tip).add(-0.3f, -0.7f * sg, 0), new Vector3f(tip).add(1.2f, -0.3f * sg, 0), side, 0.7f, 0.15f,
+                        0xFFDDE4EE, light, overlay);
+                for (int k = 1; k < n - 1; k++)
+                    Mesh3D.bar(pose, vc, pts.get(k), pts.get(k + 1), side, 0.2f, st.t0() * 0.6f + 0.12f, st.accent(), glow, overlay);
             }
             default -> {}
         }

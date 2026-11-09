@@ -69,7 +69,7 @@ public final class StaffLogic {
             net.zennin.mushoku.magic.SpellMastery.gain(sp, spell);
             ManaData after = mana;
             if (!sp.getAbilities().instabuild) after = after.withMana(after.mana() - cost);
-            after = after.withMaxMana(after.maxMana() + spell.level.maxManaGain);
+            after = after.withMaxMana(after.maxMana() + net.zennin.mushoku.magic.SpellMastery.manaGain(sp, spell));
             ModAttachments.set(sp, after);
             ModNetworking.syncMana(sp);
             sp.getCooldowns().addCooldown(staff.getItem(), 20);

@@ -1,0 +1,24 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "equipment",
+ "pattern": [
+  " BS",
+  "N S",
+  " BS"
+ ],
+ "key": {
+  "B": {
+   "item": "minecraft:blaze_rod"
+  },
+  "N": {
+   "item": "minecraft:netherite_scrap"
+  },
+  "S": {
+   "item": "minecraft:string"
+  }
+ },
+ "result": {
+  "id": "remushoku:wyrm_bow",
+  "count": 1
+ }
+}

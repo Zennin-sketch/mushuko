@@ -268,7 +268,18 @@ public class CharacterCreationScreen extends Screen {
     private List<Component> leftText() {
         List<Component> out = new ArrayList<>();
         switch (stage) {
-            case RACE -> split(out, "race.remushoku." + race().key + ".lore");
+            case RACE -> {
+                split(out, "race.remushoku." + race().key + ".lore");
+                // elementos sin talento: aprenderlos cuesta mucho mas
+                for (net.zennin.mushoku.magic.Element e : new net.zennin.mushoku.magic.Element[]{
+                        net.zennin.mushoku.magic.Element.FIRE, net.zennin.mushoku.magic.Element.WATER,
+                        net.zennin.mushoku.magic.Element.EARTH, net.zennin.mushoku.magic.Element.WIND}) {
+                    float pen = net.zennin.mushoku.magic.SpellMastery.penalty(race().affinity(e));
+                    if (race() == Race.SUPERD || pen <= 1) continue;
+                    out.add(Component.translatable("gui.remushoku.cc.weak_element", Component.translatable("element.remushoku." + e.key),
+                            String.format(java.util.Locale.ROOT, "%.1f", pen)).withStyle(ChatFormatting.RED));
+                }
+            }
             case TRAIT -> split(out, "gui.remushoku.cc.trait." + race().key);
             case CLASS -> split(out, "class.remushoku." + CLASSES[cls] + ".lore");
         }
