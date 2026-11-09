@@ -1,0 +1,596 @@
+[
+ {
+  "group": "Agua - Bola de Agua",
+  "items": [
+   "sv_water_ball_1",
+   "sv_water_ball_2",
+   "sv_water_ball_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Agua - Escudo de Agua",
+  "items": [
+   "sv_water_shield_1",
+   "sv_water_shield_2",
+   "sv_water_shield_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Agua - Flecha de Agua",
+  "items": [
+   "sv_water_arrow_1",
+   "sv_water_arrow_2",
+   "sv_water_arrow_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Agua - Golpe de Hielo",
+  "items": [
+   "sv_ice_smash_1",
+   "sv_ice_smash_2",
+   "sv_ice_smash_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Agua - Hoja de Hielo",
+  "items": [
+   "sv_ice_blade_1",
+   "sv_ice_blade_2",
+   "sv_ice_blade_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Agua - Cañón de Agua",
+  "items": [
+   "sv_water_cannon_1",
+   "sv_water_cannon_2",
+   "sv_water_cannon_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Agua - Pilar de Hielo",
+  "items": [
+   "sv_ice_pillar_1",
+   "sv_ice_pillar_2",
+   "sv_ice_pillar_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Agua - Inundación",
+  "items": [
+   "sv_flood_flush_1",
+   "sv_flood_flush_2",
+   "sv_flood_flush_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Agua - Lanza de Hielo",
+  "items": [
+   "sv_icicle_lance_1",
+   "sv_icicle_lance_2",
+   "sv_icicle_lance_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Agua - Ventisca",
+  "items": [
+   "sv_blizzard_storm_1",
+   "sv_blizzard_storm_2",
+   "sv_blizzard_storm_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Agua - Fortaleza de Hielo",
+  "items": [
+   "sv_ice_fortress_1",
+   "sv_ice_fortress_2",
+   "sv_ice_fortress_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Agua - Cumulonimbo",
+  "items": [
+   "sv_cumulonimbus_1",
+   "sv_cumulonimbus_2",
+   "sv_cumulonimbus_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Agua - Relámpago",
+  "items": [
+   "sv_lightning_1",
+   "sv_lightning_2",
+   "sv_lightning_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Agua - Cero Absoluto",
+  "items": [
+   "sv_absolute_zero_1",
+   "sv_absolute_zero_2",
+   "sv_absolute_zero_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Fuego - Bola de Fuego",
+  "items": [
+   "sv_fireball_1",
+   "sv_fireball_2",
+   "sv_fireball_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Fuego - Mano Ardiente",
+  "items": [
+   "sv_heat_hand_1",
+   "sv_heat_hand_2",
+   "sv_heat_hand_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Fuego - Suelo Ardiente",
+  "items": [
+   "sv_burning_place_1",
+   "sv_burning_place_2",
+   "sv_burning_place_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Fuego - Ex Llama",
+  "items": [
+   "sv_ex_flame_1",
+   "sv_ex_flame_2",
+   "sv_ex_flame_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Fuego - Explosión",
+  "items": [
+   "sv_explosion_1",
+   "sv_explosion_2",
+   "sv_explosion_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Fuego - Corte de Llamas",
+  "items": [
+   "sv_flame_slice_1",
+   "sv_flame_slice_2",
+   "sv_flame_slice_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Fuego - Llama del Éxodo",
+  "items": [
+   "sv_exodus_flame_1",
+   "sv_exodus_flame_2",
+   "sv_exodus_flame_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Fuego - Chorro de Magma",
+  "items": [
+   "sv_magma_gush_1",
+   "sv_magma_gush_2",
+   "sv_magma_gush_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Fuego - Fogonazo",
+  "items": [
+   "sv_flash_over_1",
+   "sv_flash_over_2",
+   "sv_flash_over_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Fuego - Campo Minado",
+  "items": [
+   "sv_minefield_1",
+   "sv_minefield_2",
+   "sv_minefield_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Fuego - Ataque Nuclear",
+  "items": [
+   "sv_nuclear_strike_1",
+   "sv_nuclear_strike_2",
+   "sv_nuclear_strike_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Tierra - Bala de Roca",
+  "items": [
+   "sv_rock_bullet_1",
+   "sv_rock_bullet_2",
+   "sv_rock_bullet_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Tierra - Nube de Arena",
+  "items": [
+   "sv_sand_cloud_1",
+   "sv_sand_cloud_2",
+   "sv_sand_cloud_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Tierra - Excavar",
+  "items": [
+   "sv_dig_1",
+   "sv_dig_2",
+   "sv_dig_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Tierra - Cañón de Piedra",
+  "items": [
+   "sv_stone_cannon_1",
+   "sv_stone_cannon_2",
+   "sv_stone_cannon_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Tierra - Pilar de Tierra",
+  "items": [
+   "sv_earth_pillar_1",
+   "sv_earth_pillar_2",
+   "sv_earth_pillar_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Tierra - Lanza de Tierra",
+  "items": [
+   "sv_earth_lance_1",
+   "sv_earth_lance_2",
+   "sv_earth_lance_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Tierra - Muro de Tierra",
+  "items": [
+   "sv_earth_wall_1",
+   "sv_earth_wall_2",
+   "sv_earth_wall_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Tierra - Fortaleza de Tierra",
+  "items": [
+   "sv_earth_fortress_1",
+   "sv_earth_fortress_2",
+   "sv_earth_fortress_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Tierra - Tormenta de Polvo",
+  "items": [
+   "sv_dust_storm_1",
+   "sv_dust_storm_2",
+   "sv_dust_storm_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Tierra - Tormenta de Arena",
+  "items": [
+   "sv_sandstorm_1",
+   "sv_sandstorm_2",
+   "sv_sandstorm_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Tierra - Taladro de Tierra",
+  "items": [
+   "sv_earth_drill_1",
+   "sv_earth_drill_2",
+   "sv_earth_drill_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Tierra - Montaña",
+  "items": [
+   "sv_mountain_1",
+   "sv_mountain_2",
+   "sv_mountain_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Viento - Ráfaga",
+  "items": [
+   "sv_blast_1",
+   "sv_blast_2",
+   "sv_blast_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Viento - Caída Suave",
+  "items": [
+   "sv_soft_landing_1",
+   "sv_soft_landing_2",
+   "sv_soft_landing_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Viento - Pies Veloces",
+  "items": [
+   "sv_fleet_foot_1",
+   "sv_fleet_foot_2",
+   "sv_fleet_foot_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Viento - Estampido Sónico",
+  "items": [
+   "sv_sonic_boom_1",
+   "sv_sonic_boom_2",
+   "sv_sonic_boom_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Viento - Corte de Viento",
+  "items": [
+   "sv_wind_slice_1",
+   "sv_wind_slice_2",
+   "sv_wind_slice_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Viento - Fuerza Vendaval",
+  "items": [
+   "sv_gale_force_1",
+   "sv_gale_force_2",
+   "sv_gale_force_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Viento - Ventolera",
+  "items": [
+   "sv_wind_gust_1",
+   "sv_wind_gust_2",
+   "sv_wind_gust_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Viento - Explosión Sónica",
+  "items": [
+   "sv_sonic_blast_1",
+   "sv_sonic_blast_2",
+   "sv_sonic_blast_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Viento - Impacto Tornado",
+  "items": [
+   "sv_tornado_impact_1",
+   "sv_tornado_impact_2",
+   "sv_tornado_impact_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Viento - Tormenta Violenta",
+  "items": [
+   "sv_violent_storm_1",
+   "sv_violent_storm_2",
+   "sv_violent_storm_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Viento - Tornado",
+  "items": [
+   "sv_tornado_1",
+   "sv_tornado_2",
+   "sv_tornado_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Viento - Ojo de la Tormenta",
+  "items": [
+   "sv_eye_of_the_storm_1",
+   "sv_eye_of_the_storm_2",
+   "sv_eye_of_the_storm_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Sin elemento - Curación",
+  "items": [
+   "sv_healing_1",
+   "sv_healing_2",
+   "sv_healing_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Sin elemento - Crecimiento",
+  "items": [
+   "sv_grow_1",
+   "sv_grow_2",
+   "sv_grow_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Sin elemento - Escudo Mágico",
+  "items": [
+   "sv_magic_shield_1",
+   "sv_magic_shield_2",
+   "sv_magic_shield_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Sin elemento - X-Curación",
+  "items": [
+   "sv_x_healing_1",
+   "sv_x_healing_2",
+   "sv_x_healing_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Sin elemento - Banquete",
+  "items": [
+   "sv_feast_1",
+   "sv_feast_2",
+   "sv_feast_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Sin elemento - Curación Sagrada",
+  "items": [
+   "sv_shrine_healing_1",
+   "sv_shrine_healing_2",
+   "sv_shrine_healing_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Sin elemento - Perturbar Magia",
+  "items": [
+   "sv_disturb_magic_1",
+   "sv_disturb_magic_2",
+   "sv_disturb_magic_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Sin elemento - Fuerza",
+  "items": [
+   "sv_strength_1",
+   "sv_strength_2",
+   "sv_strength_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Sin elemento - Supersalto",
+  "items": [
+   "sv_jump_boost_1",
+   "sv_jump_boost_2",
+   "sv_jump_boost_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Sin elemento - Visión Nocturna",
+  "items": [
+   "sv_night_vision_1",
+   "sv_night_vision_2",
+   "sv_night_vision_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Sin elemento - Respiración Acuática",
+  "items": [
+   "sv_water_breathing_1",
+   "sv_water_breathing_2",
+   "sv_water_breathing_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Sin elemento - Resistencia al Fuego",
+  "items": [
+   "sv_fire_resistance_1",
+   "sv_fire_resistance_2",
+   "sv_fire_resistance_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Sin elemento - Invisibilidad",
+  "items": [
+   "sv_invisibility_1",
+   "sv_invisibility_2",
+   "sv_invisibility_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Sin elemento - Reparar",
+  "items": [
+   "sv_repair_1",
+   "sv_repair_2",
+   "sv_repair_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Sin elemento - Purificar",
+  "items": [
+   "sv_cleanse_1",
+   "sv_cleanse_2",
+   "sv_cleanse_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Sin elemento - Infusión de Maná",
+  "items": [
+   "sv_mana_infusion_1",
+   "sv_mana_infusion_2",
+   "sv_mana_infusion_3"
+  ],
+  "weapon": "aqua_heartia"
+ },
+ {
+  "group": "Sin elemento - Refinamiento",
+  "items": [
+   "sv_stone_refining_1",
+   "sv_stone_refining_2",
+   "sv_stone_refining_3"
+  ],
+  "weapon": "aqua_heartia"
+ }
+]
