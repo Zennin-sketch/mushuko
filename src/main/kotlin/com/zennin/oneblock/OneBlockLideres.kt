@@ -53,6 +53,9 @@ object OneBlockLideres : ModInitializer {
             if (Reglas.enZonaSinSpawn(lugar.world, lugar.position)) evento.cancel()
         }
 
+        // Reglas de los combates contra los lideres: 6 Pokemon con el Espejo, sin objetos, cura al final.
+        ReglasLideres.registrar()
+
         LOGGER.info("OneBlock Cobblemon - Líderes, por Zennin: cargado.")
     }
 }
