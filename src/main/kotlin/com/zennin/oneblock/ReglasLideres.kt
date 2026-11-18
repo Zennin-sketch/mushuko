@@ -12,6 +12,7 @@ import com.cobblemon.mod.common.battles.BattleRegistry
 import com.cobblemon.mod.common.entity.npc.NPCBattleActor
 import com.cobblemon.mod.common.entity.npc.NPCEntity
 import com.cobblemon.mod.common.util.party
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.event.player.UseEntityCallback
 import net.fabricmc.fabric.api.event.player.UseItemCallback
 import net.minecraft.ChatFormatting
@@ -26,9 +27,12 @@ import net.minecraft.world.item.ItemStack
  * Reglas de los combates contra los líderes del OneBlock (NPCs oneblock:liderN):
  *  - Líder Espejo (lider1): solo con el equipo completo, 6 Pokémon.
  *  - Sin objetos de Cobblemon durante el combate (pociones, revivir, X Ataque...).
- *  - Al terminar, gane quien gane, el equipo del jugador se cura entero.
+ *  - Al terminar, gane quien gane, el equipo del jugador se cura entero (5 segundos despues).
  */
 object ReglasLideres {
+    private const val ESPERA_CURA = 100 // ticks = 5 segundos
+    private val curarEn = mutableMapOf<java.util.UUID, Int>()
+
     private fun lider(battle: PokemonBattle): NPCEntity? =
         battle.actors.filterIsInstance<NPCBattleActor>().map { it.npc }
             .firstOrNull { it.npc.id.namespace == "oneblock" && it.npc.id.path.startsWith("lider") }
@@ -83,12 +87,24 @@ object ReglasLideres {
 
         CobblemonEvents.BATTLE_ENDED.subscribe(Priority.NORMAL) { evento ->
             if (lider(evento.battle) == null) return@subscribe
-            for (player in evento.battle.players) {
-                // un tick despues: el combate todavia esta volcando la vida final a los Pokemon
-                player.server.execute {
-                    player.party().heal()
-                    player.displayClientMessage(Component.literal("Tu equipo se curó.").withStyle(ChatFormatting.GREEN), true)
-                }
+            // v1.4: se cura 5 segundos despues. En el mismo tick el combate todavia no termino
+            // de volcar la vida final a los Pokemon y pisaba la curacion.
+            for (player in evento.battle.players) curarEn[player.uuid] = ESPERA_CURA
+        }
+
+        ServerTickEvents.END_SERVER_TICK.register { server ->
+            if (curarEn.isEmpty()) return@register
+            val iterador = curarEn.entries.iterator()
+            while (iterador.hasNext()) {
+                val entrada = iterador.next()
+                entrada.setValue(entrada.value - 1)
+                if (entrada.value > 0) continue
+                iterador.remove()
+                val player = server.playerList.getPlayer(entrada.key) ?: continue
+                // si ya arranco otro combate, no se lo cura en el medio
+                if (BattleRegistry.getBattleByParticipatingPlayer(player) != null) continue
+                player.party().heal()
+                player.displayClientMessage(Component.literal("Tu equipo se curó.").withStyle(ChatFormatting.GREEN), true)
             }
         }
     }
