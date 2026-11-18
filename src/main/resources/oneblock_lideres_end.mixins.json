@@ -1,0 +1,7 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "com.zennin.oneblock.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [ "EndDragonFightAccessor" ]
+}

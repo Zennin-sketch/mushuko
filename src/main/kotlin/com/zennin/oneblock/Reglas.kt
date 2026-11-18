@@ -22,12 +22,16 @@ object Reglas {
     var server: MinecraftServer? = null
     private val ZONAS = ResourceLocation.fromNamespaceAndPath("oneblock", "zonas")
 
-    fun topeDeNivel(): Int? {
+    fun marcador(nombre: String): Int? {
         val server = server ?: return null
         val marcador = server.scoreboard
         val objetivo = marcador.getObjective("ob.data") ?: return null
-        val info = marcador.getPlayerScoreInfo(ScoreHolder.forNameOnly("#lvlcap"), objetivo) ?: return null
-        val tope = info.value()
+        val info = marcador.getPlayerScoreInfo(ScoreHolder.forNameOnly(nombre), objetivo) ?: return null
+        return info.value()
+    }
+
+    fun topeDeNivel(): Int? {
+        val tope = marcador("#lvlcap") ?: return null
         return if (tope in 1..99) tope else null
     }
 

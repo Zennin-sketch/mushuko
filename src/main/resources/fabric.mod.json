@@ -4,14 +4,26 @@
   "version": "${version}",
   "name": "OneBlock Cobblemon - Líderes",
   "description": "Líderes de gimnasio del OneBlock Cobblemon. Por Zennin - https://www.youtube.com/@Zorikzennin. Todos los derechos reservados.",
-  "authors": ["Zennin"],
-  "contact": { "homepage": "https://www.youtube.com/@Zorikzennin" },
+  "authors": [
+    "Zennin"
+  ],
+  "contact": {
+    "homepage": "https://www.youtube.com/@Zorikzennin"
+  },
   "license": "All Rights Reserved",
   "environment": "*",
   "entrypoints": {
-    "main": [ { "adapter": "kotlin", "value": "com.zennin.oneblock.OneBlockLideres" } ]
+    "main": [
+      {
+        "adapter": "kotlin",
+        "value": "com.zennin.oneblock.OneBlockLideres"
+      }
+    ]
   },
-  "mixins": [ "oneblock_lideres.mixins.json" ],
+  "mixins": [
+    "oneblock_lideres.mixins.json",
+    "oneblock_lideres_end.mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=0.16.0",
     "minecraft": "~1.21.1",
