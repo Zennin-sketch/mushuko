@@ -1,7 +1,9 @@
 # Compila el mod en GitHub cada vez que subis un cambio. El .jar queda en la pestaña
-# Actions > la ultima ejecucion > Artifacts > oneblock-lideres.
+# Actions > la ultima ejecucion > Artifacts > oneblock-lideres, y en la rama oneblock-lideres-jar.
 name: build
 on: [push, workflow_dispatch]
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -22,3 +24,10 @@ jobs:
           name: oneblock-lideres
           path: build/libs/oneblock-lideres-*.jar
           if-no-files-found: error
+      - name: guardar el jar en una rama
+        run: |
+          mkdir /tmp/jar && cp build/libs/oneblock-lideres-*.jar /tmp/jar/
+          cd /tmp/jar && git init -q -b oneblock-lideres-jar
+          git -c user.name=build -c user.email=build@users.noreply.github.com add -A
+          git -c user.name=build -c user.email=build@users.noreply.github.com commit -q -m "jar compilado"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" oneblock-lideres-jar
