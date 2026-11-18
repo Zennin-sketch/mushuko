@@ -1,0 +1,45 @@
+OneBlock Cobblemon (datapack y mod "OneBlock Cobblemon - Líderes") - Por Zennin
+Copyright (c) 2026 Zennin. Todos los derechos reservados.
+YouTube: https://www.youtube.com/@Zorikzennin
+
+Este datapack y este mod, su código, funciones, tablas de botín, estructuras, equipos de
+los líderes, textos y diseño de juego son obra de Zennin. Descargarlos no te da la
+propiedad ni ningún derecho sobre ellos, salvo los permisos de uso que se describen abajo.
+
+1. USO PERSONAL - PERMITIDO
+   Podés jugarlo gratis en tu propio mundo de un jugador, o en un servidor privado y sin
+   fines de lucro con tus amigos, siempre que lo descargues de los enlaces oficiales de
+   Zennin.
+
+2. SERVIDORES PÚBLICOS O CON FINES DE LUCRO - PROHIBIDO SIN LICENCIA
+   No se puede usar en servidores públicos, en redes de servidores ni en ningún servidor
+   que cobre acceso, rangos, donaciones o ventajas, ni que muestre publicidad, sin una
+   licencia escrita de Zennin. Para pedirla, contactá a Zennin por sus redes oficiales.
+
+3. VIDEOS, DIRECTOS Y CONTENIDO - PERMITIDO CON CRÉDITO
+   Podés grabar videos, shorts y directos jugando este datapack y monetizarlos, siempre
+   que en la descripción del video (o en el panel del directo) pongas las dos cosas:
+     - "Datapack OneBlock Cobblemon hecho por Zennin"
+     - el enlace al canal de YouTube de Zennin: https://www.youtube.com/@Zorikzennin
+   Si falta el crédito, el permiso no aplica y Zennin puede pedir que el contenido se
+   corrija o se baje.
+
+4. REDISTRIBUCIÓN Y MODIFICACIÓN - PROHIBIDO
+   No se puede volver a subir, compartir, vender ni incluir en otro modpack, ni original
+   ni modificado, ni con otro nombre. Tampoco se pueden publicar versiones derivadas
+   ("rehechas", traducidas o reescritas, a mano o con ayuda de herramientas automáticas
+   o de inteligencia artificial) que copien su contenido o su diseño. Pasar el datapack
+   por una herramienta para reescribirlo no lo convierte en una obra nueva.
+
+5. SIN GARANTÍA
+   Se entrega "tal cual". Zennin no se hace responsable de mundos rotos, pérdidas de
+   progreso ni problemas con otros mods.
+
+Cualquier uso no incluido en el punto 1 o el punto 3 necesita permiso escrito de Zennin.
+
+---------------------------------------------------------------------------------------
+English summary: All rights reserved. Free for personal and private non-profit play.
+Public, commercial or monetized servers need a written license from Zennin. Videos and
+streams are allowed only if the description credits "Datapack OneBlock Cobblemon by
+Zennin" and links Zennin's YouTube channel. No re-uploads, redistribution, inclusion in
+other modpacks, or derivative/rewritten versions (manual or AI-assisted).

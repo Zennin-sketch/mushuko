@@ -1,0 +1,8 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.zennin.oneblock.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [ "StrongBattleAIMixin" ],
+  "injectors": { "defaultRequire": 0 }
+}
